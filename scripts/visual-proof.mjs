@@ -23,10 +23,11 @@ function recorder(width,height){
 globalThis.window={devicePixelRatio:1};globalThis.matchMedia=()=>({matches:false});globalThis.ResizeObserver=class{observe(){}};
 await mkdir('artifacts',{recursive:true});
 const selected=process.argv.slice(2);
-for(const [name,year,width,focus,history,movie] of [['beginning',1,1200,false,false],['beach-party',24,1200,'beach',false],['palace',1350,1200,true,false],['final-island',2200,1200,false,true],['mobile-palace',1350,390,true,false],['movie-independent',2240,1200,false,false,'independent'],['movie-miracles',2240,1200,false,false,'miracles'],['movie-fortress',2240,1200,false,false,'fortress'],['movie-last-drop',2240,1200,false,false,'last-drop']]){
+for(const [name,year,width,focus,history,movie] of [['blossom-tree',24,1200,'blossom',false],['beginning',1,1200,false,false],['beach-party',24,1200,'beach',false],['palace',1350,1200,true,false],['final-island',2200,1200,false,true],['mobile-palace',1350,390,true,false],['movie-independent',2240,1200,false,false,'independent'],['movie-miracles',2240,1200,false,false,'miracles'],['movie-fortress',2240,1200,false,false,'fortress'],['movie-last-drop',2240,1200,false,false,'last-drop']]){
  if(selected.length&&!selected.includes(name))continue;
  const sim=new Civilization(31);while(sim.year<year&&!sim.ending)sim.tick();
  if(movie){startCinema(sim,movie);sim.cinematic.elapsed=17;sim.ending=true;}
+ if(focus==='blossom'){for(let i=0;i<3;i++)sim.interfere(0,0,'rain');}
  if(focus==='beach'){const t=sim.beaches[Math.floor(sim.beaches.length/2)];sim.festival={kind:'duck-race',x:t.x,y:t.y,until:sim.year+20,title:'The Great Duck Regatta',quips:['A duck has been disqualified for being a goose.']};}
  const r=recorder(width,width<500?600:650),renderer=new IslandRenderer(r.canvas,sim);
  renderer.reduced=true;renderer.showHistory=history;

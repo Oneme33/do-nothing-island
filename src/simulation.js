@@ -1,5 +1,5 @@
 import { ensureSpectacle, seedPleasures, reserveBeaches, advancePleasures, ignite, extinguish, jokeAfterTouch, RECREATION } from './spectacle.js';
-import {reshapeAfterQuake} from './consequences.js';
+import {reshapeAfterQuake,rainOnOldTree} from './consequences.js';
 import {ensureFamily,advanceFamily} from './family.js';
 import {ensureWishes,advanceWishes,answerWish} from './wishes.js';
 import {ensureChallenges,advanceChallenges} from './challenges.js';
@@ -778,6 +778,7 @@ export class Civilization {
     if(mode==='nudge'&&t?.rift&&t.kind==='water'&&!t.building){t.building='bridge';t.builtYear=this.year;this.wood=Math.max(0,this.wood-12);this.rebuildRoads();return finish('nudge','Een brug over de kloof','De bouwers verbinden de twee kanten. De breuklijn blijft zichtbaar onder de brug.',12);}
     if(mode==='rain' || mode==='nudge' && (!t||t.kind==='water')){
       const quenched=extinguish(this,spot);
+      rainOnOldTree(this,spot);
       for(const tile of this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=3))tile.wetUntil=this.year+12;
       const amount=Math.min(4000-this.food,18+this.farms.length*3);
       this.food+=amount;this.rainBoost=12;

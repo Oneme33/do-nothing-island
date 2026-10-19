@@ -146,3 +146,8 @@ test('a collection storage failure does not stop island saving or the playable i
  assert.doesNotThrow(()=>e.get('open-collection').handlers.click());assert.match(e.get('collection-progress').textContent,/1 van/);assert.match(e.get('collection-storage').textContent,/tijdens dit bezoek/);
  e.get('collection-close').handlers.click();e.get('new-island').handlers.click();assert.equal(a.saved().seed,8);assert.ok(a.saved().tiles.length);
 });
+test('a found secret stays in the collection after switching to another island',async()=>{
+ const s=new Civilization(31);for(let i=0;i<3;i++)s.interfere(0,0,'rain');const a=await appHarness(s),e=a.elements;
+ assert.ok(a.collection().entries['secret:old-tree-bloom']);assert.equal(e.get('collection-dialog').open,false);assert.equal(e.get('moment-card').hidden,true);
+ e.get('new-island').handlers.click();e.get('open-collection').handlers.click();const items=e.get('collection-groups').children.flatMap(group=>group.children[1].children),tree=items.find(item=>item.dataset.id==='secret:old-tree-bloom');assert.equal(tree.dataset.found,'true');assert.match(tree.children[1].textContent,/wist nog/);assert.match(tree.children[3].textContent,/Seed 31/);
+});

@@ -30,6 +30,8 @@ export function describePlot(s,t){
  if(t.ashFertility)lines.push(`Vruchtbare as: +${Math.round(t.ashFertility*100)}% opbrengst voor een akker op deze grond.`);
  if(t.retrofitted)lines.push('De fundering is versterkt na eerdere schade.');
  if(t.floodHistory)lines.push(`${t.floodHistory} overstromingen overleefd. Hoogwaterstrepen blijven zichtbaar.`);
+ if(t.bloomYear)lines.push(`Na drie gerichte regenbuien bloeit deze boom sinds jaar ${t.bloomYear}. De familie noemt het zijn tweede lente.`);
+ if(t.festivalTraditionYear)lines.push(`In jaar ${t.festivalTraditionYear} werd vuur tijdens het feest een jaarlijkse traditie.`);
  if(t.traditionCount)lines.push(`Sinds jaar ${t.traditionYear}: een terugkerend lichtfeest.`);
  if(t.spring)lines.push(`Sinds jaar ${t.springYear} stroomt hier vers water. De bron ondersteunt de watervoorraad.`);
  if(t.upliftedYear)lines.push(`In jaar ${t.upliftedYear} door een beving uit zee omhooggekomen.`);

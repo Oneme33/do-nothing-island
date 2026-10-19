@@ -977,6 +977,8 @@ function describePlot(s,t){
  if(t.ashFertility)lines.push(`Vruchtbare as: +${Math.round(t.ashFertility*100)}% opbrengst voor een akker op deze grond.`);
  if(t.retrofitted)lines.push('De fundering is versterkt na eerdere schade.');
  if(t.floodHistory)lines.push(`${t.floodHistory} overstromingen overleefd. Hoogwaterstrepen blijven zichtbaar.`);
+ if(t.bloomYear)lines.push(`Na drie gerichte regenbuien bloeit deze boom sinds jaar ${t.bloomYear}. De familie noemt het zijn tweede lente.`);
+ if(t.festivalTraditionYear)lines.push(`In jaar ${t.festivalTraditionYear} werd vuur tijdens het feest een jaarlijkse traditie.`);
  if(t.traditionCount)lines.push(`Sinds jaar ${t.traditionYear}: een terugkerend lichtfeest.`);
  if(t.spring)lines.push(`Sinds jaar ${t.springYear} stroomt hier vers water. De bron ondersteunt de watervoorraad.`);
  if(t.upliftedYear)lines.push(`In jaar ${t.upliftedYear} door een beving uit zee omhooggekomen.`);
@@ -995,11 +997,25 @@ const adjacentPlots=(s,t)=>[[1,0],[-1,0],[0,1],[0,-1]].map(([x,y])=>s.tile(t.x+x
 const dwelling=['hut','house','townhouse','tower','manor','palace'];
 const protectedPlot=t=>t.foundingHome||t.reservedFor||['original-tree','palace','palace-wing','royal-garden','palace-square','bridge'].includes(t.building);
 function ensureConsequences(s){
- s.fireCount??=0;s.rebuiltFires??=0;s.fireTraditions??=0;s.discoveries??=[];s.fireCode??=false;
+ s.fireCount??=0;s.rebuiltFires??=0;s.fireTraditions??=0;s.discoveries??=[];s.discoveryRecords??={};s.fireCode??=false;
 }
 function discover(s,id,t,text){
- if(!s.discoveries.includes(id)){s.discoveries.push(id);s.log(text,'discovery',{x:t.x,y:t.y});s.signal('celebrate',t,text);}
+ ensureConsequences(s);
+ if(!s.discoveries.includes(id)){
+  s.discoveries.push(id);s.discoveryRecords[id]={year:s.year,x:t.x,y:t.y};
+  s.log(text,'discovery',{x:t.x,y:t.y,discoveryId:id});s.signal('celebrate',t,'Iets bijzonders ontdekt');
+ }
 }
+function rainOnOldTree(s,spot){
+ if(spot.building!=='original-tree')return;
+ // The old ledger supplies only provable direct visits, never nearby showers.
+ spot.treeRainCount??=(s.interventionLedger||[]).filter(e=>e.type==='rain'&&e.x===spot.x&&e.y===spot.y).length;
+ spot.treeRainCount=Math.min(3,spot.treeRainCount+1);
+ if(spot.treeRainCount<3||spot.bloomYear)return;
+ spot.bloomYear=s.year;
+ discover(s,'old-tree-bloom',spot,'Na de derde regenbui bloeit de oude boom. Niemand wist dat hij dat nog kon. De familie zet een stoel onder de bloesem.');
+}
+
 function startBlaze(s,t,spread=false){
  ensureConsequences(s);if(t.fire||!t.building||t.building==='ruins')return false;
  t.fire={started:s.year,until:s.year+(s.buildings.some(p=>p.building==='fire-station')?6:16),nextSpread:s.year+(s.era<1?2:4)};
@@ -1055,9 +1071,13 @@ function tendFires(s){
  }
  if(changed)s.rebuildRoads();
 }
-function keepFireTradition(s,t){
+function keepFireTradition(s,t,{duringFestival=false}={}){
  ensureConsequences(s);t.traditionCount=(t.traditionCount||0)+1;t.traditionYear??=s.year;s.fireTraditions++;
- discover(s,'fire-tradition',t,'Een bestaand vuur wordt een jaarlijks lichtfeest. De kinderen eisen een officiële marshmallowbegroting.');
+ if(duringFestival&&!t.festivalTraditionYear){
+  t.festivalTraditionYear=s.year;
+  if(s.discoveries.includes('fire-tradition'))s.log('Het kampvuur laait op midden in het feest. Vanaf nu hoort dit vuur bij hun jaarlijkse traditie.','culture',{x:t.x,y:t.y});
+ }
+ discover(s,'fire-tradition',t,duringFestival?'Het kampvuur laait op midden in het feest. Het wordt een jaarlijks lichtfeest; de kinderen eisen een officiële marshmallowbegroting.':'Een bestaand vuur wordt een jaarlijks lichtfeest. De kinderen eisen een officiële marshmallowbegroting.');
  s.nextTradition=s.year+45;
 }
 function advanceTraditions(s){
@@ -1142,10 +1162,11 @@ function ignite(s,spot){
  const safe=['beach','campfire','bonfire','original-tree','palace','palace-wing','royal-garden','palace-square'].includes(spot.building);
  if(!spot.building||safe){
   const established=['campfire','bonfire'].includes(spot.building);
+  const duringFestival=s.festival?.until>s.year&&Math.hypot(s.festival.x-spot.x,s.festival.y-spot.y)<=3;
   if(!spot.building&&!spot.reservedFor&&!spot.landform){spot.building='bonfire';spot.builtYear=s.year;s.rebuildRoads();}
   spot.partyUntil=s.year+24;s.festival={kind:'bonfire',x:spot.x,y:spot.y,until:s.year+24,title:'A highly unauthorized barbecue',quips:['Outdoor central heating!','Someone brought a suspicious sausage.','The fire inspector is also the chef.']};
   s.wood=Math.max(0,s.wood-4);
-  if(established)keepFireTradition(s,spot);
+  if(established){keepFireTradition(s,spot,{duringFestival});s.festival.title='Het jaarlijkse lichtfeest';}
   return{title:'A bonfire. They brought snacks.',detail:'Flames, sparks and a gathering. The original tree has politely declined to participate.'};
  }
  startBlaze(s,spot);
@@ -1444,6 +1465,16 @@ function resumeSandbox(s){s.sandbox=true;s.ending=false;s.endingSeen=true;if(s.c
 
 const COLLECTION_STORAGE_KEY='do-nothing-island-collection-v1';
 const endingHints={independent:'Soms is blijven kijken genoeg.',sanctuary:'Misschien hoeft vooruitgang niet alles te vullen.',miracles:'Wat als de hemel deel van de begroting wordt?',fortress:'Een onrustige grond laat sporen in een cultuur.',phoenix:'As kan het begin van iets moois zijn.',retreat:'Een stap terug kan ook een toekomst zijn.','last-drop':'Er bestaat een grens aan winnen van de zee.'};
+const SECRET_CATALOG=[
+ {discovery:'old-tree-bloom',title:'Hij wist nog hoe het moest',description:'Na drie gerichte regenbuien bloeit de oude boom. De bloesem blijft als herinnering.',hint:'Misschien herinnert een oude vriend zich de lente nog.'},
+ {discovery:'quake-volcano',title:'De slapende berg',description:'Een beving bij de vulkaan veroorzaakte een uitbarsting. As verrijkte de grond.',hint:'Sommige slapende reuzen voelen de grond bewegen.'},
+ {discovery:'rain-quake',title:'De grond stroomt',description:'Een beving na regen werd een modderstroom. Een laag vruchtbaar slib bleef achter.',hint:'Wat doet bewegende grond die pas nog doorweekt raakte?'},
+ {discovery:'landslide',title:'Wat er onder de berg zit',description:'Een aardverschuiving legde gesteente bloot. De bouwers vonden er een steengroeve.',hint:'Een berg bewaart meer dan alleen een uitzicht.'},
+ {discovery:'uplift',title:'Land uit de zee',description:'Een beving tilde de kust op. Er ontstond nieuw land zonder inpoldering.',hint:'De zee hoeft niet altijd te vertrekken door een pomp.'},
+ {discovery:'rift',title:'De overkant bleef liggen',description:'Een beving opende een kloof. Een brug kan de twee kanten weer verbinden.',hint:'De grond onthoudt herhaalde onrust.'},
+ {discovery:'spring',title:'De verborgen bron',description:'Een beving opende een blijvende zoetwaterbron.',hint:'Soms ligt het antwoord op dorst onder je voeten.'},
+ {discovery:'fire-tradition',title:'Een feest dat terugkomt',description:'Een bestaand kampvuur werd een jaarlijkse traditie. Ook vuur tijdens een feest kan zo een lichtfeest worden.',hint:'Een vuurplaats kent misschien een tweede begin. Er mogen hapjes bij.'}
+];
 const COLLECTION_CATALOG=[
  ...Object.entries(ENDINGS).map(([id,ending])=>({id:`ending:${id}`,group:'endings',title:nl(ending.title),description:nl(ending.description),hint:endingHints[id]})),
  {id:'moment:manor',group:'moments',title:'De eerste grote voordeur',description:'De eerste hut groeide uit tot een landhuis. De sleutel bleef in de familie.',hint:'Ook een bescheiden voordeur kan ambities krijgen.'},
@@ -1452,9 +1483,10 @@ const COLLECTION_CATALOG=[
  {id:'moment:volcano',group:'moments',title:'De berg heeft een mening',description:'Je zag een vulkaan ontwaken. De bouwers houden de gratis steen.',hint:'Niet iedere berg blijft voor altijd stil.'},
  {id:'moment:rebirth',group:'moments',title:'Sterker uit de as',description:'Een uitgebrand gebouw werd herbouwd in steen. De oude brand bleef in de gevel herdacht.',hint:'Een ruïne hoeft geen eindpunt te zijn.'},
  {id:'moment:waterfront',group:'moments',title:'De wijk komt terug',description:'Een overstroomde wijk heropende met hoogwaterstrepen en sterkere funderingen.',hint:'Zoek een nieuw begin waar het water net vertrokken is.'},
+ ...SECRET_CATALOG.map(secret=>({...secret,id:`secret:${secret.discovery}`,group:'secrets'})),
  ...CHALLENGE_CATALOG.map(goal=>({id:`challenge:${goal.id}`,group:'challenges',title:goal.title,description:goal.description,hint:goal.experiment?'Een ongewoon idee van een eiland wacht op uitvoering.':'Sommige eilanden hebben een klein extra idee. Zoek hun uitdagingen op.'}))
 ];
-const COLLECTION_GROUPS={endings:'Eindes',moments:'Bijzondere momenten',challenges:'Uitdagingen'};
+const COLLECTION_GROUPS={endings:'Eindes',moments:'Bijzondere momenten',challenges:'Uitdagingen',secrets:'Geheimen'};
 const validCollectionRecord=r=>r&&Number.isInteger(r.seed)&&r.seed>=0&&r.seed<=0xffffffff&&Number.isInteger(r.year)&&r.year>=1;
 function readCollection(raw){
  const result={version:1,entries:{}};let parsed;
@@ -1473,6 +1505,12 @@ function advanceCollection(s){
  const remember=(id,year=s.year)=>{if(!Number.isInteger(s.collectionRecords[id]))s.collectionRecords[id]=Number.isInteger(year)&&year>0?year:s.year;};
  if(s.outcome&&ENDINGS[s.outcome.id])remember(`ending:${s.outcome.id}`,s.outcome.year);
  for(const goal of s.challenges?.goals||[])if(goal.status==='completed'&&CHALLENGE_CATALOG.some(g=>g.id===goal.id))remember(`challenge:${goal.id}`,goal.completedAt);
+ for(const secret of SECRET_CATALOG){
+  if(!s.discoveries?.includes(secret.discovery))continue;
+  const field={'old-tree-bloom':'bloomYear','quake-volcano':'volcanicAshYear','rain-quake':'mudflowYear',landslide:'landslideYear',uplift:'upliftedYear',rift:'riftYear',spring:'springYear','fire-tradition':'traditionYear'}[secret.discovery];
+  const evidence=s.land.find(t=>Number.isInteger(t[field]));
+  remember(`secret:${secret.discovery}`,s.discoveryRecords?.[secret.discovery]?.year||evidence?.[field]);
+ }
  const home=s.tile(-1,1),building=home?.building==='ruins'?home.rebuildFrom:home?.building;
  if(['manor','palace'].includes(building))remember('moment:manor',s.snapshots.find(p=>p.label==='The first manor')?.year||(building==='manor'?home.builtYear:s.year));
  if(building==='palace')remember('moment:palace',s.snapshots.find(p=>p.label==='The palace and its gardens')?.year||home.builtYear);
@@ -2261,6 +2299,7 @@ class Civilization {
     if(mode==='nudge'&&t?.rift&&t.kind==='water'&&!t.building){t.building='bridge';t.builtYear=this.year;this.wood=Math.max(0,this.wood-12);this.rebuildRoads();return finish('nudge','Een brug over de kloof','De bouwers verbinden de twee kanten. De breuklijn blijft zichtbaar onder de brug.',12);}
     if(mode==='rain' || mode==='nudge' && (!t||t.kind==='water')){
       const quenched=extinguish(this,spot);
+      rainOnOldTree(this,spot);
       for(const tile of this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=3))tile.wetUntil=this.year+12;
       const amount=Math.min(4000-this.food,18+this.farms.length*3);
       this.food+=amount;this.rainBoost=12;
@@ -2814,7 +2853,7 @@ class IslandRenderer {
     if(t.kind==='flooded')c.globalAlpha=.78;
     if(this.focus&&['tower','house','townhouse'].includes(t.building)){const f=this.p(this.focus.x,this.focus.y);if(p.y>f.y&&Math.abs(p.x-f.x)<65)c.globalAlpha=.26;}
     const b=t.building;
-    if(b==='original-tree')this.tree(true,t.variant);
+    if(b==='original-tree')this.tree(true,t.variant,!!t.bloomYear);
     else if(b==='tree')this.tree(false,t.variant);
     else if(b==='forest')this.forest(t.variant);
     else if(b==='beach')this.beach(t);
@@ -3091,7 +3130,7 @@ class IslandRenderer {
     this.line([[3,-45],[3,-58]],'#a89d71',1.3);this.line([[-1,-53],[7,-53]],'#a89d71',1.3);
     this.poly([[-8,-6],[-2,-3],[-2,-14],[-8,-17]],'#9ba68a');this.ellipse(7,-22,2,3,'#d7bf85');
   }
-  tree(original,v){
+  tree(original,v,bloom=false){
     const c=this.ctx;
     this.ellipse(5,3,original?23:15,original?8:5,'#556f3a19');
     if(!original && v<.5){
@@ -3117,6 +3156,14 @@ class IslandRenderer {
     this.ellipse(16,-42,8,8,'#91a763');
     this.ellipse(1,-37,10,9,'#819856');
     this.ellipse(-5,-48,4,2,'#a7b97755');
+    if(original&&bloom){
+      for(const [i,[x,y]] of [[-14,-40],[-7,-49],[3,-53],[13,-46],[17,-36],[5,-38],[-5,-32],[-17,-32],[9,-29]].entries()){
+        const color=i%2?'#f3d6c5':'#f7e7d1';
+        for(let petal=0;petal<4;petal++){const a=petal*Math.PI/2;this.ellipse(x+Math.cos(a)*1.8,y+Math.sin(a)*1.8,1.8,1.5,color);}
+        this.ellipse(x,y,1,1,'#cbaa71');
+      }
+      if(!this.reduced)for(let i=0;i<3;i++){const f=(this.time*.12+i*.32)%1;this.ellipse(-12+i*11+Math.sin(f*6+i)*3,-37+f*43,1.2,.7,'#eed5bfaa');}
+    }
     if(original){this.line([[-11,5],[7,10]],'#897c58',1.6);this.line([[-11,3],[7,8]],'#b4aa79',2.3);this.line([[-8,5],[-8,8]],'#7e7650',1.1);this.line([[4,8],[4,11]],'#7e7650',1.1);}
     c.restore();
   }
@@ -3505,7 +3552,7 @@ function renderCollection(){
   const total=COLLECTION_CATALOG.length,found=Object.keys(collection.entries).length;
   $('collection-progress').textContent=`${found} van ${total} vondsten`;
   $('collection-storage').textContent=collectionStorageAvailable?'Bewaard in deze browser, over al je eilanden heen. Nieuw eiland en Herstel vorig eiland wissen je vondsten niet.':'Bewaren lukt hier niet. Deze verzameling blijft tijdens dit bezoek in het geheugen.';
-  const silhouettes={endings:'M3 17 Q3 11 7 12 L10 5 14 11 Q21 10 21 17 Z',moments:'M3 20 V10 L12 3 21 10 V20 Z',challenges:'M8 2 H16 V9 L12 14 8 9 Z M12 12 L17 21 12 18 7 21 Z'};
+  const silhouettes={endings:'M3 17 Q3 11 7 12 L10 5 14 11 Q21 10 21 17 Z',moments:'M3 20 V10 L12 3 21 10 V20 Z',challenges:'M8 2 H16 V9 L12 14 8 9 Z M12 12 L17 21 12 18 7 21 Z',secrets:'M12 2 L15 8 22 12 15 16 12 22 9 16 2 12 9 8 Z'};
   $('collection-groups').replaceChildren(...Object.entries(COLLECTION_GROUPS).map(([group,label])=>{
     const section=document.createElement('section'),heading=document.createElement('h3'),list=document.createElement('ol'),items=COLLECTION_CATALOG.filter(item=>item.group===group);
     heading.textContent=`${label} · ${items.filter(item=>collection.entries[item.id]).length} / ${items.length}`;list.className='collection-grid';

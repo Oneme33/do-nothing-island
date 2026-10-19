@@ -14,6 +14,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Verzameling** bewaart eindes, bijzondere momenten en voltooide uitdagingen over al je eilanden heen. Onbekende items tonen een silhouet en een vage hint. Alleen zelf openen toont je voortgang; er verschijnen geen verzamelmeldingen over het eiland. De verzameling blijft in dezelfde browser bewaard bij Nieuw eiland, Herstel vorig eiland en herladen. Aantoonbare vondsten uit oude saves worden meegenomen.
 
+**Geheimen** ontstaan door experimenten. Drie gerichte regenbuien geven de oude boom blijvende bloesem. Een beving bij een vulkaan, bewegen van natte grond en vuur op een feestende vuurplaats hebben eigen gevolgen. Alle acht ontdekkingen komen stil in de verzameling, met de seed en het vastgelegde jaar. De onbekende vakjes verklappen alleen een hint. Ook bestaande ontdekkingen uit oude saves tellen mee.
+
 ## Spelen
 
 Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het volledige spel; installatie en een server zijn niet nodig. De interface is Nederlands. De eerste keer verschijnen drie korte introschermen, waarna het eiland op **1×** begint.

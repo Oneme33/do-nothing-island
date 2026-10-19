@@ -4,11 +4,25 @@ const adjacentPlots=(s,t)=>[[1,0],[-1,0],[0,1],[0,-1]].map(([x,y])=>s.tile(t.x+x
 const dwelling=['hut','house','townhouse','tower','manor','palace'];
 const protectedPlot=t=>t.foundingHome||t.reservedFor||['original-tree','palace','palace-wing','royal-garden','palace-square','bridge'].includes(t.building);
 export function ensureConsequences(s){
- s.fireCount??=0;s.rebuiltFires??=0;s.fireTraditions??=0;s.discoveries??=[];s.fireCode??=false;
+ s.fireCount??=0;s.rebuiltFires??=0;s.fireTraditions??=0;s.discoveries??=[];s.discoveryRecords??={};s.fireCode??=false;
 }
-function discover(s,id,t,text){
- if(!s.discoveries.includes(id)){s.discoveries.push(id);s.log(text,'discovery',{x:t.x,y:t.y});s.signal('celebrate',t,text);}
+export function discover(s,id,t,text){
+ ensureConsequences(s);
+ if(!s.discoveries.includes(id)){
+  s.discoveries.push(id);s.discoveryRecords[id]={year:s.year,x:t.x,y:t.y};
+  s.log(text,'discovery',{x:t.x,y:t.y,discoveryId:id});s.signal('celebrate',t,'Iets bijzonders ontdekt');
+ }
 }
+export function rainOnOldTree(s,spot){
+ if(spot.building!=='original-tree')return;
+ // The old ledger supplies only provable direct visits, never nearby showers.
+ spot.treeRainCount??=(s.interventionLedger||[]).filter(e=>e.type==='rain'&&e.x===spot.x&&e.y===spot.y).length;
+ spot.treeRainCount=Math.min(3,spot.treeRainCount+1);
+ if(spot.treeRainCount<3||spot.bloomYear)return;
+ spot.bloomYear=s.year;
+ discover(s,'old-tree-bloom',spot,'Na de derde regenbui bloeit de oude boom. Niemand wist dat hij dat nog kon. De familie zet een stoel onder de bloesem.');
+}
+
 export function startBlaze(s,t,spread=false){
  ensureConsequences(s);if(t.fire||!t.building||t.building==='ruins')return false;
  t.fire={started:s.year,until:s.year+(s.buildings.some(p=>p.building==='fire-station')?6:16),nextSpread:s.year+(s.era<1?2:4)};
@@ -64,9 +78,13 @@ export function tendFires(s){
  }
  if(changed)s.rebuildRoads();
 }
-export function keepFireTradition(s,t){
+export function keepFireTradition(s,t,{duringFestival=false}={}){
  ensureConsequences(s);t.traditionCount=(t.traditionCount||0)+1;t.traditionYear??=s.year;s.fireTraditions++;
- discover(s,'fire-tradition',t,'Een bestaand vuur wordt een jaarlijks lichtfeest. De kinderen eisen een officiële marshmallowbegroting.');
+ if(duringFestival&&!t.festivalTraditionYear){
+  t.festivalTraditionYear=s.year;
+  if(s.discoveries.includes('fire-tradition'))s.log('Het kampvuur laait op midden in het feest. Vanaf nu hoort dit vuur bij hun jaarlijkse traditie.','culture',{x:t.x,y:t.y});
+ }
+ discover(s,'fire-tradition',t,duringFestival?'Het kampvuur laait op midden in het feest. Het wordt een jaarlijks lichtfeest; de kinderen eisen een officiële marshmallowbegroting.':'Een bestaand vuur wordt een jaarlijks lichtfeest. De kinderen eisen een officiële marshmallowbegroting.');
  s.nextTradition=s.year+45;
 }
 export function advanceTraditions(s){

@@ -32,10 +32,11 @@ export function ignite(s,spot){
  const safe=['beach','campfire','bonfire','original-tree','palace','palace-wing','royal-garden','palace-square'].includes(spot.building);
  if(!spot.building||safe){
   const established=['campfire','bonfire'].includes(spot.building);
+  const duringFestival=s.festival?.until>s.year&&Math.hypot(s.festival.x-spot.x,s.festival.y-spot.y)<=3;
   if(!spot.building&&!spot.reservedFor&&!spot.landform){spot.building='bonfire';spot.builtYear=s.year;s.rebuildRoads();}
   spot.partyUntil=s.year+24;s.festival={kind:'bonfire',x:spot.x,y:spot.y,until:s.year+24,title:'A highly unauthorized barbecue',quips:['Outdoor central heating!','Someone brought a suspicious sausage.','The fire inspector is also the chef.']};
   s.wood=Math.max(0,s.wood-4);
-  if(established)keepFireTradition(s,spot);
+  if(established){keepFireTradition(s,spot,{duringFestival});s.festival.title='Het jaarlijkse lichtfeest';}
   return{title:'A bonfire. They brought snacks.',detail:'Flames, sparks and a gathering. The original tree has politely declined to participate.'};
  }
  startBlaze(s,spot);

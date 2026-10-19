@@ -381,7 +381,7 @@ export class IslandRenderer {
     if(t.kind==='flooded')c.globalAlpha=.78;
     if(this.focus&&['tower','house','townhouse'].includes(t.building)){const f=this.p(this.focus.x,this.focus.y);if(p.y>f.y&&Math.abs(p.x-f.x)<65)c.globalAlpha=.26;}
     const b=t.building;
-    if(b==='original-tree')this.tree(true,t.variant);
+    if(b==='original-tree')this.tree(true,t.variant,!!t.bloomYear);
     else if(b==='tree')this.tree(false,t.variant);
     else if(b==='forest')this.forest(t.variant);
     else if(b==='beach')this.beach(t);
@@ -658,7 +658,7 @@ export class IslandRenderer {
     this.line([[3,-45],[3,-58]],'#a89d71',1.3);this.line([[-1,-53],[7,-53]],'#a89d71',1.3);
     this.poly([[-8,-6],[-2,-3],[-2,-14],[-8,-17]],'#9ba68a');this.ellipse(7,-22,2,3,'#d7bf85');
   }
-  tree(original,v){
+  tree(original,v,bloom=false){
     const c=this.ctx;
     this.ellipse(5,3,original?23:15,original?8:5,'#556f3a19');
     if(!original && v<.5){
@@ -684,6 +684,14 @@ export class IslandRenderer {
     this.ellipse(16,-42,8,8,'#91a763');
     this.ellipse(1,-37,10,9,'#819856');
     this.ellipse(-5,-48,4,2,'#a7b97755');
+    if(original&&bloom){
+      for(const [i,[x,y]] of [[-14,-40],[-7,-49],[3,-53],[13,-46],[17,-36],[5,-38],[-5,-32],[-17,-32],[9,-29]].entries()){
+        const color=i%2?'#f3d6c5':'#f7e7d1';
+        for(let petal=0;petal<4;petal++){const a=petal*Math.PI/2;this.ellipse(x+Math.cos(a)*1.8,y+Math.sin(a)*1.8,1.8,1.5,color);}
+        this.ellipse(x,y,1,1,'#cbaa71');
+      }
+      if(!this.reduced)for(let i=0;i<3;i++){const f=(this.time*.12+i*.32)%1;this.ellipse(-12+i*11+Math.sin(f*6+i)*3,-37+f*43,1.2,.7,'#eed5bfaa');}
+    }
     if(original){this.line([[-11,5],[7,10]],'#897c58',1.6);this.line([[-11,3],[7,8]],'#b4aa79',2.3);this.line([[-8,5],[-8,8]],'#7e7650',1.1);this.line([[4,8],[4,11]],'#7e7650',1.1);}
     c.restore();
   }

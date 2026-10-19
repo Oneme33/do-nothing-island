@@ -4,6 +4,16 @@ import {nl} from './language.js';
 
 export const COLLECTION_STORAGE_KEY='do-nothing-island-collection-v1';
 const endingHints={independent:'Soms is blijven kijken genoeg.',sanctuary:'Misschien hoeft vooruitgang niet alles te vullen.',miracles:'Wat als de hemel deel van de begroting wordt?',fortress:'Een onrustige grond laat sporen in een cultuur.',phoenix:'As kan het begin van iets moois zijn.',retreat:'Een stap terug kan ook een toekomst zijn.','last-drop':'Er bestaat een grens aan winnen van de zee.'};
+export const SECRET_CATALOG=[
+ {discovery:'old-tree-bloom',title:'Hij wist nog hoe het moest',description:'Na drie gerichte regenbuien bloeit de oude boom. De bloesem blijft als herinnering.',hint:'Misschien herinnert een oude vriend zich de lente nog.'},
+ {discovery:'quake-volcano',title:'De slapende berg',description:'Een beving bij de vulkaan veroorzaakte een uitbarsting. As verrijkte de grond.',hint:'Sommige slapende reuzen voelen de grond bewegen.'},
+ {discovery:'rain-quake',title:'De grond stroomt',description:'Een beving na regen werd een modderstroom. Een laag vruchtbaar slib bleef achter.',hint:'Wat doet bewegende grond die pas nog doorweekt raakte?'},
+ {discovery:'landslide',title:'Wat er onder de berg zit',description:'Een aardverschuiving legde gesteente bloot. De bouwers vonden er een steengroeve.',hint:'Een berg bewaart meer dan alleen een uitzicht.'},
+ {discovery:'uplift',title:'Land uit de zee',description:'Een beving tilde de kust op. Er ontstond nieuw land zonder inpoldering.',hint:'De zee hoeft niet altijd te vertrekken door een pomp.'},
+ {discovery:'rift',title:'De overkant bleef liggen',description:'Een beving opende een kloof. Een brug kan de twee kanten weer verbinden.',hint:'De grond onthoudt herhaalde onrust.'},
+ {discovery:'spring',title:'De verborgen bron',description:'Een beving opende een blijvende zoetwaterbron.',hint:'Soms ligt het antwoord op dorst onder je voeten.'},
+ {discovery:'fire-tradition',title:'Een feest dat terugkomt',description:'Een bestaand kampvuur werd een jaarlijkse traditie. Ook vuur tijdens een feest kan zo een lichtfeest worden.',hint:'Een vuurplaats kent misschien een tweede begin. Er mogen hapjes bij.'}
+];
 export const COLLECTION_CATALOG=[
  ...Object.entries(ENDINGS).map(([id,ending])=>({id:`ending:${id}`,group:'endings',title:nl(ending.title),description:nl(ending.description),hint:endingHints[id]})),
  {id:'moment:manor',group:'moments',title:'De eerste grote voordeur',description:'De eerste hut groeide uit tot een landhuis. De sleutel bleef in de familie.',hint:'Ook een bescheiden voordeur kan ambities krijgen.'},
@@ -12,9 +22,10 @@ export const COLLECTION_CATALOG=[
  {id:'moment:volcano',group:'moments',title:'De berg heeft een mening',description:'Je zag een vulkaan ontwaken. De bouwers houden de gratis steen.',hint:'Niet iedere berg blijft voor altijd stil.'},
  {id:'moment:rebirth',group:'moments',title:'Sterker uit de as',description:'Een uitgebrand gebouw werd herbouwd in steen. De oude brand bleef in de gevel herdacht.',hint:'Een ruïne hoeft geen eindpunt te zijn.'},
  {id:'moment:waterfront',group:'moments',title:'De wijk komt terug',description:'Een overstroomde wijk heropende met hoogwaterstrepen en sterkere funderingen.',hint:'Zoek een nieuw begin waar het water net vertrokken is.'},
+ ...SECRET_CATALOG.map(secret=>({...secret,id:`secret:${secret.discovery}`,group:'secrets'})),
  ...CHALLENGE_CATALOG.map(goal=>({id:`challenge:${goal.id}`,group:'challenges',title:goal.title,description:goal.description,hint:goal.experiment?'Een ongewoon idee van een eiland wacht op uitvoering.':'Sommige eilanden hebben een klein extra idee. Zoek hun uitdagingen op.'}))
 ];
-export const COLLECTION_GROUPS={endings:'Eindes',moments:'Bijzondere momenten',challenges:'Uitdagingen'};
+export const COLLECTION_GROUPS={endings:'Eindes',moments:'Bijzondere momenten',challenges:'Uitdagingen',secrets:'Geheimen'};
 const validCollectionRecord=r=>r&&Number.isInteger(r.seed)&&r.seed>=0&&r.seed<=0xffffffff&&Number.isInteger(r.year)&&r.year>=1;
 export function readCollection(raw){
  const result={version:1,entries:{}};let parsed;
@@ -33,6 +44,12 @@ export function advanceCollection(s){
  const remember=(id,year=s.year)=>{if(!Number.isInteger(s.collectionRecords[id]))s.collectionRecords[id]=Number.isInteger(year)&&year>0?year:s.year;};
  if(s.outcome&&ENDINGS[s.outcome.id])remember(`ending:${s.outcome.id}`,s.outcome.year);
  for(const goal of s.challenges?.goals||[])if(goal.status==='completed'&&CHALLENGE_CATALOG.some(g=>g.id===goal.id))remember(`challenge:${goal.id}`,goal.completedAt);
+ for(const secret of SECRET_CATALOG){
+  if(!s.discoveries?.includes(secret.discovery))continue;
+  const field={'old-tree-bloom':'bloomYear','quake-volcano':'volcanicAshYear','rain-quake':'mudflowYear',landslide:'landslideYear',uplift:'upliftedYear',rift:'riftYear',spring:'springYear','fire-tradition':'traditionYear'}[secret.discovery];
+  const evidence=s.land.find(t=>Number.isInteger(t[field]));
+  remember(`secret:${secret.discovery}`,s.discoveryRecords?.[secret.discovery]?.year||evidence?.[field]);
+ }
  const home=s.tile(-1,1),building=home?.building==='ruins'?home.rebuildFrom:home?.building;
  if(['manor','palace'].includes(building))remember('moment:manor',s.snapshots.find(p=>p.label==='The first manor')?.year||(building==='manor'?home.builtYear:s.year));
  if(building==='palace')remember('moment:palace',s.snapshots.find(p=>p.label==='The palace and its gardens')?.year||home.builtYear);

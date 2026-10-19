@@ -10,7 +10,7 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 - [x] **2.2 Wensen van inwoners.** Af en toe een wolkje met een vraag om regen, hulp bij brand, een feest of een bijzondere ingreep. Wel of niet helpen verandert vertrouwen en afhankelijkheid. Ook vuur en bevingen krijgen verhalende wensen. *(Experimenteerder, verhalenlezer)*
 - [x] **2.3 Lichte uitdagingen.** Eén tot drie optionele wensen per eiland, zoals een kasteel vóór jaar 800 of de Renaissance bereiken zonder aanraking. Alleen zichtbaar wanneer je ze zelf opzoekt. *(Ontdekker)*
 - [x] **2.4 Verzameling over eilanden heen.** Bewaar ontdekte eindes, bijzondere mijlpalen en voltooide uitdagingen. Onontdekte items krijgen silhouetten en vage hints. *(Ontdekker)*
-- [ ] **2.5 Geheime gebeurtenissen verzamelen.** Onder andere drie keer regen op de oude boom laten bloeien, een beving bij de vulkaan en vuur op een kampvuur tijdens een feest. Koppel ook de bestaande ontdekkingen aan de verzameling. *(Experimenteerder)*
+- [x] **2.5 Geheime gebeurtenissen verzamelen.** Onder andere drie keer regen op de oude boom laten bloeien, een beving bij de vulkaan en vuur op een kampvuur tijdens een feest. Koppel ook de bestaande ontdekkingen aan de verzameling. *(Experimenteerder)*
 - [ ] **2.6 ‘Terwijl je weg was…’.** Een korte terugkomsamenvatting met eeuwen, gebeurtenissen en familieleden. ‘Laat zien’ brengt je naar het grootste moment. *(Rustige kijker)*
 - [ ] **2.7 Kroniek per tijdperk.** Hoofdstukken met een kleine illustratie en per gebeurtenis ‘Laat zien’. Familie en jouw ingrepen springen eruit. *(Verhalenlezer)*
 - [ ] **2.8 Filmisch einde op het echte eiland.** De camera volgt plekken uit de kroniek en eindigt bij de laatste nazaat onder de oude boom. Het tekstoverzicht komt daarna. *(Allemaal)*
@@ -32,4 +32,4 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 
 ## Nu aan de beurt
 
-**2.4 is gereed voor Coens test.** Opdracht: 2.4 en 2.5, elk met een eigen commit en push. Help heeft Kijk vervangen met een eigen commit. Daarna volgt ook meer natuurlijke ruimte en minder dichte nieuwbouw, op aanvullend verzoek. Ronde 3 blijft open.
+**2.4 en 2.5 zijn gereed voor Coens test**, elk met een eigen commit en push. Help heeft Kijk vervangen met een eigen commit. Nu volgt meer natuurlijke ruimte en minder dichte nieuwbouw, op aanvullend verzoek. Daarna is 2.6 (terugkomsamenvatting) aan de beurt, na feedback of een nieuwe opdracht. Ronde 3 blijft open.
