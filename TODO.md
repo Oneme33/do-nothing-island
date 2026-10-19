@@ -32,4 +32,4 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 
 ## Nu aan de beurt
 
-**2.4 en 2.5 zijn gereed voor Coens test**, elk met een eigen commit en push. Help heeft Kijk vervangen met een eigen commit. Grotere eilanden en ruimere nieuwbouw zijn toegevoegd op aanvullend verzoek. Daarna volgen de vlakke wegen en het weghalen van het grijze boomlabel; vervolgens 2.6 (terugkomsamenvatting) en 2.7 (kroniek per tijdperk), elk apart pushen. Ronde 3 blijft open.
+**2.4 en 2.5 zijn gereed voor Coens test**, elk met een eigen commit en push. Help heeft Kijk vervangen met een eigen commit. Grotere eilanden en ruimere nieuwbouw zijn toegevoegd op aanvullend verzoek. De wegen hebben nu een vlak wegdek; het grijze boomlabel is verwijderd. Nu volgen 2.6 (terugkomsamenvatting) en 2.7 (kroniek per tijdperk), elk apart pushen. Ronde 3 blijft open.

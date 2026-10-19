@@ -303,21 +303,36 @@ export class IslandRenderer {
     }
   }
   drawRoads(tiles){
-    for(const t of tiles){
-      if(!t.road || t.kind==='flooded' || t.kind==='construction')continue;
-      const paved=this.sim.era>=3&&!['forest','beach','park','garden','playground'].includes(t.building);
-      const p=this.streetPoint(t),fresh=this.sim.year-(t.roadYear||0)<3;
-      for(const [nx,ny]of [[t.x+1,t.y],[t.x,t.y+1]]){
-        const next=this.sim.tile(nx,ny);
-        if(!next?.road || next.kind==='flooded'||!t.roadLinks?.includes(key(nx,ny)))continue;
-        const end=this.streetPoint(next),points=[[p.x,p.y],[end.x,end.y]];
-        this.line(points,paved?'#a3a48d':'#aa9c74',paved?8:6.4);
-        this.line(points,paved?'#bfc0a8':fresh?'#dfc69c':'#d5c49a',paved?6:4.8);
-        if(paved)this.line([[mix(p.x,end.x,.4),mix(p.y,end.y,.4)],[mix(p.x,end.x,.58),mix(p.y,end.y,.58)]],'#e7dfb4',.7);
+    const roads=tiles.filter(t=>t.road&&t.kind!=='flooded'&&t.kind!=='construction'),edges=[];
+    const paved=t=>this.sim.era>=3&&!['forest','beach','park','garden','playground'].includes(t.building);
+    // Project a strip onto the ground plane, with no raised rim or circular couplings.
+    const ribbon=(a,b,half,color)=>{
+      const dx=b.x-a.x,dy=(b.y-a.y)*2,length=Math.hypot(dx,dy);if(!length)return;
+      const nx=-dy/length*half,ny=dx/length*half*.5;
+      this.poly([[a.x+nx,a.y+ny],[b.x+nx,b.y+ny],[b.x-nx,b.y-ny],[a.x-nx,a.y-ny]],color);
+    };
+    for(const t of roads)for(const [nx,ny]of [[t.x+1,t.y],[t.x,t.y+1]]){
+      const next=this.sim.tile(nx,ny);
+      if(next?.road&&next.kind!=='flooded'&&next.kind!=='construction'&&t.roadLinks?.includes(key(nx,ny)))edges.push({a:this.streetPoint(t),b:this.streetPoint(next),paved:paved(t)&&paved(next),tile:t});
+    }
+    for(const edge of edges)ribbon(edge.a,edge.b,edge.paved?6:4.8,edge.paved?'#a5aca1':'#c8b68e');
+    // Join every branch with the same flat surface, before any markings or texture.
+    for(const t of roads){const p=this.streetPoint(t),hard=paved(t);this.diamond(p.x,p.y,hard?8.5:6.8,hard?4.25:3.4,hard?'#a5aca1':'#c8b68e');}
+    for(const {a,b,paved:hard,tile} of edges){
+      if(hard){
+        ribbon({x:mix(a.x,b.x,.38),y:mix(a.y,b.y,.38)},{x:mix(a.x,b.x,.62),y:mix(a.y,b.y,.62)},.45,'#e8e4cf');
+      }else{
+        for(const sign of [-1,1]){
+          const dx=b.x-a.x,dy=(b.y-a.y)*2,length=Math.hypot(dx,dy),ox=-dy/length*sign*1.7,oy=dx/length*sign*.85;
+          this.line([[mix(a.x,b.x,.16)+ox,mix(a.y,b.y,.16)+oy],[mix(a.x,b.x,.84)+ox,mix(a.y,b.y,.84)+oy]],'#b6a37d55',.55);
+        }
+        const f=.3+tile.variant*.4;this.ellipse(mix(a.x,b.x,f),mix(a.y,b.y,f),.65,.35,'#e1d2ae');
       }
-      this.ellipse(p.x,p.y,paved?3.2:2.4,paved?1.7:1.2,paved?'#bfc0a8':'#d5c49a');
-      if(t.building&&!['tree','original-tree','bridge','dock','harbor'].includes(t.building)){const door=this.entrancePoint(t);this.line([[p.x,p.y],[door.x,door.y]],'#d7cba4',1.7);}
-      if(paved && this.sim.power>0 && t.variant>.81 && !t.building){
+    }
+    for(const t of roads){
+      const p=this.streetPoint(t),hard=paved(t);
+      if(t.building&&!['tree','original-tree','bridge','dock','harbor'].includes(t.building))ribbon(p,this.entrancePoint(t),1.6,hard?'#c1c5b1':'#cdbb96');
+      if(hard && this.sim.power>0 && t.variant>.81 && !t.building){
         this.line([[p.x-7,p.y+3],[p.x-7,p.y-11],[p.x-4,p.y-13]],'#7f8c77',1);
         this.ellipse(p.x-4,p.y-13,1.7,1.2,'#f5e6ad');
       }

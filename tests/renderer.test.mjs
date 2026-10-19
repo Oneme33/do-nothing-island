@@ -116,8 +116,10 @@ test('neighboring road tiles do not acquire streets that were never planned',()=
  const tiles=[[3,0],[4,0],[3,1],[4,1]].map(([x,y])=>sim.tile(x,y));
  for(const t of tiles){t.road=true;t.roadLinks=[];t.building=null;}
  tiles[0].roadLinks=['4,0'];tiles[1].roadLinks=['3,0'];tiles[2].roadLinks=['4,1'];tiles[3].roadLinks=['3,1'];
- const segments=[];renderer.line=(points,color,width)=>{if(width===6.4)segments.push(points);};
+ const segments=[];renderer.poly=points=>{if(points.some(a=>points.some(b=>Math.hypot(a[0]-b[0],a[1]-b[1])>20)))segments.push(points);};
  renderer.drawRoads(tiles);assert.equal(segments.length,2,'draw the two planned roads without joining adjacent parcels');
+ const midpoints=segments.map(points=>points.reduce((sum,p)=>({x:sum.x+p[0]/points.length,y:sum.y+p[1]/points.length}),{x:0,y:0}));
+ assert.deepEqual(midpoints,[renderer.streetPosition(tiles[0],tiles[1],.5),renderer.streetPosition(tiles[2],tiles[3],.5)]);
 });
 test('floating labels are capped, bounded and separated, including an intervention with only a title',()=>{
  for(const width of [390,1200]){

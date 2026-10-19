@@ -193,7 +193,6 @@ function updateUI(){
     $('project-percent').textContent=`${percent}%`;$('project-progress').style.width=`${percent}%`;
   }
   $('instruction').style.opacity=sim.year>90?'.5':'1';
-  $('tree-label').style.opacity=sim.era>2?'.45':'1';
   if(sim.ending && !sim.endingSeen&&!cinemaActive()){sim.endingSeen=true;renderEnding();save();$('ending-dialog').showModal();updatePause();}
   updateHistory();
   updateClock();
@@ -286,9 +285,6 @@ function frame(now){
     if(stage.width!==w||stage.height!==h){stage.width=w;stage.height=h;}
     drawFinale(stage.getContext('2d'),w,h,sim,sim.cinematic,renderer.reduced);
   }
-  const tree=renderer.point(0,0);
-  $('tree-label').style.left=`${tree.x+37*renderer.zoom}px`;
-  $('tree-label').style.top=`${tree.y+40*renderer.zoom}px`;
   requestAnimationFrame(frame);
 }
 

@@ -30,7 +30,7 @@ De pauzeknop, snelheden **1× / 2× / 3× / 10×** en het logboek staan op het e
 
 Spatie pauzeert. Scroll of +/− zoomt; sleep om de rest van het eiland te verkennen. Open vensters zoals het logboek, de handleiding en instellingen pauzeren de wereld.
 
-De bewoners kunnen zonder wegen door het landschap lopen, ook naar het achterland en de zijkanten. Wegen ontstaan bij echte bouwplaatsen en gebouwen. Bos, strand en uitzichtpunten veroorzaken geen automatisch wegennet. Karren, fietsen en auto's gebruiken de aangelegde wegen.
+De bewoners kunnen zonder wegen door het landschap lopen, ook naar het achterland en de zijkanten. Vlakke zandwegen verbinden echte bouwplaatsen en gebouwen. Later worden ze straten met een grijs wegdek en markering. Bos, strand en uitzichtpunten veroorzaken geen automatisch wegennet. Karren, fietsen en auto's gebruiken de aangelegde wegen.
 
 Je voortgang wordt lokaal bewaard. **Nieuw groot eiland** begint meteen opnieuw en biedt tien seconden lang **Herstel vorig eiland**. Nieuwe eilanden hebben ongeveer de helft meer natuurlijke landtegels en nieuwe huizen zoeken eerst plekken met ruimte tussen de buren. Ook geplande huizen tellen mee. Bestaande eilanden behouden hun kust en bebouwing; begin een nieuw eiland om de grotere kaart te zien.
 

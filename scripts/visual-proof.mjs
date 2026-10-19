@@ -23,7 +23,7 @@ function recorder(width,height){
 globalThis.window={devicePixelRatio:1};globalThis.matchMedia=()=>({matches:false});globalThis.ResizeObserver=class{observe(){}};
 await mkdir('artifacts',{recursive:true});
 const selected=process.argv.slice(2);
-for(const [name,year,width,focus,history,movie] of [['blossom-tree',24,1200,'blossom',false],['beginning',1,1200,false,false],['beach-party',24,1200,'beach',false],['palace',1350,1200,true,false],['final-island',2200,1200,false,true],['mobile-palace',1350,390,true,false],['movie-independent',2240,1200,false,false,'independent'],['movie-miracles',2240,1200,false,false,'miracles'],['movie-fortress',2240,1200,false,false,'fortress'],['movie-last-drop',2240,1200,false,false,'last-drop']]){
+for(const [name,year,width,focus,history,movie] of [['village-roads',301,1200,false,false],['modern-roads',1980,1200,true,false],['blossom-tree',24,1200,'blossom',false],['beginning',1,1200,false,false],['beach-party',24,1200,'beach',false],['palace',1350,1200,true,false],['final-island',2200,1200,false,true],['mobile-palace',1350,390,true,false],['movie-independent',2240,1200,false,false,'independent'],['movie-miracles',2240,1200,false,false,'miracles'],['movie-fortress',2240,1200,false,false,'fortress'],['movie-last-drop',2240,1200,false,false,'last-drop']]){
  if(selected.length&&!selected.includes(name))continue;
  const sim=new Civilization(31);while(sim.year<year&&!sim.ending)sim.tick();
  if(movie){startCinema(sim,movie);sim.cinematic.elapsed=17;sim.ending=true;}
