@@ -8,6 +8,7 @@ import {drawFinale,islandScores} from './finale.js';
 import {ensureFamily,currentRelative} from './family.js';
 import {ensureWishes,dismissWish,WISH_OUTCOMES,canHelpWish,helpActiveWish} from './wishes.js';
 import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
+import {returnFromAway} from './away.js';
 import {COLLECTION_STORAGE_KEY,COLLECTION_CATALOG,COLLECTION_GROUPS,readCollection,mergeCollections,collectIsland} from './collection.js';
 
 const $=id=>document.getElementById(id);
@@ -16,6 +17,7 @@ let storageAvailable=true;
 let sim;
 try {sim=Civilization.restore(localStorage.getItem(storageKey));}catch{storageAvailable=false;}
 sim ||= new Civilization();
+returnFromAway(sim);
 let collection=readCollection(null),collectionStorageAvailable=true;
 try{collection=readCollection(localStorage.getItem(COLLECTION_STORAGE_KEY));}catch{collectionStorageAvailable=false;}
 const canvas=$('island');
@@ -38,6 +40,7 @@ $('expansion-limit').value=String(sim.config.maxTiles);
 $('rare-endings').checked=sim.config.rareEndings;
 $('accelerating').checked=sim.config.accelerating;
 $('story-cards').checked=sim.config.storyCards===true;
+$('offline-life').checked=sim.config.offlineProgress!==false;
 
 function showToast(message,duration=4200){$('toast-text').textContent=nl(message);$('toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),duration);}
 function dismissStory(){beatHoldUntil=0;momentQueue=[];activeMoment=null;momentAt=performance.now();$('moment-card').hidden=true;updateClock();}
@@ -64,6 +67,7 @@ function renderCollection(){
   }));
 }
 function save(){
+  sim.lastVisitAt=Date.now();sim.lastVisitPaused=paused||otherDialogOpen()||!!sim.ending;
   syncCollection();persistCollection();
   try {localStorage.setItem(storageKey,sim.serialize());storageAvailable=true;$('save-status').textContent="Je eiland is op dit apparaat opgeslagen.";}
   catch {storageAvailable=false;$('save-status').textContent="Opslaan lukt hier niet. Je kunt dit bezoek wel gewoon verder spelen.";}
@@ -143,7 +147,14 @@ function renderWishes(){
   $('wish-history').replaceChildren(...state.history.slice().reverse().map(w=>{const item=document.createElement('li'),name=document.createElement('strong'),text=document.createElement('p');name.textContent=`${WISH_OUTCOMES[w.status]} · jaar ${w.closedAt}`;text.textContent=`${w.speaker}: “${w.text}”`;item.append(name,text);return item;}));
 }
 function openWishes(){renderWishes();$('wishes-dialog').showModal();updatePause();}
+function updateAwayReport(){
+  const report=sim.awayReport;$('away-summary').hidden=!report||report.dismissed;
+  if(!report||report.dismissed)return;
+  $('away-heading').textContent=report.focused?'Het grootste moment':'Terwijl je weg was…';$('away-show').hidden=!!report.focused;
+  $('away-text').textContent=report.focused?nl(report.biggest.text):report.summary;$('away-range').textContent=report.focused?`Jaar ${report.biggest.year}`:`Jaar ${report.from}–${report.to}${report.limited?' · maximaal drie eeuwen bijgewerkt':''}`;
+}
 function updateUI(){
+  updateAwayReport();
   syncCollection();
   updateWishBubble();
   $('year').textContent=sim.year;
@@ -278,7 +289,7 @@ function frame(now){
   if(cinemaActive()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
   if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8))renderer.addEffect(signal);sim.signals=[];}
   presentMoment(now);
-  saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
+  if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending||now<beatHoldUntil;renderer.draw(now);
   if(cinemaActive()){
     const stage=$('finale-canvas'),box=stage.getBoundingClientRect(),w=Math.max(300,Math.round(box.width)),h=Math.max(200,Math.round(box.height));
@@ -304,6 +315,15 @@ $('recenter').addEventListener('click',()=>renderer.recenter());
 $('help').addEventListener('click',()=>$('guide-dialog').showModal());
 $('settings').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;$('settings-dialog').showModal();});
 $('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();});
+$('away-dismiss').addEventListener('click',()=>{if(sim.awayReport)sim.awayReport.dismissed=true;updateAwayReport();save();});
+$('away-show').addEventListener('click',()=>{
+  const report=sim.awayReport;if(!report)return;
+  if(report.biggest.type==='ending'){report.dismissed=true;renderEnding();$('ending-dialog').showModal();updatePause();}
+  else{report.focused=true;chooseMode('help');inspectionPinned=true;focusPlace(momentTarget(report.biggest));}
+  updateAwayReport();
+  save();
+});
+$('offline-life').addEventListener('change',event=>{sim.config.offlineProgress=event.target.checked;save();});
 $('open-collection').addEventListener('click',()=>{renderCollection();$('collection-dialog').showModal();updatePause();});
 $('collection-close').addEventListener('click',()=>$('collection-dialog').close());
 $('open-challenges').addEventListener('click',()=>{ensureChallenges(sim).revealed=true;renderChallenges();$('challenges-dialog').showModal();updatePause();save();});
@@ -366,7 +386,7 @@ function switchIsland(next,message){
   syncCollection();persistCollection();
   sim=next;renderer.sim=sim;renderer.effects=[];renderer.ripples=[];renderer.visibleTiles=[];renderer.hover=null;renderer.center={x:0,y:0};renderer.zoom=1;renderer.activityTime=0;renderer.wheelTime=0;renderer.recenter();
   sim.config.speedMultiplier=speed;
-  $('story-cards').checked=sim.config.storyCards===true;
+  $('story-cards').checked=sim.config.storyCards===true;$('offline-life').checked=sim.config.offlineProgress!==false;
   accumulator=0;paused=false;dirtyHistory=true;shownRemark='';drag=null;momentQueue=[];seenMoments=new Set();activeMoment=null;beatHoldUntil=0;momentAt=-Infinity;snapshotSignature='';renderer.showHistory=false;renderer.historySnapshot=null;$('history-layer').checked=false;$('history-snapshot').hidden=true;$('history-legend').hidden=true;$('moment-card').hidden=true;
   clearTimeout(interventionTimer);$('intervention-result').hidden=true;$('tile-inspector').hidden=true;inspectionPinned=false;
   for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();
@@ -474,10 +494,14 @@ async function toggleAudio(){
   }catch{showToast("De oceaan houdt zich stil. Geluid werkt niet in deze browser.");}
 }
 $('sound').addEventListener('click',toggleAudio);
-document.addEventListener('visibilitychange',()=>{accumulator=0;lastTime=performance.now();if(document.hidden){save();if(audio?.state==='running')audio.suspend();}else if(audioEnabled)audio?.resume();});
+document.addEventListener('visibilitychange',()=>{
+  accumulator=0;lastTime=performance.now();
+  if(document.hidden){save();if(audio?.state==='running')audio.suspend();}
+  else{if(returnFromAway(sim)){dirtyHistory=true;momentQueue=[];renderer.effects=[];updateUI();}save();if(audioEnabled)audio?.resume();}
+});
 window.addEventListener('pagehide',save);
 let firstVisit=true;try{firstVisit=localStorage.getItem(introKey)!=='done';}catch{}
 if(firstVisit)showIntro();
-updateUI();updatePause();
+updateUI();updatePause();save();
 if(!storageAvailable)$('save-status').textContent="Opslaan lukt hier niet. Je kunt dit bezoek wel gewoon verder spelen.";
 requestAnimationFrame(frame);

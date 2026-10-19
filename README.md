@@ -16,6 +16,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Geheimen** ontstaan door experimenten. Drie gerichte regenbuien geven de oude boom blijvende bloesem. Een beving bij een vulkaan, bewegen van natte grond en vuur op een feestende vuurplaats hebben eigen gevolgen. Alle acht ontdekkingen komen stil in de verzameling, met de seed en het vastgelegde jaar. De onbekende vakjes verklappen alleen een hint. Ook bestaande ontdekkingen uit oude saves tellen mee.
 
+**Terwijl je weg was…** verschijnt na minstens een minuut afwezigheid. Het eiland haalt met de bewaarde snelheid maximaal drie eeuwen in en vertelt wat werkelijk gebeurde: verstreken jaren, overstromingen en de familielijn. Laat zien brengt je naar de plek van het grootste moment. De samenvatting is wegklikbaar. Pauze en open vensters worden gerespecteerd; in instellingen kun je voortgang tijdens afwezigheid uitzetten. Een einde tijdens afwezigheid opent geen automatische eindscène.
+
 ## Spelen
 
 Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het volledige spel; installatie en een server zijn niet nodig. De interface is Nederlands. De eerste keer verschijnen drie korte introschermen, waarna het eiland op **1×** begint.
@@ -99,6 +101,7 @@ Deze afbeeldingen controleren de renderer. Ze vervangen geen volledige interacti
 
 ## Broncode
 
+- `away.js`: begrensde voortgang tijdens afwezigheid en een terugkomsamenvatting op basis van echte gebeurtenissen.
 - `collection.js`: stille, blijvende vondsten per eiland en de aparte verzameling over eilanden heen.
 - `family.js`, `wishes.js` en `challenges.js`: de opgeslagen familielijn, vragen van inwoners en stille optionele doelen.
 - `simulation.js`: wereld, economie, bouw, wegen, verkeer en opslag.

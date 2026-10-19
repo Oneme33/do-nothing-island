@@ -56,6 +56,8 @@
 canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
 
 .collection-dialog{max-width:780px;width:min(780px,calc(100% - 24px))}.collection-dialog h3{font-size:12px;font-weight:500;letter-spacing:.5px;margin:27px 0 12px}.collection-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;list-style:none;padding:0;margin:0}.collection-grid li{padding:16px;border:1px solid #d5dec5;background:#eaf0db;border-radius:7px;line-height:1.7;overflow-wrap:anywhere}.collection-stamp{display:grid;place-items:center;width:42px;height:42px;margin-bottom:9px;border-radius:50%;background:#d5e2be;color:#748a54}.collection-stamp svg{width:28px;height:28px;fill:currentColor;stroke:none}.collection-grid strong{display:block;font-family:var(--serif);font-size:20px;font-weight:400}.collection-grid p{font-size:11px;color:#677756;margin:7px 0 10px}.collection-grid small{font-size:9px;color:#748464}.collection-grid li[data-found=false]{background:#f0efe6;border-color:#e0ddcf}.collection-grid li[data-found=false] .collection-stamp{color:#a4aa98;background:#e2e3d7}.collection-grid li[data-found=false] strong{font-family:var(--font);font-size:12px;color:#78826d}.collection-grid li[data-found=false] p{color:#8a907f;font-style:italic}@media(max-width:500px){.collection-grid{grid-template-columns:1fr}.collection-dialog{padding:25px 20px}}
+
+.away-summary{position:relative;display:flex;align-items:center;gap:18px;background:#e8edda;border:1px solid #ccd8bb;border-radius:7px;padding:16px 42px 16px 18px;margin-bottom:18px;line-height:1.7}.away-summary strong{display:block;font-family:var(--serif);font-size:22px;font-weight:400}.away-summary small{display:block;font-size:9px;color:#81916e}.away-summary p{font-size:11px;color:#657b54;margin:5px 0 0}.away-summary #away-show{flex-shrink:0;background:#d9e4c3;border:1px solid #bdcda4;border-radius:5px;padding:10px 12px;font-size:11px;margin-left:auto}@media(max-width:500px){.away-summary{align-items:flex-start;flex-direction:column;gap:8px}.away-summary #away-show{margin-left:0}}
 </style>
 </head>
 <body>
@@ -107,6 +109,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 
 
     <section class="island-story" aria-label="Verken het eiland en zijn geschiedenis">
+      <aside id="away-summary" class="away-summary" hidden><button id="away-dismiss" class="card-close" aria-label="Verberg de terugkomsamenvatting">×</button><div><strong id="away-heading">Terwijl je weg was…</strong><small id="away-range"></small><p id="away-text"></p></div><button id="away-show">Laat zien ↗</button></aside>
       <div class="story-health"><span id="water-status">Zoetwater · 82%</span><span id="environment-status">Levend landschap · 100%</span><span id="legacy-status">Een zelfstandig begin</span><span id="council-status">Een paar mensen. Genoeg ruimte.</span></div>
       <div class="explore-controls"><button id="open-collection" aria-haspopup="dialog">▧ Verzameling</button><button id="open-challenges" aria-haspopup="dialog">✧ Uitdagingen</button><button id="open-wishes" aria-haspopup="dialog">♡ Wensen</button><button id="open-family" aria-haspopup="dialog">♧ Stamboom</button><button id="find-palace">♜ Eerste huis</button><button id="find-knowledge">✧ Kennis</button><button id="find-fields">♧ Akkers</button><button id="find-fun">♬ Feest</button><label><input type="checkbox" id="history-layer"> Toen en nu</label><select id="history-snapshot" aria-label="Vergelijk een vroegere kustlijn" hidden></select><button id="open-ending" hidden>Lees het naschrift ↗</button></div>
       <p id="history-legend" hidden>Oker: vroegere kust · Blauw: overstroomde wijken · Goud/blauw: jouw bezoeken · Oude dijken blijven in de stad zichtbaar.</p>
@@ -133,7 +136,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
   <dialog id="family-dialog" class="family-dialog" aria-labelledby="family-title"><button id="family-close" class="dialog-close" aria-label="Sluit de stamboom">×</button><span class="eyebrow">DE FAMILIE VAN HET EERSTE HUIS</span><h2 id="family-title"></h2><p>Het huis blijft. Iedere generatie geeft de sleutel door.</p><section id="family-current" class="family-current"></section><p id="family-note" class="dialog-note"></p><div class="family-navigation"><button id="family-oldest">Naar de eerste generatie ↑</button><button id="family-latest">Naar de huidige generatie ↓</button><button id="family-find-home">Bekijk hun huis ↗</button></div><ol id="family-generations" class="family-generations" aria-label="Generaties van de eerste familie"></ol></dialog>
   <dialog id="journal-dialog" class="journal-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">HET EILANDARCHIEF</span><h2>Behoorlijk veel niets.</h2><p>Elke grote beschaving begint met een boom en wat twijfelachtige beslissingen.</p><div id="journal-entries"></div></dialog>
 
-  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Een rustig begin, daarna steeds sneller.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
+  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Leven tijdens afwezigheid</strong><small>Bij terugkomst maximaal drie eeuwen verder, behalve wanneer je pauzeert.</small></span><input type="checkbox" id="offline-life" checked></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Een rustig begin, daarna steeds sneller.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
 
   <dialog id="ending-dialog" class="ending-dialog"><button id="ending-close" class="dialog-close" aria-label="Sluit het naschrift">×</button><span class="eyebrow">HET EILAND HEEFT EEN VERHAAL</span><div class="ending-symbol">◉</div><h2 id="ending-title">De erfenis van het eiland.</h2><p class="ending-quote" id="ending-quote"></p><p id="ending-description"></p><div class="ending-shortage"><span>WAT ZE ACHTERLATEN</span><strong id="ending-consequence"></strong><p id="ending-detail"></p></div><section class="island-scores" aria-label="Eilandscores"><span class="eyebrow">HUN EILANDSCORE</span><strong id="ending-score"></strong><div id="score-breakdown"></div><p>Het gemiddelde van vijf kanten van hun beschaving. Er is meer dan één manier om het goed te doen.</p></section><p id="ending-stats"></p><div class="ending-maps"><figure><svg id="ending-before" viewBox="0 0 250 250" role="img" aria-label="Het oorspronkelijke eiland"></svg><figcaption>Het begin</figcaption></figure><figure><svg id="ending-after" viewBox="0 0 250 250" role="img" aria-label="Het uiteindelijke eiland"></svg><figcaption>Het eiland dat zij maakten</figcaption></figure></div><p id="ending-causes"></p><div id="ending-chronicle"></div><button id="ending-continue" class="primary-button">Bekijk het uiteindelijke eiland ↗</button><button id="ending-replay" class="secondary-button">Speel de eindscène opnieuw ↻</button><button id="ending-sandbox" class="secondary-button">Speel vrij verder →</button><button id="ending-new" class="secondary-button">Begin een nieuw eiland ↻</button></dialog>
   <script>(()=>{
@@ -1523,6 +1526,33 @@ function collectIsland(collection,s){
  const facts=advanceCollection(s);let changed=false;
  for(const {id} of COLLECTION_CATALOG){const year=facts[id];if(!collection.entries[id]&&Number.isInteger(year)&&year>=1){collection.entries[id]={seed:s.seed,year};changed=true;}}
  return changed;
+}
+
+
+const MAX_AWAY_YEARS=300;
+const MIN_AWAY_MS=60_000;
+function returnFromAway(s,now=Date.now()){
+ const previous=s.lastVisitAt;s.lastVisitAt=now;
+ if(!Number.isFinite(previous)||!Number.isFinite(now)||now-previous<MIN_AWAY_MS||s.lastVisitPaused||s.ending||s.config.offlineProgress===false)return null;
+ const from=s.year,floods=s.storyStats?.floods||0,relative=currentRelative(s);let seconds=Math.min(6*60*60,(now-previous)/1000),years=0,biggest=null;
+ const speed=[1,2,3,10].includes(s.config.speedMultiplier)?s.config.speedMultiplier:1;
+ while(years<MAX_AWAY_YEARS&&!s.ending){
+  const duration=s.yearDuration/speed;if(seconds<duration)break;seconds-=duration;s.events=[];s.tick();years++;
+  for(const entry of s.events){
+   const priority=eventPriority(entry.type)+(entry.type==='family'?3:0);
+   if(!biggest||priority>biggest.priority)biggest={...entry,priority};
+  }
+  s.events=[];s.signals=[];
+ }
+ if(!years)return null;
+ const descendant=currentRelative(s),floodCount=Math.max(0,(s.storyStats?.floods||0)-floods);
+ const elapsed=years%100===0?`${years/100} ${years===100?'eeuw':'eeuwen'}`:`${years} jaar`;
+ const family=descendant.id!==relative.id?`${descendant.name} nam de familiesleutel over en werkt als ${descendant.occupation}.`:`${descendant.name} houdt de sleutel van het eerste huis nog bij zich.`;
+ const report={from,to:s.year,years,floods:floodCount,summary:`${elapsed}, ${floodCount} ${floodCount===1?'overstroming':'overstromingen'}. ${family}`,biggest:biggest||{type:'family',text:family,year:s.year,x:-1,y:1},limited:years===MAX_AWAY_YEARS&&seconds>0,dismissed:false};
+ s.awayReport=report;
+ // An ending reached while absent remains available through an explicit recap button.
+ if(s.ending){s.endingSeen=true;if(s.cinematic)s.cinematic.completed=true;}
+ return report;
 }
 
 const SAVE_VERSION = 1;
@@ -3541,6 +3571,7 @@ let storageAvailable=true;
 let sim;
 try {sim=Civilization.restore(localStorage.getItem(storageKey));}catch{storageAvailable=false;}
 sim ||= new Civilization();
+returnFromAway(sim);
 let collection=readCollection(null),collectionStorageAvailable=true;
 try{collection=readCollection(localStorage.getItem(COLLECTION_STORAGE_KEY));}catch{collectionStorageAvailable=false;}
 const canvas=$('island');
@@ -3563,6 +3594,7 @@ $('expansion-limit').value=String(sim.config.maxTiles);
 $('rare-endings').checked=sim.config.rareEndings;
 $('accelerating').checked=sim.config.accelerating;
 $('story-cards').checked=sim.config.storyCards===true;
+$('offline-life').checked=sim.config.offlineProgress!==false;
 
 function showToast(message,duration=4200){$('toast-text').textContent=nl(message);$('toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),duration);}
 function dismissStory(){beatHoldUntil=0;momentQueue=[];activeMoment=null;momentAt=performance.now();$('moment-card').hidden=true;updateClock();}
@@ -3589,6 +3621,7 @@ function renderCollection(){
   }));
 }
 function save(){
+  sim.lastVisitAt=Date.now();sim.lastVisitPaused=paused||otherDialogOpen()||!!sim.ending;
   syncCollection();persistCollection();
   try {localStorage.setItem(storageKey,sim.serialize());storageAvailable=true;$('save-status').textContent="Je eiland is op dit apparaat opgeslagen.";}
   catch {storageAvailable=false;$('save-status').textContent="Opslaan lukt hier niet. Je kunt dit bezoek wel gewoon verder spelen.";}
@@ -3668,7 +3701,14 @@ function renderWishes(){
   $('wish-history').replaceChildren(...state.history.slice().reverse().map(w=>{const item=document.createElement('li'),name=document.createElement('strong'),text=document.createElement('p');name.textContent=`${WISH_OUTCOMES[w.status]} · jaar ${w.closedAt}`;text.textContent=`${w.speaker}: “${w.text}”`;item.append(name,text);return item;}));
 }
 function openWishes(){renderWishes();$('wishes-dialog').showModal();updatePause();}
+function updateAwayReport(){
+  const report=sim.awayReport;$('away-summary').hidden=!report||report.dismissed;
+  if(!report||report.dismissed)return;
+  $('away-heading').textContent=report.focused?'Het grootste moment':'Terwijl je weg was…';$('away-show').hidden=!!report.focused;
+  $('away-text').textContent=report.focused?nl(report.biggest.text):report.summary;$('away-range').textContent=report.focused?`Jaar ${report.biggest.year}`:`Jaar ${report.from}–${report.to}${report.limited?' · maximaal drie eeuwen bijgewerkt':''}`;
+}
 function updateUI(){
+  updateAwayReport();
   syncCollection();
   updateWishBubble();
   $('year').textContent=sim.year;
@@ -3803,7 +3843,7 @@ function frame(now){
   if(cinemaActive()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
   if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8))renderer.addEffect(signal);sim.signals=[];}
   presentMoment(now);
-  saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
+  if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending||now<beatHoldUntil;renderer.draw(now);
   if(cinemaActive()){
     const stage=$('finale-canvas'),box=stage.getBoundingClientRect(),w=Math.max(300,Math.round(box.width)),h=Math.max(200,Math.round(box.height));
@@ -3829,6 +3869,15 @@ $('recenter').addEventListener('click',()=>renderer.recenter());
 $('help').addEventListener('click',()=>$('guide-dialog').showModal());
 $('settings').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;$('settings-dialog').showModal();});
 $('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();});
+$('away-dismiss').addEventListener('click',()=>{if(sim.awayReport)sim.awayReport.dismissed=true;updateAwayReport();save();});
+$('away-show').addEventListener('click',()=>{
+  const report=sim.awayReport;if(!report)return;
+  if(report.biggest.type==='ending'){report.dismissed=true;renderEnding();$('ending-dialog').showModal();updatePause();}
+  else{report.focused=true;chooseMode('help');inspectionPinned=true;focusPlace(momentTarget(report.biggest));}
+  updateAwayReport();
+  save();
+});
+$('offline-life').addEventListener('change',event=>{sim.config.offlineProgress=event.target.checked;save();});
 $('open-collection').addEventListener('click',()=>{renderCollection();$('collection-dialog').showModal();updatePause();});
 $('collection-close').addEventListener('click',()=>$('collection-dialog').close());
 $('open-challenges').addEventListener('click',()=>{ensureChallenges(sim).revealed=true;renderChallenges();$('challenges-dialog').showModal();updatePause();save();});
@@ -3891,7 +3940,7 @@ function switchIsland(next,message){
   syncCollection();persistCollection();
   sim=next;renderer.sim=sim;renderer.effects=[];renderer.ripples=[];renderer.visibleTiles=[];renderer.hover=null;renderer.center={x:0,y:0};renderer.zoom=1;renderer.activityTime=0;renderer.wheelTime=0;renderer.recenter();
   sim.config.speedMultiplier=speed;
-  $('story-cards').checked=sim.config.storyCards===true;
+  $('story-cards').checked=sim.config.storyCards===true;$('offline-life').checked=sim.config.offlineProgress!==false;
   accumulator=0;paused=false;dirtyHistory=true;shownRemark='';drag=null;momentQueue=[];seenMoments=new Set();activeMoment=null;beatHoldUntil=0;momentAt=-Infinity;snapshotSignature='';renderer.showHistory=false;renderer.historySnapshot=null;$('history-layer').checked=false;$('history-snapshot').hidden=true;$('history-legend').hidden=true;$('moment-card').hidden=true;
   clearTimeout(interventionTimer);$('intervention-result').hidden=true;$('tile-inspector').hidden=true;inspectionPinned=false;
   for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();
@@ -3999,11 +4048,15 @@ async function toggleAudio(){
   }catch{showToast("De oceaan houdt zich stil. Geluid werkt niet in deze browser.");}
 }
 $('sound').addEventListener('click',toggleAudio);
-document.addEventListener('visibilitychange',()=>{accumulator=0;lastTime=performance.now();if(document.hidden){save();if(audio?.state==='running')audio.suspend();}else if(audioEnabled)audio?.resume();});
+document.addEventListener('visibilitychange',()=>{
+  accumulator=0;lastTime=performance.now();
+  if(document.hidden){save();if(audio?.state==='running')audio.suspend();}
+  else{if(returnFromAway(sim)){dirtyHistory=true;momentQueue=[];renderer.effects=[];updateUI();}save();if(audioEnabled)audio?.resume();}
+});
 window.addEventListener('pagehide',save);
 let firstVisit=true;try{firstVisit=localStorage.getItem(introKey)!=='done';}catch{}
 if(firstVisit)showIntro();
-updateUI();updatePause();
+updateUI();updatePause();save();
 if(!storageAvailable)$('save-status').textContent="Opslaan lukt hier niet. Je kunt dit bezoek wel gewoon verder spelen.";
 requestAnimationFrame(frame);
 

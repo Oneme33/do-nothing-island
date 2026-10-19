@@ -151,3 +151,14 @@ test('a found secret stays in the collection after switching to another island',
  assert.ok(a.collection().entries['secret:old-tree-bloom']);assert.equal(e.get('collection-dialog').open,false);assert.equal(e.get('moment-card').hidden,true);
  e.get('new-island').handlers.click();e.get('open-collection').handlers.click();const items=e.get('collection-groups').children.flatMap(group=>group.children[1].children),tree=items.find(item=>item.dataset.id==='secret:old-tree-bloom');assert.equal(tree.dataset.found,'true');assert.match(tree.children[1].textContent,/wist nog/);assert.match(tree.children[3].textContent,/Seed 31/);
 });
+test('return summaries are inline and dismissible; Show focuses the real place without an automatic popup',async()=>{
+ const s=new Civilization(31);s.lastVisitAt=Date.now()-120000;const a=await appHarness(s),e=a.elements;
+ assert.equal(e.get('away-summary').hidden,false);assert.ok(a.saved().year>1);assert.equal(e.get('tile-inspector').hidden,true);assert.equal(e.get('moment-card').hidden,true);assert.equal(e.get('cinema-dialog').open,false);
+ e.get('away-show').handlers.click();assert.equal(e.get('away-heading').textContent,'Het grootste moment');assert.equal(e.get('tile-inspector').hidden,false);assert.equal(e.get('away-show').hidden,true);assert.equal(e.get('journal-dialog').open,false);
+ e.get('away-dismiss').handlers.click();assert.equal(e.get('away-summary').hidden,true);assert.equal(a.saved().awayReport.dismissed,true);
+ const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));assert.equal(b.elements.get('away-summary').hidden,true);
+});
+test('offline progression can be turned off and a paused saved island does not advance on return',async()=>{
+ const s=new Civilization(31);s.lastVisitAt=Date.now()-120000;s.lastVisitPaused=true;const a=await appHarness(s),e=a.elements;assert.equal(a.saved().year,1);assert.equal(e.get('away-summary').hidden,true);
+ e.get('offline-life').handlers.change({target:{checked:false}});assert.equal(a.saved().config.offlineProgress,false);
+});
