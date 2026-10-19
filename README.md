@@ -8,6 +8,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Stamboom** volgt de familie van het eerste huis. Elke 32 jaar gaat de sleutel naar een volgende generatie, met een vaste naam, tijdpassend beroep en eigenaardigheid. De generaties blijven in de save bewaard en laten berichten in het logboek achter. Bestaande eilanden krijgen een gereconstrueerde vroege familielijn, zonder dat hun kaart of voortgang wordt teruggezet.
 
+**Wensen** verschijnen af en toe als een klein wegklikbaar wolkje. Via Wensen lees je de vraag terug en kun je de plek opzoeken. Wolkjes zijn ook helemaal uit te zetten. Regen, een boomfeest, een vreugdevuur, hulp bij brand of een bron openen kunnen het vertrouwen vergroten; wie vaak helpt maakt het eiland ook afhankelijker. Afwachten laat ruimte voor eigen oplossingen. Wensen worden met je eiland opgeslagen.
+
 ## Spelen
 
 Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het volledige spel; installatie en een server zijn niet nodig. De interface is Nederlands. De eerste keer verschijnen drie korte introschermen, waarna het eiland op **1×** begint.
@@ -91,6 +93,7 @@ Deze afbeeldingen controleren de renderer. Ze vervangen geen volledige interacti
 
 ## Broncode
 
+- `family.js` en `wishes.js`: de opgeslagen familielijn en optionele vragen van inwoners.
 - `simulation.js`: wereld, economie, bouw, wegen, verkeer en opslag.
 - `story.js`: geschiedenis, hervormingen, archief en eindregels.
 - `consequences.js`: brandverspreiding, herbouw, brandweer, terreingevolgen en ontdekkingen.

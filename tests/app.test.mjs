@@ -108,3 +108,14 @@ test('the family tree is opened deliberately, pauses time and points back to the
  const year=e.get('year').textContent;a.advance(10);assert.equal(e.get('year').textContent,year);
  e.get('family-find-home').handlers.click();assert.equal(e.get('family-dialog').open,false);assert.match(e.get('tile-inspector').textContent,/generatie 4/);assert.equal(e.get('island').dataset.mode,'inspect');
 });
+test('resident wishes stay compact, dismiss permanently and pause only when deliberately opened',async()=>{
+ const sim=new Civilization(31);sim.wishes.active={id:'wish-ui',kind:'rain',mode:'rain',speaker:'Mo Visser',text:'De boeren hopen op regen.',x:1,y:-1,issuedAt:1,deadline:100,hidden:false};
+ const a=await appHarness(sim),e=a.elements;assert.equal(e.get('wish-bubble').hidden,false);assert.equal(e.get('wishes-dialog').open,false);
+ a.advance(2);assert.ok(e.get('year').textContent>1);assert.equal(e.get('tile-inspector').hidden,true);
+ e.get('wish-dismiss').handlers.click();assert.equal(e.get('wish-bubble').hidden,true);assert.equal(a.saved().wishes.active.hidden,true);
+ e.get('open-wishes').handlers.click();assert.equal(e.get('wishes-dialog').open,true);assert.match(e.get('wish-current').children[1].textContent,/regen/);
+ const year=e.get('year').textContent;a.advance(2);assert.equal(e.get('year').textContent,year);
+ e.get('wish-find').handlers.click();assert.equal(e.get('wishes-dialog').open,false);assert.equal(e.get('island').dataset.mode,'rain');
+ e.get('wish-bubbles').handlers.change({target:{checked:false}});assert.equal(a.saved().config.wishBubbles,false);
+ const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));assert.equal(b.elements.get('wish-bubble').hidden,true);
+});

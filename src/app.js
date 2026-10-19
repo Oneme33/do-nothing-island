@@ -6,6 +6,7 @@ import { IslandRenderer } from './renderer.js';
 import {describePlot} from './inspection.js';
 import {drawFinale,islandScores} from './finale.js';
 import {ensureFamily,currentRelative} from './family.js';
+import {ensureWishes,dismissWish,WISH_OUTCOMES} from './wishes.js';
 
 const $=id=>document.getElementById(id);
 const storageKey='do-nothing-island-v1';
@@ -89,7 +90,22 @@ function renderFamily(){
     item.append(heading,time,line);return item;
   }));
 }
+function updateWishBubble(){
+  const wish=ensureWishes(sim).active;
+  $('wish-bubble').hidden=!wish||wish.hidden||sim.config.wishBubbles===false||!!sim.ending;
+  if(wish){$('wish-speaker').textContent=wish.speaker;$('wish-text').textContent=wish.text;}
+}
+function renderWishes(){
+  const state=ensureWishes(sim),wish=state.active;
+  $('wish-bubbles').checked=sim.config.wishBubbles!==false;
+  const heading=document.createElement('strong'),line=document.createElement('p');
+  heading.textContent=wish?wish.speaker:'Voorlopig geen wensen';line.textContent=wish?`“${wish.text}” · jaar ${wish.issuedAt}–${wish.deadline}`:'De inwoners gaan rustig hun gang. Af en toe vraagt iemand iets.';
+  $('wish-current').replaceChildren(heading,line);$('wish-find').hidden=!wish;
+  $('wish-history').replaceChildren(...state.history.slice().reverse().map(w=>{const item=document.createElement('li'),name=document.createElement('strong'),text=document.createElement('p');name.textContent=`${WISH_OUTCOMES[w.status]} · jaar ${w.closedAt}`;text.textContent=`${w.speaker}: “${w.text}”`;item.append(name,text);return item;}));
+}
+function openWishes(){renderWishes();$('wishes-dialog').showModal();updatePause();}
 function updateUI(){
+  updateWishBubble();
   $('year').textContent=sim.year;
   $('era-name').textContent=nl(sim.age.name).toUpperCase();
   const nextAge=AGES.find(age=>age.year>sim.year);
@@ -252,6 +268,12 @@ $('recenter').addEventListener('click',()=>renderer.recenter());
 $('help').addEventListener('click',()=>$('guide-dialog').showModal());
 $('settings').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;$('settings-dialog').showModal();});
 $('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();});
+$('open-wishes').addEventListener('click',openWishes);
+$('wish-open').addEventListener('click',openWishes);
+$('wish-dismiss').addEventListener('click',()=>{dismissWish(sim);updateWishBubble();save();});
+$('wishes-close').addEventListener('click',()=>$('wishes-dialog').close());
+$('wish-bubbles').addEventListener('change',event=>{sim.config.wishBubbles=event.target.checked;updateWishBubble();save();});
+$('wish-find').addEventListener('click',()=>{const wish=ensureWishes(sim).active;if(!wish)return;$('wishes-dialog').close();chooseMode(wish.mode);focusPlace(sim.tile(wish.x,wish.y));});
 $('open-family').addEventListener('click',()=>{renderFamily();$('family-dialog').showModal();$('family-generations').scrollTop=$('family-generations').scrollHeight;updatePause();});
 $('family-close').addEventListener('click',()=>$('family-dialog').close());
 $('family-oldest').addEventListener('click',()=>$('family-generations').scrollTop=0);
