@@ -46,6 +46,8 @@
 
 /* Notifications are optional and every visible card can be dismissed. */
 .card-close{position:absolute;top:4px;right:5px;z-index:2;display:grid;place-items:center;min-width:30px;min-height:30px;font-size:20px;color:#647653;pointer-events:auto;border-radius:4px}.card-close:hover{background:#e6ebd8}.island-window>.story-moment{padding-right:37px}.intervention-result{pointer-events:auto;padding-right:34px;max-width:min(360px,90%)}.intervention-result p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.toast{padding:10px 35px 10px 13px;max-width:min(400px,85%);font-size:10px;line-height:1.5}.toast button{pointer-events:auto;position:absolute;top:2px;right:2px;min-width:30px;min-height:30px;font-size:19px;display:grid;place-items:center}.dialog-close{position:sticky;top:0;float:right;right:auto;z-index:10;display:grid;place-items:center;min-width:36px;min-height:36px;background:#f7f7eff5;border:1px solid #d4dcc7;border-radius:50%;margin:-12px -10px 0 8px;line-height:1;font-size:26px}.intro-dialog .dialog-close,.cinema-dialog .dialog-close{margin:-10px -6px 0 8px}
+
+.family-dialog{width:min(650px,calc(100% - 28px));max-width:650px}.family-current{padding:15px 18px;background:#e7ecd7;border:1px solid #ccd7b8;border-radius:7px;line-height:1.7}.family-current strong{display:block;font-family:var(--serif);font-size:23px;font-weight:400}.family-current p{margin:6px 0 0;font-size:12px}.family-navigation{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.family-navigation button{font-size:10px;background:#edf0e2;border:1px solid #d8dfc9;border-radius:4px;padding:9px}.family-generations{list-style:none;padding:0 0 0 18px;margin:12px 0;max-height:340px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}.family-generations li{position:relative;margin:0;padding:0 10px 22px 23px;border-left:2px solid #d6dec7;line-height:1.7}.family-generations li:before{content:'';position:absolute;left:-6px;top:6px;background:#91a574;border:2px solid #f7f7ef;border-radius:50%;width:8px;height:8px}.family-generations li:last-child{border-color:transparent;padding-bottom:0}.family-generations strong{display:block;font-size:14px;color:#526b43}.family-generations time{display:block;font-size:9px;color:#899577}.family-generations p{font-size:11px;margin:4px 0;color:#78866c}.family-generations li[aria-current=true]{background:#edf0e2;border-radius:0 5px 5px 0}.family-history-item{background:#edf0df;border-radius:4px;padding:8px}.family-history-item .history-marker{background:#dfe8cb}
 </style>
 </head>
 <body>
@@ -98,7 +100,7 @@
 
     <section class="island-story" aria-label="Verken het eiland en zijn geschiedenis">
       <div class="story-health"><span id="water-status">Zoetwater · 82%</span><span id="environment-status">Levend landschap · 100%</span><span id="legacy-status">Een zelfstandig begin</span><span id="council-status">Een paar mensen. Genoeg ruimte.</span></div>
-      <div class="explore-controls"><button id="find-palace">♜ Eerste huis</button><button id="find-knowledge">✧ Kennis</button><button id="find-fields">♧ Akkers</button><button id="find-fun">♬ Feest</button><label><input type="checkbox" id="history-layer"> Toen en nu</label><select id="history-snapshot" aria-label="Vergelijk een vroegere kustlijn" hidden></select><button id="open-ending" hidden>Lees het naschrift ↗</button></div>
+      <div class="explore-controls"><button id="open-family" aria-haspopup="dialog">♧ Stamboom</button><button id="find-palace">♜ Eerste huis</button><button id="find-knowledge">✧ Kennis</button><button id="find-fields">♧ Akkers</button><button id="find-fun">♬ Feest</button><label><input type="checkbox" id="history-layer"> Toen en nu</label><select id="history-snapshot" aria-label="Vergelijk een vroegere kustlijn" hidden></select><button id="open-ending" hidden>Lees het naschrift ↗</button></div>
       <p id="history-legend" hidden>Oker: vroegere kust · Blauw: overstroomde wijken · Goud/blauw: jouw bezoeken · Oude dijken blijven in de stad zichtbaar.</p>
     </section>
 
@@ -117,6 +119,7 @@
   <dialog id="cinema-dialog" class="cinema-dialog" aria-labelledby="cinema-title"><button id="cinema-close" class="dialog-close" aria-label="Sluit de eindscène">×</button><span class="eyebrow">HUN GROTE FINALE</span><canvas id="finale-canvas" width="800" height="380" aria-label="Geanimeerde finale van het eiland"></canvas>      <div class="cinema-caption" id="cinema-caption" aria-live="polite" hidden><span class="eyebrow">HET LAATSTE GROTE IDEE</span><strong id="cinema-title"></strong><p id="cinema-line"></p><div><button id="cinema-cheer">Vier mee met de bewoners</button><button id="cinema-skip" hidden>Naar het naschrift →</button></div></div><progress id="cinema-progress" max="100" value="0" aria-label="Voortgang van de eindscène"></progress><button id="cinema-pause" class="secondary-button">Pauze</button><p class="dialog-note">Na de scène zie je de eilandscore en wat zij achterlaten.</p></dialog>
   <dialog id="guide-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN KLEINE HANDLEIDING</span><h2>Welkom bij het nietsdoen.</h2><p>Eén huisje, een kleine akker en zes mensen. De beschaving groeit vanzelf. Jij kiest of je toekijkt of ingrijpt.</p><div class="guide-steps"><div><span>01</span><p><strong>Neem de tijd.</strong> Het eiland begint op 1×. Met de balk op het eiland kies je de snelheid of pauzeer je. Een open logboek, handleiding of instellingenvenster zet het leven even stil.</p></div><div><span>02</span><p><strong>Alles laat sporen achter.</strong> Bouw helpt de bewoners. Regen voedt de akkers. Vuur en bevingen kunnen blijvende veranderingen veroorzaken. Probeer dingen uit en kijk wat de bewoners ermee doen.</p></div><div><span>03</span><p><strong>Kijk van dichtbij.</strong> Kies Kijk en klik op een plek voor bewoners, bouwjaar en herinneringen. Versleep de kaart of zoom om de rest te zien. Rond 2100 begint het laatste hoofdstuk, met een eigen eindscène en eilandscore.</p></div></div><p class="dialog-note">Spatie: pauze · Scroll of +/−: zoom · Slepen: verkennen<br>Je eiland wordt automatisch in deze browser bewaard.</p><button class="primary-button" data-close>Ik laat ze even hun gang gaan ↗</button></dialog>
 
+  <dialog id="family-dialog" class="family-dialog" aria-labelledby="family-title"><button id="family-close" class="dialog-close" aria-label="Sluit de stamboom">×</button><span class="eyebrow">DE FAMILIE VAN HET EERSTE HUIS</span><h2 id="family-title"></h2><p>Het huis blijft. Iedere generatie geeft de sleutel door.</p><section id="family-current" class="family-current"></section><p id="family-note" class="dialog-note"></p><div class="family-navigation"><button id="family-oldest">Naar de eerste generatie ↑</button><button id="family-latest">Naar de huidige generatie ↓</button><button id="family-find-home">Bekijk hun huis ↗</button></div><ol id="family-generations" class="family-generations" aria-label="Generaties van de eerste familie"></ol></dialog>
   <dialog id="journal-dialog" class="journal-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">HET EILANDARCHIEF</span><h2>Behoorlijk veel niets.</h2><p>Elke grote beschaving begint met een boom en wat twijfelachtige beslissingen.</p><div id="journal-entries"></div></dialog>
 
   <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320">Een ruim eiland · 320</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Een rustig begin, daarna steeds sneller.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
@@ -717,6 +720,47 @@ const dutchText={
 const dutchPattern=new RegExp(Object.keys(dutchText).sort((a,b)=>b.length-a.length).map(s=>s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "g");
 function nl(value){if(value==null)return "";return String(value).replace(dutchPattern,part=>dutchText[part]);}
 
+// One continuous line of keyholders; its own hash never consumes simulation randomness.
+const FAMILY_GENERATION_YEARS=32;
+const familyFirstNames=['Noor','Sam','Bo','Mila','Daan','Lou','Iris','Mo','Tess','Finn','Ada','Jip','Bep','Bram','Fien','Otis','Lena','Ravi','Roos','Nora','Teun','Liv','Evi','Sem','Pip','Niek','Cato','Abel','Linde','Mika','Els','Jo'];
+const familyLastNames=['de Vries','van de Kust','Bos','van Dijk','de Boer','Steen','van de Berg','Visser'];
+const familyQuirks=['praat met de wortels alsof ze terugpraten','telt elke avond de ramen van het eerste huis','bewaart stenen met een bijzondere vorm','fluit altijd één noot naast de melodie','geeft alle schapen een adellijke titel','komt nooit zonder een extra boterham','tekent onmogelijke uitbouwen op servetten','is ervan overtuigd dat de oude boom kan luisteren','verzamelt schelpen die op familieleden lijken','begint elke vergadering met een zeer klein gedicht','houdt een nauwkeurig dagboek van het weer','bakt voor iedereen die zomaar langskomt','maakt zich vooral zorgen over de moestuin','kan geen scheve plank met rust laten','noemt elke meeuw bij een zelfbedachte naam','draagt voor de zekerheid altijd een feesthoed bij zich','vindt dat elke stoel een verhaal heeft','legt de sleutel iedere dag op een andere veilige plek','tekent de kustlijn in de kantlijn van brieven','bewaart de recepten van alle vorige generaties','groet de oorspronkelijke boom elke ochtend','vindt stilte de beste uitvinding van de mens'];
+const familyHash=(seed,n)=>{let x=(seed^Math.imul(n+1,0x45d9f3b))>>>0;x=Math.imul(x^(x>>>16),0x45d9f3b);return(x^(x>>>16))>>>0;};
+function professionAt(year,seed,generation){
+ const jobs=['akkerbouwer','timmeraar','visser','tuinier','wever','steenhouwer'];
+ if(year>=120)jobs.push('bakker','onderwijzer','bibliothecaris','koopman');
+ if(year>=600)jobs.push('molenaar','klokkenmaker');
+ if(year>=1250)jobs.push('kaartenmaker','boekdrukker');
+ if(year>=1750)jobs.push('machinebouwer','fabrieksarbeider');
+ if(year>=1880)jobs.push('elektricien','fotograaf');
+ if(year>=1950)jobs.push('onderzoeker','stedenbouwer');
+ if(year>=1980)jobs.push('programmeur','ecoloog');
+ return generation===0?'akkerbouwer':jobs[familyHash(seed,generation+80)%jobs.length];
+}
+function makeRelative(seed,index,lastName,reconstructed=false){
+ const hash=Math.abs((seed+96)|0),name=index===0?familyFirstNames[hash%12]:familyFirstNames[(hash+index*5+Math.floor(index/familyFirstNames.length))%familyFirstNames.length];
+ const since=1+index*FAMILY_GENERATION_YEARS;
+ return{id:`family-${seed}-${index}`,generation:index+1,parentId:index?`family-${seed}-${index-1}`:null,name,lastName,born:since-24,since,occupation:professionAt(since,seed,index),quirk:familyQuirks[familyHash(seed,index+160)%familyQuirks.length],reconstructed};
+}
+function ensureFamily(s,{restoring=false}={}){
+ if(s.family?.version===1&&Array.isArray(s.family.generations)&&s.family.generations.length)return s.family;
+ const lastName=familyLastNames[Math.abs((s.seed+96)|0)%familyLastNames.length];
+ const through=restoring?Math.max(0,Math.floor((s.year-1)/FAMILY_GENERATION_YEARS)):0;
+ const generations=Array.from({length:Math.min(through+1,2048)},(_,index)=>makeRelative(s.seed,index,lastName,restoring&&s.year>1));
+ s.family={version:1,lastName,home:{x:-1,y:1},generations,currentId:generations.at(-1).id,reconstructed:restoring&&s.year>1};
+ return s.family;
+}
+function currentRelative(s){const family=ensureFamily(s);return family.generations.find(p=>p.id===family.currentId)||family.generations.at(-1);}
+function advanceFamily(s){
+ const family=ensureFamily(s);let person=family.generations.at(-1);
+ while(s.year>=person.since+FAMILY_GENERATION_YEARS&&family.generations.length<2048){
+  const previous=person;person=makeRelative(s.seed,family.generations.length,family.lastName);family.generations.push(person);family.currentId=person.id;
+  s.log(`${person.name} ${family.lastName} neemt de sleutel van het eerste huis over van ${previous.name}. ${person.name} wordt ${person.occupation} en ${person.quirk}.`,'family',{year:person.since,x:family.home.x,y:family.home.y,relativeId:person.id,parentId:previous.id});
+  s.signal('family',s.tile(family.home.x,family.home.y),`${person.name} erft de sleutel`);
+ }
+ return person;
+}
+
 const score100=n=>Math.round(Math.max(0,Math.min(100,n)));
 function islandScores(s){
  const living=score100(s.prosperity*.45+s.freshwater*.25+Math.min(100,s.food/Math.max(1,s.population)*45)*.3);
@@ -764,9 +808,14 @@ function describePlot(s,t){
  lines.push(t.foundingHome?`${heading} · het allereerste huis`:heading);
  if(t.building){lines.push(t.builtYear?`Gebouwd in jaar ${t.builtYear}${t.rebuiltYear?`; herbouwd in ${t.rebuiltYear}`:''}.`:'Dit gebouw staat hier al sinds de oude eilandgeschiedenis.');}
  const index=s.houses.findIndex(home=>home.x===t.x&&home.y===t.y);
+ if(t.foundingHome){
+  const person=currentRelative(s);lines.push(`Hier hoort familie ${person.lastName} thuis. ${person.name} bewaart nu de sleutel (generatie ${person.generation}).`);
+  lines.push(`Beroep: ${person.occupation}. ${person.name} ${person.quirk}.`);
+  if(t.building==='ruins')lines.push('De familie woont tijdelijk elders tot het eerste huis is herbouwd.');
+ }
  if(index>=0){
   const population=Math.floor(s.population),count=Math.floor(population/s.houses.length)+(index<population%s.houses.length?1:0);
-  lines.push(`Hier woont familie ${surnames[hash%surnames.length]}: ${names[hash%names.length]} en ${names[(hash+5)%names.length]}${count>2?` en ${count-2} huisgenoten`:''}. ${count} bewoners.`);
+  if(!t.foundingHome)lines.push(`Hier woont familie ${surnames[hash%surnames.length]}: ${names[hash%names.length]} en ${names[(hash+5)%names.length]}${count>2?` en ${count-2} huisgenoten`:''}. ${count} bewoners.`);
   lines.push(`Bouwmateriaal: ${t.material==='stone'?'steen':t.material==='brick'?'baksteen':s.era>=2?'baksteen en steen':'hout en leem'}.`);
  }
  if(t.fire)lines.push('Brandt nu. De bewoners brengen emmers; elke seconde telt.');
@@ -1012,7 +1061,7 @@ function cinemaVisible(s){return !!s.cinematic&&(!s.cinematic.completed||s.endin
 
 // Persistent consequences, civic projects and the finite story of an island.
 const STORY_VERSION=1;
-const eventPriority=type=>({ending:100,endgame:98,palace:96,age:92,discovery:91,crisis:90,fire:89,flood:88,abandon:87,reform:86,interference:84,legacy:82,technology:76,culture:68,land:66,district:65,repair:55,storm:45,life:35,trade:25,farm:20,build:10}[type]||30);
+const eventPriority=type=>({ending:100,endgame:98,palace:96,age:92,discovery:91,crisis:90,fire:89,flood:88,abandon:87,reform:86,family:85,interference:84,legacy:82,technology:76,culture:68,land:66,district:65,repair:55,storm:45,life:35,trade:25,farm:20,build:10}[type]||30);
 const ENDINGS={
   phoenix:{title:'De Feniksstad.',quote:'Ze zijn vaker herbouwd dan verslagen.',description:'Branden veranderden deze stad. Uit houten wijken verrezen stenen huizen, een vaste brandweer en pleinen waar het lichtfeest elk jaar terugkeert.',consequence:'Een stad die opnieuw begint',detail:'De gevels zijn mooier. De emmers staan klaar. Het verleden is hier geen weggepoetste vlek.'},
   independent:{title:'They figured it out.',quote:'The island would like to take all the credit.',description:'A civilization has learned to live with its limits. Generations come and go; the little world can look after itself.',consequence:'An independent island',detail:'Their greatest achievement is an ordinary tomorrow.'},
@@ -1390,6 +1439,7 @@ class Civilization {
     seedPleasures(this);
     this.rebuildRoads();
     this.log('A tree. A few people. An unreasonable amount of potential.','tree');
+    ensureFamily(this);
   }
   random() {
     let n = this.randomState += 0x6D2B79F5;
@@ -1579,6 +1629,7 @@ class Civilization {
     this.advanceGeology();
     advancePleasures(this);
     advanceCivicStory(this);
+    advanceFamily(this);
     this.advanceEndgame();
     this.tryLastDrop();
   }
@@ -2104,6 +2155,8 @@ class Civilization {
       if(!parsed.storyVersion){sim.storyVersion=0;sim.snapshots=[];}
       ensureStory(sim,true);
       ensureSpectacle(sim);
+      if(!parsed.family)delete sim.family;
+      ensureFamily(sim,{restoring:true});
       if(parsed.routeVersion!==2){const field=sim.tile(1,-1);if(field?.building==='farm'&&!field.builtYear)field.foundingField=true;sim.rebuildRoads();}
       if(sim.endgameStarted&&!sim.finaleDeadline&&!sim.ending)advanceFinale(sim);
       return sim;
@@ -3245,7 +3298,7 @@ function updateClock(){
 }
 const icons={legacy:'✳',reform:'✧',crisis:'⚑',age:'✧',tree:'♧',farm:'♧',home:'⌂',life:'✳',dock:'⚑',technology:'✧',dike:'≋',land:'▱',district:'⌂',storm:'☂',flood:'≈',repair:'⚒',beach:'◌',abandon:'↗',interference:'✳',ending:'◉',road:'⌁',trade:'⚑',palace:'♜',culture:'♫',bridge:'⌒',protest:'⚑',endgame:'✧',volcano:'△'};
 function historyItem(entry){
-  const item=document.createElement('article');item.className='history-item';
+  const item=document.createElement('article');item.className=entry.type==='family'?'history-item family-history-item':'history-item';
   const marker=document.createElement('span');marker.className='history-marker';marker.setAttribute('aria-hidden','true');marker.textContent=icons[entry.type]||'✳';
   const content=document.createElement('div'),time=document.createElement('time'),p=document.createElement('p');
   time.textContent=`JAAR ${entry.year}${(entry.priority||eventPriority(entry.type))>=82?" · MIJLPAAL":''}`;p.textContent=nl(entry.text);content.append(time,p);item.append(marker,content);return item;
@@ -3260,6 +3313,19 @@ function updateHistory(){
   if($('journal-dialog').open)renderJournal();
 }
 function renderJournal(){$('journal-entries').replaceChildren(...sim.history.slice().reverse().map(historyItem));}
+function renderFamily(){
+  const family=ensureFamily(sim),current=currentRelative(sim);
+  $('family-title').textContent=`Familie ${family.lastName}`;
+  const name=document.createElement('strong'),profile=document.createElement('p');name.textContent=`${current.name} ${family.lastName} · generatie ${current.generation}`;profile.textContent=`${current.occupation}. ${current.name} ${current.quirk}.`;$('family-current').replaceChildren(name,profile);
+  $('family-note').textContent=family.reconstructed?'De oudste bladzijden komen uit familieoverlevering. Nieuwe generaties worden vanaf nu bijgehouden.':'Van de eerste sleutelhouder tot de huidige generatie. Namen, beroepen en eigenaardigheden blijven bewaard.';
+  $('family-generations').replaceChildren(...family.generations.map((person,i)=>{
+    const item=document.createElement('li'),heading=document.createElement('strong'),time=document.createElement('time'),line=document.createElement('p');
+    item.dataset.relative=person.id;if(person.id===current.id)item.setAttribute('aria-current','true');
+    heading.textContent=`${person.name} ${family.lastName}`;time.textContent=`Generatie ${person.generation} · sleutelhouder vanaf jaar ${person.since}${family.generations[i+1]?` tot ${family.generations[i+1].since-1}`:' · nu'}`;
+    const parent=i?family.generations[i-1]:null;line.textContent=`${parent?`Kind van ${parent.name}. `:'De eerste bewoner. '}${person.occupation}. ${person.name} ${person.quirk}.`;
+    item.append(heading,time,line);return item;
+  }));
+}
 function updateUI(){
   $('year').textContent=sim.year;
   $('era-name').textContent=nl(sim.age.name).toUpperCase();
@@ -3423,6 +3489,11 @@ $('recenter').addEventListener('click',()=>renderer.recenter());
 $('help').addEventListener('click',()=>$('guide-dialog').showModal());
 $('settings').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;$('settings-dialog').showModal();});
 $('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();});
+$('open-family').addEventListener('click',()=>{renderFamily();$('family-dialog').showModal();$('family-generations').scrollTop=$('family-generations').scrollHeight;updatePause();});
+$('family-close').addEventListener('click',()=>$('family-dialog').close());
+$('family-oldest').addEventListener('click',()=>$('family-generations').scrollTop=0);
+$('family-latest').addEventListener('click',()=>$('family-generations').scrollTop=$('family-generations').scrollHeight);
+$('family-find-home').addEventListener('click',()=>{$('family-dialog').close();chooseMode('inspect');inspectionPinned=true;focusPlace(sim.tile(-1,1));});
 $('canvas-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();updatePause();});
 $('inspector-close').addEventListener('click',()=>{inspectionPinned=false;$('tile-inspector').hidden=true;});
 $('cinema-cheer').addEventListener('click',cheerCinema);
@@ -3491,11 +3562,12 @@ $('undo-reset').addEventListener('click',()=>{
   clearTimeout(undoTimer);previousIsland=null;$('undo-reset').hidden=true;switchIsland(previous,"Je vorige eiland is terug. Niemand heeft de omweg gemerkt.");
 });
 const modeHints={inspect:'Alleen kijken. Kies Bouw, Regen, Beving of Vuur om iets te veranderen.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
-for(const button of document.querySelectorAll('[data-interference]'))button.addEventListener('click',()=>{
-  interferenceMode=button.dataset.interference;renderer.mode=interferenceMode;inspectionPinned=false;
-  for(const b of document.querySelectorAll('[data-interference]')){b.classList.toggle('active',b===button);b.setAttribute('aria-pressed',String(b===button));}
+function chooseMode(mode){
+  interferenceMode=mode;renderer.mode=interferenceMode;inspectionPinned=false;
+  for(const b of document.querySelectorAll('[data-interference]')){const selected=b.dataset.interference===mode;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected));}
   $('interaction-hint').textContent=modeHints[interferenceMode];canvas.dataset.mode=interferenceMode;
-});
+}
+for(const button of document.querySelectorAll('[data-interference]'))button.addEventListener('click',()=>chooseMode(button.dataset.interference));
 function inspectTile(tile){
   const panel=$('tile-inspector');panel.hidden=!tile;
   if(tile)panel.textContent=interferenceMode==='inspect'?describePlot(sim,tile):describePlot(sim,tile).split('\n')[0];

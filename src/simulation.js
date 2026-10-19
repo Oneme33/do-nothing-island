@@ -1,5 +1,6 @@
 import { ensureSpectacle, seedPleasures, reserveBeaches, advancePleasures, ignite, extinguish, jokeAfterTouch, RECREATION } from './spectacle.js';
 import {reshapeAfterQuake} from './consequences.js';
+import {ensureFamily,advanceFamily} from './family.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 export const WORLD_RADIUS = 12;
@@ -147,6 +148,7 @@ export class Civilization {
     seedPleasures(this);
     this.rebuildRoads();
     this.log('A tree. A few people. An unreasonable amount of potential.','tree');
+    ensureFamily(this);
   }
   random() {
     let n = this.randomState += 0x6D2B79F5;
@@ -336,6 +338,7 @@ export class Civilization {
     this.advanceGeology();
     advancePleasures(this);
     advanceCivicStory(this);
+    advanceFamily(this);
     this.advanceEndgame();
     this.tryLastDrop();
   }
@@ -861,6 +864,8 @@ export class Civilization {
       if(!parsed.storyVersion){sim.storyVersion=0;sim.snapshots=[];}
       ensureStory(sim,true);
       ensureSpectacle(sim);
+      if(!parsed.family)delete sim.family;
+      ensureFamily(sim,{restoring:true});
       if(parsed.routeVersion!==2){const field=sim.tile(1,-1);if(field?.building==='farm'&&!field.builtYear)field.foundingField=true;sim.rebuildRoads();}
       if(sim.endgameStarted&&!sim.finaleDeadline&&!sim.ending)advanceFinale(sim);
       return sim;

@@ -101,3 +101,10 @@ test('the intro and ending windows can be dismissed immediately without a replac
  a.advance(25);assert.equal(e.get('cinema-dialog').open,false);assert.equal(e.get('ending-dialog').open,false);
  e.get('open-ending').handlers.click();assert.equal(e.get('ending-dialog').open,true);e.get('ending-close').handlers.click();a.advance(1);assert.equal(e.get('ending-dialog').open,false);
 });
+test('the family tree is opened deliberately, pauses time and points back to the founding home',async()=>{
+ const sim=new Civilization(31);while(sim.year<100)sim.tick();const a=await appHarness(sim),e=a.elements;
+ assert.equal(e.get('family-dialog').open,false);e.get('open-family').handlers.click();assert.equal(e.get('family-dialog').open,true);
+ assert.match(e.get('family-title').textContent,/Familie/);assert.equal(e.get('family-generations').children.length,4);assert.match(e.get('family-current').children[0].textContent,/generatie 4/);
+ const year=e.get('year').textContent;a.advance(10);assert.equal(e.get('year').textContent,year);
+ e.get('family-find-home').handlers.click();assert.equal(e.get('family-dialog').open,false);assert.match(e.get('tile-inspector').textContent,/generatie 4/);assert.equal(e.get('island').dataset.mode,'inspect');
+});

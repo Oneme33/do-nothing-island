@@ -6,6 +6,8 @@ Een eiland groeit vanzelf: van één huisje en een kleine akker naar een stad me
 
 De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per commit en testmoment uitgevoerd.
 
+**Stamboom** volgt de familie van het eerste huis. Elke 32 jaar gaat de sleutel naar een volgende generatie, met een vaste naam, tijdpassend beroep en eigenaardigheid. De generaties blijven in de save bewaard en laten berichten in het logboek achter. Bestaande eilanden krijgen een gereconstrueerde vroege familielijn, zonder dat hun kaart of voortgang wordt teruggezet.
+
 ## Spelen
 
 Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het volledige spel; installatie en een server zijn niet nodig. De interface is Nederlands. De eerste keer verschijnen drie korte introschermen, waarna het eiland op **1×** begint.

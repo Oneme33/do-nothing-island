@@ -5,6 +5,7 @@ import { Civilization, ERAS, PROJECT_STAGES, AGES } from './simulation.js';
 import { IslandRenderer } from './renderer.js';
 import {describePlot} from './inspection.js';
 import {drawFinale,islandScores} from './finale.js';
+import {ensureFamily,currentRelative} from './family.js';
 
 const $=id=>document.getElementById(id);
 const storageKey='do-nothing-island-v1';
@@ -60,7 +61,7 @@ function updateClock(){
 }
 const icons={legacy:'✳',reform:'✧',crisis:'⚑',age:'✧',tree:'♧',farm:'♧',home:'⌂',life:'✳',dock:'⚑',technology:'✧',dike:'≋',land:'▱',district:'⌂',storm:'☂',flood:'≈',repair:'⚒',beach:'◌',abandon:'↗',interference:'✳',ending:'◉',road:'⌁',trade:'⚑',palace:'♜',culture:'♫',bridge:'⌒',protest:'⚑',endgame:'✧',volcano:'△'};
 function historyItem(entry){
-  const item=document.createElement('article');item.className='history-item';
+  const item=document.createElement('article');item.className=entry.type==='family'?'history-item family-history-item':'history-item';
   const marker=document.createElement('span');marker.className='history-marker';marker.setAttribute('aria-hidden','true');marker.textContent=icons[entry.type]||'✳';
   const content=document.createElement('div'),time=document.createElement('time'),p=document.createElement('p');
   time.textContent=`JAAR ${entry.year}${(entry.priority||eventPriority(entry.type))>=82?" · MIJLPAAL":''}`;p.textContent=nl(entry.text);content.append(time,p);item.append(marker,content);return item;
@@ -75,6 +76,19 @@ function updateHistory(){
   if($('journal-dialog').open)renderJournal();
 }
 function renderJournal(){$('journal-entries').replaceChildren(...sim.history.slice().reverse().map(historyItem));}
+function renderFamily(){
+  const family=ensureFamily(sim),current=currentRelative(sim);
+  $('family-title').textContent=`Familie ${family.lastName}`;
+  const name=document.createElement('strong'),profile=document.createElement('p');name.textContent=`${current.name} ${family.lastName} · generatie ${current.generation}`;profile.textContent=`${current.occupation}. ${current.name} ${current.quirk}.`;$('family-current').replaceChildren(name,profile);
+  $('family-note').textContent=family.reconstructed?'De oudste bladzijden komen uit familieoverlevering. Nieuwe generaties worden vanaf nu bijgehouden.':'Van de eerste sleutelhouder tot de huidige generatie. Namen, beroepen en eigenaardigheden blijven bewaard.';
+  $('family-generations').replaceChildren(...family.generations.map((person,i)=>{
+    const item=document.createElement('li'),heading=document.createElement('strong'),time=document.createElement('time'),line=document.createElement('p');
+    item.dataset.relative=person.id;if(person.id===current.id)item.setAttribute('aria-current','true');
+    heading.textContent=`${person.name} ${family.lastName}`;time.textContent=`Generatie ${person.generation} · sleutelhouder vanaf jaar ${person.since}${family.generations[i+1]?` tot ${family.generations[i+1].since-1}`:' · nu'}`;
+    const parent=i?family.generations[i-1]:null;line.textContent=`${parent?`Kind van ${parent.name}. `:'De eerste bewoner. '}${person.occupation}. ${person.name} ${person.quirk}.`;
+    item.append(heading,time,line);return item;
+  }));
+}
 function updateUI(){
   $('year').textContent=sim.year;
   $('era-name').textContent=nl(sim.age.name).toUpperCase();
@@ -238,6 +252,11 @@ $('recenter').addEventListener('click',()=>renderer.recenter());
 $('help').addEventListener('click',()=>$('guide-dialog').showModal());
 $('settings').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;$('settings-dialog').showModal();});
 $('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();});
+$('open-family').addEventListener('click',()=>{renderFamily();$('family-dialog').showModal();$('family-generations').scrollTop=$('family-generations').scrollHeight;updatePause();});
+$('family-close').addEventListener('click',()=>$('family-dialog').close());
+$('family-oldest').addEventListener('click',()=>$('family-generations').scrollTop=0);
+$('family-latest').addEventListener('click',()=>$('family-generations').scrollTop=$('family-generations').scrollHeight);
+$('family-find-home').addEventListener('click',()=>{$('family-dialog').close();chooseMode('inspect');inspectionPinned=true;focusPlace(sim.tile(-1,1));});
 $('canvas-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();updatePause();});
 $('inspector-close').addEventListener('click',()=>{inspectionPinned=false;$('tile-inspector').hidden=true;});
 $('cinema-cheer').addEventListener('click',cheerCinema);
@@ -306,11 +325,12 @@ $('undo-reset').addEventListener('click',()=>{
   clearTimeout(undoTimer);previousIsland=null;$('undo-reset').hidden=true;switchIsland(previous,"Je vorige eiland is terug. Niemand heeft de omweg gemerkt.");
 });
 const modeHints={inspect:'Alleen kijken. Kies Bouw, Regen, Beving of Vuur om iets te veranderen.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
-for(const button of document.querySelectorAll('[data-interference]'))button.addEventListener('click',()=>{
-  interferenceMode=button.dataset.interference;renderer.mode=interferenceMode;inspectionPinned=false;
-  for(const b of document.querySelectorAll('[data-interference]')){b.classList.toggle('active',b===button);b.setAttribute('aria-pressed',String(b===button));}
+function chooseMode(mode){
+  interferenceMode=mode;renderer.mode=interferenceMode;inspectionPinned=false;
+  for(const b of document.querySelectorAll('[data-interference]')){const selected=b.dataset.interference===mode;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected));}
   $('interaction-hint').textContent=modeHints[interferenceMode];canvas.dataset.mode=interferenceMode;
-});
+}
+for(const button of document.querySelectorAll('[data-interference]'))button.addEventListener('click',()=>chooseMode(button.dataset.interference));
 function inspectTile(tile){
   const panel=$('tile-inspector');panel.hidden=!tile;
   if(tile)panel.textContent=interferenceMode==='inspect'?describePlot(sim,tile):describePlot(sim,tile).split('\n')[0];

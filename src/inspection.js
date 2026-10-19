@@ -1,4 +1,5 @@
 export const PLACE_NAMES={hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',ruins:'Ruïne'};
+import {currentRelative} from './family.js';
 const names=['Noor','Sam','Bo','Mila','Daan','Lou','Iris','Mo','Tess','Finn','Ada','Jip'];
 const surnames=['de Vries','van de Kust','Bos','van Dijk','de Boer','Steen','van de Berg','Visser'];
 export function describePlot(s,t){
@@ -8,9 +9,14 @@ export function describePlot(s,t){
  lines.push(t.foundingHome?`${heading} · het allereerste huis`:heading);
  if(t.building){lines.push(t.builtYear?`Gebouwd in jaar ${t.builtYear}${t.rebuiltYear?`; herbouwd in ${t.rebuiltYear}`:''}.`:'Dit gebouw staat hier al sinds de oude eilandgeschiedenis.');}
  const index=s.houses.findIndex(home=>home.x===t.x&&home.y===t.y);
+ if(t.foundingHome){
+  const person=currentRelative(s);lines.push(`Hier hoort familie ${person.lastName} thuis. ${person.name} bewaart nu de sleutel (generatie ${person.generation}).`);
+  lines.push(`Beroep: ${person.occupation}. ${person.name} ${person.quirk}.`);
+  if(t.building==='ruins')lines.push('De familie woont tijdelijk elders tot het eerste huis is herbouwd.');
+ }
  if(index>=0){
   const population=Math.floor(s.population),count=Math.floor(population/s.houses.length)+(index<population%s.houses.length?1:0);
-  lines.push(`Hier woont familie ${surnames[hash%surnames.length]}: ${names[hash%names.length]} en ${names[(hash+5)%names.length]}${count>2?` en ${count-2} huisgenoten`:''}. ${count} bewoners.`);
+  if(!t.foundingHome)lines.push(`Hier woont familie ${surnames[hash%surnames.length]}: ${names[hash%names.length]} en ${names[(hash+5)%names.length]}${count>2?` en ${count-2} huisgenoten`:''}. ${count} bewoners.`);
   lines.push(`Bouwmateriaal: ${t.material==='stone'?'steen':t.material==='brick'?'baksteen':s.era>=2?'baksteen en steen':'hout en leem'}.`);
  }
  if(t.fire)lines.push('Brandt nu. De bewoners brengen emmers; elke seconde telt.');

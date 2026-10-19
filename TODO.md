@@ -1,12 +1,12 @@
 # Do Nothing Island — volgende rondes
 
-Werkwijze: **één onderdeel per wijziging**, controleren, apart committen en pushen. Daarna stopt het werk zodat Coen die versie kan testen. Feedback op dat onderdeel gaat vóór het volgende onderdeel.
+Werkwijze: **één onderdeel per wijziging**, controleren, apart committen en pushen. Standaard stopt het werk daarna zodat Coen kan testen. Bij een expliciete opdracht voor meerdere onderdelen volgen aparte commits en pushes per onderdeel. Feedback gaat vóór het volgende onderdeel.
 
 Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens test al is afgerond.
 
 ## Ronde 2 — een reden om te blijven kijken
 
-- [ ] **2.1 Familie en stamboom.** Volg de familie van de eerste hut door de eeuwen. Elke generatie krijgt een opgeslagen naam, beroep en eigenaardigheid. De stamboom en familieberichten vormen de rode draad. *(Verhalenlezer)*
+- [x] **2.1 Familie en stamboom.** Volg de familie van de eerste hut door de eeuwen. Elke generatie krijgt een opgeslagen naam, beroep en eigenaardigheid. De stamboom en familieberichten vormen de rode draad. *(Verhalenlezer)*
 - [ ] **2.2 Wensen van inwoners.** Af en toe een wolkje met een vraag om regen, hulp bij brand, een feest of een bijzondere ingreep. Wel of niet helpen verandert vertrouwen en afhankelijkheid. Ook vuur en bevingen krijgen verhalende wensen. *(Experimenteerder, verhalenlezer)*
 - [ ] **2.3 Lichte uitdagingen.** Eén tot drie optionele wensen per eiland, zoals een kasteel vóór jaar 800 of de Renaissance bereiken zonder aanraking. Alleen zichtbaar wanneer je ze zelf opzoekt. *(Ontdekker)*
 - [ ] **2.4 Verzameling over eilanden heen.** Bewaar ontdekte eindes, bijzondere mijlpalen en voltooide uitdagingen. Onontdekte items krijgen silhouetten en vage hints. *(Ontdekker)*
@@ -32,6 +32,4 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 
 ## Nu aan de beurt
 
-**Eerst de feedback op de kaarten:** automatische verhaalkaarten standaard uit, geen automatische pauze of camerabeweging, zichtbare sluitknoppen en geen kronen/paraplu's op het echte eiland. Deze fix gaat als eerste apart naar GitHub en wacht daarna op Coens test.
-
-**Daarna 2.1 — Familie en stamboom.** De eerste opzet is nog niet onderdeel van de speelbare versie. 2.2 en Ronde 3 blijven open.
+**2.1 is gereed voor Coens test.** Opdracht: de volgende drie onderdelen, 2.1–2.3, met aparte commits en pushes. Nu volgt 2.2; Ronde 3 blijft open.
