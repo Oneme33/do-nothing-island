@@ -1,0 +1,96 @@
+# Do Nothing Island
+
+Een kleine beschaving. Absoluut geen verantwoordelijkheid.
+
+Een eiland groeit vanzelf: van één huisje en een kleine akker naar een stad met haar eigen gewoonten, plannen en geschiedenis. Je mag kijken. Je kunt ook ingrijpen — en ontdekken wat daarvan blijft hangen.
+
+## Spelen
+
+Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het volledige spel; installatie en een server zijn niet nodig. De interface is Nederlands. De eerste keer verschijnen drie korte introschermen, waarna het eiland op **1×** begint.
+
+- **Kijk:** lees wie ergens woont, wanneer er gebouwd is en welke gebeurtenissen een plek heeft meegemaakt.
+- **Bouw:** help een bouwplaats, geef een huis een aanbouw of verbeter een akker.
+- **Regen:** vul de voedselvoorraad aan, verbeter de oogst of blus brand.
+- **Beving:** beschadig bebouwing en verander, afhankelijk van de plek, het landschap.
+- **Vuur:** maak een vuurplaats of steek een gewone bebouwde plek in brand.
+
+De pauzeknop, snelheden **1× / 2× / 3× / 10×**, het logboek en de verhaalkaart staan op het eiland. Spatie pauzeert. Scroll of +/− zoomt; sleep om de rest van het eiland te verkennen. Open vensters zoals het logboek, de handleiding en instellingen pauzeren de wereld.
+
+De bewoners kunnen zonder wegen door het landschap lopen, ook naar het achterland en de zijkanten. Wegen ontstaan bij echte bouwplaatsen en gebouwen. Bos, strand en uitzichtpunten veroorzaken geen automatisch wegennet. Karren, fietsen en auto's gebruiken de aangelegde wegen.
+
+Je voortgang wordt lokaal bewaard. **Nieuw groot eiland** begint meteen opnieuw en biedt tien seconden lang **Herstel vorig eiland**. Bestaande eilanden behouden hun bebouwing; begin een nieuw eiland om het begin met één huisje te zien.
+
+## Een wereld die iets onthoudt
+
+Het landschap bevat per eiland ongeveer 215–255 natuurlijke landtegels binnen een begrensde wereld van 25 × 25 tegels. Er zijn verschillende kusten, bossen, stranden, heuvels, bergen en vulkanen. Bouwen en landbouw gebruiken echte ruimte. Inpoldering volgt dijkbouw, omsluiting, droogmalen, modder en droging. Alleen droog land kan bebouwd worden. Instellingen begrenzen de groei op 320, 480 of 625 tegels.
+
+Brand verdwijnt niet zonder gevolgen:
+
+- Houten buren kunnen vlam vatten; natte grond en stenen gebouwen beperken verspreiding.
+- Ongebluste gebouwen worden ruïnes en krijgen later een sterkere, stenen herbouw.
+- Herhaalde branden leiden tot stenen gevels, brandveiligheid en een brandweerkazerne. De brandweer beperkt verspreiding en blust sneller.
+- As verhoogt blijvend de opbrengst van akkers. Een uitgebrand bos laat bebouwbare open grond achter.
+- Vuurplaatsen kunnen onderdeel worden van een terugkerende traditie.
+
+Bevingen kunnen nieuw kustland omhoogdrukken, een blijvende bron openen, een kloof veroorzaken of via een aardverschuiving gesteente blootleggen. Een kloof kan overbrugd worden; een steengroeve levert steen. Het resultaat hangt af van de plaats en eerdere gebeurtenissen. Sommige opeenvolgende ingrepen hebben bijzondere combinaties. Het spel legt die niet vooraf uit: ontdekkingen komen in de geschiedenis terecht.
+
+Bewoners onthouden branden, bevingen, regen, irrigatie, herstel en overstromingen. **Toen en nu** vergelijkt oude kustlijnen; het begin blijft bewaard. Het archief bevat hoogstens zestien kaartmomenten. Ook de oudste woning blijft op haar oorspronkelijke plaats en groeit uiteindelijk uit tot een landhuis en paleis.
+
+## Tijdperken en het einde
+
+Onderzoek kan de kalender niet overslaan. De architectuur doorloopt de eerste nederzetting, klassieke tijd, middeleeuwen, renaissance, stoomtijd, moderne tijd, hedendaagse tijd en nabije toekomst. Oudere gebouwen behouden hun stijl tot een verbouwing. De wereld krijgt onderwijs, handel, industrie, energie, openbaar groen en recreatie zodra tijd en middelen dat toelaten.
+
+Rond 2100 begint het laatste hoofdstuk; een gewoon eiland eindigt uiterlijk in 2240. Jouw invloed verandert de timing en uitkomst. Er zijn zeven eindes:
+
+- **Ze hebben het zelf uitgevogeld:** een zelfstandige beschaving.
+- **Een beetje ruimte voor niets:** een groene samenleving die genoeg heeft.
+- **Blijf vooral aanraken:** een samenleving die op jouw wonderen rekent.
+- **Het bijzonder voorzichtige koninkrijk:** een eiland dat zich na bevingen heeft versterkt.
+- **De Feniksstad:** een stad die na branden steeds sterker terugkomt.
+- **De zee krijgt iets terug:** hogere grond, kleinere ambities en een veilige kust.
+- **De laatste druppel:** een zeldzame poging om de oceaan volledig op te heffen. Hiervoor zijn de maximale wereldruimte, toekomstige techniek en een ongewone ambitie nodig. Pas bij minstens 94,5% werkelijk droog land is het project geslaagd.
+
+Elke uitkomst heeft een eigen geanimeerd eindscherm. De scène duurt 24 seconden, kan gepauzeerd en opnieuw afgespeeld worden en biedt na acht seconden een knop naar het naschrift. Het voorzichtige koninkrijk viert herstel met versterkte huizen, bewoners en slingers; er is geen paraplu.
+
+Het naschrift toont kaarten, oorzaken en een **eilandscore van 0–100**, het gemiddelde van vijf onderdelen: leefbaarheid, natuur, zelfstandigheid, veerkracht en cultuur. De scores volgen de werkelijke toestand en geschiedenis. Ze blijven samen met het oorspronkelijke naschrift bewaard wanneer je vrij verder speelt. Er is meer dan één manier om een geslaagd eiland te maken.
+
+## Ontwikkelen
+
+Node.js 22 of nieuwer. Er zijn geen pakketafhankelijkheden.
+
+```sh
+npm run dev       # http://127.0.0.1:5173
+npm test          # bouw start.html opnieuw en draai alle regressietests
+npm run build     # actualiseer start.html en dist/ voor statische hosting
+```
+
+Bewerk `index.html`, `styles.css` en `src/`; bouw daarna opnieuw. `start.html` is de zelfstandige speelbare distributie. `dist/`, lokale hostinginstellingen en gegenereerde afbeeldingen staan buiten Git.
+
+De tests controleren complete beschavingen, opslaan en herstellen, blijvende gevolgen, combinaties, grenzen, wegen en wandelroutes, alle eindes, intro en pauzeren, Nederlandse presentatie, inspectie, bevroren eindscores en labelplaatsing. De app-tests voeren ook de werkelijk gebouwde zelfstandige versie uit.
+
+Visuele voorbeelden van de echte tekencode:
+
+```sh
+node scripts/visual-proof.mjs beginning beach-party
+node scripts/visual-proof.mjs finale-fortress finale-phoenix finale-mobile
+```
+
+Op macOS kun je de SVG's naar PNG omzetten:
+
+```sh
+swift -module-cache-path /tmp/dni-swift-cache scripts/render-proof.swift artifacts/*.svg
+```
+
+Deze afbeeldingen controleren de renderer. Ze vervangen geen volledige interactiecontrole in een browser.
+
+## Broncode
+
+- `simulation.js`: wereld, economie, bouw, wegen, verkeer en opslag.
+- `story.js`: geschiedenis, hervormingen, archief en eindregels.
+- `consequences.js`: brandverspreiding, herbouw, brandweer, terreingevolgen en ontdekkingen.
+- `spectacle.js` en `pageants.js`: feesten, leven op het eiland en scènes in de wereld.
+- `finale.js`: aparte eindanimaties en scores.
+- `inspection.js`: bewoners, bouwjaren en plaatselijke herinneringen.
+- `language.js`: Nederlandse presentatie, ook voor de Engelse geschiedenis in oudere saves.
+- `renderer.js`: isometrisch canvas, camera, bebouwing, bewoners en begrensde labels.
+- `app.js`: intro, bediening, vensters, inspectie, geluid en lokale opslag.

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f5ed">
+  <meta name="description" content="Een kleine beschaving. Absoluut geen verantwoordelijkheid. Watch an island grow, reclaim the sea, and get on with life in a quietly absurd civilization simulation.">
+  <title>Do Nothing Island — Een kleine beschaving.</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Do Nothing Island — start">
+      <span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M6 27 20 20 34 27 20 34Z" fill="#7a9464"/><path d="m6 27 14 7 14-7v4l-14 7-14-7" fill="#b0a17a"/><path d="M20 27V12m0 7-6-4m6 1 5-5" stroke="#536b47" stroke-width="2"/><path d="M11 14c-4-8 6-12 10-9 8-3 12 8 5 11-3 5-12 4-15-2" fill="#6d8659"/></svg></span>
+      <span>DO NOTHING<br>ISLAND<span class="brand-period">.</span></span>
+    </a>
+    <p class="header-tagline">Een kleine beschaving.<br><span>Absoluut geen verantwoordelijkheid.</span></p>
+    <div class="header-actions">
+      <span class="live-status"><i></i> HET LEVEN GAAT DOOR</span>
+      <button class="icon-button sound-toggle" id="sound" aria-label="Zet het zeegeluid aan" title="Zeegeluid"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Zm5 4a5 5 0 0 1 0 6m3-9a9 9 0 0 1 0 12"/></svg><span class="sound-slash"></span></button>
+      <button class="icon-button" id="help" aria-label="Over dit eiland" title="Een kleine handleiding"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.7 9a2.4 2.4 0 1 1 3.1 2.3c-.8.3-.8 1-.8 1.7m0 3h.01"/></svg></button>
+      <button class="icon-button" id="settings" aria-label="Eilandinstellingen" title="Eilandinstellingen"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M8 4v6m8 4v6"/></svg></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro" aria-label="Jouw eiland">
+      <div><div class="eyebrow"><span class="little-star">✳</span> DE WERELD GAAT HAAR GANG</div><h1>Een klein leven, helemaal vanzelf.</h1><p>Niets te regelen. Nergens naartoe. Kijk gewoon wat er gebeurt.</p></div>
+      <div class="intro-actions"><div class="reset-actions"><button id="new-island" class="new-island-button" title="Begin direct opnieuw met een willekeurig eiland"><span aria-hidden="true">↻</span> Nieuw groot eiland</button><small id="start-size">±250 landtegels · 6 inwoners</small><button id="undo-reset" hidden>Herstel vorig eiland</button></div><div class="year-stamp"><span>BEGONNEN IN JAAR 1</span><strong>Jaar <b id="year">1</b><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4v24M4 16h24M7.5 7.5l17 17m-17 0 17-17"/></svg></strong><span id="era-name">HET VROEGE BEGIN</span><span id="age-next">Volgend tijdperk · jaar 120</span></div></div>
+    </section>
+
+    <section class="interference-tools" aria-label="Jouw invloed"><div class="tools-caption"><span class="eyebrow">JOUW INVLOED</span><small>Ja, jij deed dat.</small></div><div class="interference-buttons" role="group" aria-label="Kies een ingreep"><button data-interference="nudge" class="active" aria-pressed="true"><span>✳</span> Bouw</button><button data-interference="rain" aria-pressed="false"><span>☂</span> Regen</button><button data-interference="rumble" aria-pressed="false"><span>≋</span> Beving</button><button data-interference="fire" aria-pressed="false"><span>♨</span> Vuur</button><button data-interference="inspect" aria-pressed="false"><span>⌕</span> Kijk</button></div><p id="interaction-hint">Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.</p><div class="pace-readout"><i></i><span id="pace-readout">Een rustig begin. Het komt op gang.</span></div></section>
+
+    <section id="island-window" class="island-window" aria-label="Een levend eiland">
+      <canvas id="island" tabindex="0" aria-label="Jouw levende eiland. Klik voor een ingreep, scroll om te zoomen en sleep om rond te kijken. Pijltjes verplaatsen de kaart; plus en min zoomen."></canvas>
+      <div class="island-heading"><span class="status-dot"></span><span id="island-mood">Een behoorlijk rustig begin</span></div>
+      <div class="weather" id="weather"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/></svg><span>Kalme zee. Kleine ambities.</span></div>
+      <div class="civic-overview"><span id="energy-source">Nog geen stroomnet</span><span id="civic-life">Een huisje en een kleine akker.</span><span id="places-status">Strand · Bos</span><span id="district-status">Eén kleine akker</span><span id="mobility-status">Te voet over het eiland</span><span id="chapter-status" title="Het laatste tijdperk begint rond 2100. Jouw ingrepen veranderen de timing en de uitkomst.">Laatste tijdperk rond 2100</span></div>
+      <div id="tile-inspector" class="tile-inspector" hidden></div><button id="inspector-close" aria-label="Sluit het informatiekaartje">×</button>
+
+      <aside class="population-card" aria-label="Overzicht van de beschaving"><span class="eyebrow">DE BEWONERS</span><div class="population-count"><span id="population">6</span><svg viewBox="0 0 32 24"><circle cx="16" cy="6" r="3"/><path d="M10 21v-6a6 6 0 0 1 12 0v6M4 20v-5a4 4 0 0 1 4-4M28 20v-5a4 4 0 0 0-4-4"/><circle cx="5" cy="7" r="2"/><circle cx="27" cy="7" r="2"/></svg></div><p id="population-note">Zes mensen. Geen vergaderingen.</p><div class="card-rule"></div><div class="mini-stat"><span>Geluk</span><span><i class="happiness-dot"></i><b id="happiness">Tevreden</b></span></div><div class="mini-stat"><span>Ingrepen</span><b id="interference-count">0</b></div></aside>
+
+      <div class="tree-label" id="tree-label"><span></span>De oorspronkelijke boom.<br><em>Hij was er eerst.</em></div>
+      <div class="map-coordinate" id="geography-label">EEN KLEINE PLEK IN EEN GROOT NIETS</div>
+      <div class="map-controls"><button id="find-beach" title="Bekijk het strand">Strand ↗</button><button id="zoom-out" aria-label="Zoom uit">−</button><button id="recenter" aria-label="Zet het eiland in het midden" title="Zet het eiland in het midden"><svg viewBox="0 0 20 20"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4"/></svg></button><button id="zoom-in" aria-label="Zoom in">+</button></div>
+      <div class="island-toolbar"><div class="time-controls"><button id="pause" aria-label="Pauzeer het eiland" title="Pauze (spatie)"><svg id="pause-icon" viewBox="0 0 20 20"><path d="M6 4v12M14 4v12"/></svg></button><div class="speed-buttons" role="group" aria-label="Snelheid van het eiland"><button class="active" data-speed="1" aria-pressed="true">1×</button><button data-speed="2" aria-pressed="false">2×</button><button data-speed="3" aria-pressed="false">3×</button><button data-speed="10" aria-pressed="false">10×</button></div><span class="time-caption" id="time-caption">GEEN BIJZONDERE HAAST</span></div><button id="canvas-journal" title="Open het logboek">Logboek ↗</button></div>
+    <aside class="story-moment" id="moment-card" aria-live="polite" hidden>
+      <div><span class="eyebrow" id="moment-year">EILANDGESCHIEDENIS</span><strong id="moment-title">Een beetje geschiedenis</strong><p id="moment-text"></p></div>
+      <div class="moment-actions"><button id="moment-focus">Laat zien ↗</button><button id="moment-continue">Verder →</button></div>
+    </aside>
+      <div class="toast" id="toast" role="status"></div>
+      <div class="intervention-result" id="intervention-result" role="status" aria-live="polite" hidden><span class="eyebrow">JOUW INGREEP</span><strong id="intervention-title"></strong><p id="intervention-detail"></p></div>
+      <div class="instruction" id="instruction"><span>✳</span> Probeer niets aan te raken.<small>Klik / tik op het eiland. Ze merken het.</small></div>
+
+      <div class="project-overlay" id="project-overlay" hidden><div><span class="status-dot"></span><b id="project-name">Een beetje meer ruimte</b><span id="project-percent">0%</span></div><p id="project-stage">De kust plannen</p><div class="progress-track"><i id="project-progress"></i></div></div>
+    </section>
+
+
+    <section class="island-story" aria-label="Verken het eiland en zijn geschiedenis">
+      <div class="story-health"><span id="water-status">Zoetwater · 82%</span><span id="environment-status">Levend landschap · 100%</span><span id="legacy-status">Een zelfstandig begin</span><span id="council-status">Een paar mensen. Genoeg ruimte.</span></div>
+      <div class="explore-controls"><button id="find-palace">♜ Eerste huis</button><button id="find-knowledge">✧ Kennis</button><button id="find-fields">♧ Akkers</button><button id="find-fun">♬ Feest</button><label><input type="checkbox" id="history-layer"> Toen en nu</label><select id="history-snapshot" aria-label="Vergelijk een vroegere kustlijn" hidden></select><button id="open-ending" hidden>Lees het naschrift ↗</button></div>
+      <p id="history-legend" hidden>Oker: vroegere kust · Blauw: overstroomde wijken · Goud/blauw: jouw bezoeken · Oude dijken blijven in de stad zichtbaar.</p>
+    </section>
+
+
+    <section class="dashboard" aria-label="Eilandstatus en bediening">
+      <div class="terrain-summary"><span class="stat-icon land-icon"><svg viewBox="0 0 24 24"><path d="m3 12 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 7l9-5 9 5"/></svg></span><div><span class="eyebrow">EEN BEETJE RUIMTE OM TE GROEIEN</span><strong><span id="land-area">0</span> <small>landtegels</small><span class="land-added" id="land-added">voorlopig allemaal natuurlijk</span></strong></div></div>
+      <div class="resources"><div title="Voedselvoorraad"><svg viewBox="0 0 24 24"><path d="M12 22V5m0 6c-6 0-7-4-7-6 5 0 7 3 7 6Zm0 6c6 0 7-4 7-6-5 0-7 3-7 6Zm0-12 3-4"/></svg><span id="food">28</span></div><div title="Hout"><svg viewBox="0 0 24 24"><path d="m12 2-7 9h4l-5 7h6v4h4v-4h6l-5-7h4L12 2Z"/></svg><span id="wood">30</span></div><div title="Welvaart"><svg viewBox="0 0 24 24"><path d="m12 2 8 5v10l-8 5-8-5V7l8-5Zm0 0v20M4 7l8 5 8-5"/></svg><span id="prosperity">62</span><small>%</small></div></div>
+
+    </section>
+
+    <section class="history-section" aria-label="Eilandgeschiedenis"><div class="history-heading"><h2>Een kleine geschiedenis van nietsdoen<span>.</span></h2><button id="open-journal">Het hele verhaal <span>↗</span></button></div><div class="history-preview" id="history-preview"></div></section>
+  </main>
+  <footer><span>Kleine levens. Grote plannen. Twijfelachtige beslissingen.</span><span>Gemaakt om naar te kijken <span class="footer-flower">✳</span></span></footer>
+
+  <dialog id="intro-dialog" class="intro-dialog" aria-labelledby="intro-title"><span class="eyebrow">DO NOTHING ISLAND</span><div class="intro-island" aria-hidden="true">♧</div><span id="intro-step">1 / 3</span><h2 id="intro-title">Dit is jouw eiland.</h2><p id="intro-line"></p><div class="intro-buttons"><button id="intro-back" class="secondary-button" hidden>Terug</button><button id="intro-next" class="primary-button">Verder →</button></div></dialog>
+  <dialog id="cinema-dialog" class="cinema-dialog" aria-labelledby="cinema-title"><span class="eyebrow">HUN GROTE FINALE</span><canvas id="finale-canvas" width="800" height="380" aria-label="Geanimeerde finale van het eiland"></canvas>      <div class="cinema-caption" id="cinema-caption" aria-live="polite" hidden><span class="eyebrow">HET LAATSTE GROTE IDEE</span><strong id="cinema-title"></strong><p id="cinema-line"></p><div><button id="cinema-cheer">Vier mee met de bewoners</button><button id="cinema-skip" hidden>Naar het naschrift →</button></div></div><progress id="cinema-progress" max="100" value="0" aria-label="Voortgang van de eindscène"></progress><button id="cinema-pause" class="secondary-button">Pauze</button><p class="dialog-note">Na de scène zie je de eilandscore en wat zij achterlaten.</p></dialog>
+  <dialog id="guide-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN KLEINE HANDLEIDING</span><h2>Welkom bij het nietsdoen.</h2><p>Eén huisje, een kleine akker en zes mensen. De beschaving groeit vanzelf. Jij kiest of je toekijkt of ingrijpt.</p><div class="guide-steps"><div><span>01</span><p><strong>Neem de tijd.</strong> Het eiland begint op 1×. Met de balk op het eiland kies je de snelheid of pauzeer je. Een open logboek, handleiding of instellingenvenster zet het leven even stil.</p></div><div><span>02</span><p><strong>Alles laat sporen achter.</strong> Bouw helpt de bewoners. Regen voedt de akkers. Vuur en bevingen kunnen blijvende veranderingen veroorzaken. Probeer dingen uit en kijk wat de bewoners ermee doen.</p></div><div><span>03</span><p><strong>Kijk van dichtbij.</strong> Kies Kijk en klik op een plek voor bewoners, bouwjaar en herinneringen. Versleep de kaart of zoom om de rest te zien. Rond 2100 begint het laatste hoofdstuk, met een eigen eindscène en eilandscore.</p></div></div><p class="dialog-note">Spatie: pauze · Scroll of +/−: zoom · Slepen: verkennen<br>Je eiland wordt automatisch in deze browser bewaard.</p><button class="primary-button" data-close>Ik laat ze even hun gang gaan ↗</button></dialog>
+
+  <dialog id="journal-dialog" class="journal-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">HET EILANDARCHIEF</span><h2>Behoorlijk veel niets.</h2><p>Elke grote beschaving begint met een boom en wat twijfelachtige beslissingen.</p><div id="journal-entries"></div></dialog>
+
+  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320">Een ruim eiland · 320</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Een rustig begin, daarna steeds sneller.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
+
+  <dialog id="ending-dialog" class="ending-dialog"><span class="eyebrow">HET EILAND HEEFT EEN VERHAAL</span><div class="ending-symbol">◉</div><h2 id="ending-title">De erfenis van het eiland.</h2><p class="ending-quote" id="ending-quote"></p><p id="ending-description"></p><div class="ending-shortage"><span>WAT ZE ACHTERLATEN</span><strong id="ending-consequence"></strong><p id="ending-detail"></p></div><section class="island-scores" aria-label="Eilandscores"><span class="eyebrow">HUN EILANDSCORE</span><strong id="ending-score"></strong><div id="score-breakdown"></div><p>Het gemiddelde van vijf kanten van hun beschaving. Er is meer dan één manier om het goed te doen.</p></section><p id="ending-stats"></p><div class="ending-maps"><figure><svg id="ending-before" viewBox="0 0 250 250" role="img" aria-label="Het oorspronkelijke eiland"></svg><figcaption>Het begin</figcaption></figure><figure><svg id="ending-after" viewBox="0 0 250 250" role="img" aria-label="Het uiteindelijke eiland"></svg><figcaption>Het eiland dat zij maakten</figcaption></figure></div><p id="ending-causes"></p><div id="ending-chronicle"></div><button id="ending-continue" class="primary-button">Bekijk het uiteindelijke eiland ↗</button><button id="ending-replay" class="secondary-button">Speel de eindscène opnieuw ↻</button><button id="ending-sandbox" class="secondary-button">Speel vrij verder →</button><button id="ending-new" class="secondary-button">Begin een nieuw eiland ↻</button></dialog>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
