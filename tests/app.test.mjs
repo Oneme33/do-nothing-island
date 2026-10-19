@@ -15,7 +15,7 @@ async function appHarness(initial,{firstVisit=false}={}){
  }
  for(const match of html.split('<script>')[0].matchAll(/<[^>]*\bid="([^"]+)"[^>]*>/g)){const element=new Element();element.id=match[1];element.hidden=/\shidden(?:\s|>)/.test(match[0]);elements.set(match[1],element);}
  const speeds=[1,2,3,10].map(value=>{const e=new Element();e.dataset.speed=String(value);return e;});
- const modes=['inspect','nudge','rain','rumble','fire'].map(value=>{const e=new Element();e.dataset.interference=value;return e;});
+ const modes=['help','nudge','rain','rumble','fire'].map(value=>{const e=new Element();e.dataset.interference=value;return e;});
  const dialogs=[...elements].filter(([id])=>id.endsWith('-dialog')).map(([,e])=>e),live=new Element();
  const document={hidden:false,activeElement:null,body:new Element(),getElementById:id=>elements.get(id),createElement:()=>new Element(),addEventListener(){},querySelector:s=>s==='.live-status'?live:dialogs.find(d=>d.open)||null,querySelectorAll:s=>s==='[data-speed]'?speeds:s==='[data-interference]'?modes:s==='dialog'?dialogs:s==='dialog[open]'?dialogs.filter(d=>d.open):[]};
  const context=new Proxy({createRadialGradient:()=>({addColorStop(){}}),measureText:text=>({width:text.length*5})},{get:(t,k)=>t[k]||(()=>{}),set:(t,k,v)=>(t[k]=v,true)});
@@ -32,12 +32,12 @@ test('the delivered game starts, creates fresh islands immediately and can undo 
  assert.equal(a.saved().tiles.filter(([,t])=>t.building==='hut').length,1);assert.equal(a.saved().tiles.some(([,t])=>t.road),false);
  e.get('new-island').handlers.click();assert.equal(a.saved().seed,12);e.get('undo-reset').handlers.click();assert.equal(a.saved().seed,8);assert.equal(e.get('undo-reset').hidden,true);
 });
-test('Observe lets a player inspect without interference; deliberately choosing rain changes the world',async()=>{
+test('Help allows looking around without interference; deliberately choosing rain changes the world',async()=>{
  const a=await appHarness(new Civilization(31)),e=a.elements,c=e.get('island');a.frame(16);
- assert.equal(c.dataset.mode,'nudge');a.modes.find(b=>b.dataset.interference==='inspect').handlers.click();
+ assert.equal(c.dataset.mode,'nudge');a.modes.find(b=>b.dataset.interference==='help').handlers.click();
  const tap=()=>{c.handlers.pointerdown({button:0,clientX:600,clientY:300,pointerId:1});c.handlers.pointerup({clientX:600,clientY:300,pointerId:1});};
  tap();assert.equal(a.saved().interferences,0);
- a.modes.find(b=>b.dataset.interference==='inspect').handlers.click();e.get('find-palace').handlers.click();assert.match(e.get('tile-inspector').textContent,/allereerste huis/);assert.match(e.get('tile-inspector').textContent,/familie/);
+ a.modes.find(b=>b.dataset.interference==='help').handlers.click();e.get('find-palace').handlers.click();assert.match(e.get('tile-inspector').textContent,/allereerste huis/);assert.match(e.get('tile-inspector').textContent,/familie/);
  a.modes.find(b=>b.dataset.interference==='rain').handlers.click();tap();assert.equal(a.saved().interferences,1);assert.equal(a.saved().influence.rain,1);assert.equal(e.get('intervention-result').hidden,true);assert.ok(e.get('toast-text').textContent);
  e.get('history-layer').handlers.change({target:{checked:true}});assert.equal(e.get('history-snapshot').hidden,false);assert.equal(e.get('history-legend').hidden,false);
  assert.ok(e.get('history-snapshot').children.length>0);
@@ -106,7 +106,7 @@ test('the family tree is opened deliberately, pauses time and points back to the
  assert.equal(e.get('family-dialog').open,false);e.get('open-family').handlers.click();assert.equal(e.get('family-dialog').open,true);
  assert.match(e.get('family-title').textContent,/Familie/);assert.equal(e.get('family-generations').children.length,4);assert.match(e.get('family-current').children[0].textContent,/generatie 4/);
  const year=e.get('year').textContent;a.advance(10);assert.equal(e.get('year').textContent,year);
- e.get('family-find-home').handlers.click();assert.equal(e.get('family-dialog').open,false);assert.match(e.get('tile-inspector').textContent,/generatie 4/);assert.equal(e.get('island').dataset.mode,'inspect');
+ e.get('family-find-home').handlers.click();assert.equal(e.get('family-dialog').open,false);assert.match(e.get('tile-inspector').textContent,/generatie 4/);assert.equal(e.get('island').dataset.mode,'help');
 });
 test('resident wishes stay compact, dismiss permanently and pause only when deliberately opened',async()=>{
  const sim=new Civilization(31);sim.wishes.active={id:'wish-ui',kind:'rain',mode:'rain',speaker:'Mo Visser',text:'De boeren hopen op regen.',x:1,y:-1,issuedAt:1,deadline:100,hidden:false};
@@ -115,7 +115,7 @@ test('resident wishes stay compact, dismiss permanently and pause only when deli
  e.get('wish-dismiss').handlers.click();assert.equal(e.get('wish-bubble').hidden,true);assert.equal(a.saved().wishes.active.hidden,true);
  e.get('open-wishes').handlers.click();assert.equal(e.get('wishes-dialog').open,true);assert.match(e.get('wish-current').children[1].textContent,/regen/);
  const year=e.get('year').textContent;a.advance(2);assert.equal(e.get('year').textContent,year);
- e.get('wish-find').handlers.click();assert.equal(e.get('wishes-dialog').open,false);assert.equal(e.get('island').dataset.mode,'rain');
+ e.get('wish-find').handlers.click();assert.equal(e.get('wishes-dialog').open,false);assert.equal(e.get('island').dataset.mode,'help');
  e.get('wish-bubbles').handlers.change({target:{checked:false}});assert.equal(a.saved().config.wishBubbles,false);
  const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));assert.equal(b.elements.get('wish-bubble').hidden,true);
 });
@@ -126,4 +126,11 @@ test('optional challenges are revealed only on request and their window pauses t
  e.get('open-challenges').handlers.click();assert.equal(e.get('challenges-dialog').open,true);assert.equal(a.saved().challenges.revealed,true);assert.equal(e.get('challenge-list').children.length,sim.challenges.goals.length);
  const year=e.get('year').textContent;a.advance(2);assert.equal(e.get('year').textContent,year);e.get('challenges-close').handlers.click();a.advance(2);assert.ok(e.get('year').textContent>year);
  const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));assert.equal(b.elements.get('challenges-dialog').open,false,'return visits never open a challenge popup');
+});
+test('Help names the requesting resident and fulfils their wish through an explicit button',async()=>{
+ const sim=new Civilization(31);sim.wishes.active={id:'help-ui',kind:'rain',mode:'rain',speaker:'Mo Visser',text:'De boeren hopen op regen.',x:1,y:-1,issuedAt:1,deadline:100,hidden:false};
+ const a=await appHarness(sim),e=a.elements;a.frame(16);a.modes.find(b=>b.dataset.interference==='help').handlers.click();e.get('open-wishes').handlers.click();
+ assert.equal(e.get('wish-help').textContent,'Help Mo');assert.equal(e.get('wish-help').hidden,false);assert.equal(a.saved().interferences,0);
+ e.get('wish-help').handlers.click();assert.equal(e.get('wishes-dialog').open,false);assert.equal(a.saved().interferences,1);assert.equal(a.saved().wishes.history.at(-1).status,'helped');assert.equal(a.saved().influence.rain,1);assert.equal(e.get('wish-bubble').hidden,true);
+ e.get('wish-help').handlers.click();assert.equal(a.saved().interferences,1);
 });

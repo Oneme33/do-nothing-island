@@ -16,7 +16,7 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het volledige spel; installatie en een server zijn niet nodig. De interface is Nederlands. De eerste keer verschijnen drie korte introschermen, waarna het eiland op **1×** begint.
 
-- **Kijk:** lees wie ergens woont, wanneer er gebouwd is en welke gebeurtenissen een plek heeft meegemaakt.
+- **Help:** klik op een inwoner met een hartje of open Wensen. Met de knop Help geef je precies de gevraagde hulp. Een klik op andere gebouwen toont hun bewoners en geschiedenis, zonder ingreep.
 - **Bouw:** help een bouwplaats, geef een huis een aanbouw of verbeter een akker.
 - **Regen:** vul de voedselvoorraad aan, verbeter de oogst of blus brand.
 - **Beving:** beschadig bebouwing en verander, afhankelijk van de plek, het landschap.

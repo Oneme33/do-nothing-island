@@ -149,6 +149,18 @@ export class IslandRenderer {
     this.drawDistrictLabels();
     if(!cinemaVisible(this.sim))this.drawLandmarkLabels();
     drawComicBubbles(this);
+    this.drawWishResident();
+  }
+  wishResidentPoint(){
+    const wish=this.sim.wishes?.active;if(this.mode!=='help'||!wish||this.sim.ending)return null;
+    const p=this.point(wish.x,wish.y);return{x:p.x+16*this.zoom,y:p.y+8*this.zoom,wish};
+  }
+  pickWishResident(x,y){const p=this.wishResidentPoint();return !!p&&Math.hypot(x-p.x,y-(p.y-7*this.zoom))<=Math.max(20,14*this.zoom);}
+  drawWishResident(){
+    const p=this.wishResidentPoint();if(!p)return;
+    const c=this.ctx;c.save();c.translate(p.x,p.y);c.scale(this.zoom,this.zoom);
+    this.ellipse(0,0,7,3,'#8c9e6e44');this.person(0,0,'#a37b5f',0);
+    this.ellipse(0,-22,8,7,'#faf8e9');c.fillStyle='#64794e';c.font='11px serif';c.textAlign='center';c.fillText('♡',0,-18);c.restore();
   }
   enqueueActor(depth,draw){if(this.scene)this.scene.push({depth,draw});else draw();}
   streetPoint(tile){const p=this.p(tile.x,tile.y);return{x:p.x,y:p.y+11.5};}

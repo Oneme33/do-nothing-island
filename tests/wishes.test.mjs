@@ -38,3 +38,9 @@ test('old saves get future wishes without inventing a backlog or changing histor
  const s=new Civilization(31);while(s.year<150)s.tick();const old=JSON.parse(s.serialize());delete old.wishes;
  const restored=Civilization.restore(JSON.stringify(old));assert.equal(restored.wishes.active,null);assert.ok(restored.wishes.nextAt>restored.year);assert.deepEqual(restored.history,old.history);assert.equal(restored.randomState,old.randomState);
 });
+test('Help fulfils each real request once and refuses stale or changed places without an intervention',async()=>{
+ const {helpActiveWish,canHelpWish}=await import('../src/wishes.js');
+ for(const kind of ['rain','feast','bonfire','spring']){const s=requesting(kind),id=s.wishes.active.id;assert.equal(canHelpWish(s),true);assert.equal(helpActiveWish(s,id),true);assert.equal(s.interferences,1);assert.equal(helpActiveWish(s,id),false);assert.equal(s.interferences,1);}
+ const s=requesting('bonfire'),w=s.wishes.active;s.tile(w.x,w.y).building='house';assert.equal(canHelpWish(s),false);assert.equal(helpActiveWish(s,w.id),false);assert.equal(s.interferences,0);assert.equal(s.tile(w.x,w.y).fire,undefined);
+ const a=requesting('rain');assert.equal(helpActiveWish(a,'a different request'),false);assert.equal(a.interferences,0);a.year=a.wishes.active.deadline+1;assert.equal(helpActiveWish(a,a.wishes.active.id),false);assert.equal(a.interferences,0);
+});

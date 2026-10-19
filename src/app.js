@@ -6,7 +6,7 @@ import { IslandRenderer } from './renderer.js';
 import {describePlot} from './inspection.js';
 import {drawFinale,islandScores} from './finale.js';
 import {ensureFamily,currentRelative} from './family.js';
-import {ensureWishes,dismissWish,WISH_OUTCOMES} from './wishes.js';
+import {ensureWishes,dismissWish,WISH_OUTCOMES,canHelpWish,helpActiveWish} from './wishes.js';
 import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
 
 const $=id=>document.getElementById(id);
@@ -113,6 +113,7 @@ function renderWishes(){
   const heading=document.createElement('strong'),line=document.createElement('p');
   heading.textContent=wish?wish.speaker:'Voorlopig geen wensen';line.textContent=wish?`“${wish.text}” · jaar ${wish.issuedAt}–${wish.deadline}`:'De inwoners gaan rustig hun gang. Af en toe vraagt iemand iets.';
   $('wish-current').replaceChildren(heading,line);$('wish-find').hidden=!wish;
+  $('wish-help').hidden=!canHelpWish(sim,wish);$('wish-help').textContent=wish?`Help ${wish.speaker.split(' ')[0]}`:'Help deze inwoner';
   $('wish-history').replaceChildren(...state.history.slice().reverse().map(w=>{const item=document.createElement('li'),name=document.createElement('strong'),text=document.createElement('p');name.textContent=`${WISH_OUTCOMES[w.status]} · jaar ${w.closedAt}`;text.textContent=`${w.speaker}: “${w.text}”`;item.append(name,text);return item;}));
 }
 function openWishes(){renderWishes();$('wishes-dialog').showModal();updatePause();}
@@ -287,12 +288,12 @@ $('wish-open').addEventListener('click',openWishes);
 $('wish-dismiss').addEventListener('click',()=>{dismissWish(sim);updateWishBubble();save();});
 $('wishes-close').addEventListener('click',()=>$('wishes-dialog').close());
 $('wish-bubbles').addEventListener('change',event=>{sim.config.wishBubbles=event.target.checked;updateWishBubble();save();});
-$('wish-find').addEventListener('click',()=>{const wish=ensureWishes(sim).active;if(!wish)return;$('wishes-dialog').close();chooseMode(wish.mode);focusPlace(sim.tile(wish.x,wish.y));});
+$('wish-find').addEventListener('click',()=>{const wish=ensureWishes(sim).active;if(!wish)return;$('wishes-dialog').close();chooseMode('help');focusPlace(sim.tile(wish.x,wish.y));});
 $('open-family').addEventListener('click',()=>{renderFamily();$('family-dialog').showModal();$('family-generations').scrollTop=$('family-generations').scrollHeight;updatePause();});
 $('family-close').addEventListener('click',()=>$('family-dialog').close());
 $('family-oldest').addEventListener('click',()=>$('family-generations').scrollTop=0);
 $('family-latest').addEventListener('click',()=>$('family-generations').scrollTop=$('family-generations').scrollHeight);
-$('family-find-home').addEventListener('click',()=>{$('family-dialog').close();chooseMode('inspect');inspectionPinned=true;focusPlace(sim.tile(-1,1));});
+$('family-find-home').addEventListener('click',()=>{$('family-dialog').close();chooseMode('help');inspectionPinned=true;focusPlace(sim.tile(-1,1));});
 $('canvas-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();updatePause();});
 $('inspector-close').addEventListener('click',()=>{inspectionPinned=false;$('tile-inspector').hidden=true;});
 $('cinema-cheer').addEventListener('click',cheerCinema);
@@ -360,7 +361,7 @@ $('undo-reset').addEventListener('click',()=>{
   const previous=previousIsland&&Civilization.restore(previousIsland);if(!previous)return;
   clearTimeout(undoTimer);previousIsland=null;$('undo-reset').hidden=true;switchIsland(previous,"Je vorige eiland is terug. Niemand heeft de omweg gemerkt.");
 });
-const modeHints={inspect:'Alleen kijken. Kies Bouw, Regen, Beving of Vuur om iets te veranderen.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
+const modeHints={help:'Klik op een inwoner met een hartje of open Wensen. Kies zelf of je helpt.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
 function chooseMode(mode){
   interferenceMode=mode;renderer.mode=interferenceMode;inspectionPinned=false;
   for(const b of document.querySelectorAll('[data-interference]')){const selected=b.dataset.interference===mode;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected));}
@@ -369,8 +370,22 @@ function chooseMode(mode){
 for(const button of document.querySelectorAll('[data-interference]'))button.addEventListener('click',()=>chooseMode(button.dataset.interference));
 function inspectTile(tile){
   const panel=$('tile-inspector');panel.hidden=!tile;
-  if(tile)panel.textContent=interferenceMode==='inspect'?describePlot(sim,tile):describePlot(sim,tile).split('\n')[0];
+  if(tile)panel.textContent=interferenceMode==='help'?describePlot(sim,tile):describePlot(sim,tile).split('\n')[0];
 }
+function showIntervention(x,y){
+  const result=sim.lastIntervention;
+  renderer.addEffect({...result,priority:100});beatHoldUntil=0;accumulator=0;
+  $('intervention-result').hidden=sim.config.storyCards!==true;$('intervention-result').dataset.type=result.type;
+  $('intervention-title').textContent=nl(result.title);$('intervention-detail').textContent=nl(result.detail);
+  if(sim.config.storyCards!==true)showToast(result.title,2400);
+  clearTimeout(interventionTimer);interventionTimer=setTimeout(()=>$('intervention-result').hidden=true,3000);
+  renderer.ripple(x,y);dirtyHistory=true;updateUI();save();
+}
+$('wish-help').addEventListener('click',()=>{
+  const wish=ensureWishes(sim).active;
+  if(!helpActiveWish(sim,wish?.id)){renderWishes();showToast('Deze wens is veranderd. Er is geen ingreep gedaan.');return;}
+  $('wishes-dialog').close();const point=renderer.point(wish.x,wish.y);showIntervention(point.x,point.y);
+});
 let drag=null;
 canvas.addEventListener('pointerdown',e=>{
   if(e.button!==0)return;
@@ -390,16 +405,11 @@ canvas.addEventListener('pointerup',e=>{
     const r=canvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
     const tile=renderer.pick(x,y);
     if(cinemaActive()){cheerCinema();renderer.ripple(x,y);drag=null;return;}
-    if(interferenceMode==='inspect'){inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));drag=null;return;}
+    if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&(renderer.pickWishResident(x,y)||tile.x===wish.x&&tile.y===wish.y))openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}drag=null;return;}
     if(sim.ending){showToast("Hun verhaal is klaar. Open het naschrift om vrij verder te spelen.");drag=null;return;}
     sim.interfere(tile.x,tile.y,interferenceMode);
-    const result=sim.lastIntervention;
-    renderer.addEffect({...result,priority:100});beatHoldUntil=0;accumulator=0;
-    $('intervention-result').hidden=sim.config.storyCards!==true;$('intervention-result').dataset.type=result.type;
-    $('intervention-title').textContent=nl(result.title);$('intervention-detail').textContent=nl(result.detail);
-    if(sim.config.storyCards!==true)showToast(result.title,2400);
-    clearTimeout(interventionTimer);interventionTimer=setTimeout(()=>$('intervention-result').hidden=true,3000);
-    renderer.ripple(x,y);dirtyHistory=true;updateUI();save();inspectTile(sim.tile(tile.x,tile.y));
+    showIntervention(x,y);
+    inspectTile(sim.tile(tile.x,tile.y));
   }
   drag=null;
 });

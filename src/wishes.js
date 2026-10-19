@@ -16,12 +16,27 @@ function closeWish(s,status){
  if(status!=='changed')s.log(`${wish.speaker}: “${wish.text}” ${status==='helped'?'Je hielp. Het vertrouwen groeit; ze rekenen iets meer op je.':status==='independent'?'De inwoners losten het zelf op. Dat geeft vertrouwen in eigen kunnen.':'Er kwam geen ingreep. Ze gaan op eigen kracht verder.'}`,'wish',{x:wish.x,y:wish.y,wishId:wish.id});
  state.history.push({...wish});state.history=state.history.slice(-24);state.active=null;state.nextAt=s.year+64+(s.seed+state.serial*17)%37;
 }
-function springWishPlot(s){
- if((s.influence.rumble+1)%3===0)return null;
- return s.land.find(t=>!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.spring&&
+function canOpenWishSpring(s,t){
+ return !!t&&(s.influence.rumble+1)%3!==0&&!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.spring&&
   [[1,0],[-1,0],[0,1],[0,-1]].every(([dx,dy])=>s.tile(t.x+dx,t.y+dy)?.kind==='land')&&
-  !s.land.some(p=>wishNear(p,t,2)&&(p.wetUntil>s.year))&&
-  !s.land.some(p=>p.landform&&wishNear(p,t,2.5)&&(p.landform==='volcano'||!p.landslideYear)));
+  !s.land.some(p=>wishNear(p,t,2)&&p.wetUntil>s.year)&&
+  !s.land.some(p=>p.landform&&wishNear(p,t,2.5)&&(p.landform==='volcano'||!p.landslideYear));
+}
+function springWishPlot(s){return s.land.find(t=>canOpenWishSpring(s,t));}
+export function canHelpWish(s,wish=ensureWishes(s).active){
+ if(!wish||s.ending||s.year>wish.deadline)return false;
+ const t=s.tile(wish.x,wish.y);if(t?.kind!=='land')return false;
+ if(wish.kind==='rain')return t.building==='farm';
+ if(wish.kind==='extinguish')return !!t.fire;
+ if(wish.kind==='feast')return t.building==='original-tree';
+ if(wish.kind==='bonfire')return !t.buildSite&&(['bonfire','campfire'].includes(t.building)||!t.building&&!t.reservedFor&&!t.landform);
+ return wish.kind==='spring'&&canOpenWishSpring(s,t);
+}
+export function helpActiveWish(s,expectedId){
+ const wish=ensureWishes(s).active;
+ if(!wish||wish.id!==expectedId||!canHelpWish(s,wish))return false;
+ s.interfere(wish.x,wish.y,{rain:'rain',extinguish:'rain',feast:'nudge',bonfire:'fire',spring:'rumble'}[wish.kind]);
+ return s.wishes.history.some(w=>w.id===expectedId&&w.status==='helped');
 }
 function wishCandidates(s){
  const choices=[],farm=s.farms.find(t=>!t.fire),tree=s.tile(0,0);
