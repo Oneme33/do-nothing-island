@@ -4,6 +4,8 @@ Een kleine beschaving. Absoluut geen verantwoordelijkheid.
 
 Een eiland groeit vanzelf: van één huisje en een kleine akker naar een stad met haar eigen gewoonten, plannen en geschiedenis. Je mag kijken. Je kunt ook ingrijpen — en ontdekken wat daarvan blijft hangen.
 
+De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per commit en testmoment uitgevoerd.
+
 ## Spelen
 
 Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het volledige spel; installatie en een server zijn niet nodig. De interface is Nederlands. De eerste keer verschijnen drie korte introschermen, waarna het eiland op **1×** begint.
@@ -14,7 +16,9 @@ Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het
 - **Beving:** beschadig bebouwing en verander, afhankelijk van de plek, het landschap.
 - **Vuur:** maak een vuurplaats of steek een gewone bebouwde plek in brand.
 
-De pauzeknop, snelheden **1× / 2× / 3× / 10×**, het logboek en de verhaalkaart staan op het eiland. Spatie pauzeert. Scroll of +/− zoomt; sleep om de rest van het eiland te verkennen. Open vensters zoals het logboek, de handleiding en instellingen pauzeren de wereld.
+De pauzeknop, snelheden **1× / 2× / 3× / 10×** en het logboek staan op het eiland. Automatische verhaalkaarten staan standaard uit; in instellingen kun je ze aanzetten. Gebeurtenissen blijven altijd in het logboek. Kaarten pauzeren of verplaatsen de camera niet automatisch. Iedere kaart heeft een sluitknop; ook intro, eindscène en naschrift zijn meteen met × of Escape te verbergen.
+
+Spatie pauzeert. Scroll of +/− zoomt; sleep om de rest van het eiland te verkennen. Open vensters zoals het logboek, de handleiding en instellingen pauzeren de wereld.
 
 De bewoners kunnen zonder wegen door het landschap lopen, ook naar het achterland en de zijkanten. Wegen ontstaan bij echte bouwplaatsen en gebouwen. Bos, strand en uitzichtpunten veroorzaken geen automatisch wegennet. Karren, fietsen en auto's gebruiken de aangelegde wegen.
 
@@ -50,7 +54,7 @@ Rond 2100 begint het laatste hoofdstuk; een gewoon eiland eindigt uiterlijk in 2
 - **De zee krijgt iets terug:** hogere grond, kleinere ambities en een veilige kust.
 - **De laatste druppel:** een zeldzame poging om de oceaan volledig op te heffen. Hiervoor zijn de maximale wereldruimte, toekomstige techniek en een ongewone ambitie nodig. Pas bij minstens 94,5% werkelijk droog land is het project geslaagd.
 
-Elke uitkomst heeft een eigen geanimeerd eindscherm. De scène duurt 24 seconden, kan gepauzeerd en opnieuw afgespeeld worden en biedt na acht seconden een knop naar het naschrift. Het voorzichtige koninkrijk viert herstel met versterkte huizen, bewoners en slingers; er is geen paraplu.
+Elke uitkomst heeft een eigen geanimeerd eindscherm. De scène duurt 24 seconden, kan gepauzeerd en opnieuw afgespeeld worden en biedt na acht seconden een knop naar het naschrift. Je kunt het scherm ook direct sluiten zonder een nieuw venster opgedrongen te krijgen. Het echte eiland krijgt geen extra eindscène-versieringen zoals kronen, paraplu's of zwevende monumenten.
 
 Het naschrift toont kaarten, oorzaken en een **eilandscore van 0–100**, het gemiddelde van vijf onderdelen: leefbaarheid, natuur, zelfstandigheid, veerkracht en cultuur. De scores volgen de werkelijke toestand en geschiedenis. Ze blijven samen met het oorspronkelijke naschrift bewaard wanneer je vrij verder speelt. Er is meer dan één manier om een geslaagd eiland te maken.
 

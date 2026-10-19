@@ -13,7 +13,7 @@ async function appHarness(initial,{firstVisit=false}={}){
   querySelector(){return new Element();}matches(){return false;}close(){const wasOpen=this.open;this.open=false;if(wasOpen)this.handlers.close?.();}showModal(){this.open=true;}
   getBoundingClientRect(){return{width:1200,height:575,left:0,top:0};}
  }
- for(const match of html.split('<script>')[0].matchAll(/id="([^"]+)"/g)){const element=new Element();element.id=match[1];elements.set(match[1],element);}
+ for(const match of html.split('<script>')[0].matchAll(/<[^>]*\bid="([^"]+)"[^>]*>/g)){const element=new Element();element.id=match[1];element.hidden=/\shidden(?:\s|>)/.test(match[0]);elements.set(match[1],element);}
  const speeds=[1,2,3,10].map(value=>{const e=new Element();e.dataset.speed=String(value);return e;});
  const modes=['inspect','nudge','rain','rumble','fire'].map(value=>{const e=new Element();e.dataset.interference=value;return e;});
  const dialogs=[...elements].filter(([id])=>id.endsWith('-dialog')).map(([,e])=>e),live=new Element();
@@ -38,7 +38,7 @@ test('Observe lets a player inspect without interference; deliberately choosing 
  const tap=()=>{c.handlers.pointerdown({button:0,clientX:600,clientY:300,pointerId:1});c.handlers.pointerup({clientX:600,clientY:300,pointerId:1});};
  tap();assert.equal(a.saved().interferences,0);
  a.modes.find(b=>b.dataset.interference==='inspect').handlers.click();e.get('find-palace').handlers.click();assert.match(e.get('tile-inspector').textContent,/allereerste huis/);assert.match(e.get('tile-inspector').textContent,/familie/);
- a.modes.find(b=>b.dataset.interference==='rain').handlers.click();tap();assert.equal(a.saved().interferences,1);assert.equal(a.saved().influence.rain,1);assert.equal(e.get('intervention-result').hidden,false);
+ a.modes.find(b=>b.dataset.interference==='rain').handlers.click();tap();assert.equal(a.saved().interferences,1);assert.equal(a.saved().influence.rain,1);assert.equal(e.get('intervention-result').hidden,true);assert.ok(e.get('toast-text').textContent);
  e.get('history-layer').handlers.change({target:{checked:true}});assert.equal(e.get('history-snapshot').hidden,false);assert.equal(e.get('history-legend').hidden,false);
  assert.ok(e.get('history-snapshot').children.length>0);
 });
@@ -82,4 +82,22 @@ test('a saved ending resumes its scene, while a completed recap stays completed 
  const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));
  assert.equal(b.elements.get('cinema-caption').hidden,true);assert.equal(b.elements.get('ending-dialog').open,false);
  b.elements.get('open-ending').handlers.click();assert.equal(b.elements.get('ending-dialog').open,true);
+});
+test('story cards are off by default and milestones do not interrupt watching',async()=>{
+ const sim=new Civilization(31);sim.year=119;sim.technology=100;const a=await appHarness(sim),e=a.elements;
+ assert.equal(e.get('story-cards').checked,false);a.advance(3);assert.ok(e.get('year').textContent>121);
+ assert.equal(e.get('moment-card').hidden,true);assert.equal(e.get('tile-inspector').hidden,true);
+});
+test('opted-in cards have an immediate close button and never automatically pause or select a place',async()=>{
+ const sim=new Civilization(31);sim.year=119;sim.technology=100;sim.config.storyCards=true;const a=await appHarness(sim),e=a.elements;
+ a.advance(3);assert.equal(e.get('moment-card').hidden,false);assert.ok(e.get('year').textContent>121);assert.equal(e.get('tile-inspector').hidden,true);
+ e.get('moment-close').handlers.click();assert.equal(e.get('moment-card').hidden,true);a.advance(1);assert.equal(e.get('moment-card').hidden,true);
+ e.get('story-cards').handlers.change({target:{checked:false}});assert.equal(a.saved().config.storyCards,false);
+});
+test('the intro and ending windows can be dismissed immediately without a replacement popup',async()=>{
+ const intro=await appHarness(new Civilization(31),{firstVisit:true});intro.elements.get('intro-close').handlers.click();assert.equal(intro.elements.get('intro-dialog').open,false);intro.advance(2);assert.ok(intro.elements.get('year').textContent>1);
+ const sim=new Civilization(31);while(!sim.ending)sim.tick();const a=await appHarness(sim),e=a.elements;
+ assert.equal(e.get('cinema-dialog').open,true);e.get('cinema-close').handlers.click();assert.equal(e.get('cinema-dialog').open,false);assert.equal(e.get('ending-dialog').open,false);
+ a.advance(25);assert.equal(e.get('cinema-dialog').open,false);assert.equal(e.get('ending-dialog').open,false);
+ e.get('open-ending').handlers.click();assert.equal(e.get('ending-dialog').open,true);e.get('ending-close').handlers.click();a.advance(1);assert.equal(e.get('ending-dialog').open,false);
 });

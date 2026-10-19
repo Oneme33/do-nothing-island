@@ -43,6 +43,9 @@
 .cinema-dialog{width:min(860px,calc(100% - 24px));max-width:860px;text-align:center;padding:26px;max-height:95vh}.cinema-dialog::backdrop{background:#354e41aa;backdrop-filter:blur(6px)}#finale-canvas{display:block;width:100%;height:clamp(210px,40vh,370px);border-radius:9px;margin:18px 0;background:#dfece0}.cinema-dialog .cinema-caption{position:static;width:100%;pointer-events:auto;transform:none;color:#536648}.cinema-dialog .cinema-caption strong{font-size:27px}.cinema-dialog progress{display:block;width:100%;height:5px;margin:18px 0 10px;accent-color:#87986b}.cinema-dialog>.eyebrow{font-size:9px}.cinema-dialog .dialog-note{margin-bottom:0}
 .island-scores{padding:20px;background:#eef0df;border:1px solid #d8dec5;border-radius:8px;margin:20px 0}.island-scores>#ending-score{display:block;font-family:var(--serif);font-size:38px;font-weight:400;margin:8px}.score-row{display:grid;grid-template-columns:115px 1fr 30px;align-items:center;gap:12px;text-align:left;margin:11px 0;font-size:11px;text-transform:capitalize}.score-row progress{width:100%;height:7px;accent-color:#8d9f6c}.score-row strong{text-align:right;font-weight:500}.island-scores>p{font-size:10px;line-height:1.7;color:#839071;margin-bottom:0}
 @media(max-width:600px){.island-toolbar{gap:5px;padding:5px 7px;bottom:10px}.island-toolbar .time-controls{gap:4px;padding:0}.island-toolbar .speed-buttons button{min-width:30px;height:29px}.island-toolbar>button{font-size:9px;padding:7px}.island-window>.story-moment{bottom:66px;flex-direction:row;align-items:center;padding:9px 10px;gap:7px}.island-window .moment-actions{flex-direction:column;min-width:63px}.island-window .story-moment strong{font-size:15px}.island-window .story-moment p{font-size:9px;max-height:42px}.map-controls{bottom:183px;right:12px}.instruction{bottom:83px}.tile-inspector{top:58px;bottom:auto;right:12px;font-size:9px;width:260px;max-height:250px;max-width:calc(100% - 24px)}#inspector-close{top:62px;right:16px}.intervention-result{bottom:185px;max-width:90%}.project-overlay{bottom:190px;left:12px;width:158px;padding:10px}.cinema-dialog{padding:18px 14px}.cinema-dialog .cinema-caption strong{font-size:21px}#finale-canvas{height:235px}.intro-dialog{padding:26px 22px}.intro-dialog h2{font-size:29px}.score-row{grid-template-columns:95px 1fr 25px;gap:7px;font-size:10px}}
+
+/* Notifications are optional and every visible card can be dismissed. */
+.card-close{position:absolute;top:4px;right:5px;z-index:2;display:grid;place-items:center;min-width:30px;min-height:30px;font-size:20px;color:#647653;pointer-events:auto;border-radius:4px}.card-close:hover{background:#e6ebd8}.island-window>.story-moment{padding-right:37px}.intervention-result{pointer-events:auto;padding-right:34px;max-width:min(360px,90%)}.intervention-result p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.toast{padding:10px 35px 10px 13px;max-width:min(400px,85%);font-size:10px;line-height:1.5}.toast button{pointer-events:auto;position:absolute;top:2px;right:2px;min-width:30px;min-height:30px;font-size:19px;display:grid;place-items:center}.dialog-close{position:sticky;top:0;float:right;right:auto;z-index:10;display:grid;place-items:center;min-width:36px;min-height:36px;background:#f7f7eff5;border:1px solid #d4dcc7;border-radius:50%;margin:-12px -10px 0 8px;line-height:1;font-size:26px}.intro-dialog .dialog-close,.cinema-dialog .dialog-close{margin:-10px -6px 0 8px}
 </style>
 </head>
 <body>
@@ -83,10 +86,10 @@
       <div class="island-toolbar"><div class="time-controls"><button id="pause" aria-label="Pauzeer het eiland" title="Pauze (spatie)"><svg id="pause-icon" viewBox="0 0 20 20"><path d="M6 4v12M14 4v12"/></svg></button><div class="speed-buttons" role="group" aria-label="Snelheid van het eiland"><button class="active" data-speed="1" aria-pressed="true">1×</button><button data-speed="2" aria-pressed="false">2×</button><button data-speed="3" aria-pressed="false">3×</button><button data-speed="10" aria-pressed="false">10×</button></div><span class="time-caption" id="time-caption">GEEN BIJZONDERE HAAST</span></div><button id="canvas-journal" title="Open het logboek">Logboek ↗</button></div>
     <aside class="story-moment" id="moment-card" aria-live="polite" hidden>
       <div><span class="eyebrow" id="moment-year">EILANDGESCHIEDENIS</span><strong id="moment-title">Een beetje geschiedenis</strong><p id="moment-text"></p></div>
-      <div class="moment-actions"><button id="moment-focus">Laat zien ↗</button><button id="moment-continue">Verder →</button></div>
+      <button id="moment-close" class="card-close" aria-label="Verberg verhaalkaart">×</button><div class="moment-actions"><button id="moment-focus">Laat zien ↗</button><button id="moment-continue">Sluiten</button></div>
     </aside>
-      <div class="toast" id="toast" role="status"></div>
-      <div class="intervention-result" id="intervention-result" role="status" aria-live="polite" hidden><span class="eyebrow">JOUW INGREEP</span><strong id="intervention-title"></strong><p id="intervention-detail"></p></div>
+      <div class="toast" id="toast" role="status"><span id="toast-text"></span><button id="toast-close" aria-label="Verberg melding">×</button></div>
+      <div class="intervention-result" id="intervention-result" role="status" aria-live="polite" hidden><button id="intervention-close" class="card-close" aria-label="Verberg je ingreep">×</button><span class="eyebrow">JOUW INGREEP</span><strong id="intervention-title"></strong><p id="intervention-detail"></p></div>
       <div class="instruction" id="instruction"><span>✳</span> Probeer niets aan te raken.<small>Klik / tik op het eiland. Ze merken het.</small></div>
 
       <div class="project-overlay" id="project-overlay" hidden><div><span class="status-dot"></span><b id="project-name">Een beetje meer ruimte</b><span id="project-percent">0%</span></div><p id="project-stage">De kust plannen</p><div class="progress-track"><i id="project-progress"></i></div></div>
@@ -110,15 +113,15 @@
   </main>
   <footer><span>Kleine levens. Grote plannen. Twijfelachtige beslissingen.</span><span>Gemaakt om naar te kijken <span class="footer-flower">✳</span></span></footer>
 
-  <dialog id="intro-dialog" class="intro-dialog" aria-labelledby="intro-title"><span class="eyebrow">DO NOTHING ISLAND</span><div class="intro-island" aria-hidden="true">♧</div><span id="intro-step">1 / 3</span><h2 id="intro-title">Dit is jouw eiland.</h2><p id="intro-line"></p><div class="intro-buttons"><button id="intro-back" class="secondary-button" hidden>Terug</button><button id="intro-next" class="primary-button">Verder →</button></div></dialog>
-  <dialog id="cinema-dialog" class="cinema-dialog" aria-labelledby="cinema-title"><span class="eyebrow">HUN GROTE FINALE</span><canvas id="finale-canvas" width="800" height="380" aria-label="Geanimeerde finale van het eiland"></canvas>      <div class="cinema-caption" id="cinema-caption" aria-live="polite" hidden><span class="eyebrow">HET LAATSTE GROTE IDEE</span><strong id="cinema-title"></strong><p id="cinema-line"></p><div><button id="cinema-cheer">Vier mee met de bewoners</button><button id="cinema-skip" hidden>Naar het naschrift →</button></div></div><progress id="cinema-progress" max="100" value="0" aria-label="Voortgang van de eindscène"></progress><button id="cinema-pause" class="secondary-button">Pauze</button><p class="dialog-note">Na de scène zie je de eilandscore en wat zij achterlaten.</p></dialog>
+  <dialog id="intro-dialog" class="intro-dialog" aria-labelledby="intro-title"><button id="intro-close" class="dialog-close" aria-label="Intro overslaan en eiland bekijken">×</button><span class="eyebrow">DO NOTHING ISLAND</span><div class="intro-island" aria-hidden="true">♧</div><span id="intro-step">1 / 3</span><h2 id="intro-title">Dit is jouw eiland.</h2><p id="intro-line"></p><div class="intro-buttons"><button id="intro-back" class="secondary-button" hidden>Terug</button><button id="intro-next" class="primary-button">Verder →</button></div></dialog>
+  <dialog id="cinema-dialog" class="cinema-dialog" aria-labelledby="cinema-title"><button id="cinema-close" class="dialog-close" aria-label="Sluit de eindscène">×</button><span class="eyebrow">HUN GROTE FINALE</span><canvas id="finale-canvas" width="800" height="380" aria-label="Geanimeerde finale van het eiland"></canvas>      <div class="cinema-caption" id="cinema-caption" aria-live="polite" hidden><span class="eyebrow">HET LAATSTE GROTE IDEE</span><strong id="cinema-title"></strong><p id="cinema-line"></p><div><button id="cinema-cheer">Vier mee met de bewoners</button><button id="cinema-skip" hidden>Naar het naschrift →</button></div></div><progress id="cinema-progress" max="100" value="0" aria-label="Voortgang van de eindscène"></progress><button id="cinema-pause" class="secondary-button">Pauze</button><p class="dialog-note">Na de scène zie je de eilandscore en wat zij achterlaten.</p></dialog>
   <dialog id="guide-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN KLEINE HANDLEIDING</span><h2>Welkom bij het nietsdoen.</h2><p>Eén huisje, een kleine akker en zes mensen. De beschaving groeit vanzelf. Jij kiest of je toekijkt of ingrijpt.</p><div class="guide-steps"><div><span>01</span><p><strong>Neem de tijd.</strong> Het eiland begint op 1×. Met de balk op het eiland kies je de snelheid of pauzeer je. Een open logboek, handleiding of instellingenvenster zet het leven even stil.</p></div><div><span>02</span><p><strong>Alles laat sporen achter.</strong> Bouw helpt de bewoners. Regen voedt de akkers. Vuur en bevingen kunnen blijvende veranderingen veroorzaken. Probeer dingen uit en kijk wat de bewoners ermee doen.</p></div><div><span>03</span><p><strong>Kijk van dichtbij.</strong> Kies Kijk en klik op een plek voor bewoners, bouwjaar en herinneringen. Versleep de kaart of zoom om de rest te zien. Rond 2100 begint het laatste hoofdstuk, met een eigen eindscène en eilandscore.</p></div></div><p class="dialog-note">Spatie: pauze · Scroll of +/−: zoom · Slepen: verkennen<br>Je eiland wordt automatisch in deze browser bewaard.</p><button class="primary-button" data-close>Ik laat ze even hun gang gaan ↗</button></dialog>
 
   <dialog id="journal-dialog" class="journal-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">HET EILANDARCHIEF</span><h2>Behoorlijk veel niets.</h2><p>Elke grote beschaving begint met een boom en wat twijfelachtige beslissingen.</p><div id="journal-entries"></div></dialog>
 
-  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320">Een ruim eiland · 320</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Een rustig begin, daarna steeds sneller.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
+  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320">Een ruim eiland · 320</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Een rustig begin, daarna steeds sneller.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
 
-  <dialog id="ending-dialog" class="ending-dialog"><span class="eyebrow">HET EILAND HEEFT EEN VERHAAL</span><div class="ending-symbol">◉</div><h2 id="ending-title">De erfenis van het eiland.</h2><p class="ending-quote" id="ending-quote"></p><p id="ending-description"></p><div class="ending-shortage"><span>WAT ZE ACHTERLATEN</span><strong id="ending-consequence"></strong><p id="ending-detail"></p></div><section class="island-scores" aria-label="Eilandscores"><span class="eyebrow">HUN EILANDSCORE</span><strong id="ending-score"></strong><div id="score-breakdown"></div><p>Het gemiddelde van vijf kanten van hun beschaving. Er is meer dan één manier om het goed te doen.</p></section><p id="ending-stats"></p><div class="ending-maps"><figure><svg id="ending-before" viewBox="0 0 250 250" role="img" aria-label="Het oorspronkelijke eiland"></svg><figcaption>Het begin</figcaption></figure><figure><svg id="ending-after" viewBox="0 0 250 250" role="img" aria-label="Het uiteindelijke eiland"></svg><figcaption>Het eiland dat zij maakten</figcaption></figure></div><p id="ending-causes"></p><div id="ending-chronicle"></div><button id="ending-continue" class="primary-button">Bekijk het uiteindelijke eiland ↗</button><button id="ending-replay" class="secondary-button">Speel de eindscène opnieuw ↻</button><button id="ending-sandbox" class="secondary-button">Speel vrij verder →</button><button id="ending-new" class="secondary-button">Begin een nieuw eiland ↻</button></dialog>
+  <dialog id="ending-dialog" class="ending-dialog"><button id="ending-close" class="dialog-close" aria-label="Sluit het naschrift">×</button><span class="eyebrow">HET EILAND HEEFT EEN VERHAAL</span><div class="ending-symbol">◉</div><h2 id="ending-title">De erfenis van het eiland.</h2><p class="ending-quote" id="ending-quote"></p><p id="ending-description"></p><div class="ending-shortage"><span>WAT ZE ACHTERLATEN</span><strong id="ending-consequence"></strong><p id="ending-detail"></p></div><section class="island-scores" aria-label="Eilandscores"><span class="eyebrow">HUN EILANDSCORE</span><strong id="ending-score"></strong><div id="score-breakdown"></div><p>Het gemiddelde van vijf kanten van hun beschaving. Er is meer dan één manier om het goed te doen.</p></section><p id="ending-stats"></p><div class="ending-maps"><figure><svg id="ending-before" viewBox="0 0 250 250" role="img" aria-label="Het oorspronkelijke eiland"></svg><figcaption>Het begin</figcaption></figure><figure><svg id="ending-after" viewBox="0 0 250 250" role="img" aria-label="Het uiteindelijke eiland"></svg><figcaption>Het eiland dat zij maakten</figcaption></figure></div><p id="ending-causes"></p><div id="ending-chronicle"></div><button id="ending-continue" class="primary-button">Bekijk het uiteindelijke eiland ↗</button><button id="ending-replay" class="secondary-button">Speel de eindscène opnieuw ↻</button><button id="ending-sandbox" class="secondary-button">Speel vrij verder →</button><button id="ending-new" class="secondary-button">Begin een nieuw eiland ↻</button></dialog>
   <script>(()=>{
 // Dutch presentation also translates narrative text in older saved islands.
 const dutchText={
@@ -743,7 +746,6 @@ function drawFinale(c,w,h,s,m,reduced=false){
  if(id==='independent')for(let i=0;i<4;i++){const x=(i-1.5)*100,y=-100-Math.sin(t+i)*5;line(x,y+20,x*.8,20,'#a48c64');ellipse(x,y,24,32,['#c58b70','#d4b966','#8da99b','#c3bd83'][i]);}
  if(id==='fortress'){for(let i=0;i<5;i++){const x=(i-2)*66;rect(x-20,3,40,5,'#a7a48c');}line(-170,-78,170,-78,'#a08d66',1);for(let i=0;i<11;i++){const x=-165+i*32;poly([[x,-78],[x+17,-78],[x+8,-64]],i%2?'#b78d64':'#d1b66b');}}
  if(id==='miracles'){rect(-12,-122,24,62,'#c5a461');ellipse(0,-132,22,22,'#ddc583');for(let i=0;i<8;i++){const a=t*.2+i*Math.PI/4;line(Math.cos(a)*32,-132+Math.sin(a)*32,Math.cos(a)*42,-132+Math.sin(a)*42,'#c8ab64',3);}}
- if(id==='phoenix'){const y=-110-Math.sin(t*2)*8,flap=Math.sin(t*3)*17;poly([[0,y-18],[-20,y+5],[-68,y-18-flap],[-34,y+24],[0,y+11],[34,y+24],[68,y-18-flap],[20,y+5]],'#cd9852');ellipse(1,y-8,6,8,'#d9b76c');}
  for(let i=0;i<9;i++)person((i-4)*23,39+Math.sin(i)*6,i);
  if(id==='last-drop'){line(170,-112,170,-49,'#a1a68d',14);line(170,-112,218,-112,'#a1a68d',14);line(218,-112,218,-88,'#a1a68d',14);ellipse(218,-24,18,5,'#bcb18f');if(t<18)ellipse(218,-78+((t*.6)%1)*48,3,5,'#82b6af');else{line(204,-61,231,-49,'#aa775b',2);line(231,-61,204,-49,'#aa775b',2);}}
  c.restore();
@@ -2109,8 +2111,6 @@ class Civilization {
   }
 }
 
-const pageant01=n=>Math.max(0,Math.min(1,n));
-function cinemaLift(s){const m=s.cinematic;return m?.id==='independent'&&cinemaVisible(s)?125*pageant01((m.elapsed-10)/10):0;}
 function drawFlames(r,x,y,size=1){
  const clock=r.reduced?0:r.activityTime;
  r.ellipse(x,y+2,13*size,5*size,'#e5ae4b55');
@@ -2173,65 +2173,6 @@ function drawComicBubbles(r){
   c.fillStyle='#6f7654';c.textAlign='center';rows.forEach((text,i)=>c.fillText(text,x,y+18+i*16));c.restore();
  }
 }
-function drawCinemaBack(r){
- const m=r.sim.cinematic;if(!m||!cinemaVisible(r.sim))return;
- const t=m.elapsed,p=r.groundOrigin||r.origin;
- if(m.id==='independent'){
-  const lift=pageant01((t-10)/10);r.ellipse(p.x,p.y+65,Math.min(390,r.width*.35)*(1-lift*.15),90*(1-lift*.2),`rgba(85,114,89,${.08+lift*.12})`);
- }else if(m.id==='last-drop'){
-  const dry=pageant01((t-5)/12),c=r.ctx;c.save();c.globalAlpha=dry*.85;r.rect(0,0,r.width,r.height,'#ded3af');
-  for(let i=0;i<42;i++){const x=(i*137.7)%r.width,y=(i*79.3)%r.height;r.line([[x-22,y-9],[x,y],[x+14,y-6],[x+30,y+4]],'#bfb28d',.8);r.line([[x,y],[x-5,y+19]],'#bfb28d',.8);}c.restore();
- }else if(m.id==='retreat'){
-  const surge=Math.sin(pageant01((t-6)/15)*Math.PI);r.ellipse(r.width*.5,r.height*.64,r.width*.45,55+surge*35,'#b2d2c577');
- }
-}
-function drawCinemaWorld(r){
- const m=r.sim.cinematic;if(!m||!cinemaVisible(r.sim))return;
- const t=r.reduced?Math.floor(m.elapsed/6)*6:m.elapsed,grow=pageant01((t-4)/7),p=r.p(2,-2),c=r.ctx;
- if(m.id==='independent'){
-  for(const [i,[x,y]]of [[-6,-1],[0,-6],[5,0],[0,5]].entries()){
-   const q=r.p(x,y);r.enqueueActor(q.y+2,()=>{const top=q.y-70-35*grow;r.line([[q.x-10,q.y],[q.x-12,top+15]],'#a99771',1.2);r.line([[q.x+10,q.y],[q.x+12,top+15]],'#a99771',1.2);r.ellipse(q.x,top,21*grow+3,29*grow+3,['#c4876b','#d4bb79','#8fa99c','#b7b385'][i]);r.line([[q.x,top-26*grow],[q.x,top+25*grow]],'#eee0b455',2);r.rect(q.x-7,top+29*grow,14,7,'#ad9470');});
-  }
- }else if(['miracles','fortress','last-drop'].includes(m.id)){
-  r.enqueueActor(p.y+3,()=>{c.save();c.translate(p.x,p.y);c.scale(Math.max(.08,grow),Math.max(.08,grow));
-   r.diamond(0,0,40,20,'#c8bd92');r.poly([[-25,0],[0,12],[25,0],[25,-12],[0,-24],[-25,-12]],'#cbb88b');
-   if(m.id==='miracles'){
-    r.poly([[-27,-126],[-27,-38],[-7,-57],[9,-22],[25,-30],[9,-66],[35,-66]],'#b28d4c','#8e774c',2);
-    r.poly([[-22,-119],[-22,-49],[-5,-66],[12,-30],[18,-34],[1,-72],[24,-72]],'#ecd187');
-    for(let i=0;i<7;i++){const a=i*Math.PI*2/7+t*.1;r.line([[Math.cos(a)*55,-84+Math.sin(a)*44],[Math.cos(a)*65,-84+Math.sin(a)*54]],'#d6b769',2);}
-   }else if(m.id==='fortress'){
-    for(let i=0;i<5;i++){const x=(i-2)*22;r.line([[x,-2],[x,-48]],'#a68b5c',2);r.poly([[x,-48],[x+15,-44],[x,-36]],i%2?'#a9bb9a':'#d5b57e');}
-    r.line([[-55,-50],[55,-50]],'#aa9974',1);
-   }else{
-    r.line([[-40,0],[-40,-100],[4,-100],[4,-74],[30,-74],[30,-57]],'#9b9e86',20);
-    r.line([[-42,-1],[-42,-98],[2,-98],[2,-75],[30,-75]],'#d2c6a2',9);
-    r.ellipse(-20,-110,18,5,'#9b8d68');r.line([[-20,-118],[-20,-103]],'#a38d62',3);r.line([[-37,-110],[-3,-110]],'#a38d62',3);
-    r.ellipse(30,-4,21,7,'#b4ac88');r.ellipse(30,-6,16,4,'#a9bba5');
-    if(t<19){const fall=((t-10)*.6)%1;if(t>=10&&fall>=0){const y=-48+fall*37;r.poly([[30,y-5],[26,y+2],[30,y+5],[34,y+2]],'#8eb6ad');}}
-   }
-   c.restore();});
- }else if(m.id==='phoenix'){
-  for(let i=0;i<5;i++){const q=r.p(i-2,2-i%2);r.enqueueActor(q.y+5,()=>{c.save();c.translate(q.x,q.y);c.scale(.7,.7);r.archStyle='classical';r.house(i*.2,1);r.line([[10,2],[10,-44]],'#b49760',2);r.poly([[10,-44],[24,-40],[10,-33]],'#d7a34f');c.restore();});}
-  const q=r.p(0,-2);r.enqueueActor(q.y,()=>{r.poly([[q.x,q.y-100],[q.x-25,q.y-53],[q.x-78,q.y-78],[q.x-36,q.y-24],[q.x,q.y-36],[q.x+36,q.y-24],[q.x+78,q.y-78],[q.x+25,q.y-53]],'#cc9a50');drawFlames(r,q.x,q.y-12,.7);});
- }else if(m.id==='sanctuary'){
-  const root=r.p(0,0);r.enqueueActor(root.y-2,()=>{c.save();c.translate(root.x,root.y);c.scale(1+grow*1.65,1+grow*.9);r.tree(true,.5);c.restore();});
- }else if(m.id==='retreat'){
-  for(let i=0;i<6;i++){const x=-175+i*65+(t-10)*1.6,y=135+Math.sin(i*2+t)*3;r.enqueueActor(y,()=>{c.save();c.translate(x,y);r.smallBoat(true);r.poly([[-8,-8],[0,-18],[10,-9]],'#b88366');r.rect(-6,-9,14,8,'#d8cbab');c.restore();});}
- }
- if(t>2){const root=r.p(0,2);for(let i=0;i<12;i++){const x=root.x+(i%6-2.5)*9,y=root.y+14+Math.floor(i/6)*8;r.enqueueActor(y,()=>{r.person(x,y,['#c8ac72','#88a28d','#b48667'][i%3],i);if(i%3===0){r.line([[x+3,y-3],[x+3,y-25]],'#9b8e68',1);r.poly([[x+3,y-25],[x+17,y-22],[x+3,y-16]],'#d4b469');}});}}
-}
-function drawCinemaOverlay(r){
- const m=r.sim.cinematic;if(!m||!cinemaVisible(r.sim))return;const t=m.elapsed,c=r.ctx;
- if(t>11&&m.id!=='retreat'&&m.id!=='last-drop'){
-  for(let i=0;i<7;i++){
-   const phase=((t-11)*.5+i*.31)%1,boom=pageant01((phase-.18)/.72);if(phase<.18)continue;
-   const x=r.width*(.15+(i*.137)% .72),y=r.height*(.14+(i*.073)% .24);
-   for(let j=0;j<9;j++){const a=j*Math.PI*2/9+i,len=12+boom*38;c.save();c.globalAlpha=1-boom;r.line([[x+Math.cos(a)*len,y+Math.sin(a)*len],[x+Math.cos(a)*(len+5),y+Math.sin(a)*(len+5)]],['#bf8d60','#d7b96a','#82a99c'][i%3],1.8);c.restore();}
-  }
- }
- if(m.id==='sanctuary'&&t>10)for(let i=0;i<30;i++){const x=((i*83.7+t*11)%r.width),y=((i*47+t*18)%r.height);r.ellipse(x,y,2.5,1.2,i%2?'#d8bd95':'#b9c993');}
- if(m.cheers>0&&t>5){const q=r.point(0,1);for(let i=0;i<Math.min(24,m.cheers*4);i++){const a=i*2.4+t;r.ellipse(q.x+Math.cos(a)*55,q.y-20+Math.sin(a)*25,2,2,['#d5ad66','#9aaf80','#c38d72'][i%3]);}}
-}
 
 const aroundLand=(s,t)=>neighbors(t).every(([x,y])=>s.tile(x,y)?.kind==='land');
 const TAU=Math.PI*2;
@@ -2250,7 +2191,7 @@ class IslandRenderer {
     this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.ripples=[];this.hover=null;this.particles=[];
     this.effects=[];this.activityTime=0;this.wheelTime=0;this.activityRate=1;this.paused=false;this.mode='nudge';
-    this.sceneLift=0;this.lastFrame=0;this.fitZoom=1;this.focus=null;this.showHistory=false;this.historySnapshot=null;this.showDistricts=true;
+    this.lastFrame=0;this.fitZoom=1;this.focus=null;this.showHistory=false;this.historySnapshot=null;this.showDistricts=true;
     this.resizeObserver=new ResizeObserver(()=>this.resize());
     this.resizeObserver.observe(canvas);
     this.resize();
@@ -2337,10 +2278,7 @@ class IslandRenderer {
     this.center.y=mix(this.center.y,focusPoint?focusPoint.y-24:(minY+maxY)/2+15,Math.min(1,dt*.9));
     const quake=this.reduced?0:this.effects.filter(e=>e.type==='rumble'&&e.elapsed<1).reduce((s,e)=>s+Math.sin(e.elapsed*55)*(1-e.elapsed)*3,0);
     this.origin={x:this.width*(mobile?.54:.55)-this.center.x*this.zoom+this.pan.x+quake,y:this.height*(cinemaVisible(this.sim)?.62:mobile?.54:.52)-this.center.y*this.zoom+this.pan.y};
-    this.groundOrigin={...this.origin};
-    this.sceneLift=mix(this.sceneLift,cinemaLift(this.sim),Math.min(1,dt*3));
-    this.origin.y-=this.sceneLift;
-    this.drawWater();drawCinemaBack(this);
+    this.drawWater();
     c.save();c.translate(this.origin.x,this.origin.y);c.scale(this.zoom,this.zoom);
     // Shore water is derived from current geography, so the coast follows every project.
     const tiles=[...this.sim.tiles.values()];
@@ -2364,7 +2302,7 @@ class IslandRenderer {
       if(t.landform||t.building||t.buildSite)this.scene.push({depth,draw:()=>{if(t.landform)this.drawLandform(t);if(t.building)this.drawBuilding(t);if(t.buildSite)this.drawBuildingSite(t);}});
     }
     this.drawWorkers();
-    this.drawVisitors();drawLifeWorld(this);drawCinemaWorld(this);
+    this.drawVisitors();drawLifeWorld(this);
     this.scene.sort((a,b)=>a.depth-b.depth);
     for(const item of this.scene)item.draw();
     this.scene=null;
@@ -2382,7 +2320,7 @@ class IslandRenderer {
     this.drawEffectLabels();
     this.drawDistrictLabels();
     if(!cinemaVisible(this.sim))this.drawLandmarkLabels();
-    drawComicBubbles(this);drawCinemaOverlay(this);
+    drawComicBubbles(this);
   }
   enqueueActor(depth,draw){if(this.scene)this.scene.push({depth,draw});else draw();}
   streetPoint(tile){const p=this.p(tile.x,tile.y);return{x:p.x,y:p.y+11.5};}
@@ -3278,8 +3216,10 @@ $('reduce-motion').checked=reducedPref;
 $('expansion-limit').value=String(sim.config.maxTiles);
 $('rare-endings').checked=sim.config.rareEndings;
 $('accelerating').checked=sim.config.accelerating;
+$('story-cards').checked=sim.config.storyCards===true;
 
-function showToast(message){$('toast').textContent=nl(message);$('toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),4200);}
+function showToast(message,duration=4200){$('toast-text').textContent=nl(message);$('toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),duration);}
+function dismissStory(){beatHoldUntil=0;momentQueue=[];activeMoment=null;momentAt=performance.now();$('moment-card').hidden=true;updateClock();}
 function save(){
   try {localStorage.setItem(storageKey,sim.serialize());storageAvailable=true;$('save-status').textContent="Je eiland is op dit apparaat opgeslagen.";}
   catch {storageAvailable=false;$('save-status').textContent="Opslaan lukt hier niet. Je kunt dit bezoek wel gewoon verder spelen.";}
@@ -3380,18 +3320,18 @@ function momentTarget(entry){
 }
 function focusPlace(tile){if(!tile)return;renderer.focusTile(tile);inspectTile(tile);}
 function queueMoments(entries){
+  if(sim.config.storyCards!==true)return;
   for(const entry of entries){if((entry.priority||eventPriority(entry.type))<76||seenMoments.has(entry.id))continue;seenMoments.add(entry.id);momentQueue.push(entry);}
   momentQueue.sort((a,b)=>(b.priority||eventPriority(b.type))-(a.priority||eventPriority(a.type))||a.year-b.year);
   if(momentQueue.length>40)momentQueue.length=40;
 }
 function presentMoment(now){
-  if(!momentQueue.length||now-momentAt<8500||sim.ending||cinemaActive()||otherDialogOpen())return;
+  if(sim.config.storyCards!==true||!momentQueue.length||now-momentAt<8500||sim.ending||cinemaActive()||otherDialogOpen())return;
   activeMoment=momentQueue.shift();momentAt=now;
   const priority=activeMoment.priority||eventPriority(activeMoment.type);
   $('moment-card').hidden=false;$('moment-year').textContent=`JAAR ${activeMoment.year} · ${priority>=90?"EEN KEERPUNT":"EILANDGESCHIEDENIS"}`;
   $('moment-title').textContent=({palace:"Het eerste huis heeft toekomst",age:nl(sim.age.name),endgame:"Het laatste hoofdstuk van het eiland",flood:"De waterkant heeft hulp nodig",reform:"Een discussie wordt een plek",legacy:"Ze herinneren zich jouw bezoek",technology:"Een nieuwe manier van leven",interference:"Jouw hand in hun geschiedenis",crisis:"Een waarschuwing van de zee"})[activeMoment.type]||"Een beetje geschiedenis";
   $('moment-text').textContent=nl(activeMoment.text);
-  if(priority>=92){beatHoldUntil=now+5500;accumulator=0;focusPlace(momentTarget(activeMoment));}
   updateClock();
 }
 function updateSnapshotOptions(){
@@ -3427,6 +3367,16 @@ function updateCinemaUI(){
 }
 function completeCinema(){
   sim.cinematic.elapsed=sim.cinematic.duration;sim.cinematic.completed=true;sim.endingSeen=true;beatHoldUntil=0;momentQueue=[];$('cinema-dialog').close();renderEnding();$('ending-dialog').showModal();updateUI();updatePause();save();
+}
+function dismissCinema(){
+  if(sim.cinematic){sim.cinematic.elapsed=sim.cinematic.duration;sim.cinematic.completed=true;}
+  sim.endingSeen=true;$('cinema-dialog').close();dismissStory();updateUI();updatePause();save();
+}
+function finishIntro(){
+  try{localStorage.setItem(introKey,'done');}catch{}
+  speed=1;sim.config.speedMultiplier=1;paused=false;accumulator=0;lastTime=performance.now();
+  for(const button of document.querySelectorAll('[data-speed]')){const selected=Number(button.dataset.speed)===1;button.classList.toggle('active',selected);button.setAttribute('aria-pressed',String(selected));}
+  $('intro-dialog').close();updateCinemaUI();updatePause();save();
 }
 function cheerCinema(){if(!cinemaActive())return;sim.cinematic.cheers++;updateCinemaUI();}
 function frame(now){
@@ -3477,10 +3427,13 @@ $('canvas-journal').addEventListener('click',()=>{renderJournal();$('journal-dia
 $('inspector-close').addEventListener('click',()=>{inspectionPinned=false;$('tile-inspector').hidden=true;});
 $('cinema-cheer').addEventListener('click',cheerCinema);
 $('cinema-pause').addEventListener('click',()=>{togglePause();updateCinemaUI();});
-$('cinema-dialog').addEventListener('cancel',e=>{e.preventDefault();togglePause();updateCinemaUI();});
-$('intro-dialog').addEventListener('cancel',e=>e.preventDefault());
+$('cinema-dialog').addEventListener('cancel',e=>{e.preventDefault();dismissCinema();});
+$('cinema-close').addEventListener('click',dismissCinema);
+$('ending-close').addEventListener('click',()=>$('ending-dialog').close());
+$('intro-dialog').addEventListener('cancel',e=>{e.preventDefault();finishIntro();});
+$('intro-close').addEventListener('click',finishIntro);
 $('intro-back').addEventListener('click',()=>{introStep=Math.max(0,introStep-1);updateIntro();});
-$('intro-next').addEventListener('click',()=>{if(introStep<2){introStep++;updateIntro();return;}try{localStorage.setItem(introKey,'done');}catch{}speed=1;sim.config.speedMultiplier=1;paused=false;accumulator=0;lastTime=performance.now();for(const button of document.querySelectorAll('[data-speed]')){const selected=Number(button.dataset.speed)===1;button.classList.toggle('active',selected);button.setAttribute('aria-pressed',String(selected));}$('intro-dialog').close();updateCinemaUI();updatePause();save();});
+$('intro-next').addEventListener('click',()=>{if(introStep<2){introStep++;updateIntro();return;}finishIntro();});
 $('cinema-skip').addEventListener('click',completeCinema);
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));
@@ -3495,7 +3448,10 @@ $('find-fields').addEventListener('click',()=>focusPlace(sim.farms[0]));
 $('history-layer').addEventListener('change',e=>{renderer.showHistory=e.target.checked;$('history-snapshot').hidden=!e.target.checked;$('history-legend').hidden=!e.target.checked;});
 $('history-snapshot').addEventListener('change',e=>{renderer.historySnapshot=sim.snapshots[Number(e.target.value)]||null;});
 $('moment-focus').addEventListener('click',()=>{if(activeMoment)focusPlace(momentTarget(activeMoment));});
-$('moment-continue').addEventListener('click',()=>{beatHoldUntil=0;momentAt=performance.now()-9000;accumulator=0;updateClock();});
+$('moment-continue').addEventListener('click',dismissStory);
+$('moment-close').addEventListener('click',dismissStory);
+$('intervention-close').addEventListener('click',()=>{clearTimeout(interventionTimer);$('intervention-result').hidden=true;});
+$('toast-close').addEventListener('click',()=>{clearTimeout(toastTimer);$('toast').classList.remove('visible');});
 for(const button of document.querySelectorAll('[data-close]')) button.addEventListener('click',()=>button.closest('dialog').close());
 for(const dialog of document.querySelectorAll('dialog')) {dialog.addEventListener('close',()=>{accumulator=0;lastTime=performance.now();updatePause();});dialog.addEventListener('click',e=>{if(e.target!==dialog || ['ending-dialog','intro-dialog','cinema-dialog'].includes(dialog.id))return;const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();});}
 $('expansion-limit').addEventListener('change',e=>{
@@ -3506,12 +3462,14 @@ $('expansion-limit').addEventListener('change',e=>{
 });
 $('rare-endings').addEventListener('change',e=>{sim.config.rareEndings=e.target.checked;save();});
 $('accelerating').addEventListener('change',e=>{sim.config.accelerating=e.target.checked;accumulator=0;updateClock();save();});
+$('story-cards').addEventListener('change',e=>{sim.config.storyCards=e.target.checked;if(!e.target.checked){dismissStory();$('intervention-result').hidden=true;}save();});
 $('reduce-motion').addEventListener('change',e=>{renderer.reduced=e.target.checked;});
 $('restart').addEventListener('click',()=>{$('restart-confirm').hidden=false;$('restart').hidden=true;});
 $('cancel-restart').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;});
 function switchIsland(next,message){
   sim=next;renderer.sim=sim;renderer.effects=[];renderer.ripples=[];renderer.visibleTiles=[];renderer.hover=null;renderer.center={x:0,y:0};renderer.zoom=1;renderer.activityTime=0;renderer.wheelTime=0;renderer.recenter();
   sim.config.speedMultiplier=speed;
+  $('story-cards').checked=sim.config.storyCards===true;
   accumulator=0;paused=false;dirtyHistory=true;shownRemark='';drag=null;momentQueue=[];seenMoments=new Set();activeMoment=null;beatHoldUntil=0;momentAt=-Infinity;snapshotSignature='';renderer.showHistory=false;renderer.historySnapshot=null;$('history-layer').checked=false;$('history-snapshot').hidden=true;$('history-legend').hidden=true;$('moment-card').hidden=true;
   clearTimeout(interventionTimer);$('intervention-result').hidden=true;$('tile-inspector').hidden=true;inspectionPinned=false;
   for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();
@@ -3566,9 +3524,10 @@ canvas.addEventListener('pointerup',e=>{
     sim.interfere(tile.x,tile.y,interferenceMode);
     const result=sim.lastIntervention;
     renderer.addEffect({...result,priority:100});beatHoldUntil=0;accumulator=0;
-    $('intervention-result').hidden=false;$('intervention-result').dataset.type=result.type;
+    $('intervention-result').hidden=sim.config.storyCards!==true;$('intervention-result').dataset.type=result.type;
     $('intervention-title').textContent=nl(result.title);$('intervention-detail').textContent=nl(result.detail);
-    clearTimeout(interventionTimer);interventionTimer=setTimeout(()=>$('intervention-result').hidden=true,8500);
+    if(sim.config.storyCards!==true)showToast(result.title,2400);
+    clearTimeout(interventionTimer);interventionTimer=setTimeout(()=>$('intervention-result').hidden=true,3000);
     renderer.ripple(x,y);dirtyHistory=true;updateUI();save();inspectTile(sim.tile(tile.x,tile.y));
   }
   drag=null;

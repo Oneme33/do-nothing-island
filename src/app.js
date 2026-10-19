@@ -31,8 +31,10 @@ $('reduce-motion').checked=reducedPref;
 $('expansion-limit').value=String(sim.config.maxTiles);
 $('rare-endings').checked=sim.config.rareEndings;
 $('accelerating').checked=sim.config.accelerating;
+$('story-cards').checked=sim.config.storyCards===true;
 
-function showToast(message){$('toast').textContent=nl(message);$('toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),4200);}
+function showToast(message,duration=4200){$('toast-text').textContent=nl(message);$('toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),duration);}
+function dismissStory(){beatHoldUntil=0;momentQueue=[];activeMoment=null;momentAt=performance.now();$('moment-card').hidden=true;updateClock();}
 function save(){
   try {localStorage.setItem(storageKey,sim.serialize());storageAvailable=true;$('save-status').textContent="Je eiland is op dit apparaat opgeslagen.";}
   catch {storageAvailable=false;$('save-status').textContent="Opslaan lukt hier niet. Je kunt dit bezoek wel gewoon verder spelen.";}
@@ -133,18 +135,18 @@ function momentTarget(entry){
 }
 function focusPlace(tile){if(!tile)return;renderer.focusTile(tile);inspectTile(tile);}
 function queueMoments(entries){
+  if(sim.config.storyCards!==true)return;
   for(const entry of entries){if((entry.priority||eventPriority(entry.type))<76||seenMoments.has(entry.id))continue;seenMoments.add(entry.id);momentQueue.push(entry);}
   momentQueue.sort((a,b)=>(b.priority||eventPriority(b.type))-(a.priority||eventPriority(a.type))||a.year-b.year);
   if(momentQueue.length>40)momentQueue.length=40;
 }
 function presentMoment(now){
-  if(!momentQueue.length||now-momentAt<8500||sim.ending||cinemaActive()||otherDialogOpen())return;
+  if(sim.config.storyCards!==true||!momentQueue.length||now-momentAt<8500||sim.ending||cinemaActive()||otherDialogOpen())return;
   activeMoment=momentQueue.shift();momentAt=now;
   const priority=activeMoment.priority||eventPriority(activeMoment.type);
   $('moment-card').hidden=false;$('moment-year').textContent=`JAAR ${activeMoment.year} · ${priority>=90?"EEN KEERPUNT":"EILANDGESCHIEDENIS"}`;
   $('moment-title').textContent=({palace:"Het eerste huis heeft toekomst",age:nl(sim.age.name),endgame:"Het laatste hoofdstuk van het eiland",flood:"De waterkant heeft hulp nodig",reform:"Een discussie wordt een plek",legacy:"Ze herinneren zich jouw bezoek",technology:"Een nieuwe manier van leven",interference:"Jouw hand in hun geschiedenis",crisis:"Een waarschuwing van de zee"})[activeMoment.type]||"Een beetje geschiedenis";
   $('moment-text').textContent=nl(activeMoment.text);
-  if(priority>=92){beatHoldUntil=now+5500;accumulator=0;focusPlace(momentTarget(activeMoment));}
   updateClock();
 }
 function updateSnapshotOptions(){
@@ -180,6 +182,16 @@ function updateCinemaUI(){
 }
 function completeCinema(){
   sim.cinematic.elapsed=sim.cinematic.duration;sim.cinematic.completed=true;sim.endingSeen=true;beatHoldUntil=0;momentQueue=[];$('cinema-dialog').close();renderEnding();$('ending-dialog').showModal();updateUI();updatePause();save();
+}
+function dismissCinema(){
+  if(sim.cinematic){sim.cinematic.elapsed=sim.cinematic.duration;sim.cinematic.completed=true;}
+  sim.endingSeen=true;$('cinema-dialog').close();dismissStory();updateUI();updatePause();save();
+}
+function finishIntro(){
+  try{localStorage.setItem(introKey,'done');}catch{}
+  speed=1;sim.config.speedMultiplier=1;paused=false;accumulator=0;lastTime=performance.now();
+  for(const button of document.querySelectorAll('[data-speed]')){const selected=Number(button.dataset.speed)===1;button.classList.toggle('active',selected);button.setAttribute('aria-pressed',String(selected));}
+  $('intro-dialog').close();updateCinemaUI();updatePause();save();
 }
 function cheerCinema(){if(!cinemaActive())return;sim.cinematic.cheers++;updateCinemaUI();}
 function frame(now){
@@ -230,10 +242,13 @@ $('canvas-journal').addEventListener('click',()=>{renderJournal();$('journal-dia
 $('inspector-close').addEventListener('click',()=>{inspectionPinned=false;$('tile-inspector').hidden=true;});
 $('cinema-cheer').addEventListener('click',cheerCinema);
 $('cinema-pause').addEventListener('click',()=>{togglePause();updateCinemaUI();});
-$('cinema-dialog').addEventListener('cancel',e=>{e.preventDefault();togglePause();updateCinemaUI();});
-$('intro-dialog').addEventListener('cancel',e=>e.preventDefault());
+$('cinema-dialog').addEventListener('cancel',e=>{e.preventDefault();dismissCinema();});
+$('cinema-close').addEventListener('click',dismissCinema);
+$('ending-close').addEventListener('click',()=>$('ending-dialog').close());
+$('intro-dialog').addEventListener('cancel',e=>{e.preventDefault();finishIntro();});
+$('intro-close').addEventListener('click',finishIntro);
 $('intro-back').addEventListener('click',()=>{introStep=Math.max(0,introStep-1);updateIntro();});
-$('intro-next').addEventListener('click',()=>{if(introStep<2){introStep++;updateIntro();return;}try{localStorage.setItem(introKey,'done');}catch{}speed=1;sim.config.speedMultiplier=1;paused=false;accumulator=0;lastTime=performance.now();for(const button of document.querySelectorAll('[data-speed]')){const selected=Number(button.dataset.speed)===1;button.classList.toggle('active',selected);button.setAttribute('aria-pressed',String(selected));}$('intro-dialog').close();updateCinemaUI();updatePause();save();});
+$('intro-next').addEventListener('click',()=>{if(introStep<2){introStep++;updateIntro();return;}finishIntro();});
 $('cinema-skip').addEventListener('click',completeCinema);
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));
@@ -248,7 +263,10 @@ $('find-fields').addEventListener('click',()=>focusPlace(sim.farms[0]));
 $('history-layer').addEventListener('change',e=>{renderer.showHistory=e.target.checked;$('history-snapshot').hidden=!e.target.checked;$('history-legend').hidden=!e.target.checked;});
 $('history-snapshot').addEventListener('change',e=>{renderer.historySnapshot=sim.snapshots[Number(e.target.value)]||null;});
 $('moment-focus').addEventListener('click',()=>{if(activeMoment)focusPlace(momentTarget(activeMoment));});
-$('moment-continue').addEventListener('click',()=>{beatHoldUntil=0;momentAt=performance.now()-9000;accumulator=0;updateClock();});
+$('moment-continue').addEventListener('click',dismissStory);
+$('moment-close').addEventListener('click',dismissStory);
+$('intervention-close').addEventListener('click',()=>{clearTimeout(interventionTimer);$('intervention-result').hidden=true;});
+$('toast-close').addEventListener('click',()=>{clearTimeout(toastTimer);$('toast').classList.remove('visible');});
 for(const button of document.querySelectorAll('[data-close]')) button.addEventListener('click',()=>button.closest('dialog').close());
 for(const dialog of document.querySelectorAll('dialog')) {dialog.addEventListener('close',()=>{accumulator=0;lastTime=performance.now();updatePause();});dialog.addEventListener('click',e=>{if(e.target!==dialog || ['ending-dialog','intro-dialog','cinema-dialog'].includes(dialog.id))return;const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();});}
 $('expansion-limit').addEventListener('change',e=>{
@@ -259,12 +277,14 @@ $('expansion-limit').addEventListener('change',e=>{
 });
 $('rare-endings').addEventListener('change',e=>{sim.config.rareEndings=e.target.checked;save();});
 $('accelerating').addEventListener('change',e=>{sim.config.accelerating=e.target.checked;accumulator=0;updateClock();save();});
+$('story-cards').addEventListener('change',e=>{sim.config.storyCards=e.target.checked;if(!e.target.checked){dismissStory();$('intervention-result').hidden=true;}save();});
 $('reduce-motion').addEventListener('change',e=>{renderer.reduced=e.target.checked;});
 $('restart').addEventListener('click',()=>{$('restart-confirm').hidden=false;$('restart').hidden=true;});
 $('cancel-restart').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;});
 function switchIsland(next,message){
   sim=next;renderer.sim=sim;renderer.effects=[];renderer.ripples=[];renderer.visibleTiles=[];renderer.hover=null;renderer.center={x:0,y:0};renderer.zoom=1;renderer.activityTime=0;renderer.wheelTime=0;renderer.recenter();
   sim.config.speedMultiplier=speed;
+  $('story-cards').checked=sim.config.storyCards===true;
   accumulator=0;paused=false;dirtyHistory=true;shownRemark='';drag=null;momentQueue=[];seenMoments=new Set();activeMoment=null;beatHoldUntil=0;momentAt=-Infinity;snapshotSignature='';renderer.showHistory=false;renderer.historySnapshot=null;$('history-layer').checked=false;$('history-snapshot').hidden=true;$('history-legend').hidden=true;$('moment-card').hidden=true;
   clearTimeout(interventionTimer);$('intervention-result').hidden=true;$('tile-inspector').hidden=true;inspectionPinned=false;
   for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();
@@ -319,9 +339,10 @@ canvas.addEventListener('pointerup',e=>{
     sim.interfere(tile.x,tile.y,interferenceMode);
     const result=sim.lastIntervention;
     renderer.addEffect({...result,priority:100});beatHoldUntil=0;accumulator=0;
-    $('intervention-result').hidden=false;$('intervention-result').dataset.type=result.type;
+    $('intervention-result').hidden=sim.config.storyCards!==true;$('intervention-result').dataset.type=result.type;
     $('intervention-title').textContent=nl(result.title);$('intervention-detail').textContent=nl(result.detail);
-    clearTimeout(interventionTimer);interventionTimer=setTimeout(()=>$('intervention-result').hidden=true,8500);
+    if(sim.config.storyCards!==true)showToast(result.title,2400);
+    clearTimeout(interventionTimer);interventionTimer=setTimeout(()=>$('intervention-result').hidden=true,3000);
     renderer.ripple(x,y);dirtyHistory=true;updateUI();save();inspectTile(sim.tile(tile.x,tile.y));
   }
   drag=null;

@@ -1,6 +1,6 @@
 import { cinemaVisible } from './spectacle.js';
 import {nl} from './language.js';
-import { drawFlames, drawBonfire, drawFestivalGround, drawLifeWorld, drawComicBubbles, cinemaLift, drawCinemaBack, drawCinemaWorld, drawCinemaOverlay } from './pageants.js';
+import { drawFlames, drawBonfire, drawFestivalGround, drawLifeWorld, drawComicBubbles } from './pageants.js';
 const aroundLand=(s,t)=>neighbors(t).every(([x,y])=>s.tile(x,y)?.kind==='land');
 import { neighbors, key } from './simulation.js';
 const TAU=Math.PI*2;
@@ -19,7 +19,7 @@ export class IslandRenderer {
     this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.ripples=[];this.hover=null;this.particles=[];
     this.effects=[];this.activityTime=0;this.wheelTime=0;this.activityRate=1;this.paused=false;this.mode='nudge';
-    this.sceneLift=0;this.lastFrame=0;this.fitZoom=1;this.focus=null;this.showHistory=false;this.historySnapshot=null;this.showDistricts=true;
+    this.lastFrame=0;this.fitZoom=1;this.focus=null;this.showHistory=false;this.historySnapshot=null;this.showDistricts=true;
     this.resizeObserver=new ResizeObserver(()=>this.resize());
     this.resizeObserver.observe(canvas);
     this.resize();
@@ -106,10 +106,7 @@ export class IslandRenderer {
     this.center.y=mix(this.center.y,focusPoint?focusPoint.y-24:(minY+maxY)/2+15,Math.min(1,dt*.9));
     const quake=this.reduced?0:this.effects.filter(e=>e.type==='rumble'&&e.elapsed<1).reduce((s,e)=>s+Math.sin(e.elapsed*55)*(1-e.elapsed)*3,0);
     this.origin={x:this.width*(mobile?.54:.55)-this.center.x*this.zoom+this.pan.x+quake,y:this.height*(cinemaVisible(this.sim)?.62:mobile?.54:.52)-this.center.y*this.zoom+this.pan.y};
-    this.groundOrigin={...this.origin};
-    this.sceneLift=mix(this.sceneLift,cinemaLift(this.sim),Math.min(1,dt*3));
-    this.origin.y-=this.sceneLift;
-    this.drawWater();drawCinemaBack(this);
+    this.drawWater();
     c.save();c.translate(this.origin.x,this.origin.y);c.scale(this.zoom,this.zoom);
     // Shore water is derived from current geography, so the coast follows every project.
     const tiles=[...this.sim.tiles.values()];
@@ -133,7 +130,7 @@ export class IslandRenderer {
       if(t.landform||t.building||t.buildSite)this.scene.push({depth,draw:()=>{if(t.landform)this.drawLandform(t);if(t.building)this.drawBuilding(t);if(t.buildSite)this.drawBuildingSite(t);}});
     }
     this.drawWorkers();
-    this.drawVisitors();drawLifeWorld(this);drawCinemaWorld(this);
+    this.drawVisitors();drawLifeWorld(this);
     this.scene.sort((a,b)=>a.depth-b.depth);
     for(const item of this.scene)item.draw();
     this.scene=null;
@@ -151,7 +148,7 @@ export class IslandRenderer {
     this.drawEffectLabels();
     this.drawDistrictLabels();
     if(!cinemaVisible(this.sim))this.drawLandmarkLabels();
-    drawComicBubbles(this);drawCinemaOverlay(this);
+    drawComicBubbles(this);
   }
   enqueueActor(depth,draw){if(this.scene)this.scene.push({depth,draw});else draw();}
   streetPoint(tile){const p=this.p(tile.x,tile.y);return{x:p.x,y:p.y+11.5};}
