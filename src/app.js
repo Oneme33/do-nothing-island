@@ -8,6 +8,7 @@ import {drawFinale,islandScores} from './finale.js';
 import {ensureFamily,currentRelative} from './family.js';
 import {ensureWishes,dismissWish,WISH_OUTCOMES,canHelpWish,helpActiveWish} from './wishes.js';
 import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
+import {COLLECTION_STORAGE_KEY,COLLECTION_CATALOG,COLLECTION_GROUPS,readCollection,mergeCollections,collectIsland} from './collection.js';
 
 const $=id=>document.getElementById(id);
 const storageKey='do-nothing-island-v1';
@@ -15,6 +16,8 @@ let storageAvailable=true;
 let sim;
 try {sim=Civilization.restore(localStorage.getItem(storageKey));}catch{storageAvailable=false;}
 sim ||= new Civilization();
+let collection=readCollection(null),collectionStorageAvailable=true;
+try{collection=readCollection(localStorage.getItem(COLLECTION_STORAGE_KEY));}catch{collectionStorageAvailable=false;}
 const canvas=$('island');
 const renderer=new IslandRenderer(canvas,sim);renderer.mode='nudge';canvas.dataset.mode='nudge';
 let paused=false,speed=[1,2,3,10].includes(sim.config.speedMultiplier)?sim.config.speedMultiplier:1,accumulator=0,lastTime=performance.now(),saveTimer=0,toastTimer,dirtyHistory=true;
@@ -38,7 +41,30 @@ $('story-cards').checked=sim.config.storyCards===true;
 
 function showToast(message,duration=4200){$('toast-text').textContent=nl(message);$('toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),duration);}
 function dismissStory(){beatHoldUntil=0;momentQueue=[];activeMoment=null;momentAt=performance.now();$('moment-card').hidden=true;updateClock();}
+function persistCollection(){
+  try{const stored=readCollection(localStorage.getItem(COLLECTION_STORAGE_KEY));mergeCollections(stored,collection);collection=stored;localStorage.setItem(COLLECTION_STORAGE_KEY,JSON.stringify(collection));collectionStorageAvailable=true;}
+  catch{collectionStorageAvailable=false;}
+}
+function syncCollection(){if(collectIsland(collection,sim))persistCollection();}
+function renderCollection(){
+  syncCollection();persistCollection();
+  const total=COLLECTION_CATALOG.length,found=Object.keys(collection.entries).length;
+  $('collection-progress').textContent=`${found} van ${total} vondsten`;
+  $('collection-storage').textContent=collectionStorageAvailable?'Bewaard in deze browser, over al je eilanden heen. Nieuw eiland en Herstel vorig eiland wissen je vondsten niet.':'Bewaren lukt hier niet. Deze verzameling blijft tijdens dit bezoek in het geheugen.';
+  const silhouettes={endings:'M3 17 Q3 11 7 12 L10 5 14 11 Q21 10 21 17 Z',moments:'M3 20 V10 L12 3 21 10 V20 Z',challenges:'M8 2 H16 V9 L12 14 8 9 Z M12 12 L17 21 12 18 7 21 Z'};
+  $('collection-groups').replaceChildren(...Object.entries(COLLECTION_GROUPS).map(([group,label])=>{
+    const section=document.createElement('section'),heading=document.createElement('h3'),list=document.createElement('ol'),items=COLLECTION_CATALOG.filter(item=>item.group===group);
+    heading.textContent=`${label} · ${items.filter(item=>collection.entries[item.id]).length} / ${items.length}`;list.className='collection-grid';
+    list.append(...items.map(definition=>{
+      const record=collection.entries[definition.id],item=document.createElement('li'),stamp=document.createElement('span'),title=document.createElement('strong'),text=document.createElement('p'),source=document.createElement('small');
+      item.dataset.id=definition.id;item.dataset.found=String(!!record);stamp.className='collection-stamp';stamp.setAttribute('aria-hidden','true');stamp.innerHTML=`<svg viewBox="0 0 24 24"><path d="${silhouettes[group]}"/></svg>`;
+      title.textContent=record?definition.title:'Nog niet ontdekt';text.textContent=record?definition.description:definition.hint;source.textContent=record?`Seed ${record.seed} · vastgelegd in jaar ${record.year}`:'Volg een ander spoor.';
+      item.append(stamp,title,text,source);return item;
+    }));section.append(heading,list);return section;
+  }));
+}
 function save(){
+  syncCollection();persistCollection();
   try {localStorage.setItem(storageKey,sim.serialize());storageAvailable=true;$('save-status').textContent="Je eiland is op dit apparaat opgeslagen.";}
   catch {storageAvailable=false;$('save-status').textContent="Opslaan lukt hier niet. Je kunt dit bezoek wel gewoon verder spelen.";}
 }
@@ -118,6 +144,7 @@ function renderWishes(){
 }
 function openWishes(){renderWishes();$('wishes-dialog').showModal();updatePause();}
 function updateUI(){
+  syncCollection();
   updateWishBubble();
   $('year').textContent=sim.year;
   $('era-name').textContent=nl(sim.age.name).toUpperCase();
@@ -281,6 +308,8 @@ $('recenter').addEventListener('click',()=>renderer.recenter());
 $('help').addEventListener('click',()=>$('guide-dialog').showModal());
 $('settings').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;$('settings-dialog').showModal();});
 $('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();});
+$('open-collection').addEventListener('click',()=>{renderCollection();$('collection-dialog').showModal();updatePause();});
+$('collection-close').addEventListener('click',()=>$('collection-dialog').close());
 $('open-challenges').addEventListener('click',()=>{ensureChallenges(sim).revealed=true;renderChallenges();$('challenges-dialog').showModal();updatePause();save();});
 $('challenges-close').addEventListener('click',()=>$('challenges-dialog').close());
 $('open-wishes').addEventListener('click',openWishes);
@@ -338,6 +367,7 @@ $('reduce-motion').addEventListener('change',e=>{renderer.reduced=e.target.check
 $('restart').addEventListener('click',()=>{$('restart-confirm').hidden=false;$('restart').hidden=true;});
 $('cancel-restart').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;});
 function switchIsland(next,message){
+  syncCollection();persistCollection();
   sim=next;renderer.sim=sim;renderer.effects=[];renderer.ripples=[];renderer.visibleTiles=[];renderer.hover=null;renderer.center={x:0,y:0};renderer.zoom=1;renderer.activityTime=0;renderer.wheelTime=0;renderer.recenter();
   sim.config.speedMultiplier=speed;
   $('story-cards').checked=sim.config.storyCards===true;

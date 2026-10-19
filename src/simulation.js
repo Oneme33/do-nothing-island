@@ -3,6 +3,7 @@ import {reshapeAfterQuake} from './consequences.js';
 import {ensureFamily,advanceFamily} from './family.js';
 import {ensureWishes,advanceWishes,answerWish} from './wishes.js';
 import {ensureChallenges,advanceChallenges} from './challenges.js';
+import {advanceCollection} from './collection.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 export const WORLD_RADIUS = 12;
@@ -153,6 +154,7 @@ export class Civilization {
     ensureFamily(this);
     ensureWishes(this);
     ensureChallenges(this);
+    advanceCollection(this);
   }
   random() {
     let n = this.randomState += 0x6D2B79F5;
@@ -347,6 +349,7 @@ export class Civilization {
     this.advanceEndgame();
     this.tryLastDrop();
     advanceChallenges(this);
+    advanceCollection(this);
   }
   develop() {
     if(this.wood < 7 || this.food < 3) return;
@@ -769,7 +772,7 @@ export class Civilization {
       jokeAfterTouch(this,spot,type);
       this.belief+=type==='rumble'?3:type==='rain'?2:1;
       this.lastIntervention={type,title,detail,year:this.year,expires:this.year+expires,x:spot.x,y:spot.y};
-      this.signal(type,spot,title);this.log(detail,'interference');this.ensureInfrastructure();this.advanceEndgame();advanceChallenges(this);return detail;
+      this.signal(type,spot,title);this.log(detail,'interference');this.ensureInfrastructure();this.advanceEndgame();advanceChallenges(this);advanceCollection(this);return detail;
     };
     if(mode==='fire'){const result=ignite(this,spot);return finish('fire',result.title,result.detail,16);}
     if(mode==='nudge'&&t?.rift&&t.kind==='water'&&!t.building){t.building='bridge';t.builtYear=this.year;this.wood=Math.max(0,this.wood-12);this.rebuildRoads();return finish('nudge','Een brug over de kloof','De bouwers verbinden de twee kanten. De breuklijn blijft zichtbaar onder de brug.',12);}
@@ -877,6 +880,8 @@ export class Civilization {
       ensureWishes(sim);
       if(!parsed.challenges)delete sim.challenges;
       ensureChallenges(sim,{restoring:true});
+      if(!parsed.collectionRecords)delete sim.collectionRecords;
+      advanceCollection(sim);
       if(parsed.routeVersion!==2){const field=sim.tile(1,-1);if(field?.building==='farm'&&!field.builtYear)field.foundingField=true;sim.rebuildRoads();}
       if(sim.endgameStarted&&!sim.finaleDeadline&&!sim.ending)advanceFinale(sim);
       return sim;

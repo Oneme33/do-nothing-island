@@ -4,8 +4,8 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 import {Civilization} from '../src/simulation.js';
 import {nl} from '../src/language.js';
-async function appHarness(initial,{firstVisit=false}={}){
- const html=await readFile('start.html','utf8'),elements=new Map(),storage=new Map();
+async function appHarness(initial,{firstVisit=false,persistentStorage=null,rejectCollectionWrites=false}={}){
+ const html=await readFile('start.html','utf8'),elements=new Map(),storage=persistentStorage||new Map();
  class Element{
   constructor(){this.hidden=false;this.open=false;this.style={};this.dataset={};this.handlers={};this.children=[];this.classList={toggle(){},add(){},remove(){}};}
   addEventListener(type,handler){this.handlers[type]=handler;}
@@ -21,9 +21,9 @@ async function appHarness(initial,{firstVisit=false}={}){
  const context=new Proxy({createRadialGradient:()=>({addColorStop(){}}),measureText:text=>({width:text.length*5})},{get:(t,k)=>t[k]||(()=>{}),set:(t,k,v)=>(t[k]=v,true)});
  elements.get('island').getContext=()=>context;elements.get('finale-canvas').getContext=()=>context;storage.set('do-nothing-island-v1',initial.serialize());if(!firstVisit)storage.set('do-nothing-island-intro-v1','done');
  let nextFrame,now=0;const seeds=[8,12],window={devicePixelRatio:1,addEventListener(){}};
- const runtime=vm.createContext({document,window,localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)},performance:{now:()=>now},matchMedia:()=>({matches:false}),ResizeObserver:class{observe(){}},requestAnimationFrame:fn=>nextFrame=fn,setTimeout:()=>1,clearTimeout(){},crypto:{getRandomValues:a=>{a[0]=seeds.shift();return a;}}});
+ const runtime=vm.createContext({document,window,localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>{if(rejectCollectionWrites&&k==='do-nothing-island-collection-v1')throw new Error('Collection storage denied');storage.set(k,v);}},performance:{now:()=>now},matchMedia:()=>({matches:false}),ResizeObserver:class{observe(){}},requestAnimationFrame:fn=>nextFrame=fn,setTimeout:()=>1,clearTimeout(){},crypto:{getRandomValues:a=>{a[0]=seeds.shift();return a;}}});
  vm.runInContext(html.match(/<script>([\s\S]*)<\/script>/)[1],runtime);
- return{elements,modes,frame:time=>{now=time;nextFrame(now);},advance:seconds=>{for(let end=now+seconds*1000;now<end;){now+=100;nextFrame(now);}},saved:()=>JSON.parse(storage.get('do-nothing-island-v1'))};
+ return{elements,modes,storage,collection:()=>JSON.parse(storage.get('do-nothing-island-collection-v1')||'{"version":1,"entries":{}}'),frame:time=>{now=time;nextFrame(now);},advance:seconds=>{for(let end=now+seconds*1000;now<end;){now+=100;nextFrame(now);}},saved:()=>JSON.parse(storage.get('do-nothing-island-v1'))};
 }
 test('the delivered game starts, creates fresh islands immediately and can undo a reset',async()=>{
  const old=new Civilization(31);for(let i=0;i<40;i++)old.tick();const a=await appHarness(old),e=a.elements;
@@ -133,4 +133,16 @@ test('Help names the requesting resident and fulfils their wish through an expli
  assert.equal(e.get('wish-help').textContent,'Help Mo');assert.equal(e.get('wish-help').hidden,false);assert.equal(a.saved().interferences,0);
  e.get('wish-help').handlers.click();assert.equal(e.get('wishes-dialog').open,false);assert.equal(a.saved().interferences,1);assert.equal(a.saved().wishes.history.at(-1).status,'helped');assert.equal(a.saved().influence.rain,1);assert.equal(e.get('wish-bubble').hidden,true);
  e.get('wish-help').handlers.click();assert.equal(a.saved().interferences,1);
+});
+test('the collection is quiet, hides titles behind hints and survives new islands, undo and reload',async()=>{
+ const s=new Civilization(31);s.year=120;s.tile(-1,1).building='manor';s.tile(-1,1).builtYear=120;const a=await appHarness(s),e=a.elements;
+ assert.equal(e.get('collection-dialog').open,false);assert.ok(a.collection().entries['moment:manor']);e.get('open-collection').handlers.click();assert.equal(e.get('collection-dialog').open,true);
+ const items=e.get('collection-groups').children.flatMap(group=>group.children[1].children),hidden=items.find(item=>item.dataset.id==='ending:phoenix');assert.equal(hidden.children[1].textContent,'Nog niet ontdekt');assert.ok(hidden.children[2].textContent);assert.equal(hidden.dataset.found,'false');
+ const year=e.get('year').textContent;a.advance(2);assert.equal(e.get('year').textContent,year);e.get('collection-close').handlers.click();e.get('new-island').handlers.click();assert.ok(a.collection().entries['moment:manor']);e.get('undo-reset').handlers.click();assert.ok(a.collection().entries['moment:manor']);
+ const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())),{persistentStorage:a.storage});assert.ok(b.collection().entries['moment:manor']);assert.equal(b.elements.get('collection-dialog').open,false);
+});
+test('a collection storage failure does not stop island saving or the playable in-memory collection',async()=>{
+ const s=new Civilization(31);s.tile(-1,1).building='manor';const a=await appHarness(s,{rejectCollectionWrites:true}),e=a.elements;
+ assert.doesNotThrow(()=>e.get('open-collection').handlers.click());assert.match(e.get('collection-progress').textContent,/1 van/);assert.match(e.get('collection-storage').textContent,/tijdens dit bezoek/);
+ e.get('collection-close').handlers.click();e.get('new-island').handlers.click();assert.equal(a.saved().seed,8);assert.ok(a.saved().tiles.length);
 });

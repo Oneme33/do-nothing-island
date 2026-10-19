@@ -12,6 +12,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Uitdagingen** bevat één tot drie vrijblijvende doelen per seed. Ze worden stil bijgehouden en zijn alleen zichtbaar als je zelf het venster opent. Bijvoorbeeld: een vroeg landhuis, de Renaissance zonder ingreep, een bibliotheek of een vuurtraditie. Ze geven geen bonus of straf. Behaalde doelen blijven bewaard; een oudere save krijgt geen achteraf verzonnen uitslagen.
 
+**Verzameling** bewaart eindes, bijzondere momenten en voltooide uitdagingen over al je eilanden heen. Onbekende items tonen een silhouet en een vage hint. Alleen zelf openen toont je voortgang; er verschijnen geen verzamelmeldingen over het eiland. De verzameling blijft in dezelfde browser bewaard bij Nieuw eiland, Herstel vorig eiland en herladen. Aantoonbare vondsten uit oude saves worden meegenomen.
+
 ## Spelen
 
 Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het volledige spel; installatie en een server zijn niet nodig. De interface is Nederlands. De eerste keer verschijnen drie korte introschermen, waarna het eiland op **1×** begint.
@@ -95,6 +97,7 @@ Deze afbeeldingen controleren de renderer. Ze vervangen geen volledige interacti
 
 ## Broncode
 
+- `collection.js`: stille, blijvende vondsten per eiland en de aparte verzameling over eilanden heen.
 - `family.js`, `wishes.js` en `challenges.js`: de opgeslagen familielijn, vragen van inwoners en stille optionele doelen.
 - `simulation.js`: wereld, economie, bouw, wegen, verkeer en opslag.
 - `story.js`: geschiedenis, hervormingen, archief en eindregels.
