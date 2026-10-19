@@ -76,7 +76,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
   <main>
     <section class="intro" aria-label="Jouw eiland">
       <div><div class="eyebrow"><span class="little-star">✳</span> DE WERELD GAAT HAAR GANG</div><h1>Een klein leven, helemaal vanzelf.</h1><p>Niets te regelen. Nergens naartoe. Kijk gewoon wat er gebeurt.</p></div>
-      <div class="intro-actions"><div class="reset-actions"><button id="new-island" class="new-island-button" title="Begin direct opnieuw met een willekeurig eiland"><span aria-hidden="true">↻</span> Nieuw groot eiland</button><small id="start-size">±250 landtegels · 6 inwoners</small><button id="undo-reset" hidden>Herstel vorig eiland</button></div><div class="year-stamp"><span>BEGONNEN IN JAAR 1</span><strong>Jaar <b id="year">1</b><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4v24M4 16h24M7.5 7.5l17 17m-17 0 17-17"/></svg></strong><span id="era-name">HET VROEGE BEGIN</span><span id="age-next">Volgend tijdperk · jaar 120</span></div></div>
+      <div class="intro-actions"><div class="reset-actions"><button id="new-island" class="new-island-button" title="Begin direct opnieuw met een willekeurig eiland"><span aria-hidden="true">↻</span> Nieuw groot eiland</button><small id="start-size">±350–400 landtegels · 6 inwoners</small><button id="undo-reset" hidden>Herstel vorig eiland</button></div><div class="year-stamp"><span>BEGONNEN IN JAAR 1</span><strong>Jaar <b id="year">1</b><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4v24M4 16h24M7.5 7.5l17 17m-17 0 17-17"/></svg></strong><span id="era-name">HET VROEGE BEGIN</span><span id="age-next">Volgend tijdperk · jaar 120</span></div></div>
     </section>
 
     <section class="interference-tools" aria-label="Jouw invloed"><div class="tools-caption"><span class="eyebrow">JOUW INVLOED</span><small>Ja, jij deed dat.</small></div><div class="interference-buttons" role="group" aria-label="Kies een ingreep"><button data-interference="nudge" class="active" aria-pressed="true"><span>✳</span> Bouw</button><button data-interference="rain" aria-pressed="false"><span>☂</span> Regen</button><button data-interference="rumble" aria-pressed="false"><span>≋</span> Beving</button><button data-interference="fire" aria-pressed="false"><span>♨</span> Vuur</button><button data-interference="help" aria-pressed="false"><span>♡</span> Help</button></div><p id="interaction-hint">Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.</p><div class="pace-readout"><i></i><span id="pace-readout">Een rustig begin. Het komt op gang.</span></div></section>
@@ -134,7 +134,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
   <dialog id="family-dialog" class="family-dialog" aria-labelledby="family-title"><button id="family-close" class="dialog-close" aria-label="Sluit de stamboom">×</button><span class="eyebrow">DE FAMILIE VAN HET EERSTE HUIS</span><h2 id="family-title"></h2><p>Het huis blijft. Iedere generatie geeft de sleutel door.</p><section id="family-current" class="family-current"></section><p id="family-note" class="dialog-note"></p><div class="family-navigation"><button id="family-oldest">Naar de eerste generatie ↑</button><button id="family-latest">Naar de huidige generatie ↓</button><button id="family-find-home">Bekijk hun huis ↗</button></div><ol id="family-generations" class="family-generations" aria-label="Generaties van de eerste familie"></ol></dialog>
   <dialog id="journal-dialog" class="journal-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">HET EILANDARCHIEF</span><h2>Behoorlijk veel niets.</h2><p>Elke grote beschaving begint met een boom en wat twijfelachtige beslissingen.</p><div id="journal-entries"></div></dialog>
 
-  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320">Een ruim eiland · 320</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Een rustig begin, daarna steeds sneller.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
+  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Een rustig begin, daarna steeds sneller.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
 
   <dialog id="ending-dialog" class="ending-dialog"><button id="ending-close" class="dialog-close" aria-label="Sluit het naschrift">×</button><span class="eyebrow">HET EILAND HEEFT EEN VERHAAL</span><div class="ending-symbol">◉</div><h2 id="ending-title">De erfenis van het eiland.</h2><p class="ending-quote" id="ending-quote"></p><p id="ending-description"></p><div class="ending-shortage"><span>WAT ZE ACHTERLATEN</span><strong id="ending-consequence"></strong><p id="ending-detail"></p></div><section class="island-scores" aria-label="Eilandscores"><span class="eyebrow">HUN EILANDSCORE</span><strong id="ending-score"></strong><div id="score-breakdown"></div><p>Het gemiddelde van vijf kanten van hun beschaving. Er is meer dan één manier om het goed te doen.</p></section><p id="ending-stats"></p><div class="ending-maps"><figure><svg id="ending-before" viewBox="0 0 250 250" role="img" aria-label="Het oorspronkelijke eiland"></svg><figcaption>Het begin</figcaption></figure><figure><svg id="ending-after" viewBox="0 0 250 250" role="img" aria-label="Het uiteindelijke eiland"></svg><figcaption>Het eiland dat zij maakten</figcaption></figure></div><p id="ending-causes"></p><div id="ending-chronicle"></div><button id="ending-continue" class="primary-button">Bekijk het uiteindelijke eiland ↗</button><button id="ending-replay" class="secondary-button">Speel de eindscène opnieuw ↻</button><button id="ending-sandbox" class="secondary-button">Speel vrij verder →</button><button id="ending-new" class="secondary-button">Begin een nieuw eiland ↻</button></dialog>
   <script>(()=>{
@@ -1101,7 +1101,7 @@ function reshapeAfterQuake(s,spot){
   s.food=Math.max(0,s.food-18);discover(s,'rain-quake',spot,'De verzadigde grond schuift weg. Een modderstroom volgt de beving; de nieuwe sliblaag blijft.');
   return 'De natte grond wordt een modderstroom. Huizen lopen schade op; slib verrijkt de velden.';
  }
- const peak=s.land.find(t=>t.landform&&nearby(t,spot,2.5)&&!t.landslideYear);
+ const peak=s.land.filter(t=>t.landform&&nearby(t,spot,2.5)&&!t.landslideYear).sort((a,b)=>Math.hypot(a.x-spot.x,a.y-spot.y)-Math.hypot(b.x-spot.x,b.y-spot.y))[0];
  if(peak){
   peak.landslideYear=s.year;peak.relief=Math.max(18,(peak.relief||35)-18);
   const quarry=s.land.find(t=>nearby(t,peak,2)&&!t.building&&!t.landform&&!t.reservedFor);
@@ -1577,7 +1577,7 @@ function landscapeForSeed(seed) {
   let state=(seed^0xa511e9b3)>>>0;
   const draw=()=>{let n=state+=0x6D2B79F5;n=Math.imul(n^n>>>15,n|1);n^=n+Math.imul(n^n>>>7,n|61);return((n^n>>>14)>>>0)/4294967296;};
   const roll=draw();
-  return{kind:roll<.28?'volcanic':roll<.72?'highlands':'rolling',name:roll<.28?'Volcanic island':roll<.72?'Highland island':'Rolling green island',radiusX:8.8+draw()*.8,radiusY:7.8+draw()*.7,angle:(draw()-.5)*1.4,phase:draw()*Math.PI*2,detailSeed:draw()*1000};
+  return{kind:roll<.28?'volcanic':roll<.72?'highlands':'rolling',name:roll<.28?'Volcanic island':roll<.72?'Highland island':'Rolling green island',radiusX:11.2+draw()*.65,radiusY:10+draw()*.6,angle:(draw()-.5)*1.4,phase:draw()*Math.PI*2,detailSeed:draw()*1000};
 }
 
 class Civilization {
@@ -1635,12 +1635,13 @@ class Civilization {
     this.volcanoActiveUntil=0;
     this.nextVolcanicEvent=380+Math.floor(noise(this.seed,79)*240);
     this.timelineVersion=2;
+    this.geographyVersion=3;
     const g=this.geography,cos=Math.cos(g.angle),sin=Math.sin(g.angle);
     for(let x=-WORLD_RADIUS;x<=WORLD_RADIUS;x++) for(let y=-WORLD_RADIUS;y<=WORLD_RADIUS;y++) {
       const u=x*cos-y*sin,v=x*sin+y*cos,angle=Math.atan2(v,u);
       const edge=1+.13*Math.sin(angle*3+g.phase)+.07*Math.cos(angle*5-g.phase);
       const core=(Math.abs(x)<=1&&Math.abs(y)<=1)||[[-2,0],[-2,-1],[-1,-2],[2,0],[0,2]].some(([a,b])=>a===x&&b===y);
-      const natural = core || (u*u/g.radiusX**2+v*v/g.radiusY**2)<edge;
+      const natural = core || Math.abs(x)<WORLD_RADIUS&&Math.abs(y)<WORLD_RADIUS&&(u*u/g.radiusX**2+v*v/g.radiusY**2)<edge;
       this.tiles.set(key(x,y), {x,y,kind:natural?'land':'water',natural,reclaimed:false,building:null,variant:noise(x+g.detailSeed,y),elevation:natural?1:.08,damage:0,floodYears:0});
     }
     // Keep one walkable island: diagonal specks do not become disconnected starting land.
@@ -1724,8 +1725,16 @@ class Civilization {
       if(['park','playground','garden','theater'].includes(type))return Math.abs(depth-.8)*5+Math.abs(side-.35)*3;
       return Math.abs(depth-.62)*5+Math.abs(side-.6)*2+Number(!!tile.road)*.5;
     };
-    const score=t=>baseScore(t)+(desired&&t.district!==desired?5:0)+(t.district==='heritage'?12:0)+(this.era===0?Math.hypot(t.x,t.y)*.6:0)-(t.burntForest&&['hut','house','townhouse','tower'].includes(type)?4:0);
-    return plots.slice().sort((a,b)=>score(a)-score(b))[0];
+    const housing=['hut','house','townhouse','tower'].includes(type);
+    const dwelling=t=>t&&['hut','house','townhouse','tower','manor','palace'].includes(t.buildSite?.type||t.building);
+    const roomAround=t=>{
+      if(!housing)return 0;
+      let penalty=0;
+      for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)if((dx||dy)&&dwelling(this.tile(t.x+dx,t.y+dy)))penalty+=dx&&dy?4:8;
+      return penalty;
+    };
+    const score=t=>baseScore(t)+roomAround(t)+(desired&&t.district!==desired?5:0)+(t.district==='heritage'?12:0)+(this.era===0?Math.hypot(t.x,t.y)*.6:0)-(t.burntForest&&['hut','house','townhouse','tower'].includes(type)?4:0);
+    let best,bestScore=Infinity;for(const tile of plots){const value=score(tile);if(value<bestScore){best=tile;bestScore=value;}}return best;
   }
   homeTypeFor(tile) {
     if(this.era<3)return this.era===0?'hut':'house';
@@ -2371,6 +2380,7 @@ class Civilization {
       sim.events=[];
       sim.signals=[];
       sim.config={maxTiles:480,rareEndings:true,accelerating:true,...sim.config};
+      sim.geographyVersion=parsed.geographyVersion||2;
       if(!parsed.geography)sim.geography={kind:'legacy',name:'The original island'};
       if(parsed.timelineVersion!==2){
         const allowed=ERAS.reduce((n,era,i)=>sim.year>=era.year?i:n,0);sim.era=Math.min(sim.era,allowed);
@@ -3659,7 +3669,7 @@ function updateUI(){
   $('happiness').textContent=nl(sim.happiness);
   $('interference-count').textContent=sim.interferences;
   $('land-area').textContent=sim.land.length;
-  $('start-size').textContent=sim.originalArea<200?'Bewaard klein eiland · kies Nieuw groot eiland':`${sim.originalArea} natuurlijke landtegels · de ruimte is er al`;
+  $('start-size').textContent=sim.geographyVersion<3?'Bewaard eiland · Nieuw groot eiland geeft meer ruimte':`${sim.originalArea} natuurlijke landtegels · de ruimte is er al`;
   updateCinemaUI();
   $('land-added').textContent=sim.reclaimed.length?`+${sim.reclaimed.length} geleend van de zee`:"voorlopig allemaal natuurlijk";
   $('food').textContent=Math.floor(sim.food).toLocaleString();

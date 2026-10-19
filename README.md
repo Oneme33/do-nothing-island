@@ -32,11 +32,11 @@ Spatie pauzeert. Scroll of +/− zoomt; sleep om de rest van het eiland te verke
 
 De bewoners kunnen zonder wegen door het landschap lopen, ook naar het achterland en de zijkanten. Wegen ontstaan bij echte bouwplaatsen en gebouwen. Bos, strand en uitzichtpunten veroorzaken geen automatisch wegennet. Karren, fietsen en auto's gebruiken de aangelegde wegen.
 
-Je voortgang wordt lokaal bewaard. **Nieuw groot eiland** begint meteen opnieuw en biedt tien seconden lang **Herstel vorig eiland**. Bestaande eilanden behouden hun bebouwing; begin een nieuw eiland om het begin met één huisje te zien.
+Je voortgang wordt lokaal bewaard. **Nieuw groot eiland** begint meteen opnieuw en biedt tien seconden lang **Herstel vorig eiland**. Nieuwe eilanden hebben ongeveer de helft meer natuurlijke landtegels en nieuwe huizen zoeken eerst plekken met ruimte tussen de buren. Ook geplande huizen tellen mee. Bestaande eilanden behouden hun kust en bebouwing; begin een nieuw eiland om de grotere kaart te zien.
 
 ## Een wereld die iets onthoudt
 
-Het landschap bevat per eiland ongeveer 215–255 natuurlijke landtegels binnen een begrensde wereld van 25 × 25 tegels. Er zijn verschillende kusten, bossen, stranden, heuvels, bergen en vulkanen. Bouwen en landbouw gebruiken echte ruimte. Inpoldering volgt dijkbouw, omsluiting, droogmalen, modder en droging. Alleen droog land kan bebouwd worden. Instellingen begrenzen de groei op 320, 480 of 625 tegels.
+Het landschap bevat per eiland ongeveer 350–400 natuurlijke landtegels binnen een begrensde wereld van 25 × 25 tegels. Er zijn verschillende kusten, bossen, stranden, heuvels, bergen en vulkanen. Bouwen en landbouw gebruiken echte ruimte. Inpoldering volgt dijkbouw, omsluiting, droogmalen, modder en droging. Alleen droog land kan bebouwd worden. Instellingen begrenzen de groei op 320, 480 of 625 tegels.
 
 Brand verdwijnt niet zonder gevolgen:
 

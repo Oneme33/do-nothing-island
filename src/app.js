@@ -158,7 +158,7 @@ function updateUI(){
   $('happiness').textContent=nl(sim.happiness);
   $('interference-count').textContent=sim.interferences;
   $('land-area').textContent=sim.land.length;
-  $('start-size').textContent=sim.originalArea<200?'Bewaard klein eiland · kies Nieuw groot eiland':`${sim.originalArea} natuurlijke landtegels · de ruimte is er al`;
+  $('start-size').textContent=sim.geographyVersion<3?'Bewaard eiland · Nieuw groot eiland geeft meer ruimte':`${sim.originalArea} natuurlijke landtegels · de ruimte is er al`;
   updateCinemaUI();
   $('land-added').textContent=sim.reclaimed.length?`+${sim.reclaimed.length} geleend van de zee`:"voorlopig allemaal natuurlijk";
   $('food').textContent=Math.floor(sim.food).toLocaleString();

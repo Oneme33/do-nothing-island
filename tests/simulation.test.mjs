@@ -251,7 +251,7 @@ test('new terrain is connected, reserves relief from construction and preserves 
     shapes.add(JSON.stringify(sim.land.map(t=>[t.x,t.y,t.landform])));
     const seen=new Set(['0,0']),queue=[sim.tile(0,0)];
     for(let i=0;i<queue.length;i++)for(const [x,y]of neighbors(queue[i])){const t=sim.tile(x,y),id=`${x},${y}`;if(t?.kind==='land'&&!seen.has(id)){seen.add(id);queue.push(t);}}
-    assert.equal(seen.size,sim.land.length);assert.ok(sim.land.length>=200&&sim.land.length<280);
+    assert.equal(seen.size,sim.land.length);assert.ok(sim.land.length>=340&&sim.land.length<=410);
     assert.equal(sim.population,6);assert.equal(sim.houses.length,1);assert.equal(sim.farms.length,1);
     assert.ok(sim.land.filter(t=>!t.building&&!t.landform).length>sim.land.length*.8,'most of the larger island starts unoccupied');
     assert.equal(sim.tile(0,0).building,'original-tree');assert.equal(sim.tile(-1,1).building,'hut');assert.equal(sim.tile(1,1).building,null);

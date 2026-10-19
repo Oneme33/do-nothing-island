@@ -56,7 +56,7 @@ export function landscapeForSeed(seed) {
   let state=(seed^0xa511e9b3)>>>0;
   const draw=()=>{let n=state+=0x6D2B79F5;n=Math.imul(n^n>>>15,n|1);n^=n+Math.imul(n^n>>>7,n|61);return((n^n>>>14)>>>0)/4294967296;};
   const roll=draw();
-  return{kind:roll<.28?'volcanic':roll<.72?'highlands':'rolling',name:roll<.28?'Volcanic island':roll<.72?'Highland island':'Rolling green island',radiusX:8.8+draw()*.8,radiusY:7.8+draw()*.7,angle:(draw()-.5)*1.4,phase:draw()*Math.PI*2,detailSeed:draw()*1000};
+  return{kind:roll<.28?'volcanic':roll<.72?'highlands':'rolling',name:roll<.28?'Volcanic island':roll<.72?'Highland island':'Rolling green island',radiusX:11.2+draw()*.65,radiusY:10+draw()*.6,angle:(draw()-.5)*1.4,phase:draw()*Math.PI*2,detailSeed:draw()*1000};
 }
 
 export class Civilization {
@@ -114,12 +114,13 @@ export class Civilization {
     this.volcanoActiveUntil=0;
     this.nextVolcanicEvent=380+Math.floor(noise(this.seed,79)*240);
     this.timelineVersion=2;
+    this.geographyVersion=3;
     const g=this.geography,cos=Math.cos(g.angle),sin=Math.sin(g.angle);
     for(let x=-WORLD_RADIUS;x<=WORLD_RADIUS;x++) for(let y=-WORLD_RADIUS;y<=WORLD_RADIUS;y++) {
       const u=x*cos-y*sin,v=x*sin+y*cos,angle=Math.atan2(v,u);
       const edge=1+.13*Math.sin(angle*3+g.phase)+.07*Math.cos(angle*5-g.phase);
       const core=(Math.abs(x)<=1&&Math.abs(y)<=1)||[[-2,0],[-2,-1],[-1,-2],[2,0],[0,2]].some(([a,b])=>a===x&&b===y);
-      const natural = core || (u*u/g.radiusX**2+v*v/g.radiusY**2)<edge;
+      const natural = core || Math.abs(x)<WORLD_RADIUS&&Math.abs(y)<WORLD_RADIUS&&(u*u/g.radiusX**2+v*v/g.radiusY**2)<edge;
       this.tiles.set(key(x,y), {x,y,kind:natural?'land':'water',natural,reclaimed:false,building:null,variant:noise(x+g.detailSeed,y),elevation:natural?1:.08,damage:0,floodYears:0});
     }
     // Keep one walkable island: diagonal specks do not become disconnected starting land.
@@ -203,8 +204,16 @@ export class Civilization {
       if(['park','playground','garden','theater'].includes(type))return Math.abs(depth-.8)*5+Math.abs(side-.35)*3;
       return Math.abs(depth-.62)*5+Math.abs(side-.6)*2+Number(!!tile.road)*.5;
     };
-    const score=t=>baseScore(t)+(desired&&t.district!==desired?5:0)+(t.district==='heritage'?12:0)+(this.era===0?Math.hypot(t.x,t.y)*.6:0)-(t.burntForest&&['hut','house','townhouse','tower'].includes(type)?4:0);
-    return plots.slice().sort((a,b)=>score(a)-score(b))[0];
+    const housing=['hut','house','townhouse','tower'].includes(type);
+    const dwelling=t=>t&&['hut','house','townhouse','tower','manor','palace'].includes(t.buildSite?.type||t.building);
+    const roomAround=t=>{
+      if(!housing)return 0;
+      let penalty=0;
+      for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)if((dx||dy)&&dwelling(this.tile(t.x+dx,t.y+dy)))penalty+=dx&&dy?4:8;
+      return penalty;
+    };
+    const score=t=>baseScore(t)+roomAround(t)+(desired&&t.district!==desired?5:0)+(t.district==='heritage'?12:0)+(this.era===0?Math.hypot(t.x,t.y)*.6:0)-(t.burntForest&&['hut','house','townhouse','tower'].includes(type)?4:0);
+    let best,bestScore=Infinity;for(const tile of plots){const value=score(tile);if(value<bestScore){best=tile;bestScore=value;}}return best;
   }
   homeTypeFor(tile) {
     if(this.era<3)return this.era===0?'hut':'house';
@@ -850,6 +859,7 @@ export class Civilization {
       sim.events=[];
       sim.signals=[];
       sim.config={maxTiles:480,rareEndings:true,accelerating:true,...sim.config};
+      sim.geographyVersion=parsed.geographyVersion||2;
       if(!parsed.geography)sim.geography={kind:'legacy',name:'The original island'};
       if(parsed.timelineVersion!==2){
         const allowed=ERAS.reduce((n,era,i)=>sim.year>=era.year?i:n,0);sim.era=Math.min(sim.era,allowed);

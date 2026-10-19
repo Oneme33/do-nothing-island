@@ -108,7 +108,7 @@ export function reshapeAfterQuake(s,spot){
   s.food=Math.max(0,s.food-18);discover(s,'rain-quake',spot,'De verzadigde grond schuift weg. Een modderstroom volgt de beving; de nieuwe sliblaag blijft.');
   return 'De natte grond wordt een modderstroom. Huizen lopen schade op; slib verrijkt de velden.';
  }
- const peak=s.land.find(t=>t.landform&&nearby(t,spot,2.5)&&!t.landslideYear);
+ const peak=s.land.filter(t=>t.landform&&nearby(t,spot,2.5)&&!t.landslideYear).sort((a,b)=>Math.hypot(a.x-spot.x,a.y-spot.y)-Math.hypot(b.x-spot.x,b.y-spot.y))[0];
  if(peak){
   peak.landslideYear=s.year;peak.relief=Math.max(18,(peak.relief||35)-18);
   const quarry=s.land.find(t=>nearby(t,peak,2)&&!t.building&&!t.landform&&!t.reservedFor);
