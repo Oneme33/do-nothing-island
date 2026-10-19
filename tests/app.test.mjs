@@ -119,3 +119,11 @@ test('resident wishes stay compact, dismiss permanently and pause only when deli
  e.get('wish-bubbles').handlers.change({target:{checked:false}});assert.equal(a.saved().config.wishBubbles,false);
  const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));assert.equal(b.elements.get('wish-bubble').hidden,true);
 });
+test('optional challenges are revealed only on request and their window pauses the island',async()=>{
+ const sim=new Civilization(31),a=await appHarness(sim),e=a.elements;
+ assert.equal(e.get('challenges-dialog').open,false);assert.equal(e.get('challenge-list').children.length,0);assert.equal(a.saved().challenges.revealed,false);
+ a.advance(2);assert.ok(e.get('year').textContent>1);assert.equal(e.get('challenges-dialog').open,false);
+ e.get('open-challenges').handlers.click();assert.equal(e.get('challenges-dialog').open,true);assert.equal(a.saved().challenges.revealed,true);assert.equal(e.get('challenge-list').children.length,sim.challenges.goals.length);
+ const year=e.get('year').textContent;a.advance(2);assert.equal(e.get('year').textContent,year);e.get('challenges-close').handlers.click();a.advance(2);assert.ok(e.get('year').textContent>year);
+ const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));assert.equal(b.elements.get('challenges-dialog').open,false,'return visits never open a challenge popup');
+});

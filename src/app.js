@@ -7,6 +7,7 @@ import {describePlot} from './inspection.js';
 import {drawFinale,islandScores} from './finale.js';
 import {ensureFamily,currentRelative} from './family.js';
 import {ensureWishes,dismissWish,WISH_OUTCOMES} from './wishes.js';
+import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
 
 const $=id=>document.getElementById(id);
 const storageKey='do-nothing-island-v1';
@@ -88,6 +89,17 @@ function renderFamily(){
     heading.textContent=`${person.name} ${family.lastName}`;time.textContent=`Generatie ${person.generation} · sleutelhouder vanaf jaar ${person.since}${family.generations[i+1]?` tot ${family.generations[i+1].since-1}`:' · nu'}`;
     const parent=i?family.generations[i-1]:null;line.textContent=`${parent?`Kind van ${parent.name}. `:'De eerste bewoner. '}${person.occupation}. ${person.name} ${person.quirk}.`;
     item.append(heading,time,line);return item;
+  }));
+}
+function renderChallenges(){
+  const state=ensureChallenges(sim);
+  $('challenge-note').textContent=state.trackingSince>1?`Bijhouden begonnen in jaar ${state.trackingSince}. Voorbijgegane doelen zijn niet achteraf beoordeeld.`:'Deze ideeën horen bij de seed van je eiland. Je hoeft ze niet te volgen.';
+  $('challenge-list').replaceChildren(...state.goals.map(goal=>{
+    const definition=CHALLENGE_CATALOG.find(d=>d.id===goal.id),item=document.createElement('li'),title=document.createElement('strong'),description=document.createElement('p'),status=document.createElement('span'),progress=document.createElement('small');
+    item.dataset.status=goal.status;title.textContent=definition?.title||'Een idee uit een andere versie';description.textContent=definition?.description||'';
+    status.textContent=goal.status==='completed'?`✓ Gelukt in jaar ${goal.completedAt}`:goal.status==='missed'?'Afgesloten · het eiland koos een ander verhaal':goal.status==='unavailable'?'Niet bijgehouden in deze oude save':'Vrijblijvend · nog mogelijk';
+    progress.textContent=goal.status==='active'?challengeProgress(sim,goal.id):goal.status==='completed'?'Deze mijlpaal blijft bewaard, ook als het eiland verder verandert.':'Je kunt rustig verder spelen.';
+    item.append(title,description,status,progress);return item;
   }));
 }
 function updateWishBubble(){
@@ -268,6 +280,8 @@ $('recenter').addEventListener('click',()=>renderer.recenter());
 $('help').addEventListener('click',()=>$('guide-dialog').showModal());
 $('settings').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;$('settings-dialog').showModal();});
 $('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();});
+$('open-challenges').addEventListener('click',()=>{ensureChallenges(sim).revealed=true;renderChallenges();$('challenges-dialog').showModal();updatePause();save();});
+$('challenges-close').addEventListener('click',()=>$('challenges-dialog').close());
 $('open-wishes').addEventListener('click',openWishes);
 $('wish-open').addEventListener('click',openWishes);
 $('wish-dismiss').addEventListener('click',()=>{dismissWish(sim);updateWishBubble();save();});

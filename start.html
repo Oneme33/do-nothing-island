@@ -50,6 +50,8 @@
 .family-dialog{width:min(650px,calc(100% - 28px));max-width:650px}.family-current{padding:15px 18px;background:#e7ecd7;border:1px solid #ccd7b8;border-radius:7px;line-height:1.7}.family-current strong{display:block;font-family:var(--serif);font-size:23px;font-weight:400}.family-current p{margin:6px 0 0;font-size:12px}.family-navigation{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.family-navigation button{font-size:10px;background:#edf0e2;border:1px solid #d8dfc9;border-radius:4px;padding:9px}.family-generations{list-style:none;padding:0 0 0 18px;margin:12px 0;max-height:340px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}.family-generations li{position:relative;margin:0;padding:0 10px 22px 23px;border-left:2px solid #d6dec7;line-height:1.7}.family-generations li:before{content:'';position:absolute;left:-6px;top:6px;background:#91a574;border:2px solid #f7f7ef;border-radius:50%;width:8px;height:8px}.family-generations li:last-child{border-color:transparent;padding-bottom:0}.family-generations strong{display:block;font-size:14px;color:#526b43}.family-generations time{display:block;font-size:9px;color:#899577}.family-generations p{font-size:11px;margin:4px 0;color:#78866c}.family-generations li[aria-current=true]{background:#edf0e2;border-radius:0 5px 5px 0}.family-history-item{background:#edf0df;border-radius:4px;padding:8px}.family-history-item .history-marker{background:#dfe8cb}
 
 .wish-bubble{position:absolute;left:18px;bottom:66px;width:224px;max-width:calc(100% - 36px);z-index:3;background:#faf9eef5;border:1px solid #c4d3b3;border-radius:12px 12px 12px 2px;box-shadow:0 3px 14px #3d55300d;padding:10px 32px 10px 12px}.wish-bubble #wish-open{display:block;text-align:left;width:100%;line-height:1.5}.wish-bubble small{display:block;font-size:8px;color:#60734e;margin-bottom:4px}.wish-bubble span{font-size:10px;color:#526547}.wish-bubble .card-close{top:1px;right:1px}.wish-history{padding-left:18px;max-height:220px;overflow:auto;font-size:11px;line-height:1.7}.wish-history p{margin:4px 0 15px;color:#728167}.island-window:has(.wish-bubble:not([hidden])) .project-overlay,.island-window:has(.wish-bubble:not([hidden])) .map-coordinate{visibility:hidden}.island-window:has(.story-moment:not([hidden])) .wish-bubble,.island-window:has(.tile-inspector:not([hidden])) .wish-bubble{visibility:hidden}
+
+.challenge-list{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:14px}.challenge-list li{padding:17px;background:#edf0e1;border:1px solid #d7dfc6;border-radius:7px;line-height:1.7}.challenge-list strong{font-family:var(--serif);font-size:22px;font-weight:400}.challenge-list p{font-size:12px;margin:6px 0 12px;color:#687a59}.challenge-list span{display:block;font-size:10px;font-weight:600;color:#596f46}.challenge-list small{display:block;font-size:10px;margin-top:6px;color:#7d896e}.challenge-list li[data-status=completed]{background:#e1ebd0;border-color:#b9cba3}.challenge-list li[data-status=missed],.challenge-list li[data-status=unavailable]{background:#f0eee4;border-color:#dfdacb}
 </style>
 </head>
 <body>
@@ -103,7 +105,7 @@
 
     <section class="island-story" aria-label="Verken het eiland en zijn geschiedenis">
       <div class="story-health"><span id="water-status">Zoetwater · 82%</span><span id="environment-status">Levend landschap · 100%</span><span id="legacy-status">Een zelfstandig begin</span><span id="council-status">Een paar mensen. Genoeg ruimte.</span></div>
-      <div class="explore-controls"><button id="open-wishes" aria-haspopup="dialog">♡ Wensen</button><button id="open-family" aria-haspopup="dialog">♧ Stamboom</button><button id="find-palace">♜ Eerste huis</button><button id="find-knowledge">✧ Kennis</button><button id="find-fields">♧ Akkers</button><button id="find-fun">♬ Feest</button><label><input type="checkbox" id="history-layer"> Toen en nu</label><select id="history-snapshot" aria-label="Vergelijk een vroegere kustlijn" hidden></select><button id="open-ending" hidden>Lees het naschrift ↗</button></div>
+      <div class="explore-controls"><button id="open-challenges" aria-haspopup="dialog">✧ Uitdagingen</button><button id="open-wishes" aria-haspopup="dialog">♡ Wensen</button><button id="open-family" aria-haspopup="dialog">♧ Stamboom</button><button id="find-palace">♜ Eerste huis</button><button id="find-knowledge">✧ Kennis</button><button id="find-fields">♧ Akkers</button><button id="find-fun">♬ Feest</button><label><input type="checkbox" id="history-layer"> Toen en nu</label><select id="history-snapshot" aria-label="Vergelijk een vroegere kustlijn" hidden></select><button id="open-ending" hidden>Lees het naschrift ↗</button></div>
       <p id="history-legend" hidden>Oker: vroegere kust · Blauw: overstroomde wijken · Goud/blauw: jouw bezoeken · Oude dijken blijven in de stad zichtbaar.</p>
     </section>
 
@@ -122,6 +124,7 @@
   <dialog id="cinema-dialog" class="cinema-dialog" aria-labelledby="cinema-title"><button id="cinema-close" class="dialog-close" aria-label="Sluit de eindscène">×</button><span class="eyebrow">HUN GROTE FINALE</span><canvas id="finale-canvas" width="800" height="380" aria-label="Geanimeerde finale van het eiland"></canvas>      <div class="cinema-caption" id="cinema-caption" aria-live="polite" hidden><span class="eyebrow">HET LAATSTE GROTE IDEE</span><strong id="cinema-title"></strong><p id="cinema-line"></p><div><button id="cinema-cheer">Vier mee met de bewoners</button><button id="cinema-skip" hidden>Naar het naschrift →</button></div></div><progress id="cinema-progress" max="100" value="0" aria-label="Voortgang van de eindscène"></progress><button id="cinema-pause" class="secondary-button">Pauze</button><p class="dialog-note">Na de scène zie je de eilandscore en wat zij achterlaten.</p></dialog>
   <dialog id="guide-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN KLEINE HANDLEIDING</span><h2>Welkom bij het nietsdoen.</h2><p>Eén huisje, een kleine akker en zes mensen. De beschaving groeit vanzelf. Jij kiest of je toekijkt of ingrijpt.</p><div class="guide-steps"><div><span>01</span><p><strong>Neem de tijd.</strong> Het eiland begint op 1×. Met de balk op het eiland kies je de snelheid of pauzeer je. Een open logboek, handleiding of instellingenvenster zet het leven even stil.</p></div><div><span>02</span><p><strong>Alles laat sporen achter.</strong> Bouw helpt de bewoners. Regen voedt de akkers. Vuur en bevingen kunnen blijvende veranderingen veroorzaken. Probeer dingen uit en kijk wat de bewoners ermee doen.</p></div><div><span>03</span><p><strong>Kijk van dichtbij.</strong> Kies Kijk en klik op een plek voor bewoners, bouwjaar en herinneringen. Versleep de kaart of zoom om de rest te zien. Rond 2100 begint het laatste hoofdstuk, met een eigen eindscène en eilandscore.</p></div></div><p class="dialog-note">Spatie: pauze · Scroll of +/−: zoom · Slepen: verkennen<br>Je eiland wordt automatisch in deze browser bewaard.</p><button class="primary-button" data-close>Ik laat ze even hun gang gaan ↗</button></dialog>
 
+  <dialog id="challenges-dialog" aria-labelledby="challenges-title"><button id="challenges-close" class="dialog-close" aria-label="Sluit de uitdagingen">×</button><span class="eyebrow">ALLEEN ALS JE ZIN HEBT</span><h2 id="challenges-title">Kleine uitdagingen</h2><p>Dit eiland heeft een paar vrijblijvende ideeën. Er hangt geen beloning of straf aan. Gewoon kijken blijft genoeg.</p><p id="challenge-note" class="dialog-note"></p><ol id="challenge-list" class="challenge-list"></ol></dialog>
   <dialog id="wishes-dialog" aria-labelledby="wishes-title"><button id="wishes-close" class="dialog-close" aria-label="Sluit de wensen">×</button><span class="eyebrow">EEN VRAAG VAN HET EILAND</span><h2 id="wishes-title">Wensen van inwoners</h2><p>Je mag helpen of gewoon blijven kijken. Hulp vergroot hun vertrouwen én de verwachting dat je terugkomt. Zonder ingreep zoeken ze hun eigen weg.</p><section id="wish-current" class="family-current"></section><button id="wish-find" class="primary-button" hidden>Laat zien ↗</button><label class="setting-row"><span>Toon kleine wenswolkjes</span><input id="wish-bubbles" type="checkbox"></label><h3>Eerdere wensen</h3><ol id="wish-history" class="wish-history"></ol></dialog>
   <dialog id="family-dialog" class="family-dialog" aria-labelledby="family-title"><button id="family-close" class="dialog-close" aria-label="Sluit de stamboom">×</button><span class="eyebrow">DE FAMILIE VAN HET EERSTE HUIS</span><h2 id="family-title"></h2><p>Het huis blijft. Iedere generatie geeft de sleutel door.</p><section id="family-current" class="family-current"></section><p id="family-note" class="dialog-note"></p><div class="family-navigation"><button id="family-oldest">Naar de eerste generatie ↑</button><button id="family-latest">Naar de huidige generatie ↓</button><button id="family-find-home">Bekijk hun huis ↗</button></div><ol id="family-generations" class="family-generations" aria-label="Generaties van de eerste familie"></ol></dialog>
   <dialog id="journal-dialog" class="journal-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">HET EILANDARCHIEF</span><h2>Behoorlijk veel niets.</h2><p>Elke grote beschaving begint met een boom en wat twijfelachtige beslissingen.</p><div id="journal-entries"></div></dialog>
@@ -826,6 +829,66 @@ function answerWish(s,spot,mode){
 }
 function dismissWish(s){const wish=ensureWishes(s).active;if(wish)wish.hidden=true;}
 
+// Optional goals never consume world randomness, produce popups or award resources.
+const CHALLENGE_CATALOG=[
+ {id:'first-manor',title:'Een voordeur met ambities',description:'Laat het eerste huis uiterlijk in jaar 400 uitgroeien tot een landhuis.',deadline:400},
+ {id:'hundred-neighbors',title:'Iedereen kent nog iemand',description:'Bereik uiterlijk in jaar 600 minstens 100 inwoners.',deadline:600},
+ {id:'hands-off',title:'Ze redden zich prima',description:'Bereik de Renaissance in jaar 1250 zonder één ingreep.',deadline:1250},
+ {id:'green-modernity',title:'Vooruitgang met schaduw',description:'Bereik jaar 1920 met minstens 75% levend landschap en vier bossen.',deadline:1920},
+ {id:'fire-tradition',title:'Wij nemen de hapjes mee',description:'Sticht uiterlijk in jaar 500 een terugkerende vuurtraditie op een vuurplaats.',deadline:500,experiment:true},
+ {id:'fresh-spring',title:'Water uit de grond',description:'Open uiterlijk in jaar 1000 een blijvende zoetwaterbron.',deadline:1000,experiment:true},
+ {id:'library',title:'Een eiland vol verhalen',description:'Laat uiterlijk in jaar 600 een bibliotheek bouwen.',deadline:600}
+];
+const challengeHash=(seed,n)=>{let x=(seed^Math.imul(n+1,0x9e3779b1))>>>0;x=Math.imul(x^(x>>>16),0x85ebca6b);return(x^(x>>>13))>>>0;};
+function selectChallenges(seed){
+ const count=1+challengeHash(seed,0)%3,pool=CHALLENGE_CATALOG.slice().sort((a,b)=>challengeHash(seed,CHALLENGE_CATALOG.indexOf(a)+1)-challengeHash(seed,CHALLENGE_CATALOG.indexOf(b)+1));
+ const chosen=[];
+ for(const goal of pool){
+  if(goal.id==='hands-off'&&chosen.some(g=>g.experiment)||goal.experiment&&chosen.some(g=>g.id==='hands-off'))continue;
+  chosen.push(goal);if(chosen.length===count)break;
+ }
+ return chosen;
+}
+function ensureChallenges(s,{restoring=false}={}){
+ if(s.challenges?.version===1&&Array.isArray(s.challenges.goals))return s.challenges;
+ return s.challenges={version:1,revealed:false,trackingSince:s.year,goals:selectChallenges(s.seed).map(goal=>({id:goal.id,status:restoring&&(s.year>=goal.deadline||goal.id==='hands-off'&&s.interferences>0)?'unavailable':'active',completedAt:null}))};
+}
+function challengeMet(s,id){
+ switch(id){
+  case'first-manor':return ['manor','palace'].includes(s.tile(-1,1)?.building);
+  case'hundred-neighbors':return s.population>=100;
+  case'hands-off':return s.year>=1250&&s.interferences===0;
+  case'green-modernity':return s.year>=1920&&s.environment>=75&&s.forests.length>=4;
+  case'fire-tradition':return s.fireTraditions>0;
+  case'fresh-spring':return s.land.some(t=>t.spring);
+  case'library':return s.buildings.some(t=>t.building==='library');
+  default:return false;
+ }
+}
+function advanceChallenges(s){
+ const state=ensureChallenges(s);
+ for(const goal of state.goals){
+  if(goal.status!=='active')continue;
+  const definition=CHALLENGE_CATALOG.find(g=>g.id===goal.id);if(!definition){goal.status='unavailable';continue;}
+  if(s.year>definition.deadline||goal.id==='hands-off'&&s.interferences>0){goal.status='missed';goal.closedAt=s.year;}
+  else if(challengeMet(s,goal.id)){goal.status='completed';goal.completedAt=s.year;}
+  else if(s.ending){goal.status='missed';goal.closedAt=s.year;}
+ }
+ return state;
+}
+function challengeProgress(s,id){
+ switch(id){
+  case'first-manor':return ['manor','palace'].includes(s.tile(-1,1)?.building)?'Het eerste huis is uitgegroeid.':'De eerste voordeur wacht op haar landhuis.';
+  case'hundred-neighbors':return `${Math.floor(s.population)} van 100 inwoners`;
+  case'hands-off':return `${s.interferences} ingrepen · jaar ${Math.min(s.year,1250)} van 1250`;
+  case'green-modernity':return `${Math.round(s.environment)}% landschap · ${s.forests.length} van 4 bossen · jaar ${Math.min(s.year,1920)} van 1920`;
+  case'fire-tradition':return s.fireTraditions?'Het vuurfeest is een traditie.':'Er is nog geen terugkerende vuurtraditie.';
+  case'fresh-spring':return s.land.some(t=>t.spring)?'Er stroomt vers water uit de grond.':'Er is nog geen blijvende bron.';
+  case'library':return s.buildings.some(t=>t.building==='library')?'De bibliotheek is open.':'De bibliotheek moet nog gebouwd worden.';
+  default:return '';
+ }
+}
+
 const score100=n=>Math.round(Math.max(0,Math.min(100,n)));
 function islandScores(s){
  const living=score100(s.prosperity*.45+s.freshwater*.25+Math.min(100,s.food/Math.max(1,s.population)*45)*.3);
@@ -1506,6 +1569,7 @@ class Civilization {
     this.log('A tree. A few people. An unreasonable amount of potential.','tree');
     ensureFamily(this);
     ensureWishes(this);
+    ensureChallenges(this);
   }
   random() {
     let n = this.randomState += 0x6D2B79F5;
@@ -1699,6 +1763,7 @@ class Civilization {
     advanceWishes(this);
     this.advanceEndgame();
     this.tryLastDrop();
+    advanceChallenges(this);
   }
   develop() {
     if(this.wood < 7 || this.food < 3) return;
@@ -2121,7 +2186,7 @@ class Civilization {
       jokeAfterTouch(this,spot,type);
       this.belief+=type==='rumble'?3:type==='rain'?2:1;
       this.lastIntervention={type,title,detail,year:this.year,expires:this.year+expires,x:spot.x,y:spot.y};
-      this.signal(type,spot,title);this.log(detail,'interference');this.ensureInfrastructure();this.advanceEndgame();return detail;
+      this.signal(type,spot,title);this.log(detail,'interference');this.ensureInfrastructure();this.advanceEndgame();advanceChallenges(this);return detail;
     };
     if(mode==='fire'){const result=ignite(this,spot);return finish('fire',result.title,result.detail,16);}
     if(mode==='nudge'&&t?.rift&&t.kind==='water'&&!t.building){t.building='bridge';t.builtYear=this.year;this.wood=Math.max(0,this.wood-12);this.rebuildRoads();return finish('nudge','Een brug over de kloof','De bouwers verbinden de twee kanten. De breuklijn blijft zichtbaar onder de brug.',12);}
@@ -2227,6 +2292,8 @@ class Civilization {
       ensureFamily(sim,{restoring:true});
       if(!parsed.wishes)delete sim.wishes;
       ensureWishes(sim);
+      if(!parsed.challenges)delete sim.challenges;
+      ensureChallenges(sim,{restoring:true});
       if(parsed.routeVersion!==2){const field=sim.tile(1,-1);if(field?.building==='farm'&&!field.builtYear)field.foundingField=true;sim.rebuildRoads();}
       if(sim.endgameStarted&&!sim.finaleDeadline&&!sim.ending)advanceFinale(sim);
       return sim;
@@ -3396,6 +3463,17 @@ function renderFamily(){
     item.append(heading,time,line);return item;
   }));
 }
+function renderChallenges(){
+  const state=ensureChallenges(sim);
+  $('challenge-note').textContent=state.trackingSince>1?`Bijhouden begonnen in jaar ${state.trackingSince}. Voorbijgegane doelen zijn niet achteraf beoordeeld.`:'Deze ideeën horen bij de seed van je eiland. Je hoeft ze niet te volgen.';
+  $('challenge-list').replaceChildren(...state.goals.map(goal=>{
+    const definition=CHALLENGE_CATALOG.find(d=>d.id===goal.id),item=document.createElement('li'),title=document.createElement('strong'),description=document.createElement('p'),status=document.createElement('span'),progress=document.createElement('small');
+    item.dataset.status=goal.status;title.textContent=definition?.title||'Een idee uit een andere versie';description.textContent=definition?.description||'';
+    status.textContent=goal.status==='completed'?`✓ Gelukt in jaar ${goal.completedAt}`:goal.status==='missed'?'Afgesloten · het eiland koos een ander verhaal':goal.status==='unavailable'?'Niet bijgehouden in deze oude save':'Vrijblijvend · nog mogelijk';
+    progress.textContent=goal.status==='active'?challengeProgress(sim,goal.id):goal.status==='completed'?'Deze mijlpaal blijft bewaard, ook als het eiland verder verandert.':'Je kunt rustig verder spelen.';
+    item.append(title,description,status,progress);return item;
+  }));
+}
 function updateWishBubble(){
   const wish=ensureWishes(sim).active;
   $('wish-bubble').hidden=!wish||wish.hidden||sim.config.wishBubbles===false||!!sim.ending;
@@ -3574,6 +3652,8 @@ $('recenter').addEventListener('click',()=>renderer.recenter());
 $('help').addEventListener('click',()=>$('guide-dialog').showModal());
 $('settings').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;$('settings-dialog').showModal();});
 $('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();});
+$('open-challenges').addEventListener('click',()=>{ensureChallenges(sim).revealed=true;renderChallenges();$('challenges-dialog').showModal();updatePause();save();});
+$('challenges-close').addEventListener('click',()=>$('challenges-dialog').close());
 $('open-wishes').addEventListener('click',openWishes);
 $('wish-open').addEventListener('click',openWishes);
 $('wish-dismiss').addEventListener('click',()=>{dismissWish(sim);updateWishBubble();save();});

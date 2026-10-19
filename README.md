@@ -10,6 +10,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Wensen** verschijnen af en toe als een klein wegklikbaar wolkje. Via Wensen lees je de vraag terug en kun je de plek opzoeken. Wolkjes zijn ook helemaal uit te zetten. Regen, een boomfeest, een vreugdevuur, hulp bij brand of een bron openen kunnen het vertrouwen vergroten; wie vaak helpt maakt het eiland ook afhankelijker. Afwachten laat ruimte voor eigen oplossingen. Wensen worden met je eiland opgeslagen.
 
+**Uitdagingen** bevat één tot drie vrijblijvende doelen per seed. Ze worden stil bijgehouden en zijn alleen zichtbaar als je zelf het venster opent. Bijvoorbeeld: een vroeg landhuis, de Renaissance zonder ingreep, een bibliotheek of een vuurtraditie. Ze geven geen bonus of straf. Behaalde doelen blijven bewaard; een oudere save krijgt geen achteraf verzonnen uitslagen.
+
 ## Spelen
 
 Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het volledige spel; installatie en een server zijn niet nodig. De interface is Nederlands. De eerste keer verschijnen drie korte introschermen, waarna het eiland op **1×** begint.
@@ -93,7 +95,7 @@ Deze afbeeldingen controleren de renderer. Ze vervangen geen volledige interacti
 
 ## Broncode
 
-- `family.js` en `wishes.js`: de opgeslagen familielijn en optionele vragen van inwoners.
+- `family.js`, `wishes.js` en `challenges.js`: de opgeslagen familielijn, vragen van inwoners en stille optionele doelen.
 - `simulation.js`: wereld, economie, bouw, wegen, verkeer en opslag.
 - `story.js`: geschiedenis, hervormingen, archief en eindregels.
 - `consequences.js`: brandverspreiding, herbouw, brandweer, terreingevolgen en ontdekkingen.
