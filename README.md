@@ -18,6 +18,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Terwijl je weg was…** verschijnt na minstens een minuut afwezigheid. Het eiland haalt met de bewaarde snelheid maximaal drie eeuwen in en vertelt wat werkelijk gebeurde: verstreken jaren, overstromingen en de familielijn. Laat zien brengt je naar de plek van het grootste moment. De samenvatting is wegklikbaar. Pauze en open vensters worden gerespecteerd; in instellingen kun je voortgang tijdens afwezigheid uitzetten. Een einde tijdens afwezigheid opent geen automatische eindscène.
 
+**De kroniek** groepeert het logboek per tijdperk, met kleine illustraties en knoppen om tussen hoofdstukken te springen. Familie en jouw ingrepen vallen op. Elk bericht heeft Laat zien: een vastgelegde plek opent op het huidige eiland; bij een oud bericht zonder precieze plek zie je het eiland als geheel. De kroniek bewaart maximaal 350 berichten en geeft grote momenten voorrang.
+
 ## Spelen
 
 Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het volledige spel; installatie en een server zijn niet nodig. De interface is Nederlands. De eerste keer verschijnen drie korte introschermen, waarna het eiland op **1×** begint.
@@ -101,6 +103,7 @@ Deze afbeeldingen controleren de renderer. Ze vervangen geen volledige interacti
 
 ## Broncode
 
+- `chronicle.js`: hoofdstukken per tijdperk, illustraties en eerlijke verwijzingen naar opgeslagen plekken.
 - `away.js`: begrensde voortgang tijdens afwezigheid en een terugkomsamenvatting op basis van echte gebeurtenissen.
 - `collection.js`: stille, blijvende vondsten per eiland en de aparte verzameling over eilanden heen.
 - `family.js`, `wishes.js` en `challenges.js`: de opgeslagen familielijn, vragen van inwoners en stille optionele doelen.

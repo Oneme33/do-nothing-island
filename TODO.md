@@ -12,7 +12,7 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 - [x] **2.4 Verzameling over eilanden heen.** Bewaar ontdekte eindes, bijzondere mijlpalen en voltooide uitdagingen. Onontdekte items krijgen silhouetten en vage hints. *(Ontdekker)*
 - [x] **2.5 Geheime gebeurtenissen verzamelen.** Onder andere drie keer regen op de oude boom laten bloeien, een beving bij de vulkaan en vuur op een kampvuur tijdens een feest. Koppel ook de bestaande ontdekkingen aan de verzameling. *(Experimenteerder)*
 - [x] **2.6 ‘Terwijl je weg was…’.** Een korte terugkomsamenvatting met eeuwen, gebeurtenissen en familieleden. ‘Laat zien’ brengt je naar het grootste moment. *(Rustige kijker)*
-- [ ] **2.7 Kroniek per tijdperk.** Hoofdstukken met een kleine illustratie en per gebeurtenis ‘Laat zien’. Familie en jouw ingrepen springen eruit. *(Verhalenlezer)*
+- [x] **2.7 Kroniek per tijdperk.** Hoofdstukken met een kleine illustratie en per gebeurtenis ‘Laat zien’. Familie en jouw ingrepen springen eruit. *(Verhalenlezer)*
 - [ ] **2.8 Filmisch einde op het echte eiland.** De camera volgt plekken uit de kroniek en eindigt bij de laatste nazaat onder de oude boom. Het tekstoverzicht komt daarna. *(Allemaal)*
 - [ ] **2.9 Dag, nacht en seizoenen.** Avondlicht, lantaarns, verlichte ramen, herfstbomen en sneeuw op de bergen. *(Rustige kijker)*
 - [ ] **2.10 Organisch begin.** Geen zichtbaar raster in jaar 1. Loopsporen worden paden en later straten; de groei naar een stad wordt zichtbaar verdiend.
@@ -32,4 +32,10 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 
 ## Nu aan de beurt
 
-**2.4 en 2.5 zijn gereed voor Coens test**, elk met een eigen commit en push. Help heeft Kijk vervangen met een eigen commit. Grotere eilanden en ruimere nieuwbouw zijn toegevoegd op aanvullend verzoek. De wegen hebben nu een vlak wegdek; het grijze boomlabel is verwijderd. 2.6 (terugkomsamenvatting) is gereed. Nu volgt 2.7 (kroniek per tijdperk), met een eigen commit en push. Ronde 3 blijft open.
+**2.1–2.7 zijn gereed voor Coens test**, elk met een eigen commit en push. Aanvullende feedback is verwerkt in aparte commits: Help in plaats van Kijk, meer natuurlijke landtegels en ruimte tussen huizen, vlakke wegen en het verwijderen van het grijze boomlabel.
+
+Aanvullende visuele feedback, na het afronden en testen van deze reeks:
+
+- [ ] **Meer herkenbare mensjes.** Duidelijkere menselijke vormen en wat meer persoonlijkheid in de bewoners; behoud de kleine schaal en rustige uitstraling.
+
+Het volgende onderdeel van Ronde 2 is **2.8 (filmisch einde op het echte eiland)**, na feedback of een nieuwe opdracht. Ronde 3 blijft open.

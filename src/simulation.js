@@ -151,7 +151,7 @@ export class Civilization {
     ensureStory(this);
     seedPleasures(this);
     this.rebuildRoads();
-    this.log('A tree. A few people. An unreasonable amount of potential.','tree');
+    this.log('A tree. A few people. An unreasonable amount of potential.','tree',{x:0,y:0});
     ensureFamily(this);
     ensureWishes(this);
     ensureChallenges(this);
@@ -550,8 +550,8 @@ export class Civilization {
       Object.assign(openings,{school:'A school opens. The children immediately question the entire system.','science-center':'A science center opens. The researchers request more funding before lunch.'});
       if(type==='powerplant'&&this.year>=1980)openings.powerplant='Een regelbare reservecentrale versterkt het stroomnet. De stad kiest voor leveringszekerheid.';
       if(['school','library','science-center'].includes(type)){const court=neighbors(t).map(([x,y])=>this.tile(x,y)).find(p=>p?.kind==='land'&&!p.building&&!p.buildSite&&!p.landform&&(!p.reservedFor||p.reservedFor==='knowledge')&&p.district==='knowledge');if(court&&!this.buildings.some(p=>p.building==='campus-square')){court.building='campus-square';court.civicLegacy='The knowledge quarter';court.builtYear=this.year;}}
-      if(openings[type])this.log(this.buildings.filter(t=>t.building===type).length>1?`${openings[type].replace(/The first /,'Another ')} A new neighborhood gets its turn.`:openings[type],['statue','garden','theater','park','forest','beach','playground','fairground'].includes(type)?'culture':['shop','bakery','cafe'].includes(type)?'trade':'technology');
-      else if(this.buildings.length<18)this.log(type==='farm'?'Another field is planted. Dinner looks increasingly likely.':'A new home is finished. The neighbors come over to inspect it.','home');
+      if(openings[type])this.log(this.buildings.filter(t=>t.building===type).length>1?`${openings[type].replace(/The first /,'Another ')} A new neighborhood gets its turn.`:openings[type],['statue','garden','theater','park','forest','beach','playground','fairground'].includes(type)?'culture':['shop','bakery','cafe'].includes(type)?'trade':'technology',{x:t.x,y:t.y});
+      else if(this.buildings.length<18)this.log(type==='farm'?'Another field is planted. Dinner looks increasingly likely.':'A new home is finished. The neighbors come over to inspect it.','home',{x:t.x,y:t.y});
     }
     if(changed)this.rebuildRoads();
   }
@@ -561,7 +561,7 @@ export class Civilization {
     if(home.building==='palace'&&this.year===this.age.year){home.architecture=this.age.id;home.builtYear=this.year;this.signal('palace',home,'The palace enters a new age');}
     if(this.era>=1 && this.population>=18 && !['manor','palace'].includes(home.building)){
       home.building='manor';delete home.futureBuilding;home.architecture=this.age.id;home.builtYear=this.year;
-      this.log('The very first hut becomes a manor. Its owners begin referring to everyone else as “the village”.','palace');
+      this.log('The very first hut becomes a manor. Its owners begin referring to everyone else as “the village”.','palace',{x:home.x,y:home.y});
       growEstate(this,home);captureSnapshot(this,'The first manor');
       this.signal('palace',home,'The first hut → a manor');
     }else if(this.year>=1000 && this.population>=(this.character==='builder'?50:70) && home.building==='manor'){
@@ -781,7 +781,7 @@ export class Civilization {
       jokeAfterTouch(this,spot,type);
       this.belief+=type==='rumble'?3:type==='rain'?2:1;
       this.lastIntervention={type,title,detail,year:this.year,expires:this.year+expires,x:spot.x,y:spot.y};
-      this.signal(type,spot,title);this.log(detail,'interference');this.ensureInfrastructure();this.advanceEndgame();advanceChallenges(this);advanceCollection(this);return detail;
+      this.signal(type,spot,title);this.log(detail,'interference',{x:spot.x,y:spot.y,interventionId:this.interventionLedger.at(-1)?.id});this.ensureInfrastructure();this.advanceEndgame();advanceChallenges(this);advanceCollection(this);return detail;
     };
     if(mode==='fire'){const result=ignite(this,spot);return finish('fire',result.title,result.detail,16);}
     if(mode==='nudge'&&t?.rift&&t.kind==='water'&&!t.building){t.building='bridge';t.builtYear=this.year;this.wood=Math.max(0,this.wood-12);this.rebuildRoads();return finish('nudge','Een brug over de kloof','De bouwers verbinden de twee kanten. De breuklijn blijft zichtbaar onder de brug.',12);}

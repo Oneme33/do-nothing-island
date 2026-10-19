@@ -9,6 +9,7 @@ async function appHarness(initial,{firstVisit=false,persistentStorage=null,rejec
  class Element{
   constructor(){this.hidden=false;this.open=false;this.style={};this.dataset={};this.handlers={};this.children=[];this.classList={toggle(){},add(){},remove(){}};}
   addEventListener(type,handler){this.handlers[type]=handler;}
+  scrollIntoView(options){this.scrolled=options;}
   setAttribute(){}setPointerCapture(){}append(...items){this.children.push(...items);}replaceChildren(...items){this.children=items;}
   querySelector(){return new Element();}matches(){return false;}close(){const wasOpen=this.open;this.open=false;if(wasOpen)this.handlers.close?.();}showModal(){this.open=true;}
   getBoundingClientRect(){return{width:1200,height:575,left:0,top:0};}
@@ -161,4 +162,12 @@ test('return summaries are inline and dismissible; Show focuses the real place w
 test('offline progression can be turned off and a paused saved island does not advance on return',async()=>{
  const s=new Civilization(31);s.lastVisitAt=Date.now()-120000;s.lastVisitPaused=true;const a=await appHarness(s),e=a.elements;assert.equal(a.saved().year,1);assert.equal(e.get('away-summary').hidden,true);
  e.get('offline-life').handlers.change({target:{checked:false}});assert.equal(a.saved().config.offlineProgress,false);
+});
+test('the journal has illustrated chapters, highlighted people and a working Show button on every entry',async()=>{
+ const s=new Civilization(31);while(s.year<650)s.tick();s.interfere(1,-1,'rain');s.log('Een oud bericht zonder plek.','trade');const a=await appHarness(s),e=a.elements;a.frame(16);e.get('canvas-journal').handlers.click();
+ const chapters=e.get('journal-entries').children,nav=e.get('journal-chapters').children;assert.equal(chapters.length,3);assert.equal(nav.length,3);assert.match(chapters[0].children[0].children[0].innerHTML,/<svg/);nav[2].handlers.click();assert.equal(chapters[2].scrolled.block,'start');
+ const items=chapters.flatMap(c=>c.children.slice(1)).filter(item=>item.className?.includes('history-item'));assert.equal(items.length,s.history.length);assert.ok(items.some(item=>item.className.includes('family-history-item')));assert.ok(items.some(item=>item.className.includes('interference-history-item')));assert.ok(items.every(item=>item.children[1].children[2].textContent==='Laat zien ↗'));
+ const year=e.get('year').textContent;a.advance(2);assert.equal(e.get('year').textContent,year);
+ const intervention=items.find(item=>item.className.includes('interference-history-item'));intervention.children[1].children[2].handlers.click();assert.equal(e.get('journal-dialog').open,false);assert.equal(e.get('tile-inspector').hidden,false);assert.equal(e.get('island').dataset.mode,'help');assert.equal(a.saved().interferences,1,'reading the chronicle never causes another intervention');
+ e.get('canvas-journal').handlers.click();const old=e.get('journal-entries').children.flatMap(c=>c.children.slice(1)).find(item=>item.children?.[1]?.children?.[1]?.textContent==='Een oud bericht zonder plek.');old.children[1].children[2].handlers.click();assert.equal(e.get('journal-dialog').open,false);assert.equal(e.get('tile-inspector').hidden,true);assert.match(e.get('toast-text').textContent,/precIeze plek|precieze plek/);
 });

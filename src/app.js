@@ -8,6 +8,7 @@ import {drawFinale,islandScores} from './finale.js';
 import {ensureFamily,currentRelative} from './family.js';
 import {ensureWishes,dismissWish,WISH_OUTCOMES,canHelpWish,helpActiveWish} from './wishes.js';
 import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
+import {chronicleChapters,chroniclePlace,CHAPTER_ILLUSTRATIONS} from './chronicle.js';
 import {returnFromAway} from './away.js';
 import {COLLECTION_STORAGE_KEY,COLLECTION_CATALOG,COLLECTION_GROUPS,readCollection,mergeCollections,collectIsland} from './collection.js';
 
@@ -92,11 +93,13 @@ function updateClock(){
   renderer.activityRate=cinemaActive()?1:rate*.68;renderer.paused=paused||modal||!cinemaActive()&&(sim.ending||held);
 }
 const icons={legacy:'✳',reform:'✧',crisis:'⚑',age:'✧',tree:'♧',farm:'♧',home:'⌂',life:'✳',dock:'⚑',technology:'✧',dike:'≋',land:'▱',district:'⌂',storm:'☂',flood:'≈',repair:'⚒',beach:'◌',abandon:'↗',interference:'✳',ending:'◉',road:'⌁',trade:'⚑',palace:'♜',culture:'♫',bridge:'⌒',protest:'⚑',endgame:'✧',volcano:'△'};
-function historyItem(entry){
-  const item=document.createElement('article');item.className=entry.type==='family'?'history-item family-history-item':'history-item';
+function historyItem(entry,locate=false){
+  const item=document.createElement('article');item.className='history-item'+(entry.type==='family'?' family-history-item':entry.type==='interference'?' interference-history-item':'');
   const marker=document.createElement('span');marker.className='history-marker';marker.setAttribute('aria-hidden','true');marker.textContent=icons[entry.type]||'✳';
   const content=document.createElement('div'),time=document.createElement('time'),p=document.createElement('p');
-  time.textContent=`JAAR ${entry.year}${(entry.priority||eventPriority(entry.type))>=82?" · MIJLPAAL":''}`;p.textContent=nl(entry.text);content.append(time,p);item.append(marker,content);return item;
+  time.textContent=`JAAR ${entry.year}${entry.type==='family'?' · FAMILIE':entry.type==='interference'?' · JOUW INGREEP':(entry.priority||eventPriority(entry.type))>=82?' · MIJLPAAL':''}`;p.textContent=nl(entry.text);content.append(time,p);
+  if(locate===true){const button=document.createElement('button');button.className='chronicle-show';button.textContent='Laat zien ↗';button.title=chroniclePlace(sim,entry)?'Bekijk deze plek op het huidige eiland':'Bekijk het eiland; de precieze plek is niet opgeslagen';button.addEventListener('click',()=>showChroniclePlace(entry));content.append(button);}
+  item.append(marker,content);return item;
 }
 function updateHistory(){
   if(!dirtyHistory)return;dirtyHistory=false;
@@ -107,7 +110,23 @@ function updateHistory(){
   }
   if($('journal-dialog').open)renderJournal();
 }
-function renderJournal(){$('journal-entries').replaceChildren(...sim.history.slice().reverse().map(historyItem));}
+function showChroniclePlace(entry){
+  $('journal-dialog').close();const place=chroniclePlace(sim,entry);chooseMode('help');
+  if(place){inspectionPinned=true;focusPlace(place);showToast(`Plek uit de kroniek · jaar ${entry.year} · je ziet het huidige eiland.`,3200);}
+  else{renderer.focus=null;renderer.recenter();inspectionPinned=false;$('tile-inspector').hidden=true;showToast(`Jaar ${entry.year} · de precieze plek is niet opgeslagen. Je ziet het hele eiland.`,3600);}
+}
+function renderJournal(){
+  const chapters=chronicleChapters(sim),sections=[];
+  const navigation=chapters.map(chapter=>{
+    const section=document.createElement('section'),header=document.createElement('header'),picture=document.createElement('span'),words=document.createElement('div'),range=document.createElement('span'),title=document.createElement('h3'),note=document.createElement('small'),button=document.createElement('button');
+    section.className='chronicle-chapter';section.dataset.era=chapter.id;section.dataset.current=String(chapter.current);section.setAttribute('aria-labelledby',`chapter-${chapter.id}`);
+    picture.className='chapter-illustration';picture.setAttribute('aria-hidden','true');picture.innerHTML=`<svg viewBox="0 0 96 60">${CHAPTER_ILLUSTRATIONS[chapter.id]}</svg>`;
+    range.className='eyebrow';range.textContent=`JAAR ${chapter.year}${chapter.until?`–${chapter.until}`:' EN VERDER'}`;title.id=`chapter-${chapter.id}`;title.textContent=chapter.title;note.textContent=`${chapter.entries.length} bewaarde berichten${chapter.current?' · huidig hoofdstuk':''}`;words.append(range,title,note);header.append(picture,words);section.append(header);
+    if(chapter.entries.length)section.append(...chapter.entries.map(entry=>historyItem(entry,true)));else{const empty=document.createElement('p');empty.className='chapter-empty';empty.textContent='Nog geen bewaarde berichten in dit hoofdstuk. Het dagelijks leven ging ondertussen gewoon door.';section.append(empty);}
+    sections.push(section);button.textContent=chapter.title;button.setAttribute('aria-label',`Ga naar ${chapter.title}`);if(chapter.current)button.setAttribute('aria-current','true');button.addEventListener('click',()=>section.scrollIntoView({behavior:renderer.reduced?'auto':'smooth',block:'start'}));return button;
+  });
+  $('journal-chapters').replaceChildren(...navigation);$('journal-entries').replaceChildren(...sections);
+}
 function renderFamily(){
   const family=ensureFamily(sim),current=currentRelative(sim);
   $('family-title').textContent=`Familie ${family.lastName}`;
@@ -314,7 +333,7 @@ $('zoom-out').addEventListener('click',()=>renderer.setZoom(1/1.18));
 $('recenter').addEventListener('click',()=>renderer.recenter());
 $('help').addEventListener('click',()=>$('guide-dialog').showModal());
 $('settings').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;$('settings-dialog').showModal();});
-$('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();});
+$('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();updatePause();});
 $('away-dismiss').addEventListener('click',()=>{if(sim.awayReport)sim.awayReport.dismissed=true;updateAwayReport();save();});
 $('away-show').addEventListener('click',()=>{
   const report=sim.awayReport;if(!report)return;

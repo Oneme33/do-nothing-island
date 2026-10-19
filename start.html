@@ -58,6 +58,8 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .collection-dialog{max-width:780px;width:min(780px,calc(100% - 24px))}.collection-dialog h3{font-size:12px;font-weight:500;letter-spacing:.5px;margin:27px 0 12px}.collection-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;list-style:none;padding:0;margin:0}.collection-grid li{padding:16px;border:1px solid #d5dec5;background:#eaf0db;border-radius:7px;line-height:1.7;overflow-wrap:anywhere}.collection-stamp{display:grid;place-items:center;width:42px;height:42px;margin-bottom:9px;border-radius:50%;background:#d5e2be;color:#748a54}.collection-stamp svg{width:28px;height:28px;fill:currentColor;stroke:none}.collection-grid strong{display:block;font-family:var(--serif);font-size:20px;font-weight:400}.collection-grid p{font-size:11px;color:#677756;margin:7px 0 10px}.collection-grid small{font-size:9px;color:#748464}.collection-grid li[data-found=false]{background:#f0efe6;border-color:#e0ddcf}.collection-grid li[data-found=false] .collection-stamp{color:#a4aa98;background:#e2e3d7}.collection-grid li[data-found=false] strong{font-family:var(--font);font-size:12px;color:#78826d}.collection-grid li[data-found=false] p{color:#8a907f;font-style:italic}@media(max-width:500px){.collection-grid{grid-template-columns:1fr}.collection-dialog{padding:25px 20px}}
 
 .away-summary{position:relative;display:flex;align-items:center;gap:18px;background:#e8edda;border:1px solid #ccd8bb;border-radius:7px;padding:16px 42px 16px 18px;margin-bottom:18px;line-height:1.7}.away-summary strong{display:block;font-family:var(--serif);font-size:22px;font-weight:400}.away-summary small{display:block;font-size:9px;color:#81916e}.away-summary p{font-size:11px;color:#657b54;margin:5px 0 0}.away-summary #away-show{flex-shrink:0;background:#d9e4c3;border:1px solid #bdcda4;border-radius:5px;padding:10px 12px;font-size:11px;margin-left:auto}@media(max-width:500px){.away-summary{align-items:flex-start;flex-direction:column;gap:8px}.away-summary #away-show{margin-left:0}}
+
+.journal-dialog{max-width:720px}.chronicle-legend{display:flex;gap:18px;font-size:10px;color:#6b7b57;margin:16px 0}.journal-chapters{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}.journal-chapters button{font-size:9px;line-height:1.5;padding:7px 9px;background:#e9eddb;border:1px solid #d1dbbe;border-radius:4px}.journal-chapters button[aria-current=true]{background:#dce7c8;border-color:#b6ca9d}.chronicle-chapter{margin:24px 0 32px;scroll-margin-top:24px}.chronicle-chapter>header{display:flex;align-items:center;gap:15px;border-bottom:1px solid #ccd6ba;padding-bottom:14px;margin-bottom:5px}.chapter-illustration{flex-shrink:0;width:90px;height:64px;border-radius:8px;background:#e8edda;display:grid;place-items:center}.chapter-illustration svg{width:84px;height:54px;fill:none;stroke:#7e8f66;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}.chronicle-chapter h3{font-family:var(--serif);font-size:26px;line-height:1.2;font-weight:400;margin:6px 0}.chronicle-chapter header small{font-size:9px;color:#8a967c}.chronicle-show{font-size:10px;padding:7px 10px;margin-top:10px;border:1px solid #ced9bc;background:#ebefdf;border-radius:4px;color:#60754e}.chronicle-chapter .history-item>div{min-width:0;flex:1}.chronicle-chapter .history-item{padding:15px 8px}.chronicle-chapter .family-history-item{background:#edf0df;margin:5px 0}.interference-history-item{background:#f2e9d7;border-radius:4px;margin:5px 0}.interference-history-item .history-marker{background:#e9dbb7;border-color:#ded0ab;color:#927d51}.chapter-empty{font-size:11px;color:#8a967c;line-height:1.8;padding:12px 8px}@media(max-width:500px){.journal-dialog{padding:25px 20px}.chapter-illustration{width:68px;height:54px}.chapter-illustration svg{width:64px;height:44px}.chronicle-chapter h3{font-size:23px}}
 </style>
 </head>
 <body>
@@ -134,7 +136,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
   <dialog id="challenges-dialog" aria-labelledby="challenges-title"><button id="challenges-close" class="dialog-close" aria-label="Sluit de uitdagingen">×</button><span class="eyebrow">ALLEEN ALS JE ZIN HEBT</span><h2 id="challenges-title">Kleine uitdagingen</h2><p>Dit eiland heeft een paar vrijblijvende ideeën. Er hangt geen beloning of straf aan. Gewoon kijken blijft genoeg.</p><p id="challenge-note" class="dialog-note"></p><ol id="challenge-list" class="challenge-list"></ol></dialog>
   <dialog id="wishes-dialog" aria-labelledby="wishes-title"><button id="wishes-close" class="dialog-close" aria-label="Sluit de wensen">×</button><span class="eyebrow">EEN VRAAG VAN HET EILAND</span><h2 id="wishes-title">Wensen van inwoners</h2><p>Je mag helpen of gewoon blijven kijken. Hulp vergroot hun vertrouwen én de verwachting dat je terugkomt. Zonder ingreep zoeken ze hun eigen weg.</p><section id="wish-current" class="family-current"></section><div class="wish-actions"><button id="wish-help" class="primary-button" hidden>Help deze inwoner</button><button id="wish-find" class="secondary-button" hidden>Bekijk inwoner ↗</button></div><label class="setting-row"><span>Toon kleine wenswolkjes</span><input id="wish-bubbles" type="checkbox"></label><h3>Eerdere wensen</h3><ol id="wish-history" class="wish-history"></ol></dialog>
   <dialog id="family-dialog" class="family-dialog" aria-labelledby="family-title"><button id="family-close" class="dialog-close" aria-label="Sluit de stamboom">×</button><span class="eyebrow">DE FAMILIE VAN HET EERSTE HUIS</span><h2 id="family-title"></h2><p>Het huis blijft. Iedere generatie geeft de sleutel door.</p><section id="family-current" class="family-current"></section><p id="family-note" class="dialog-note"></p><div class="family-navigation"><button id="family-oldest">Naar de eerste generatie ↑</button><button id="family-latest">Naar de huidige generatie ↓</button><button id="family-find-home">Bekijk hun huis ↗</button></div><ol id="family-generations" class="family-generations" aria-label="Generaties van de eerste familie"></ol></dialog>
-  <dialog id="journal-dialog" class="journal-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">HET EILANDARCHIEF</span><h2>Behoorlijk veel niets.</h2><p>Elke grote beschaving begint met een boom en wat twijfelachtige beslissingen.</p><div id="journal-entries"></div></dialog>
+  <dialog id="journal-dialog" class="journal-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">HET EILANDARCHIEF</span><h2>De kroniek van jouw eiland.</h2><p>Hoofdstukken vol familie, eigen ideeën en jouw ingrepen. Laat zien brengt je naar de plek zoals die er nu bij ligt.</p><div class="chronicle-legend"><span>♧ Familie</span><span>✳ Jouw ingreep</span></div><nav id="journal-chapters" class="journal-chapters" aria-label="Hoofdstukken van de kroniek"></nav><p class="dialog-note">De kroniek bewaart maximaal 350 berichten. Grote momenten en familie krijgen voorrang op dagelijkse nieuwtjes.</p><div id="journal-entries"></div></dialog>
 
   <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Leven tijdens afwezigheid</strong><small>Bij terugkomst maximaal drie eeuwen verder, behalve wanneer je pauzeert.</small></span><input type="checkbox" id="offline-life" checked></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Een rustig begin, daarna steeds sneller.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
 
@@ -1701,7 +1703,7 @@ class Civilization {
     ensureStory(this);
     seedPleasures(this);
     this.rebuildRoads();
-    this.log('A tree. A few people. An unreasonable amount of potential.','tree');
+    this.log('A tree. A few people. An unreasonable amount of potential.','tree',{x:0,y:0});
     ensureFamily(this);
     ensureWishes(this);
     ensureChallenges(this);
@@ -2100,8 +2102,8 @@ class Civilization {
       Object.assign(openings,{school:'A school opens. The children immediately question the entire system.','science-center':'A science center opens. The researchers request more funding before lunch.'});
       if(type==='powerplant'&&this.year>=1980)openings.powerplant='Een regelbare reservecentrale versterkt het stroomnet. De stad kiest voor leveringszekerheid.';
       if(['school','library','science-center'].includes(type)){const court=neighbors(t).map(([x,y])=>this.tile(x,y)).find(p=>p?.kind==='land'&&!p.building&&!p.buildSite&&!p.landform&&(!p.reservedFor||p.reservedFor==='knowledge')&&p.district==='knowledge');if(court&&!this.buildings.some(p=>p.building==='campus-square')){court.building='campus-square';court.civicLegacy='The knowledge quarter';court.builtYear=this.year;}}
-      if(openings[type])this.log(this.buildings.filter(t=>t.building===type).length>1?`${openings[type].replace(/The first /,'Another ')} A new neighborhood gets its turn.`:openings[type],['statue','garden','theater','park','forest','beach','playground','fairground'].includes(type)?'culture':['shop','bakery','cafe'].includes(type)?'trade':'technology');
-      else if(this.buildings.length<18)this.log(type==='farm'?'Another field is planted. Dinner looks increasingly likely.':'A new home is finished. The neighbors come over to inspect it.','home');
+      if(openings[type])this.log(this.buildings.filter(t=>t.building===type).length>1?`${openings[type].replace(/The first /,'Another ')} A new neighborhood gets its turn.`:openings[type],['statue','garden','theater','park','forest','beach','playground','fairground'].includes(type)?'culture':['shop','bakery','cafe'].includes(type)?'trade':'technology',{x:t.x,y:t.y});
+      else if(this.buildings.length<18)this.log(type==='farm'?'Another field is planted. Dinner looks increasingly likely.':'A new home is finished. The neighbors come over to inspect it.','home',{x:t.x,y:t.y});
     }
     if(changed)this.rebuildRoads();
   }
@@ -2111,7 +2113,7 @@ class Civilization {
     if(home.building==='palace'&&this.year===this.age.year){home.architecture=this.age.id;home.builtYear=this.year;this.signal('palace',home,'The palace enters a new age');}
     if(this.era>=1 && this.population>=18 && !['manor','palace'].includes(home.building)){
       home.building='manor';delete home.futureBuilding;home.architecture=this.age.id;home.builtYear=this.year;
-      this.log('The very first hut becomes a manor. Its owners begin referring to everyone else as “the village”.','palace');
+      this.log('The very first hut becomes a manor. Its owners begin referring to everyone else as “the village”.','palace',{x:home.x,y:home.y});
       growEstate(this,home);captureSnapshot(this,'The first manor');
       this.signal('palace',home,'The first hut → a manor');
     }else if(this.year>=1000 && this.population>=(this.character==='builder'?50:70) && home.building==='manor'){
@@ -2331,7 +2333,7 @@ class Civilization {
       jokeAfterTouch(this,spot,type);
       this.belief+=type==='rumble'?3:type==='rain'?2:1;
       this.lastIntervention={type,title,detail,year:this.year,expires:this.year+expires,x:spot.x,y:spot.y};
-      this.signal(type,spot,title);this.log(detail,'interference');this.ensureInfrastructure();this.advanceEndgame();advanceChallenges(this);advanceCollection(this);return detail;
+      this.signal(type,spot,title);this.log(detail,'interference',{x:spot.x,y:spot.y,interventionId:this.interventionLedger.at(-1)?.id});this.ensureInfrastructure();this.advanceEndgame();advanceChallenges(this);advanceCollection(this);return detail;
     };
     if(mode==='fire'){const result=ignite(this,spot);return finish('fire',result.title,result.detail,16);}
     if(mode==='nudge'&&t?.rift&&t.kind==='water'&&!t.building){t.building='bridge';t.builtYear=this.year;this.wood=Math.max(0,this.wood-12);this.rebuildRoads();return finish('nudge','Een brug over de kloof','De bouwers verbinden de twee kanten. De breuklijn blijft zichtbaar onder de brug.',12);}
@@ -2448,6 +2450,30 @@ class Civilization {
       return sim;
     } catch { return null; }
   }
+}
+
+
+const CHAPTER_ILLUSTRATIONS={
+ early:'<path d="M14 45V29l17-13 17 13v16H14Z" fill="#d9c9a4"/><path d="m10 29 21-17 21 17" fill="#b89471"/><path d="M27 45V32h9v13M67 46V27"/><circle cx="67" cy="20" r="13" fill="#a3b67d"/><circle cx="76" cy="25" r="9" fill="#b5c88a"/>',
+ classical:'<path d="M17 21 48 8 79 21Z" fill="#c4c9a5"/><path d="M17 25h62M15 47h66"/><path d="M23 26h9v19h-9zM43 26h9v19h-9zM64 26h9v19h-9z" fill="#d8d8b7"/>',
+ medieval:'<path d="M16 47V18h6v6h7v-6h7v29M59 47V18h7v6h7v-6h7v29M36 47V31h23v16Z" fill="#c1c5a4"/><path d="M43 47V37a5 5 0 0 1 10 0v10" fill="#9eaa86"/>',
+ renaissance:'<path d="M12 18q18-6 35 3v27q-17-9-35-3ZM47 21q17-9 35-3v27q-18-6-35 3Z" fill="#e2dbc1"/><path d="M21 26h15M21 32h15M58 26h15M58 32h15M47 21v27"/><path d="m69 12 14-7-9 15-9 6Z" fill="#a5b486"/>',
+ industrial:'<path d="M13 47V27l18-9v9l17-9v9l18-9v29Z" fill="#b3b6a0"/><path d="M65 47V12h12v35" fill="#bda184"/><path d="M22 35h7v7h-7zM38 35h7v7h-7zM53 35h7v7h-7z" fill="#e5d9af"/><path d="M71 8q-14-8-25 0" stroke="#c3c9b6" stroke-width="5"/>',
+ modern:'<rect x="13" y="19" width="69" height="25" rx="5" fill="#a6b89e"/><path d="M23 24h12v9H23zM42 24h12v9H42zM62 24h12v9H62z" fill="#e0e4cb"/><path d="M12 49h71M40 19l7-9 8 9M27 44v4M67 44v4"/>',
+ contemporary:'<path d="M16 47V20h20v27M39 47V9h23v38M66 47V27h16v20" fill="#b8c6ac"/><path d="M23 27h6M23 35h6M46 18h9M46 27h9M46 36h9M71 34h6" stroke="#e7e6ca" stroke-width="4"/>',
+ future:'<path d="M17 47V31h28v16Z" fill="#c1ccad"/><path d="m13 31 18-14 18 14" fill="#e1d7af"/><path d="M68 46V19M68 19 53 14M68 19l12-12M68 19l3 17"/><circle cx="26" cy="9" r="6" fill="#dfcf94"/>'
+};
+function chronicleChapters(s){
+ const chapters=AGES.filter(age=>age.year<=s.year).map((age,i)=>({...age,title:nl(age.name),until:AGES[i+1]?.year-1||null,current:s.age.id===age.id,entries:[]}));
+ const entries=s.history.map((entry,index)=>({entry,index})).sort((a,b)=>a.entry.year-b.entry.year||a.index-b.index);
+ for(const {entry} of entries){const chapter=chapters.findLast(c=>entry.year>=c.year)||chapters[0];chapter.entries.push(entry);}
+ return chapters;
+}
+function chroniclePlace(s,entry){
+ if(Number.isFinite(entry.x)&&Number.isFinite(entry.y)&&s.tile(entry.x,entry.y))return s.tile(entry.x,entry.y);
+ if(entry.type==='family')return s.tile(s.family?.home.x??-1,s.family?.home.y??1);
+ if(entry.type==='tree')return s.tile(0,0);
+ return null;
 }
 
 function drawFlames(r,x,y,size=1){
@@ -3646,11 +3672,13 @@ function updateClock(){
   renderer.activityRate=cinemaActive()?1:rate*.68;renderer.paused=paused||modal||!cinemaActive()&&(sim.ending||held);
 }
 const icons={legacy:'✳',reform:'✧',crisis:'⚑',age:'✧',tree:'♧',farm:'♧',home:'⌂',life:'✳',dock:'⚑',technology:'✧',dike:'≋',land:'▱',district:'⌂',storm:'☂',flood:'≈',repair:'⚒',beach:'◌',abandon:'↗',interference:'✳',ending:'◉',road:'⌁',trade:'⚑',palace:'♜',culture:'♫',bridge:'⌒',protest:'⚑',endgame:'✧',volcano:'△'};
-function historyItem(entry){
-  const item=document.createElement('article');item.className=entry.type==='family'?'history-item family-history-item':'history-item';
+function historyItem(entry,locate=false){
+  const item=document.createElement('article');item.className='history-item'+(entry.type==='family'?' family-history-item':entry.type==='interference'?' interference-history-item':'');
   const marker=document.createElement('span');marker.className='history-marker';marker.setAttribute('aria-hidden','true');marker.textContent=icons[entry.type]||'✳';
   const content=document.createElement('div'),time=document.createElement('time'),p=document.createElement('p');
-  time.textContent=`JAAR ${entry.year}${(entry.priority||eventPriority(entry.type))>=82?" · MIJLPAAL":''}`;p.textContent=nl(entry.text);content.append(time,p);item.append(marker,content);return item;
+  time.textContent=`JAAR ${entry.year}${entry.type==='family'?' · FAMILIE':entry.type==='interference'?' · JOUW INGREEP':(entry.priority||eventPriority(entry.type))>=82?' · MIJLPAAL':''}`;p.textContent=nl(entry.text);content.append(time,p);
+  if(locate===true){const button=document.createElement('button');button.className='chronicle-show';button.textContent='Laat zien ↗';button.title=chroniclePlace(sim,entry)?'Bekijk deze plek op het huidige eiland':'Bekijk het eiland; de precieze plek is niet opgeslagen';button.addEventListener('click',()=>showChroniclePlace(entry));content.append(button);}
+  item.append(marker,content);return item;
 }
 function updateHistory(){
   if(!dirtyHistory)return;dirtyHistory=false;
@@ -3661,7 +3689,23 @@ function updateHistory(){
   }
   if($('journal-dialog').open)renderJournal();
 }
-function renderJournal(){$('journal-entries').replaceChildren(...sim.history.slice().reverse().map(historyItem));}
+function showChroniclePlace(entry){
+  $('journal-dialog').close();const place=chroniclePlace(sim,entry);chooseMode('help');
+  if(place){inspectionPinned=true;focusPlace(place);showToast(`Plek uit de kroniek · jaar ${entry.year} · je ziet het huidige eiland.`,3200);}
+  else{renderer.focus=null;renderer.recenter();inspectionPinned=false;$('tile-inspector').hidden=true;showToast(`Jaar ${entry.year} · de precieze plek is niet opgeslagen. Je ziet het hele eiland.`,3600);}
+}
+function renderJournal(){
+  const chapters=chronicleChapters(sim),sections=[];
+  const navigation=chapters.map(chapter=>{
+    const section=document.createElement('section'),header=document.createElement('header'),picture=document.createElement('span'),words=document.createElement('div'),range=document.createElement('span'),title=document.createElement('h3'),note=document.createElement('small'),button=document.createElement('button');
+    section.className='chronicle-chapter';section.dataset.era=chapter.id;section.dataset.current=String(chapter.current);section.setAttribute('aria-labelledby',`chapter-${chapter.id}`);
+    picture.className='chapter-illustration';picture.setAttribute('aria-hidden','true');picture.innerHTML=`<svg viewBox="0 0 96 60">${CHAPTER_ILLUSTRATIONS[chapter.id]}</svg>`;
+    range.className='eyebrow';range.textContent=`JAAR ${chapter.year}${chapter.until?`–${chapter.until}`:' EN VERDER'}`;title.id=`chapter-${chapter.id}`;title.textContent=chapter.title;note.textContent=`${chapter.entries.length} bewaarde berichten${chapter.current?' · huidig hoofdstuk':''}`;words.append(range,title,note);header.append(picture,words);section.append(header);
+    if(chapter.entries.length)section.append(...chapter.entries.map(entry=>historyItem(entry,true)));else{const empty=document.createElement('p');empty.className='chapter-empty';empty.textContent='Nog geen bewaarde berichten in dit hoofdstuk. Het dagelijks leven ging ondertussen gewoon door.';section.append(empty);}
+    sections.push(section);button.textContent=chapter.title;button.setAttribute('aria-label',`Ga naar ${chapter.title}`);if(chapter.current)button.setAttribute('aria-current','true');button.addEventListener('click',()=>section.scrollIntoView({behavior:renderer.reduced?'auto':'smooth',block:'start'}));return button;
+  });
+  $('journal-chapters').replaceChildren(...navigation);$('journal-entries').replaceChildren(...sections);
+}
 function renderFamily(){
   const family=ensureFamily(sim),current=currentRelative(sim);
   $('family-title').textContent=`Familie ${family.lastName}`;
@@ -3868,7 +3912,7 @@ $('zoom-out').addEventListener('click',()=>renderer.setZoom(1/1.18));
 $('recenter').addEventListener('click',()=>renderer.recenter());
 $('help').addEventListener('click',()=>$('guide-dialog').showModal());
 $('settings').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;$('settings-dialog').showModal();});
-$('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();});
+$('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();updatePause();});
 $('away-dismiss').addEventListener('click',()=>{if(sim.awayReport)sim.awayReport.dismissed=true;updateAwayReport();save();});
 $('away-show').addEventListener('click',()=>{
   const report=sim.awayReport;if(!report)return;

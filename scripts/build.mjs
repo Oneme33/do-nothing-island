@@ -4,7 +4,7 @@ await mkdir('dist', { recursive:true });
 for (const file of ['index.html','styles.css','favicon.svg']) await copyFile(file,`dist/${file}`);
 await cp('src','dist/src',{recursive:true});
 // A self-contained entry point also runs directly from disk, without a server.
-const sources = await Promise.all(['language','family','wishes','challenges','finale','inspection','consequences','spectacle','story','collection','away','simulation','pageants','renderer','app'].map(name=>readFile(`src/${name}.js`,'utf8')));
+const sources = await Promise.all(['language','family','wishes','challenges','finale','inspection','consequences','spectacle','story','collection','away','simulation','chronicle','pageants','renderer','app'].map(name=>readFile(`src/${name}.js`,'utf8')));
 const script = sources.map(source=>source.replace(/^import .*;\n/gm,'').replace(/\bexport /g,'')).join('\n');
 const css = await readFile('styles.css','utf8');
 const html = (await readFile('index.html','utf8'))
