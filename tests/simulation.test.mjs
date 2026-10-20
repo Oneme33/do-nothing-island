@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Civilization, neighbors, PROJECT_STAGES, secondsPerYear } from '../src/simulation.js';
+import { Civilization, neighbors, PROJECT_STAGES, secondsPerYear, FIXED_SECONDS_PER_YEAR } from '../src/simulation.js';
 
 function prepared(era=2,config={}) {
   const sim=new Civilization(48,config);
@@ -149,13 +149,14 @@ test('new islands have different geography while identical seeds reproduce the s
 test('pacing accelerates smoothly, stays bounded, and still permits the fixed-speed setting',()=>{
   let previous=secondsPerYear(1);
   assert.ok(previous>1);
+  assert.ok(previous*32>=55,'a family generation lasts about a minute at 1×');
   for(let year=2;year<3000;year++){
     const duration=secondsPerYear(year,Math.min(4,Math.floor(year/100)));
-    assert.ok(duration<=previous);assert.ok(duration>=.24);previous=duration;
+    assert.ok(duration<=previous);assert.ok(duration>=1.1);previous=duration;
   }
-  const sim=new Civilization(8);assert.ok(sim.yearDuration>.68);
-  sim.year=300;sim.era=2;assert.ok(sim.yearDuration<.68);
-  sim.config.accelerating=false;assert.equal(sim.yearDuration,.68);
+  const sim=new Civilization(8);assert.ok(sim.yearDuration>FIXED_SECONDS_PER_YEAR);
+  sim.year=1000;sim.era=3;assert.ok(sim.yearDuration<FIXED_SECONDS_PER_YEAR);
+  sim.config.accelerating=false;assert.equal(sim.yearDuration,FIXED_SECONDS_PER_YEAR);
 });
 test('roads connect real destinations and traffic only appears after powered modern roads exist',()=>{
   const sim=new Civilization(31);

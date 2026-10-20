@@ -49,7 +49,9 @@ const REMARKS = {
 export const key = (x,y) => `${x},${y}`;
 export const neighbors = t => [[t.x+1,t.y],[t.x-1,t.y],[t.x,t.y+1],[t.x,t.y-1]];
 export const isUsable = t => t.kind === 'land';
-export const secondsPerYear = (year,era=0) => Math.max(.24,1.15/(1+Math.max(0,year-1)/110+era*.2));
+// About a minute per generation at 1×: slow enough to get to know the family, gently faster in later ages.
+export const secondsPerYear = (year,era=0) => Math.max(1.1,1.9/(1+Math.max(0,year-1)/2500+era*.05));
+export const FIXED_SECONDS_PER_YEAR=1.5;
 const clamp = (v,min,max) => Math.max(min,Math.min(max,v));
 const noise = (x,y) => { const n = Math.sin(x*127.1+y*311.7)*43758.5453; return n-Math.floor(n); };
 export function landscapeForSeed(seed) {
@@ -177,7 +179,7 @@ export class Civilization {
   get endgameYear() { const i=this.influence||{};return this.endgameStarted?this.endgameAt:Math.max(1950,2100-Math.min(150,(i.fire||0)*5+(i.rumble||0)*9+(i.nudge||0)*4+(i.rain||0)*3+(i.rescues||0)*2)); }
   isCoast(tile) { return tile?.kind==='land' && neighbors(tile).some(([x,y])=>this.tile(x,y)?.kind==='water'&&!this.tile(x,y)?.building); }
   get capacity() { return this.houses.reduce((sum,t)=>sum+ERAS[this.era].housing*(t.building==='palace'?4:t.building==='manor'?2:1)*(t.quakeDamage?.5:1)*(t.inspired?1.1:1)*(1+(t.extensionLevel||0)*.25),0); }
-  get yearDuration() { const base=this.config.accelerating?secondsPerYear(this.year,this.era):.68;return Math.max(base,this.endgameStarted&&!this.sandbox?.65:this.year>=1920?.6:this.year>=1750?.38:0); }
+  get yearDuration() { const base=this.config.accelerating?secondsPerYear(this.year,this.era):FIXED_SECONDS_PER_YEAR;return Math.max(base,this.endgameStarted&&!this.sandbox?.65:this.year>=1920?.6:this.year>=1750?.38:0); }
   get age() { return [...AGES].reverse().find(age=>this.year>=age.year)||AGES[0]; }
   get temperament() { return CHARACTERS.find(p=>p.id===this.character)||{food:1,trade:1,science:1,growth:1}; }
   get pressure() { return this.population / Math.max(1,this.capacity); }

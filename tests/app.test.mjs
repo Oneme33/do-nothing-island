@@ -86,12 +86,12 @@ test('a saved ending resumes its scene, while a completed recap stays completed 
 });
 test('story cards are off by default and milestones do not interrupt watching',async()=>{
  const sim=new Civilization(31);sim.year=119;sim.technology=100;const a=await appHarness(sim),e=a.elements;
- assert.equal(e.get('story-cards').checked,false);a.advance(3);assert.ok(e.get('year').textContent>121);
+ assert.equal(e.get('story-cards').checked,false);a.advance(7);assert.ok(e.get('year').textContent>121);
  assert.equal(e.get('moment-card').hidden,true);assert.equal(e.get('tile-inspector').hidden,true);
 });
 test('opted-in cards have an immediate close button and never automatically pause or select a place',async()=>{
  const sim=new Civilization(31);sim.year=119;sim.technology=100;sim.config.storyCards=true;const a=await appHarness(sim),e=a.elements;
- a.advance(3);assert.equal(e.get('moment-card').hidden,false);assert.ok(e.get('year').textContent>121);assert.equal(e.get('tile-inspector').hidden,true);
+ a.advance(7);assert.equal(e.get('moment-card').hidden,false);assert.ok(e.get('year').textContent>121);assert.equal(e.get('tile-inspector').hidden,true);
  e.get('moment-close').handlers.click();assert.equal(e.get('moment-card').hidden,true);a.advance(1);assert.equal(e.get('moment-card').hidden,true);
  e.get('story-cards').handlers.change({target:{checked:false}});assert.equal(a.saved().config.storyCards,false);
 });

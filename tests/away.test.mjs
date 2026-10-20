@@ -4,7 +4,7 @@ import {Civilization} from '../src/simulation.js';
 import {returnFromAway,MAX_AWAY_YEARS} from '../src/away.js';
 
 test('absence runs the real simulation at saved speed and reports actual family and flood changes',()=>{
- const s=new Civilization(31),expected=Civilization.restore(s.serialize());s.lastVisitAt=1000;const report=returnFromAway(s,121000);assert.ok(report&&report.years>100&&report.years<=300);
+ const s=new Civilization(31),expected=Civilization.restore(s.serialize());s.lastVisitAt=1000;const report=returnFromAway(s,301000);assert.ok(report&&report.years>100&&report.years<=300);
  while(expected.year<s.year)expected.tick();assert.equal(s.population,expected.population);assert.equal(s.randomState,expected.randomState);assert.deepEqual([...s.tiles],[...expected.tiles]);assert.deepEqual(s.family,expected.family);assert.equal(report.floods,s.storyStats.floods);assert.match(report.summary,/familiesleutel/);assert.ok(report.biggest.text);assert.equal(s.events.length,0);assert.equal(s.signals.length,0);
 });
 test('long absences are bounded, saved and cannot be processed twice',()=>{

@@ -32,6 +32,8 @@ Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het
 
 De pauzeknop, snelheden **1× / 2× / 3× / 10×** en het logboek staan op het eiland. Automatische verhaalkaarten staan standaard uit; in instellingen kun je ze aanzetten. Gebeurtenissen blijven altijd in het logboek. Kaarten pauzeren of verplaatsen de camera niet automatisch. Iedere kaart heeft een sluitknop; ook intro, eindscène en naschrift zijn meteen met × of Escape te verbergen.
 
+Op **1×** duurt een jaar in het begin bijna twee seconden, zodat elke generatie van de familie ongeveer een minuut meegaat. In latere tijdperken gaat het rustig naar ruim een seconde per jaar. Een heel eiland duurt op 1× zo'n vijftig minuten; 2×, 3× en 10× zijn er voor wie sneller wil. Zonder ‘Steeds wat sneller’ duurt elk jaar anderhalve seconde.
+
 Spatie pauzeert. Scroll of +/− zoomt; sleep om de rest van het eiland te verkennen. Open vensters zoals het logboek, de handleiding en instellingen pauzeren de wereld.
 
 De bewoners kunnen zonder wegen door het landschap lopen, ook naar het achterland en de zijkanten. Vlakke zandwegen verbinden echte bouwplaatsen en gebouwen. Later worden ze straten met een grijs wegdek en markering. Bos, strand en uitzichtpunten veroorzaken geen automatisch wegennet. Karren, fietsen en auto's gebruiken de aangelegde wegen.
