@@ -8,6 +8,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Huizen verschillen van elkaar.** Elk huis krijgt vanuit zijn plek een eigen gevelkleur, dakkleur, kleur luiken en eigen verhoudingen; sommige hebben bloembakken, andere geen schoorsteen. Een straat ziet er daardoor nooit gekopieerd uit, en hetzelfde huis houdt altijd hetzelfde uiterlijk.
 
+**Het dorpsplein** ligt midden in het dorp, vóór het eerste huis en naast de oude boom: vier tegels die vanaf jaar 1 vrij blijven. Rond jaar 40 wordt het aangelegd. Eerst staan er bankjes rond een vuurkuil, vanaf de klassieke tijd ligt er bestrating met een fontein, en vanaf de stoomtijd staat er een muziektent. Er zijn marktkraampjes, bankjes, plantenbakken en een laag bloemperk aan de voorkant, zodat niets het plein verbergt; later komen er lantaarns. Op het plein worden marktdagen en dansavonden gehouden. Oudere eilanden krijgen het plein op vrije plekken of in plaats van een park of speeltuin, nooit over huizen of akkers.
+
 **De vuurtoren** verschijnt vanaf jaar 400 zodra het eiland een steiger of haven heeft, op het meest blootgestelde vrije punt van de kust. Overdag is het een rood-witte toren; 's nachts zwaait een lichtbundel over het water. Verdwijnt hij door overstroming of verbouwing, dan bouwen de bewoners hem verderop opnieuw op.
 
 **Meer stranden.** Na het eerste strand ontstaan er in de loop van de eeuwen tot drie nieuwe stranden op vrije stukken kust, minstens zes tegels van het bestaande zand. Ze krijgen een naam naar hun kant van het eiland (Noorderstrand, Oosterstrand, Zuiderstrand, Westerduin). Parasols hebben verschillende kleuren, er groeit helmgras, en vanaf de renaissance staan er gestreepte strandhuisjes.

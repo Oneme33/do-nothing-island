@@ -2,6 +2,7 @@ import { cinemaVisible } from './spectacle.js';
 import {nl} from './language.js';
 import {daylightAt,drawDaylight,seasonalLeaf,randomDaylightStart} from './daylight.js';
 import {drawSeaLife} from './sea.js';
+import {squareRole} from './square.js';
 import { drawFlames, drawBonfire, drawFestivalGround, drawLifeWorld, drawComicBubbles } from './pageants.js';
 const aroundLand=(s,t)=>neighbors(t).every(([x,y])=>s.tile(x,y)?.kind==='land');
 import { neighbors, key } from './simulation.js';
@@ -207,7 +208,7 @@ export class IslandRenderer {
     const steps=route.length-1,doorTime=1.6,insideTime=3,cycle=steps*2+doorTime*2+insideTime;
     const phase=this.reduced?((hash(index,79)*cycle)%cycle):(time*.9+hash(index,79)*cycle)%cycle;
     const target=this.sim.tiles.get(route.at(-1)),street=this.walkingPoint(target),door=this.entrancePoint(target);
-    const outdoors=!target.building||['forest','beach','park','garden','farm','bonfire','campfire','playground','royal-garden','palace-square','campus-square'].includes(target.building);
+    const outdoors=!target.building||['forest','beach','park','garden','farm','bonfire','campfire','playground','royal-garden','palace-square','town-square','campus-square'].includes(target.building);
     if(outdoors&&phase>=steps&&phase<steps+doorTime*2+insideTime)return{...street,stage:'visiting',alpha:1,target};
     if(phase>=steps&&phase<steps+doorTime){const t=(phase-steps)/doorTime;return{x:mix(street.x,door.x,t),y:mix(street.y,door.y,t),stage:'entering',alpha:1-Math.max(0,(t-.6)/.4),target};}
     if(phase>=steps+doorTime&&phase<steps+doorTime+insideTime)return{stage:'inside',target};
@@ -439,6 +440,7 @@ export class IslandRenderer {
     else if(b==='townhouse')this.house(t.variant,2);
     else if(b==='tower')this.tower(t.variant);
     else if(b==='lighthouse')this.lighthouse();
+    else if(b==='town-square')this.townSquare(t);
     else if(b==='manor'||b==='palace'){if(b==='palace')c.scale(1.45,1.45);this.palace(b==='palace',t.variant);}
     else if(b==='palace-wing'){this.house(t.variant,2);this.line([[0,-40],[0,-53]],'#a39668',1);this.poly([[0,-53],[9,-50],[0,-47]],'#c8af64');}
     else if(b==='royal-garden')this.formalGarden();
@@ -761,6 +763,41 @@ export class IslandRenderer {
     this.ellipse(-1,-5,3,1.3,'#f1d77a');
     if(!this.reduced)for(let i=0;i<3;i++){const f=(this.time*.5+i*.33)%1;this.ellipse(-1+Math.sin(i*2+f*4)*3,-7-f*10,.9,.9,`rgba(255,236,160,${(1-f)*.9})`);}
     c.restore();
+  }
+  // The village square grows with the island: a fire circle, a fountain, later a bandstand and lanterns.
+  townSquare(t){
+    const year=this.sim.year,role=squareRole(t);
+    this.diamond(0,0,23,11.5,year>=120?'#d9d1b3':'#cdbf96');
+    // Cobbles: two sets of lines parallel to the diamond's edges.
+    if(year>=120)for(let k=1;k<4;k++){const f=k/4;this.line([[-23*f,-11.5+11.5*f],[23-23*f,11.5*f]],'#c4b99466',.5);this.line([[23*f,-11.5+11.5*f],[-23+23*f,11.5*f]],'#c4b99466',.5);}
+    const planter=(x,y)=>{this.rect(x-3,y-2,6,3,'#a7957a');this.ellipse(x,y-5,4.5,4,this.leaf('#7e965c'));this.ellipse(x+1.5,y-7,3,2.6,this.leaf('#91a763'));};
+    const bench=(x,y)=>{this.line([[x-5,y],[x+5,y-2.5]],'#8f7a58',1.8);this.line([[x-5,y-3],[x+5,y-5.5]],'#a58e66',1.2);};
+    const lamp=(x,y)=>{if(year<1880)return;this.line([[x,y],[x,y-14]],'#5f6b62',1);this.ellipse(x,y-15,1.8,1.8,this.light.darkness>.2?'#ffe6a6':'#e8e2c2');};
+    if(role==='centre'){
+      if(year<120){
+        this.ellipse(0,0,8,4,'#9c8e72');this.ellipse(0,-.5,5,2.5,'#6f5e4b');for(const [x,y] of [[-12,1],[11,-2],[0,7]])this.line([[x-4,y],[x+4,y-1]],'#8a7552',2.4);
+      }else if(year<1750){
+        this.ellipse(0,1,11,5.5,'#b9b39b');this.ellipse(0,0,9.5,4.5,'#a8c4bd');this.rect(-1.2,-12,2.4,12,'#c9c3aa');this.ellipse(0,-12,4,1.8,'#bdb69c');
+        if(!this.reduced)for(let i=0;i<4;i++){const f=(this.time*.9+i*.25)%1,a=i*Math.PI/2;this.ellipse(Math.cos(a)*f*6,-13+f*12-Math.sin(f*Math.PI)*5,.9,.9,`rgba(226,241,238,${(1-f)*.9})`);}
+      }else{
+        // A bandstand with a striped roof, where someone is always tuning an instrument.
+        this.poly([[-12,0],[0,6],[12,0],[0,-6]],'#c4b796');
+        for(const [x,y] of [[-9,0],[0,4.5],[9,0],[0,-4.5]])this.line([[x,y],[x,y-15]],'#efe9d8',1.3);
+        this.poly([[-14,-15],[0,-24],[14,-15],[0,-9]],'#b8644f');this.poly([[-14,-15],[0,-9],[0,-24]],'#c97b6b');this.line([[0,-24],[0,-28]],'#8c5a48',1);
+        this.person(-3,1,'#7f9481',1);this.person(3,0,'#c09870',2);
+      }
+      lamp(17,2);
+    }else if(role==='market'){
+      const awning=['#c97b6b','#7fa3a8','#e2c26a'];
+      for(const [i,[x,y]] of [[-8,-2],[7,2]].entries()){this.line([[x-5,y+2],[x-5,y-9]],'#8a7552',1);this.line([[x+5,y-1],[x+5,y-12]],'#8a7552',1);this.poly([[x-7,y-8],[x+7,y-12],[x+8,y-9],[x-6,y-5]],awning[i]);this.poly([[x-5,y],[x+5,y-3],[x+5,y-1],[x-5,y+2]],'#b29b74');this.ellipse(x-1,y-2,1.5,1,'#d7a25a');this.ellipse(x+2,y-3,1.5,1,'#9cae6a');}
+      this.person(0,6,'#a37b5f',3);lamp(-18,1);
+    }else if(role==='back'){
+      planter(-12,-1);planter(12,-1);bench(0,3);this.person(-2,2,'#899e78',4);
+    }else{
+      // The front stays low, so the square is never hidden: a flower bed and a bench.
+      this.diamond(0,1,9,4.5,'#b9a77d');for(let i=0;i<6;i++)this.ellipse(-5+i*2,1+(i%2?-1:1),1.3,1.1,['#d58f7a','#e2c26a','#c98fb0'][i%3]);
+      bench(-13,6);bench(13,-4);lamp(0,-8);
+    }
   }
   lighthouse(){
     const c=this.ctx;

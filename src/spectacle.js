@@ -29,7 +29,7 @@ export function seedPleasures(s){
 }
 export function ignite(s,spot){
  if(spot.kind==='water'||spot.kind==='construction'||spot.kind==='flooded')return{title:'The sea refuses to catch fire.',detail:'The fish applaud your commitment. Nothing burns underwater.'};
- const safe=['beach','campfire','bonfire','original-tree','palace','palace-wing','royal-garden','palace-square'].includes(spot.building);
+ const safe=['beach','campfire','bonfire','original-tree','palace','palace-wing','royal-garden','palace-square','town-square'].includes(spot.building);
  if(!spot.building||safe){
   const established=['campfire','bonfire'].includes(spot.building);
   const duringFestival=s.festival?.until>s.year&&Math.hypot(s.festival.x-spot.x,s.festival.y-spot.y)<=3;
@@ -55,11 +55,12 @@ export function advancePleasures(s){
  if(s.year<s.nextFestival||s.storm||s.endgameStarted||s.ending)return;
  const beach=s.beaches.find(t=>t.walkable),bonfire=s.buildings.find(t=>['bonfire','campfire'].includes(t.building));
  const stage=s.buildings.find(t=>['festival-ground','theater','fairground'].includes(t.building));
- const bakery=s.buildings.find(t=>t.building==='bakery');
+ const bakery=s.buildings.find(t=>t.building==='bakery'),square=s.buildings.find(t=>t.building==='town-square');
  const choices=[];
  if(beach)choices.push({kind:'duck-race',spot:beach,title:'The Great Duck Regatta',quips:['All ducks. No steering committee.','The favorite is facing the wrong way.','A duck has been disqualified for being a goose.']},{kind:'kite-day',spot:beach,title:'The annual argument with the wind',quips:['The sky has taken three hats.','That kite is technically a bedsheet.','The seagulls demand air traffic control.']});
  if(bonfire)choices.push({kind:'bonfire',spot:bonfire,title:'A very small night out',quips:['The mayor has burned dinner.','A dramatic reading of the shopping list.','Everyone is briefly an expert on fire.']});
  if(stage)choices.push({kind:'circus',spot:stage,title:'The circus has exactly one trick',quips:['The juggler has requested softer vegetables.','The sheep refuses its costume.','Standing ovation. There are no chairs.']});
+ if(square)choices.push({kind:'market-day',spot:square,title:'Marktdag op het plein',quips:['Drie kazen voor de prijs van vier.','De groenteboer zingt. Niemand heeft erom gevraagd.','Er is een kraam die alleen knopen verkoopt.']},{kind:'square-dance',spot:square,title:'Dansavond op het plein',quips:['Links, rechts, en dan maar improviseren.','De burgemeester danst als een kapstok.','Iemand heeft een accordeon meegenomen. Iedereen.']});
  if(bakery)choices.push({kind:'pancakes',spot:bakery,title:'The Pancake Emergency',quips:['Too many pancakes. An unprecedented crisis.','The council forms a tasting committee.','The emergency lasts until lunchtime.']});
  if(!choices.length)return;
  const event=choices[Math.floor(s.random()*choices.length)];

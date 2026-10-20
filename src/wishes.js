@@ -40,7 +40,7 @@ export function helpActiveWish(s,expectedId){
  return s.wishes.history.some(w=>w.id===expectedId&&w.status==='helped');
 }
 // An open plot: nothing tall stands in front of it, so a fire there is actually visible.
-const LOW_PLOTS=new Set(['farm','beach','park','garden','campfire','bonfire','playground','campus-square','palace-square']);
+const LOW_PLOTS=new Set(['farm','beach','park','garden','campfire','bonfire','playground','campus-square','palace-square','town-square']);
 const lowOrEmpty=t=>!!t&&t.kind==='land'&&!t.landform&&!t.buildSite&&(!t.building||LOW_PLOTS.has(t.building));
 export function isOpenPlot(s,t){
  if(!t||t.kind!=='land'||t.building||t.buildSite||t.reservedFor||t.landform||t.spring||t.foundingHome)return false;

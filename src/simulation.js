@@ -5,6 +5,7 @@ import {ensureWishes,advanceWishes,answerWish} from './wishes.js';
 import {ensureChallenges,advanceChallenges} from './challenges.js';
 import {advanceCollection} from './collection.js';
 import {advanceCoast,coastNotice} from './coast.js';
+import {ensureSquare,advanceSquare} from './square.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 export const WORLD_RADIUS = 12;
@@ -152,6 +153,7 @@ export class Civilization {
     const coast=this.freeLand.filter(t=>this.isCoast(t)).sort((a,b)=>b.y-a.y||b.x-a.x);
     for(const beach of coast.slice(0,2))beach.building='beach';
     ensureStory(this);
+    ensureSquare(this);
     seedPleasures(this);
     this.rebuildRoads();
     this.log('A tree. A few people. An unreasonable amount of potential.','tree',{x:0,y:0});
@@ -354,7 +356,7 @@ export class Civilization {
     }
     this.repairFloods();
     this.advanceGeology();
-    advancePleasures(this);advanceCoast(this);
+    advancePleasures(this);advanceCoast(this);advanceSquare(this);
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);
@@ -886,7 +888,7 @@ export class Civilization {
       if(!parsed.character && sim.year>=32)sim.character=CHARACTERS[sim.seed%CHARACTERS.length].id;
       if(!Array.isArray(parsed.routes) || !parsed.tiles.every(([,tile])=>typeof tile.road==='boolean'))sim.rebuildRoads();
       if(!parsed.storyVersion){sim.storyVersion=0;sim.snapshots=[];}
-      ensureStory(sim,true);
+      ensureStory(sim,true);if(!parsed.square)delete sim.square;ensureSquare(sim,{restoring:true});
       ensureSpectacle(sim);
       if(!parsed.family)delete sim.family;
       ensureFamily(sim,{restoring:true});
