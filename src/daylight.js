@@ -3,6 +3,8 @@ export const DAY_SECONDS=150;
 export const SEASON_DAYS=2;
 export const SEASON_NAMES=['lente','zomer','herfst','winter'];
 export const DAYLIGHT_START=DAY_SECONDS*.32;
+// Every visit begins on a morning, in any of the four seasons.
+export const randomDaylightStart=(roll=Math.random())=>DAYLIGHT_START+DAY_SECONDS*SEASON_DAYS*Math.min(3,Math.floor(roll*4));
 const dayClamp=n=>Math.max(0,Math.min(1,n));
 const DAY_TAU=Math.PI*2;
 const SUMMER_NOON={phase:.5,darkness:0,dusk:0,night:false,season:1,seasonName:'zomer',spring:0,summer:1,autumn:0,winter:0};

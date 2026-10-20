@@ -33,3 +33,9 @@ test('the island draws safely by night and in winter, with lit windows, and neve
  renderer.dayNight=false;fills.length=0;renderer.draw(32);assert.equal(renderer.light.darkness,0);assert.ok(!fills.some(f=>/^rgba\(255,205,130,/.test(f)));
  assert.equal(sim.serialize(),before);
 });
+import {randomDaylightStart} from '../src/daylight.js';
+test('a visit starts on a morning in any of the four seasons',()=>{
+ const seasons=[0,.3,.6,.99].map(roll=>daylightAt(randomDaylightStart(roll)));
+ assert.deepEqual(seasons.map(l=>l.seasonName),['lente','zomer','herfst','winter']);
+ for(const l of seasons){assert.equal(l.darkness,0);assert.ok(l.phase>.3&&l.phase<.35);}
+});

@@ -1,6 +1,6 @@
 import { cinemaVisible } from './spectacle.js';
 import {nl} from './language.js';
-import {daylightAt,drawDaylight,seasonalLeaf,DAYLIGHT_START} from './daylight.js';
+import {daylightAt,drawDaylight,seasonalLeaf,randomDaylightStart} from './daylight.js';
 import {drawSeaLife} from './sea.js';
 import { drawFlames, drawBonfire, drawFestivalGround, drawLifeWorld, drawComicBubbles } from './pageants.js';
 const aroundLand=(s,t)=>neighbors(t).every(([x,y])=>s.tile(x,y)?.kind==='land');
@@ -31,7 +31,7 @@ export class IslandRenderer {
     this.center={x:0,y:0}; this.time=0;
     this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.ripples=[];this.hover=null;this.particles=[];
-    this.dayClock=DAYLIGHT_START;this.daySpeed=1;this.dayNight=true;this.light=daylightAt(this.dayClock);
+    this.dayClock=randomDaylightStart();this.daySpeed=1;this.dayNight=true;this.light=daylightAt(this.dayClock);
     this.effects=[];this.activityTime=0;this.wheelTime=0;this.activityRate=1;this.paused=false;this.mode='nudge';
     this.lastFrame=0;this.fitZoom=1;this.focus=null;this.showHistory=false;this.historySnapshot=null;this.showDistricts=true;
     this.resizeObserver=new ResizeObserver(()=>this.resize());

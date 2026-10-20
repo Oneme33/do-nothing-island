@@ -2722,6 +2722,8 @@ const DAY_SECONDS=150;
 const SEASON_DAYS=2;
 const SEASON_NAMES=['lente','zomer','herfst','winter'];
 const DAYLIGHT_START=DAY_SECONDS*.32;
+// Every visit begins on a morning, in any of the four seasons.
+const randomDaylightStart=(roll=Math.random())=>DAYLIGHT_START+DAY_SECONDS*SEASON_DAYS*Math.min(3,Math.floor(roll*4));
 const dayClamp=n=>Math.max(0,Math.min(1,n));
 const DAY_TAU=Math.PI*2;
 const SUMMER_NOON={phase:.5,darkness:0,dusk:0,night:false,season:1,seasonName:'zomer',spring:0,summer:1,autumn:0,winter:0};
@@ -2873,7 +2875,7 @@ class IslandRenderer {
     this.center={x:0,y:0}; this.time=0;
     this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.ripples=[];this.hover=null;this.particles=[];
-    this.dayClock=DAYLIGHT_START;this.daySpeed=1;this.dayNight=true;this.light=daylightAt(this.dayClock);
+    this.dayClock=randomDaylightStart();this.daySpeed=1;this.dayNight=true;this.light=daylightAt(this.dayClock);
     this.effects=[];this.activityTime=0;this.wheelTime=0;this.activityRate=1;this.paused=false;this.mode='nudge';
     this.lastFrame=0;this.fitZoom=1;this.focus=null;this.showHistory=false;this.historySnapshot=null;this.showDistricts=true;
     this.resizeObserver=new ResizeObserver(()=>this.resize());
