@@ -897,11 +897,22 @@ function helpActiveWish(s,expectedId){
  s.interfere(wish.x,wish.y,{rain:'rain',extinguish:'rain',feast:'nudge',bonfire:'fire',spring:'rumble'}[wish.kind]);
  return s.wishes.history.some(w=>w.id===expectedId&&w.status==='helped');
 }
+// An open plot: nothing tall stands in front of it, so a fire there is actually visible.
+const LOW_PLOTS=new Set(['farm','beach','park','garden','campfire','bonfire','playground','campus-square','palace-square']);
+const lowOrEmpty=t=>!!t&&t.kind==='land'&&!t.landform&&!t.buildSite&&(!t.building||LOW_PLOTS.has(t.building));
+function isOpenPlot(s,t){
+ if(!t||t.kind!=='land'||t.building||t.buildSite||t.reservedFor||t.landform||t.spring||t.foundingHome)return false;
+ const front=[[1,0],[0,1],[1,1]].every(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return !n||n.kind!=='land'||lowOrEmpty(n);});
+ const room=[[1,0],[-1,0],[0,1],[0,-1]].filter(([dx,dy])=>lowOrEmpty(s.tile(t.x+dx,t.y+dy))).length;
+ return front&&room>=2;
+}
+const wishPick=(s,list,salt=0)=>list.length?list[((Math.imul((s.seed>>>0)+1,2654435761)+Math.imul(ensureWishes(s).serial+salt+1,40503))>>>0)%list.length]:null;
 function wishCandidates(s){
  const choices=[],farm=s.farms.find(t=>!t.fire),tree=s.tile(0,0);
  if(farm)choices.push({kind:'rain',mode:'rain',text:'De boeren hopen op regen. Een bui over onze akker?',...{x:farm.x,y:farm.y}});
  if(tree?.building==='original-tree')choices.push({kind:'feast',mode:'nudge',text:'We willen een feest onder de oude boom. Geef jij het eerste zetje?',x:tree.x,y:tree.y});
- const camp=s.land.find(t=>['campfire','bonfire'].includes(t.building))||s.land.find(t=>!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.spring&&t.x+t.y>1);
+ const visibleCamp=s.land.find(t=>['campfire','bonfire'].includes(t.building)&&[[1,0],[0,1],[1,1]].every(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return !n||n.kind!=='land'||lowOrEmpty(n);}));
+ const camp=visibleCamp||wishPick(s,s.land.filter(t=>isOpenPlot(s,t)),3);
  if(camp)choices.push({kind:'bonfire',mode:'fire',text:'Een vreugdevuur op onze open plek? Wij nemen de hapjes mee.',x:camp.x,y:camp.y});
  const spring=springWishPlot(s);if(spring)choices.push({kind:'spring',mode:'rumble',text:'Volgens de waterzoekers zit hier een bron. Zou een beving haar kunnen openen?',x:spring.x,y:spring.y});
  return choices;

@@ -44,3 +44,13 @@ test('Help fulfils each real request once and refuses stale or changed places wi
  const s=requesting('bonfire'),w=s.wishes.active;s.tile(w.x,w.y).building='house';assert.equal(canHelpWish(s),false);assert.equal(helpActiveWish(s,w.id),false);assert.equal(s.interferences,0);assert.equal(s.tile(w.x,w.y).fire,undefined);
  const a=requesting('rain');assert.equal(helpActiveWish(a,'a different request'),false);assert.equal(a.interferences,0);a.year=a.wishes.active.deadline+1;assert.equal(helpActiveWish(a,a.wishes.active.id),false);assert.equal(a.interferences,0);
 });
+import {isOpenPlot} from '../src/wishes.js';
+test('a requested bonfire goes on an open plot that no house hides',()=>{
+ for(let seed=1;seed<40;seed++){
+  const s=new Civilization(seed);while(s.year<150)s.tick();s.wishes.active=null;s.wishes.nextAt=s.year;
+  for(let i=0;i<8&&s.wishes.active?.kind!=='bonfire';i++){s.wishes.active=null;s.wishes.serial++;s.wishes.nextAt=s.year;advanceWishes(s);}
+  const w=s.wishes.active;if(w?.kind!=='bonfire')continue;const t=s.tile(w.x,w.y);
+  if(!['campfire','bonfire'].includes(t.building))assert.ok(isOpenPlot(s,t),`seed ${seed}`);
+  for(const [dx,dy] of [[1,0],[0,1],[1,1]]){const n=s.tile(t.x+dx,t.y+dy);assert.ok(!n?.building||['farm','beach','park','garden','campfire','bonfire','playground','campus-square','palace-square'].includes(n.building),`nothing tall in front (seed ${seed})`);}
+ }
+});
