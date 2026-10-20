@@ -56,7 +56,7 @@ function storyFor(s,family,entry){
  if(entry.type==='wish'){
   const wish=s.wishes?.active?.id===entry.wishId?s.wishes.active:s.wishes?.history?.find(w=>w.id===entry.wishId);if(!wish)return null;
   const current=family.generations.find(p=>p.id===family.currentId)||family.generations.at(-1),speaker=family.generations.find(p=>`${p.name} ${p.lastName}`===wish.speaker);
-  const thing=wishThing[wish.kind]||'hulp',noun=wishMemory[wish.kind]||'de hulp',own=!speaker||speaker.id===current.id;
+  const thing=wish.thing||wishThing[wish.kind]||'hulp',noun=wish.noun||wishMemory[wish.kind]||'de hulp',own=!speaker||speaker.id===current.id;
   // A wish can outlive its keyholder; the current generation then remembers it on their behalf.
   const text=wish.status==='helped'?(!own?`zag de wens van ${speaker.name} om ${thing} alsnog uitkomen en vertelde het ${speaker.name} meteen.`:wish.kind==='extinguish'?familyPick(seed,y,['riep om hulp bij de brand. Het begon te regenen voordat de emmers vol waren.','riep om hulp bij de brand en kreeg een bui precies boven het dak. Er werd die avond niet veel gezegd, wel veel gedacht.']):familyPick(seed,y,[`vroeg om ${thing} en kreeg het. Sindsdien bedankt de familie elke zondag de lucht, voor de zekerheid.`,`vroeg om ${thing} en kreeg het meteen. Niemand in het dorp gelooft het verhaal, maar het wordt elk jaar mooier.`])):
    wish.status==='independent'?`${own?'vroeg':`hoorde ${speaker.name} vragen`} om ${thing}, maar het dorp loste het zelf op. De familie vertelt het verhaal liever zo.`:

@@ -54,3 +54,17 @@ test('a requested bonfire goes on an open plot that no house hides',()=>{
   for(const [dx,dy] of [[1,0],[0,1],[1,1]]){const n=s.tile(t.x+dx,t.y+dy);assert.ok(!n?.building||['farm','beach','park','garden','campfire','bonfire','playground','campus-square','palace-square'].includes(n.building),`nothing tall in front (seed ${seed})`);}
  }
 });
+import {FUNNY_WISHES} from '../src/wishes.js';
+test('funny wishes appear in varied places and are solved with the asked-for tool on the spot',()=>{
+ const kinds=new Set(),places=new Set();
+ for(let seed=1;seed<60;seed++){
+  const s=new Civilization(seed);while(s.year<450)s.tick();s.wishes.active=null;s.wishes.nextAt=s.year;advanceWishes(s);const w=s.wishes.active;if(!w)continue;
+  kinds.add(w.kind);places.add(`${w.x},${w.y}`);
+  if(!FUNNY_WISHES[w.kind])continue;
+  const other=['rain','nudge','rumble','fire'].find(m=>m!==w.mode);const far=s.land.find(t=>Math.hypot(t.x-w.x,t.y-w.y)>6);
+  s.interfere(far.x,far.y,w.mode);assert.equal(s.wishes.active?.id,w.id,'the wrong place does not count');
+  s.interfere(w.x,w.y,other);if(s.wishes.active)assert.equal(s.wishes.active.id,w.id,'the wrong tool does not count');
+  if(s.wishes.active?.id===w.id){s.interfere(w.x,w.y,w.mode);const done=s.wishes.history.at(-1);assert.equal(done.status,'helped');assert.ok(s.history.at(-1).text.includes(FUNNY_WISHES[w.kind].thanks)||s.history.some(e=>e.type==='wish'&&e.text.includes(FUNNY_WISHES[w.kind].thanks)));}
+ }
+ assert.ok(kinds.size>=6,`varied wishes: ${[...kinds]}`);assert.ok(places.size>=20,'wishes are not always in the same place');
+});

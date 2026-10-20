@@ -466,7 +466,7 @@ $('undo-reset').addEventListener('click',()=>{
   const previous=previousIsland&&Civilization.restore(previousIsland);if(!previous)return;
   clearTimeout(undoTimer);previousIsland=null;$('undo-reset').hidden=true;switchIsland(previous,"Je vorige eiland is terug. Niemand heeft de omweg gemerkt.");
 });
-const modeHints={help:'Klik op een inwoner met een hartje of open Wensen. Kies zelf of je helpt.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
+const modeHints={help:'Klik op een vraagteken om te lezen wat iemand vraagt. Kies zelf of je helpt.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
 function chooseMode(mode){
   interferenceMode=mode;renderer.mode=interferenceMode;inspectionPinned=false;
   for(const b of document.querySelectorAll('[data-interference]')){const selected=b.dataset.interference===mode;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected));}
@@ -510,7 +510,8 @@ canvas.addEventListener('pointerup',e=>{
     const r=canvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
     const tile=renderer.pick(x,y);
     if(cinemaActive()){cheerCinema();renderer.ripple(x,y);drag=null;return;}
-    if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&(renderer.pickWishResident(x,y)||tile.x===wish.x&&tile.y===wish.y))openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}drag=null;return;}
+    if(renderer.pickWishResident(x,y)){openWishes();drag=null;return;}
+    if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}drag=null;return;}
     if(sim.ending){showToast("Hun verhaal is klaar. Open het naschrift om vrij verder te spelen.");drag=null;return;}
     sim.interfere(tile.x,tile.y,interferenceMode);
     showIntervention(x,y);

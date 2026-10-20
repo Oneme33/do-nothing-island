@@ -172,16 +172,20 @@ export class IslandRenderer {
     drawComicBubbles(this);
     this.drawWishResident();
   }
+  // A question mark floats over every open wish; in Help mode the asking resident stands beside it.
   wishResidentPoint(){
-    const wish=this.sim.wishes?.active;if(this.mode!=='help'||!wish||this.sim.ending)return null;
-    const p=this.point(wish.x,wish.y);return{x:p.x+16*this.zoom,y:p.y+8*this.zoom,wish};
+    const wish=this.sim.wishes?.active;if(!wish||wish.hidden||this.sim.ending||this.sim.config.wishBubbles===false)return null;
+    const p=this.point(wish.x,wish.y);return{x:p.x,y:p.y-30*this.zoom,ground:p,wish};
   }
-  pickWishResident(x,y){const p=this.wishResidentPoint();return !!p&&Math.hypot(x-p.x,y-(p.y-7*this.zoom))<=Math.max(20,14*this.zoom);}
+  pickWishResident(x,y){const p=this.wishResidentPoint();return !!p&&Math.hypot(x-p.x,y-p.y)<=Math.max(16,12*this.zoom);}
   drawWishResident(){
     const p=this.wishResidentPoint();if(!p)return;
-    const c=this.ctx;c.save();c.translate(p.x,p.y);c.scale(this.zoom,this.zoom);
-    this.ellipse(0,0,7,3,'#8c9e6e44');this.person(0,0,'#a37b5f',0);
-    this.ellipse(0,-22,8,7,'#faf8e9');c.fillStyle='#64794e';c.font='11px serif';c.textAlign='center';c.fillText('♡',0,-18);c.restore();
+    const c=this.ctx,bob=this.reduced?0:Math.sin(this.time*2.2)*2;
+    if(this.mode==='help'){c.save();c.translate(p.ground.x+16*this.zoom,p.ground.y+8*this.zoom);c.scale(this.zoom,this.zoom);this.ellipse(0,0,7,3,'#8c9e6e44');this.person(0,0,'#a37b5f',0);c.restore();}
+    c.save();c.translate(p.x,p.y+bob);c.scale(Math.max(.8,this.zoom),Math.max(.8,this.zoom));
+    this.line([[0,9],[0,16]],'#8f9e7f88',1);
+    this.ellipse(0,0,9,9,'#fbf6df');c.strokeStyle='#c7a85c';c.lineWidth=1.3;c.beginPath();c.ellipse(0,0,9,9,0,0,TAU);c.stroke();
+    c.fillStyle='#7a6230';c.font='bold 12px Georgia, serif';c.textAlign='center';c.textBaseline='middle';c.fillText('?',0,1);c.restore();
   }
   enqueueActor(depth,draw){if(this.scene)this.scene.push({depth,draw});else draw();}
   streetPoint(tile){const p=this.p(tile.x,tile.y);return{x:p.x,y:p.y+11.5};}

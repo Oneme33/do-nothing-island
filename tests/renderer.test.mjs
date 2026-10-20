@@ -151,10 +151,12 @@ test('the larger palace, history overlays and reserved campus render with smooth
   assert.equal(renderer.focus,null,'focus also expires with reduced motion');assert.ok(calls.includes('fillText'));assert.ok(calls.includes('stroke'));
  }
 });
-test('Help shows one small clickable resident at the requested place at either screen size',()=>{
+test('every open wish shows one clickable question mark at the requested place at either screen size',()=>{
  for(const width of [1200,390]){
-  const s=new Civilization(31),{canvas}=canvasHarness(width,650),r=new IslandRenderer(canvas,s);s.wishes.active={x:1,y:-1,id:'test'};r.draw(100);assert.equal(r.wishResidentPoint(),null);
-  r.mode='help';r.draw(200);const p=r.wishResidentPoint();assert.ok(p&&Number.isFinite(p.x)&&Number.isFinite(p.y));assert.equal(r.pickWishResident(p.x,p.y-7*r.zoom),true);assert.equal(r.pickWishResident(p.x+100,p.y),false);
+  const s=new Civilization(31),{canvas}=canvasHarness(width,650),r=new IslandRenderer(canvas,s);s.wishes.active={x:1,y:-1,id:'test'};r.draw(100);
+  const p=r.wishResidentPoint();assert.ok(p&&Number.isFinite(p.x)&&Number.isFinite(p.y),'visible outside Help mode too');assert.equal(r.pickWishResident(p.x,p.y),true);assert.equal(r.pickWishResident(p.x+100,p.y),false);
+  r.mode='help';assert.doesNotThrow(()=>r.draw(200));
+  s.wishes.active.hidden=true;assert.equal(r.wishResidentPoint(),null,'a dismissed wish hides its question mark');
   s.wishes.active=null;r.draw(300);assert.equal(r.pickWishResident(p.x,p.y),false);
  }
 });

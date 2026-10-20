@@ -152,7 +152,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 
   <dialog id="intro-dialog" class="intro-dialog" aria-labelledby="intro-title"><button id="intro-close" class="dialog-close" aria-label="Intro overslaan en eiland bekijken">×</button><span class="eyebrow">DO NOTHING ISLAND</span><div class="intro-island" aria-hidden="true">♧</div><span id="intro-step">1 / 3</span><h2 id="intro-title">Dit is jouw eiland.</h2><p id="intro-line"></p><div class="intro-buttons"><button id="intro-back" class="secondary-button" hidden>Terug</button><button id="intro-next" class="primary-button">Verder →</button></div></dialog>
   <dialog id="cinema-dialog" class="cinema-dialog" aria-labelledby="cinema-title"><button id="cinema-close" class="dialog-close" aria-label="Sluit de eindscène">×</button><span class="eyebrow">HUN GROTE FINALE</span><canvas id="finale-canvas" width="800" height="380" aria-label="Geanimeerde finale van het eiland"></canvas>      <div class="cinema-caption" id="cinema-caption" aria-live="polite" hidden><span class="eyebrow">HET LAATSTE GROTE IDEE</span><strong id="cinema-title"></strong><p id="cinema-line"></p><div><button id="cinema-cheer">Vier mee met de bewoners</button><button id="cinema-skip" hidden>Naar het naschrift →</button></div></div><progress id="cinema-progress" max="100" value="0" aria-label="Voortgang van de eindscène"></progress><button id="cinema-pause" class="secondary-button">Pauze</button><p class="dialog-note">Na de scène zie je de eilandscore en wat zij achterlaten.</p></dialog>
-  <dialog id="guide-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN KLEINE HANDLEIDING</span><h2>Welkom bij het nietsdoen.</h2><p>Eén huisje, een kleine akker en zes mensen. De beschaving groeit vanzelf. Jij kiest of je toekijkt of ingrijpt.</p><div class="guide-steps"><div><span>01</span><p><strong>Neem de tijd.</strong> Het eiland begint op 1×. Met de balk op het eiland kies je de snelheid of pauzeer je. Een open eilandboek, handleiding of instellingenvenster zet het leven even stil.</p></div><div><span>02</span><p><strong>Alles laat sporen achter.</strong> Bouw helpt de bewoners. Regen voedt de akkers. Vuur en bevingen kunnen blijvende veranderingen veroorzaken. Probeer dingen uit en kijk wat de bewoners ermee doen.</p></div><div><span>03</span><p><strong>Help een inwoner.</strong> Kies Help en klik op de inwoner met een hartje. Lees de wens en kies of je helpt. Een klik op andere gebouwen toont bewoners, bouwjaar en herinneringen. Versleep de kaart of zoom om de rest te zien. Rond 2100 begint het laatste hoofdstuk, met een eigen eindscène en eilandscore.</p></div></div><p class="dialog-note">Spatie: pauze · Scroll of +/−: zoom · Slepen: verkennen<br>Je eiland wordt automatisch in deze browser bewaard.</p><button class="primary-button" data-close>Ik laat ze even hun gang gaan ↗</button></dialog>
+  <dialog id="guide-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN KLEINE HANDLEIDING</span><h2>Welkom bij het nietsdoen.</h2><p>Eén huisje, een kleine akker en zes mensen. De beschaving groeit vanzelf. Jij kiest of je toekijkt of ingrijpt.</p><div class="guide-steps"><div><span>01</span><p><strong>Neem de tijd.</strong> Het eiland begint op 1×. Met de balk op het eiland kies je de snelheid of pauzeer je. Een open eilandboek, handleiding of instellingenvenster zet het leven even stil.</p></div><div><span>02</span><p><strong>Alles laat sporen achter.</strong> Bouw helpt de bewoners. Regen voedt de akkers. Vuur en bevingen kunnen blijvende veranderingen veroorzaken. Probeer dingen uit en kijk wat de bewoners ermee doen.</p></div><div><span>03</span><p><strong>Help een inwoner.</strong> Zie je een vraagteken op het eiland? Klik erop, lees de wens en kies of je helpt. Een klik op andere gebouwen toont bewoners, bouwjaar en herinneringen. Versleep de kaart of zoom om de rest te zien. Rond 2100 begint het laatste hoofdstuk, met een eigen eindscène en eilandscore.</p></div></div><p class="dialog-note">Spatie: pauze · Scroll of +/−: zoom · Slepen: verkennen<br>Je eiland wordt automatisch in deze browser bewaard.</p><button class="primary-button" data-close>Ik laat ze even hun gang gaan ↗</button></dialog>
 
   <dialog id="book-dialog" class="book-dialog" aria-label="Het eilandboek"><div class="book-bar"><div class="book-tabs" role="tablist" aria-label="Hoofdstukken van het eilandboek"><button id="book-tab-journal" role="tab" aria-controls="book-journal" aria-selected="true" tabindex="0"><span aria-hidden="true">✳</span> Kroniek</button><button id="book-tab-family" role="tab" aria-controls="book-family" aria-selected="false" tabindex="-1"><span aria-hidden="true">♧</span> Familie</button><button id="book-tab-wishes" role="tab" aria-controls="book-wishes" aria-selected="false" tabindex="-1"><span aria-hidden="true">♡</span> Wensen</button><button id="book-tab-challenges" role="tab" aria-controls="book-challenges" aria-selected="false" tabindex="-1"><span aria-hidden="true">✧</span> Uitdagingen</button><button id="book-tab-collection" role="tab" aria-controls="book-collection" aria-selected="false" tabindex="-1"><span aria-hidden="true">▧</span> Verzameling</button></div><button id="book-close" class="dialog-close book-close" aria-label="Sluit het eilandboek">×</button></div><section id="book-journal" class="book-page journal-page" role="tabpanel" aria-labelledby="book-tab-journal"><span class="eyebrow">HET EILANDARCHIEF</span><h2>De kroniek van jouw eiland.</h2><p>Hoofdstukken vol familie, eigen ideeën en jouw ingrepen. Laat zien brengt je naar de plek zoals die er nu bij ligt.</p><div class="chronicle-legend"><span>♧ Familie</span><span>✳ Jouw ingreep</span></div><nav id="journal-chapters" class="journal-chapters" aria-label="Hoofdstukken van de kroniek"></nav><p class="dialog-note">De kroniek bewaart maximaal 350 berichten. Grote momenten en familie krijgen voorrang op dagelijkse nieuwtjes.</p><div id="journal-entries"></div></section><section id="book-family" class="book-page family-page" role="tabpanel" aria-labelledby="book-tab-family" hidden><span class="eyebrow">DE FAMILIE VAN HET EERSTE HUIS</span><h2 id="family-title"></h2><p>Het huis blijft. Iedere generatie geeft de sleutel door.</p><section id="family-current" class="family-current"></section><p id="family-note" class="dialog-note"></p><div class="family-navigation"><button id="family-oldest">Naar de eerste generatie ↑</button><button id="family-latest">Naar de huidige generatie ↓</button><button id="family-find-home">Bekijk hun huis ↗</button></div><ol id="family-generations" class="family-generations" aria-label="Generaties van de eerste familie"></ol></section><section id="book-wishes" class="book-page wishes-page" role="tabpanel" aria-labelledby="book-tab-wishes" hidden><span class="eyebrow">EEN VRAAG VAN HET EILAND</span><h2 id="wishes-title">Wensen van inwoners</h2><p>Je mag helpen of gewoon blijven kijken. Hulp vergroot hun vertrouwen én de verwachting dat je terugkomt. Zonder ingreep zoeken ze hun eigen weg.</p><section id="wish-current" class="family-current"></section><div class="wish-actions"><button id="wish-help" class="primary-button" hidden>Help deze inwoner</button><button id="wish-find" class="secondary-button" hidden>Bekijk inwoner ↗</button></div><label class="setting-row"><span>Toon kleine wenswolkjes</span><input id="wish-bubbles" type="checkbox"></label><h3>Eerdere wensen</h3><ol id="wish-history" class="wish-history"></ol></section><section id="book-challenges" class="book-page challenges-page" role="tabpanel" aria-labelledby="book-tab-challenges" hidden><span class="eyebrow">ALLEEN ALS JE ZIN HEBT</span><h2 id="challenges-title">Kleine uitdagingen</h2><p>Dit eiland heeft een paar vrijblijvende ideeën. Er hangt geen beloning of straf aan. Gewoon kijken blijft genoeg.</p><p id="challenge-note" class="dialog-note"></p><ol id="challenge-list" class="challenge-list"></ol></section><section id="book-collection" class="book-page collection-page" role="tabpanel" aria-labelledby="book-tab-collection" hidden><span class="eyebrow">SPOREN VAN AL JE EILANDEN</span><h2 id="collection-title">De verzameling</h2><p id="collection-progress"></p><p id="collection-storage" class="dialog-note"></p><div id="collection-groups"></div></section></dialog>
   <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Leven tijdens afwezigheid</strong><small>Bij terugkomst maximaal drie eeuwen verder, behalve wanneer je pauzeert.</small></span><input type="checkbox" id="offline-life" checked></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Ongeveer een minuut per generatie, later iets vlotter.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Dag, nacht en seizoenen</strong><small>Avondlicht, lantaarns, herfstbladeren en sneeuw. Alleen sfeer: het eiland zelf merkt er niets van.</small></span><input type="checkbox" id="day-night" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
@@ -809,7 +809,7 @@ function storyFor(s,family,entry){
  if(entry.type==='wish'){
   const wish=s.wishes?.active?.id===entry.wishId?s.wishes.active:s.wishes?.history?.find(w=>w.id===entry.wishId);if(!wish)return null;
   const current=family.generations.find(p=>p.id===family.currentId)||family.generations.at(-1),speaker=family.generations.find(p=>`${p.name} ${p.lastName}`===wish.speaker);
-  const thing=wishThing[wish.kind]||'hulp',noun=wishMemory[wish.kind]||'de hulp',own=!speaker||speaker.id===current.id;
+  const thing=wish.thing||wishThing[wish.kind]||'hulp',noun=wish.noun||wishMemory[wish.kind]||'de hulp',own=!speaker||speaker.id===current.id;
   // A wish can outlive its keyholder; the current generation then remembers it on their behalf.
   const text=wish.status==='helped'?(!own?`zag de wens van ${speaker.name} om ${thing} alsnog uitkomen en vertelde het ${speaker.name} meteen.`:wish.kind==='extinguish'?familyPick(seed,y,['riep om hulp bij de brand. Het begon te regenen voordat de emmers vol waren.','riep om hulp bij de brand en kreeg een bui precies boven het dak. Er werd die avond niet veel gezegd, wel veel gedacht.']):familyPick(seed,y,[`vroeg om ${thing} en kreeg het. Sindsdien bedankt de familie elke zondag de lucht, voor de zekerheid.`,`vroeg om ${thing} en kreeg het meteen. Niemand in het dorp gelooft het verhaal, maar het wordt elk jaar mooier.`])):
    wish.status==='independent'?`${own?'vroeg':`hoorde ${speaker.name} vragen`} om ${thing}, maar het dorp loste het zelf op. De familie vertelt het verhaal liever zo.`:
@@ -872,7 +872,7 @@ function closeWish(s,status){
  if(status==='helped'){s.influence.trust=wishClamp(s.influence.trust+3);s.influence.dependence=wishClamp(s.influence.dependence+1.5);}
  if(status==='independent'){s.influence.trust=wishClamp(s.influence.trust+1);s.influence.dependence=wishClamp(s.influence.dependence-1);}
  if(status==='expired'){s.influence.trust=wishClamp(s.influence.trust-1);s.influence.dependence=wishClamp(s.influence.dependence-.5);}
- if(status!=='changed')s.log(`${wish.speaker}: “${wish.text}” ${status==='helped'?'Je hielp. Het vertrouwen groeit; ze rekenen iets meer op je.':status==='independent'?'De inwoners losten het zelf op. Dat geeft vertrouwen in eigen kunnen.':'Er kwam geen ingreep. Ze gaan op eigen kracht verder.'}`,'wish',{x:wish.x,y:wish.y,wishId:wish.id});
+ if(status!=='changed')s.log(`${wish.speaker}: “${wish.text}” ${status==='helped'?(wish.thanks?`${wish.thanks} Het vertrouwen groeit; ze rekenen iets meer op je.`:'Je hielp. Het vertrouwen groeit; ze rekenen iets meer op je.'):status==='independent'?'De inwoners losten het zelf op. Dat geeft vertrouwen in eigen kunnen.':'Er kwam geen ingreep. Ze gaan op eigen kracht verder.'}`,'wish',{x:wish.x,y:wish.y,wishId:wish.id});
  state.history.push({...wish});state.history=state.history.slice(-24);state.active=null;state.nextAt=s.year+64+(s.seed+state.serial*17)%37;
 }
 function canOpenWishSpring(s,t){
@@ -881,7 +881,7 @@ function canOpenWishSpring(s,t){
   !s.land.some(p=>wishNear(p,t,2)&&p.wetUntil>s.year)&&
   !s.land.some(p=>p.landform&&wishNear(p,t,2.5)&&(p.landform==='volcano'||!p.landslideYear));
 }
-function springWishPlot(s){return s.land.find(t=>canOpenWishSpring(s,t));}
+function springWishPlot(s){return wishPick(s,s.land.filter(t=>canOpenWishSpring(s,t)),5);}
 function canHelpWish(s,wish=ensureWishes(s).active){
  if(!wish||s.ending||s.year>wish.deadline)return false;
  const t=s.tile(wish.x,wish.y);if(t?.kind!=='land')return false;
@@ -889,12 +889,13 @@ function canHelpWish(s,wish=ensureWishes(s).active){
  if(wish.kind==='extinguish')return !!t.fire;
  if(wish.kind==='feast')return t.building==='original-tree';
  if(wish.kind==='bonfire')return !t.buildSite&&(['bonfire','campfire'].includes(t.building)||!t.building&&!t.reservedFor&&!t.landform);
+ if(FUNNY_WISHES[wish.kind])return true;
  return wish.kind==='spring'&&canOpenWishSpring(s,t);
 }
 function helpActiveWish(s,expectedId){
  const wish=ensureWishes(s).active;
  if(!wish||wish.id!==expectedId||!canHelpWish(s,wish))return false;
- s.interfere(wish.x,wish.y,{rain:'rain',extinguish:'rain',feast:'nudge',bonfire:'fire',spring:'rumble'}[wish.kind]);
+ s.interfere(wish.x,wish.y,FUNNY_WISHES[wish.kind]?.mode||{rain:'rain',extinguish:'rain',feast:'nudge',bonfire:'fire',spring:'rumble'}[wish.kind]);
  return s.wishes.history.some(w=>w.id===expectedId&&w.status==='helped');
 }
 // An open plot: nothing tall stands in front of it, so a fire there is actually visible.
@@ -907,13 +908,37 @@ function isOpenPlot(s,t){
  return front&&room>=2;
 }
 const wishPick=(s,list,salt=0)=>list.length?list[((Math.imul((s.seed>>>0)+1,2654435761)+Math.imul(ensureWishes(s).serial+salt+1,40503))>>>0)%list.length]:null;
+// Small, silly requests. Each one is solved by using the asked-for tool on the spot of the question mark.
+const FUNNY_WISHES={
+ sheep:{mode:'nudge',where:'farm',text:'Schaap Bertha is ontsnapt en staat nu op het dak van de schuur. Kunnen de bouwers een trapje maken?',thanks:'Bertha is van het dak. Ze doet alsof het haar eigen idee was.',thing:'een trapje voor Bertha',noun:'het trapje voor Bertha'},
+ cheese:{mode:'rain',where:'market',text:'Het is zo warm dat de kaas uit zichzelf smelt. Een buitje boven de markt?',thanks:'De kaas is gered. De markt ruikt nog dagen naar regen en oude kaas.',thing:'regen voor de kaas',noun:'de regen voor de kaas'},
+ cart:{mode:'rumble',where:'road',text:'Een kar zit muurvast in de modder. Zou een klein schokje helpen?',thanks:'De kar schiet los. De ezel kijkt verwijtend naar de lucht.',thing:'een schokje voor de kar',noun:'het schokje voor de vastgelopen kar'},
+ soup:{mode:'fire',where:'open',text:'Het is zo koud dat de soep in de pan bevriest. Een kampvuurtje om hem op te warmen?',thanks:'De soep is warm. Iedereen beweert dat het zijn recept was.',thing:'een vuurtje voor de soep',noun:'het soepvuur'},
+ kids:{mode:'nudge',where:'open',text:'De kinderen vervelen zich zó dat ze de kippen Frans leren. Een zetje voor iets leuks?',thanks:'Er wordt iets gebouwd. De kippen zijn opgelucht.',thing:'iets leuks voor de kinderen',noun:'het zetje voor de kinderen'},
+ stone:{mode:'rumble',where:'farm',text:'Er ligt een enorme kei midden op de akker. Kan de grond hem een stukje opschuiven?',thanks:'De kei rolt opzij. Hij krijgt een naam en een eigen bankje.',thing:'hulp met de kei',noun:'de kei die opzij rolde'},
+ books:{mode:'rain',where:'library',text:'De bibliotheek is zo stoffig dat de boeken niezen. Een frisse bui erover?',thanks:'De boeken zijn fris. Eén woordenboek is nog wat verkouden.',thing:'een frisse bui voor de boeken',noun:'de bui over de bibliotheek'},
+ birthday:{mode:'fire',where:'open',text:'Oma Truus wordt honderd. Een feestvuurtje voor de taart?',thanks:'Honderd kaarsjes, één vuurtje. Oma blaast ze in één keer uit.',thing:'een feestvuur voor oma Truus',noun:'het verjaardagsvuur van oma Truus'},
+ seagull:{mode:'rain',where:'beach',text:'Een meeuw heeft de patat van de burgemeester gestolen. Een bui om hem te verjagen?',thanks:'De meeuw druipt af. De patat is helaas niet meer te redden.',thing:'een bui tegen de meeuw',noun:'de bui tegen de patatmeeuw'},
+ lift:{mode:'nudge',where:'lighthouse',text:'De vuurtorenwachter is de trap zat. Een zetje voor een lift?',thanks:'Er komt een katrol met een mandje. De kat gaat voortaan met de lift.',thing:'een lift in de vuurtoren',noun:'het katrolletje van de vuurtoren'}
+};
+function funnyPlace(s,where){
+ const pick=list=>wishPick(s,list,where.length);
+ if(where==='farm')return pick(s.farms.filter(t=>!t.fire));
+ if(where==='market')return pick(s.buildings.filter(t=>['market','shop','bakery','cafe'].includes(t.building)));
+ if(where==='road')return pick(s.land.filter(t=>t.road&&!t.building&&!t.buildSite));
+ if(where==='library')return pick(s.buildings.filter(t=>t.building==='library'));
+ if(where==='beach')return pick(s.land.filter(t=>t.building==='beach'));
+ if(where==='lighthouse')return pick(s.land.filter(t=>t.building==='lighthouse'));
+ return pick(s.land.filter(t=>isOpenPlot(s,t)));
+}
 function wishCandidates(s){
- const choices=[],farm=s.farms.find(t=>!t.fire),tree=s.tile(0,0);
+ const choices=[],farm=wishPick(s,s.farms.filter(t=>!t.fire),1),tree=s.tile(0,0);
  if(farm)choices.push({kind:'rain',mode:'rain',text:'De boeren hopen op regen. Een bui over onze akker?',...{x:farm.x,y:farm.y}});
  if(tree?.building==='original-tree')choices.push({kind:'feast',mode:'nudge',text:'We willen een feest onder de oude boom. Geef jij het eerste zetje?',x:tree.x,y:tree.y});
  const visibleCamp=s.land.find(t=>['campfire','bonfire'].includes(t.building)&&[[1,0],[0,1],[1,1]].every(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return !n||n.kind!=='land'||lowOrEmpty(n);}));
  const camp=visibleCamp||wishPick(s,s.land.filter(t=>isOpenPlot(s,t)),3);
  if(camp)choices.push({kind:'bonfire',mode:'fire',text:'Een vreugdevuur op onze open plek? Wij nemen de hapjes mee.',x:camp.x,y:camp.y});
+ for(const [kind,w] of Object.entries(FUNNY_WISHES)){const t=funnyPlace(s,w.where);if(t)choices.push({kind,mode:w.mode,text:w.text,thing:w.thing,noun:w.noun,thanks:w.thanks,x:t.x,y:t.y});}
  const spring=springWishPlot(s);if(spring)choices.push({kind:'spring',mode:'rumble',text:'Volgens de waterzoekers zit hier een bron. Zou een beving haar kunnen openen?',x:spring.x,y:spring.y});
  return choices;
 }
@@ -923,13 +948,13 @@ function advanceWishes(s){
  if(active){
   const target=s.tile(active.x,active.y);
   if(active.kind==='extinguish'&&!target?.fire){closeWish(s,target?.building==='ruins'||target?.burntForest?'expired':'independent');return;}
-  if(!target||target.kind!=='land'||active.kind==='rain'&&target.building!=='farm'||active.kind==='bonfire'&&(target.buildSite||target.building&&!['bonfire','campfire'].includes(target.building))){closeWish(s,'changed');return;}
+  if(!target||target.kind!=='land'||active.kind==='rain'&&target.building!=='farm'||FUNNY_WISHES[active.kind]?.where==='farm'&&target.building!=='farm'||active.kind==='bonfire'&&(target.buildSite||target.building&&!['bonfire','campfire'].includes(target.building))){closeWish(s,'changed');return;}
   if(s.year>active.deadline)closeWish(s,'expired');
   return;
  }
  if(s.year<state.nextAt)return;
  const burning=s.land.find(t=>t.fire),choices=wishCandidates(s);
- const next=burning?{kind:'extinguish',mode:'rain',text:'Wie stopt dit vuur? Een regenbui kan ons helpen!',x:burning.x,y:burning.y}:choices[(Math.abs(s.seed)+state.serial)%choices.length];
+ const next=burning?{kind:'extinguish',mode:'rain',text:'Wie stopt dit vuur? Een regenbui kan ons helpen!',x:burning.x,y:burning.y}:wishPick(s,choices,7);
  if(!next){state.nextAt=s.year+20;return;}
  const person=currentRelative(s);state.serial++;
  state.active={...next,id:`wish-${s.seed}-${state.serial}`,speaker:`${person.name} ${person.lastName}`,issuedAt:s.year,deadline:s.year+36,status:'active',hidden:false};
@@ -937,6 +962,7 @@ function advanceWishes(s){
 function answerWish(s,spot,mode){
  const wish=ensureWishes(s).active;if(!wish||s.year>wish.deadline||wish.mode!==mode||!wishNear(wish,spot))return false;
  const target=s.tile(wish.x,wish.y);
+ if(FUNNY_WISHES[wish.kind]){if(!wishNear(wish,spot,1.5))return false;closeWish(s,'helped');return true;}
  const success=wish.kind==='rain'?target?.building==='farm'&&target.wetUntil>s.year:
   wish.kind==='extinguish'?!target?.fire:
   wish.kind==='spring'?s.land.some(t=>t.springYear===s.year&&wishNear(t,wish,2)):
@@ -3027,16 +3053,20 @@ class IslandRenderer {
     drawComicBubbles(this);
     this.drawWishResident();
   }
+  // A question mark floats over every open wish; in Help mode the asking resident stands beside it.
   wishResidentPoint(){
-    const wish=this.sim.wishes?.active;if(this.mode!=='help'||!wish||this.sim.ending)return null;
-    const p=this.point(wish.x,wish.y);return{x:p.x+16*this.zoom,y:p.y+8*this.zoom,wish};
+    const wish=this.sim.wishes?.active;if(!wish||wish.hidden||this.sim.ending||this.sim.config.wishBubbles===false)return null;
+    const p=this.point(wish.x,wish.y);return{x:p.x,y:p.y-30*this.zoom,ground:p,wish};
   }
-  pickWishResident(x,y){const p=this.wishResidentPoint();return !!p&&Math.hypot(x-p.x,y-(p.y-7*this.zoom))<=Math.max(20,14*this.zoom);}
+  pickWishResident(x,y){const p=this.wishResidentPoint();return !!p&&Math.hypot(x-p.x,y-p.y)<=Math.max(16,12*this.zoom);}
   drawWishResident(){
     const p=this.wishResidentPoint();if(!p)return;
-    const c=this.ctx;c.save();c.translate(p.x,p.y);c.scale(this.zoom,this.zoom);
-    this.ellipse(0,0,7,3,'#8c9e6e44');this.person(0,0,'#a37b5f',0);
-    this.ellipse(0,-22,8,7,'#faf8e9');c.fillStyle='#64794e';c.font='11px serif';c.textAlign='center';c.fillText('♡',0,-18);c.restore();
+    const c=this.ctx,bob=this.reduced?0:Math.sin(this.time*2.2)*2;
+    if(this.mode==='help'){c.save();c.translate(p.ground.x+16*this.zoom,p.ground.y+8*this.zoom);c.scale(this.zoom,this.zoom);this.ellipse(0,0,7,3,'#8c9e6e44');this.person(0,0,'#a37b5f',0);c.restore();}
+    c.save();c.translate(p.x,p.y+bob);c.scale(Math.max(.8,this.zoom),Math.max(.8,this.zoom));
+    this.line([[0,9],[0,16]],'#8f9e7f88',1);
+    this.ellipse(0,0,9,9,'#fbf6df');c.strokeStyle='#c7a85c';c.lineWidth=1.3;c.beginPath();c.ellipse(0,0,9,9,0,0,TAU);c.stroke();
+    c.fillStyle='#7a6230';c.font='bold 12px Georgia, serif';c.textAlign='center';c.textBaseline='middle';c.fillText('?',0,1);c.restore();
   }
   enqueueActor(depth,draw){if(this.scene)this.scene.push({depth,draw});else draw();}
   streetPoint(tile){const p=this.p(tile.x,tile.y);return{x:p.x,y:p.y+11.5};}
@@ -4430,7 +4460,7 @@ $('undo-reset').addEventListener('click',()=>{
   const previous=previousIsland&&Civilization.restore(previousIsland);if(!previous)return;
   clearTimeout(undoTimer);previousIsland=null;$('undo-reset').hidden=true;switchIsland(previous,"Je vorige eiland is terug. Niemand heeft de omweg gemerkt.");
 });
-const modeHints={help:'Klik op een inwoner met een hartje of open Wensen. Kies zelf of je helpt.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
+const modeHints={help:'Klik op een vraagteken om te lezen wat iemand vraagt. Kies zelf of je helpt.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
 function chooseMode(mode){
   interferenceMode=mode;renderer.mode=interferenceMode;inspectionPinned=false;
   for(const b of document.querySelectorAll('[data-interference]')){const selected=b.dataset.interference===mode;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected));}
@@ -4474,7 +4504,8 @@ canvas.addEventListener('pointerup',e=>{
     const r=canvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
     const tile=renderer.pick(x,y);
     if(cinemaActive()){cheerCinema();renderer.ripple(x,y);drag=null;return;}
-    if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&(renderer.pickWishResident(x,y)||tile.x===wish.x&&tile.y===wish.y))openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}drag=null;return;}
+    if(renderer.pickWishResident(x,y)){openWishes();drag=null;return;}
+    if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}drag=null;return;}
     if(sim.ending){showToast("Hun verhaal is klaar. Open het naschrift om vrij verder te spelen.");drag=null;return;}
     sim.interfere(tile.x,tile.y,interferenceMode);
     showIntervention(x,y);
