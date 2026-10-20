@@ -65,7 +65,7 @@ test('first visit has three quiet intro screens and begins at 1x only when finis
 });
 test('the logbook and settings stop simulation time without changing the chosen speed',async()=>{
  const sim=new Civilization(31);sim.config.speedMultiplier=3;const a=await appHarness(sim),e=a.elements;
- e.get('canvas-journal').handlers.click();a.advance(20);assert.equal(e.get('year').textContent,1);e.get('journal-dialog').close();a.advance(1);assert.ok(e.get('year').textContent>1);
+ e.get('canvas-journal').handlers.click();a.advance(20);assert.equal(e.get('year').textContent,1);e.get('book-dialog').close();a.advance(1);assert.ok(e.get('year').textContent>1);
  const year=e.get('year').textContent;e.get('settings').handlers.click();a.advance(20);assert.equal(e.get('year').textContent,year);e.get('settings-dialog').close();a.advance(1);assert.ok(e.get('year').textContent>year);
 });
 test('population remarks update before their normal hold when six residents become eight',async()=>{
@@ -104,58 +104,58 @@ test('the intro and ending windows can be dismissed immediately without a replac
 });
 test('the family tree is opened deliberately, pauses time and points back to the founding home',async()=>{
  const sim=new Civilization(31);while(sim.year<100)sim.tick();const a=await appHarness(sim),e=a.elements;
- assert.equal(e.get('family-dialog').open,false);e.get('open-family').handlers.click();assert.equal(e.get('family-dialog').open,true);
+ assert.equal(e.get('book-dialog').open,false);e.get('book-tab-family').handlers.click();assert.equal(e.get('book-dialog').open,true);
  assert.match(e.get('family-title').textContent,/Familie/);assert.equal(e.get('family-generations').children.length,4);assert.match(e.get('family-current').children[0].textContent,/generatie 4/);
  const year=e.get('year').textContent;a.advance(10);assert.equal(e.get('year').textContent,year);
- e.get('family-find-home').handlers.click();assert.equal(e.get('family-dialog').open,false);assert.match(e.get('tile-inspector').textContent,/generatie 4/);assert.equal(e.get('island').dataset.mode,'help');
+ e.get('family-find-home').handlers.click();assert.equal(e.get('book-dialog').open,false);assert.match(e.get('tile-inspector').textContent,/generatie 4/);assert.equal(e.get('island').dataset.mode,'help');
 });
 test('resident wishes stay compact, dismiss permanently and pause only when deliberately opened',async()=>{
  const sim=new Civilization(31);sim.wishes.active={id:'wish-ui',kind:'rain',mode:'rain',speaker:'Mo Visser',text:'De boeren hopen op regen.',x:1,y:-1,issuedAt:1,deadline:100,hidden:false};
- const a=await appHarness(sim),e=a.elements;assert.equal(e.get('wish-bubble').hidden,false);assert.equal(e.get('wishes-dialog').open,false);
+ const a=await appHarness(sim),e=a.elements;assert.equal(e.get('wish-bubble').hidden,false);assert.equal(e.get('book-dialog').open,false);
  a.advance(2);assert.ok(e.get('year').textContent>1);assert.equal(e.get('tile-inspector').hidden,true);
  e.get('wish-dismiss').handlers.click();assert.equal(e.get('wish-bubble').hidden,true);assert.equal(a.saved().wishes.active.hidden,true);
- e.get('open-wishes').handlers.click();assert.equal(e.get('wishes-dialog').open,true);assert.match(e.get('wish-current').children[1].textContent,/regen/);
+ e.get('book-tab-wishes').handlers.click();assert.equal(e.get('book-dialog').open,true);assert.match(e.get('wish-current').children[1].textContent,/regen/);
  const year=e.get('year').textContent;a.advance(2);assert.equal(e.get('year').textContent,year);
- e.get('wish-find').handlers.click();assert.equal(e.get('wishes-dialog').open,false);assert.equal(e.get('island').dataset.mode,'help');
+ e.get('wish-find').handlers.click();assert.equal(e.get('book-dialog').open,false);assert.equal(e.get('island').dataset.mode,'help');
  e.get('wish-bubbles').handlers.change({target:{checked:false}});assert.equal(a.saved().config.wishBubbles,false);
  const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));assert.equal(b.elements.get('wish-bubble').hidden,true);
 });
 test('optional challenges are revealed only on request and their window pauses the island',async()=>{
  const sim=new Civilization(31),a=await appHarness(sim),e=a.elements;
- assert.equal(e.get('challenges-dialog').open,false);assert.equal(e.get('challenge-list').children.length,0);assert.equal(a.saved().challenges.revealed,false);
- a.advance(2);assert.ok(e.get('year').textContent>1);assert.equal(e.get('challenges-dialog').open,false);
- e.get('open-challenges').handlers.click();assert.equal(e.get('challenges-dialog').open,true);assert.equal(a.saved().challenges.revealed,true);assert.equal(e.get('challenge-list').children.length,sim.challenges.goals.length);
- const year=e.get('year').textContent;a.advance(2);assert.equal(e.get('year').textContent,year);e.get('challenges-close').handlers.click();a.advance(2);assert.ok(e.get('year').textContent>year);
- const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));assert.equal(b.elements.get('challenges-dialog').open,false,'return visits never open a challenge popup');
+ assert.equal(e.get('book-dialog').open,false);assert.equal(e.get('challenge-list').children.length,0);assert.equal(a.saved().challenges.revealed,false);
+ a.advance(2);assert.ok(e.get('year').textContent>1);assert.equal(e.get('book-dialog').open,false);
+ e.get('book-tab-challenges').handlers.click();assert.equal(e.get('book-dialog').open,true);assert.equal(a.saved().challenges.revealed,true);assert.equal(e.get('challenge-list').children.length,sim.challenges.goals.length);
+ const year=e.get('year').textContent;a.advance(2);assert.equal(e.get('year').textContent,year);e.get('book-close').handlers.click();a.advance(2);assert.ok(e.get('year').textContent>year);
+ const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));assert.equal(b.elements.get('book-dialog').open,false,'return visits never open a challenge popup');
 });
 test('Help names the requesting resident and fulfils their wish through an explicit button',async()=>{
  const sim=new Civilization(31);sim.wishes.active={id:'help-ui',kind:'rain',mode:'rain',speaker:'Mo Visser',text:'De boeren hopen op regen.',x:1,y:-1,issuedAt:1,deadline:100,hidden:false};
- const a=await appHarness(sim),e=a.elements;a.frame(16);a.modes.find(b=>b.dataset.interference==='help').handlers.click();e.get('open-wishes').handlers.click();
+ const a=await appHarness(sim),e=a.elements;a.frame(16);a.modes.find(b=>b.dataset.interference==='help').handlers.click();e.get('book-tab-wishes').handlers.click();
  assert.equal(e.get('wish-help').textContent,'Help Mo');assert.equal(e.get('wish-help').hidden,false);assert.equal(a.saved().interferences,0);
- e.get('wish-help').handlers.click();assert.equal(e.get('wishes-dialog').open,false);assert.equal(a.saved().interferences,1);assert.equal(a.saved().wishes.history.at(-1).status,'helped');assert.equal(a.saved().influence.rain,1);assert.equal(e.get('wish-bubble').hidden,true);
+ e.get('wish-help').handlers.click();assert.equal(e.get('book-dialog').open,false);assert.equal(a.saved().interferences,1);assert.equal(a.saved().wishes.history.at(-1).status,'helped');assert.equal(a.saved().influence.rain,1);assert.equal(e.get('wish-bubble').hidden,true);
  e.get('wish-help').handlers.click();assert.equal(a.saved().interferences,1);
 });
 test('the collection is quiet, hides titles behind hints and survives new islands, undo and reload',async()=>{
  const s=new Civilization(31);s.year=120;s.tile(-1,1).building='manor';s.tile(-1,1).builtYear=120;const a=await appHarness(s),e=a.elements;
- assert.equal(e.get('collection-dialog').open,false);assert.ok(a.collection().entries['moment:manor']);e.get('open-collection').handlers.click();assert.equal(e.get('collection-dialog').open,true);
+ assert.equal(e.get('book-dialog').open,false);assert.ok(a.collection().entries['moment:manor']);e.get('book-tab-collection').handlers.click();assert.equal(e.get('book-dialog').open,true);
  const items=e.get('collection-groups').children.flatMap(group=>group.children[1].children),hidden=items.find(item=>item.dataset.id==='ending:phoenix');assert.equal(hidden.children[1].textContent,'Nog niet ontdekt');assert.ok(hidden.children[2].textContent);assert.equal(hidden.dataset.found,'false');
- const year=e.get('year').textContent;a.advance(2);assert.equal(e.get('year').textContent,year);e.get('collection-close').handlers.click();e.get('new-island').handlers.click();assert.ok(a.collection().entries['moment:manor']);e.get('undo-reset').handlers.click();assert.ok(a.collection().entries['moment:manor']);
- const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())),{persistentStorage:a.storage});assert.ok(b.collection().entries['moment:manor']);assert.equal(b.elements.get('collection-dialog').open,false);
+ const year=e.get('year').textContent;a.advance(2);assert.equal(e.get('year').textContent,year);e.get('book-close').handlers.click();e.get('new-island').handlers.click();assert.ok(a.collection().entries['moment:manor']);e.get('undo-reset').handlers.click();assert.ok(a.collection().entries['moment:manor']);
+ const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())),{persistentStorage:a.storage});assert.ok(b.collection().entries['moment:manor']);assert.equal(b.elements.get('book-dialog').open,false);
 });
 test('a collection storage failure does not stop island saving or the playable in-memory collection',async()=>{
  const s=new Civilization(31);s.tile(-1,1).building='manor';const a=await appHarness(s,{rejectCollectionWrites:true}),e=a.elements;
- assert.doesNotThrow(()=>e.get('open-collection').handlers.click());assert.match(e.get('collection-progress').textContent,/1 van/);assert.match(e.get('collection-storage').textContent,/tijdens dit bezoek/);
- e.get('collection-close').handlers.click();e.get('new-island').handlers.click();assert.equal(a.saved().seed,8);assert.ok(a.saved().tiles.length);
+ assert.doesNotThrow(()=>e.get('book-tab-collection').handlers.click());assert.match(e.get('collection-progress').textContent,/1 van/);assert.match(e.get('collection-storage').textContent,/tijdens dit bezoek/);
+ e.get('book-close').handlers.click();e.get('new-island').handlers.click();assert.equal(a.saved().seed,8);assert.ok(a.saved().tiles.length);
 });
 test('a found secret stays in the collection after switching to another island',async()=>{
  const s=new Civilization(31);for(let i=0;i<3;i++)s.interfere(0,0,'rain');const a=await appHarness(s),e=a.elements;
- assert.ok(a.collection().entries['secret:old-tree-bloom']);assert.equal(e.get('collection-dialog').open,false);assert.equal(e.get('moment-card').hidden,true);
- e.get('new-island').handlers.click();e.get('open-collection').handlers.click();const items=e.get('collection-groups').children.flatMap(group=>group.children[1].children),tree=items.find(item=>item.dataset.id==='secret:old-tree-bloom');assert.equal(tree.dataset.found,'true');assert.match(tree.children[1].textContent,/wist nog/);assert.match(tree.children[3].textContent,/Seed 31/);
+ assert.ok(a.collection().entries['secret:old-tree-bloom']);assert.equal(e.get('book-dialog').open,false);assert.equal(e.get('moment-card').hidden,true);
+ e.get('new-island').handlers.click();e.get('book-tab-collection').handlers.click();const items=e.get('collection-groups').children.flatMap(group=>group.children[1].children),tree=items.find(item=>item.dataset.id==='secret:old-tree-bloom');assert.equal(tree.dataset.found,'true');assert.match(tree.children[1].textContent,/wist nog/);assert.match(tree.children[3].textContent,/Seed 31/);
 });
 test('return summaries are inline and dismissible; Show focuses the real place without an automatic popup',async()=>{
  const s=new Civilization(31);s.lastVisitAt=Date.now()-120000;const a=await appHarness(s),e=a.elements;
  assert.equal(e.get('away-summary').hidden,false);assert.ok(a.saved().year>1);assert.equal(e.get('tile-inspector').hidden,true);assert.equal(e.get('moment-card').hidden,true);assert.equal(e.get('cinema-dialog').open,false);
- e.get('away-show').handlers.click();assert.equal(e.get('away-heading').textContent,'Het grootste moment');assert.equal(e.get('tile-inspector').hidden,false);assert.equal(e.get('away-show').hidden,true);assert.equal(e.get('journal-dialog').open,false);
+ e.get('away-show').handlers.click();assert.equal(e.get('away-heading').textContent,'Het grootste moment');assert.equal(e.get('tile-inspector').hidden,false);assert.equal(e.get('away-show').hidden,true);assert.equal(e.get('book-dialog').open,false);
  e.get('away-dismiss').handlers.click();assert.equal(e.get('away-summary').hidden,true);assert.equal(a.saved().awayReport.dismissed,true);
  const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));assert.equal(b.elements.get('away-summary').hidden,true);
 });
@@ -168,6 +168,18 @@ test('the journal has illustrated chapters, highlighted people and a working Sho
  const chapters=e.get('journal-entries').children,nav=e.get('journal-chapters').children;assert.equal(chapters.length,3);assert.equal(nav.length,3);assert.match(chapters[0].children[0].children[0].innerHTML,/<svg/);nav[2].handlers.click();assert.equal(chapters[2].scrolled.block,'start');
  const items=chapters.flatMap(c=>c.children.slice(1)).filter(item=>item.className?.includes('history-item'));assert.equal(items.length,s.history.length);assert.ok(items.some(item=>item.className.includes('family-history-item')));assert.ok(items.some(item=>item.className.includes('interference-history-item')));assert.ok(items.every(item=>item.children[1].children[2].textContent==='Laat zien ↗'));
  const year=e.get('year').textContent;a.advance(2);assert.equal(e.get('year').textContent,year);
- const intervention=items.find(item=>item.className.includes('interference-history-item'));intervention.children[1].children[2].handlers.click();assert.equal(e.get('journal-dialog').open,false);assert.equal(e.get('tile-inspector').hidden,false);assert.equal(e.get('island').dataset.mode,'help');assert.equal(a.saved().interferences,1,'reading the chronicle never causes another intervention');
- e.get('canvas-journal').handlers.click();const old=e.get('journal-entries').children.flatMap(c=>c.children.slice(1)).find(item=>item.children?.[1]?.children?.[1]?.textContent==='Een oud bericht zonder plek.');old.children[1].children[2].handlers.click();assert.equal(e.get('journal-dialog').open,false);assert.equal(e.get('tile-inspector').hidden,true);assert.match(e.get('toast-text').textContent,/precIeze plek|precieze plek/);
+ const intervention=items.find(item=>item.className.includes('interference-history-item'));intervention.children[1].children[2].handlers.click();assert.equal(e.get('book-dialog').open,false);assert.equal(e.get('tile-inspector').hidden,false);assert.equal(e.get('island').dataset.mode,'help');assert.equal(a.saved().interferences,1,'reading the chronicle never causes another intervention');
+ e.get('canvas-journal').handlers.click();const old=e.get('journal-entries').children.flatMap(c=>c.children.slice(1)).find(item=>item.children?.[1]?.children?.[1]?.textContent==='Een oud bericht zonder plek.');old.children[1].children[2].handlers.click();assert.equal(e.get('book-dialog').open,false);assert.equal(e.get('tile-inspector').hidden,true);assert.match(e.get('toast-text').textContent,/precIeze plek|precieze plek/);
+});
+test('one island book replaces five windows; tabs switch pages and the book remembers the last page',async()=>{
+ const sim=new Civilization(31);sim.wishes.active={id:'wish-book',kind:'rain',mode:'rain',speaker:'Mo Visser',text:'De boeren hopen op regen.',x:1,y:-1,issuedAt:1,deadline:100,hidden:false};
+ const a=await appHarness(sim),e=a.elements;a.frame(16);
+ for(const id of ['open-family','open-wishes','open-challenges','open-collection','family-dialog','wishes-dialog','journal-dialog'])assert.equal(e.get(id),undefined,`${id} is gone`);
+ assert.equal(e.get('book-tab-wishes').dataset.pending,'true','a waiting wish is marked on its tab');
+ e.get('canvas-journal').handlers.click();assert.equal(e.get('book-dialog').open,true);assert.equal(e.get('book-journal').hidden,false);assert.equal(e.get('book-family').hidden,true);
+ e.get('book-tab-family').handlers.click();assert.equal(e.get('book-family').hidden,false);assert.equal(e.get('book-journal').hidden,true);assert.match(e.get('family-title').textContent,/Familie/);
+ e.get('book-tab-collection').handlers.click();assert.equal(e.get('book-collection').hidden,false);assert.equal(e.get('book-family').hidden,true);
+ e.get('book-close').handlers.click();assert.equal(e.get('book-dialog').open,false);
+ e.get('canvas-journal').handlers.click();assert.equal(e.get('book-collection').hidden,false,'reopening returns to the last page');
+ e.get('book-close').handlers.click();e.get('open-journal').handlers.click();assert.equal(e.get('book-journal').hidden,false,'the history link always opens the chronicle');
 });

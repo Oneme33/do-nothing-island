@@ -108,10 +108,10 @@ function updateHistory(){
   for(let i=recent.length;i<3;i++){
     const empty=document.createElement('div');empty.className='history-empty';empty.textContent=i===1?"De geschiedenis neemt haar tijd.":"Er gaat iets gebeuren. Waarschijnlijk.";$('history-preview').append(empty);
   }
-  if($('journal-dialog').open)renderJournal();
+  if($('book-dialog').open&&bookPage==='journal')renderJournal();
 }
 function showChroniclePlace(entry){
-  $('journal-dialog').close();const place=chroniclePlace(sim,entry);chooseMode('help');
+  $('book-dialog').close();const place=chroniclePlace(sim,entry);chooseMode('help');
   if(place){inspectionPinned=true;focusPlace(place);showToast(`Plek uit de kroniek · jaar ${entry.year} · je ziet het huidige eiland.`,3200);}
   else{renderer.focus=null;renderer.recenter();inspectionPinned=false;$('tile-inspector').hidden=true;showToast(`Jaar ${entry.year} · de precieze plek is niet opgeslagen. Je ziet het hele eiland.`,3600);}
 }
@@ -153,6 +153,7 @@ function renderChallenges(){
 }
 function updateWishBubble(){
   const wish=ensureWishes(sim).active;
+  $('book-tab-wishes').dataset.pending=String(!!wish&&!sim.ending);
   $('wish-bubble').hidden=!wish||wish.hidden||sim.config.wishBubbles===false||!!sim.ending;
   if(wish){$('wish-speaker').textContent=wish.speaker;$('wish-text').textContent=wish.text;}
 }
@@ -165,7 +166,26 @@ function renderWishes(){
   $('wish-help').hidden=!canHelpWish(sim,wish);$('wish-help').textContent=wish?`Help ${wish.speaker.split(' ')[0]}`:'Help deze inwoner';
   $('wish-history').replaceChildren(...state.history.slice().reverse().map(w=>{const item=document.createElement('li'),name=document.createElement('strong'),text=document.createElement('p');name.textContent=`${WISH_OUTCOMES[w.status]} · jaar ${w.closedAt}`;text.textContent=`${w.speaker}: “${w.text}”`;item.append(name,text);return item;}));
 }
-function openWishes(){renderWishes();$('wishes-dialog').showModal();updatePause();}
+const bookPages=['journal','family','wishes','challenges','collection'];
+let bookPage='journal';
+function renderBookPage(name){
+  if(name==='journal')renderJournal();
+  else if(name==='family')renderFamily();
+  else if(name==='wishes')renderWishes();
+  else if(name==='challenges'){ensureChallenges(sim).revealed=true;renderChallenges();}
+  else renderCollection();
+}
+// One book instead of five windows: every page pauses the island the same way.
+function openBook(name=bookPage){
+  bookPage=bookPages.includes(name)?name:'journal';
+  for(const page of bookPages){const selected=page===bookPage,tab=$(`book-tab-${page}`);$(`book-${page}`).hidden=!selected;tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;}
+  renderBookPage(bookPage);
+  if(!$('book-dialog').open)$('book-dialog').showModal();
+  if(bookPage==='family')$('family-generations').scrollTop=$('family-generations').scrollHeight;
+  if(bookPage==='challenges')save();
+  updatePause();
+}
+function openWishes(){openBook('wishes');}
 function updateAwayReport(){
   const report=sim.awayReport;$('away-summary').hidden=!report||report.dismissed;
   if(!report||report.dismissed)return;
@@ -333,7 +353,7 @@ $('zoom-out').addEventListener('click',()=>renderer.setZoom(1/1.18));
 $('recenter').addEventListener('click',()=>renderer.recenter());
 $('help').addEventListener('click',()=>$('guide-dialog').showModal());
 $('settings').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;$('settings-dialog').showModal();});
-$('open-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();updatePause();});
+$('open-journal').addEventListener('click',()=>openBook('journal'));
 $('away-dismiss').addEventListener('click',()=>{if(sim.awayReport)sim.awayReport.dismissed=true;updateAwayReport();save();});
 $('away-show').addEventListener('click',()=>{
   const report=sim.awayReport;if(!report)return;
@@ -343,22 +363,22 @@ $('away-show').addEventListener('click',()=>{
   save();
 });
 $('offline-life').addEventListener('change',event=>{sim.config.offlineProgress=event.target.checked;save();});
-$('open-collection').addEventListener('click',()=>{renderCollection();$('collection-dialog').showModal();updatePause();});
-$('collection-close').addEventListener('click',()=>$('collection-dialog').close());
-$('open-challenges').addEventListener('click',()=>{ensureChallenges(sim).revealed=true;renderChallenges();$('challenges-dialog').showModal();updatePause();save();});
-$('challenges-close').addEventListener('click',()=>$('challenges-dialog').close());
-$('open-wishes').addEventListener('click',openWishes);
+bookPages.forEach((page,index)=>{
+  const tab=$(`book-tab-${page}`);tab.addEventListener('click',()=>openBook(page));
+  tab.addEventListener('keydown',e=>{
+    const step=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(!step)return;e.preventDefault();
+    const next=bookPages[(index+step+bookPages.length)%bookPages.length];openBook(next);$(`book-tab-${next}`).focus?.();
+  });
+});
+$('book-close').addEventListener('click',()=>$('book-dialog').close());
 $('wish-open').addEventListener('click',openWishes);
 $('wish-dismiss').addEventListener('click',()=>{dismissWish(sim);updateWishBubble();save();});
-$('wishes-close').addEventListener('click',()=>$('wishes-dialog').close());
 $('wish-bubbles').addEventListener('change',event=>{sim.config.wishBubbles=event.target.checked;updateWishBubble();save();});
-$('wish-find').addEventListener('click',()=>{const wish=ensureWishes(sim).active;if(!wish)return;$('wishes-dialog').close();chooseMode('help');focusPlace(sim.tile(wish.x,wish.y));});
-$('open-family').addEventListener('click',()=>{renderFamily();$('family-dialog').showModal();$('family-generations').scrollTop=$('family-generations').scrollHeight;updatePause();});
-$('family-close').addEventListener('click',()=>$('family-dialog').close());
+$('wish-find').addEventListener('click',()=>{const wish=ensureWishes(sim).active;if(!wish)return;$('book-dialog').close();chooseMode('help');focusPlace(sim.tile(wish.x,wish.y));});
 $('family-oldest').addEventListener('click',()=>$('family-generations').scrollTop=0);
 $('family-latest').addEventListener('click',()=>$('family-generations').scrollTop=$('family-generations').scrollHeight);
-$('family-find-home').addEventListener('click',()=>{$('family-dialog').close();chooseMode('help');inspectionPinned=true;focusPlace(sim.tile(-1,1));});
-$('canvas-journal').addEventListener('click',()=>{renderJournal();$('journal-dialog').showModal();updatePause();});
+$('family-find-home').addEventListener('click',()=>{$('book-dialog').close();chooseMode('help');inspectionPinned=true;focusPlace(sim.tile(-1,1));});
+$('canvas-journal').addEventListener('click',()=>openBook());
 $('inspector-close').addEventListener('click',()=>{inspectionPinned=false;$('tile-inspector').hidden=true;});
 $('cinema-cheer').addEventListener('click',cheerCinema);
 $('cinema-pause').addEventListener('click',()=>{togglePause();updateCinemaUI();});
@@ -449,7 +469,7 @@ function showIntervention(x,y){
 $('wish-help').addEventListener('click',()=>{
   const wish=ensureWishes(sim).active;
   if(!helpActiveWish(sim,wish?.id)){renderWishes();showToast('Deze wens is veranderd. Er is geen ingreep gedaan.');return;}
-  $('wishes-dialog').close();const point=renderer.point(wish.x,wish.y);showIntervention(point.x,point.y);
+  $('book-dialog').close();const point=renderer.point(wish.x,wish.y);showIntervention(point.x,point.y);
 });
 let drag=null;
 canvas.addEventListener('pointerdown',e=>{

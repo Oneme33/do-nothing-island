@@ -6,13 +6,15 @@ Een eiland groeit vanzelf: van één huisje en een kleine akker naar een stad me
 
 De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per commit en testmoment uitgevoerd.
 
-**Stamboom** volgt de familie van het eerste huis. Elke 32 jaar gaat de sleutel naar een volgende generatie, met een vaste naam, tijdpassend beroep en eigenaardigheid. De generaties blijven in de save bewaard en laten berichten in het logboek achter. Bestaande eilanden krijgen een gereconstrueerde vroege familielijn, zonder dat hun kaart of voortgang wordt teruggezet.
+**Het eilandboek** bundelt alles wat je terugleest op één plek: de knop **Eilandboek ↗** op het eiland opent tabbladen voor Kroniek, Familie, Wensen, Uitdagingen en Verzameling. Het boek onthoudt het laatst gelezen tabblad, pauzeert het eiland zolang het open is en markeert het tabblad Wensen met een stipje als iemand iets vraagt. Pijltjestoetsen wisselen tussen tabbladen.
 
-**Wensen** verschijnen af en toe als een klein wegklikbaar wolkje. Via Wensen lees je de vraag terug en kun je de plek opzoeken. Wolkjes zijn ook helemaal uit te zetten. Regen, een boomfeest, een vreugdevuur, hulp bij brand of een bron openen kunnen het vertrouwen vergroten; wie vaak helpt maakt het eiland ook afhankelijker. Afwachten laat ruimte voor eigen oplossingen. Wensen worden met je eiland opgeslagen.
+Het tabblad **Familie** volgt de familie van het eerste huis. Elke 32 jaar gaat de sleutel naar een volgende generatie, met een vaste naam, tijdpassend beroep en eigenaardigheid. De generaties blijven in de save bewaard en laten berichten in het logboek achter. Bestaande eilanden krijgen een gereconstrueerde vroege familielijn, zonder dat hun kaart of voortgang wordt teruggezet.
 
-**Uitdagingen** bevat één tot drie vrijblijvende doelen per seed. Ze worden stil bijgehouden en zijn alleen zichtbaar als je zelf het venster opent. Bijvoorbeeld: een vroeg landhuis, de Renaissance zonder ingreep, een bibliotheek of een vuurtraditie. Ze geven geen bonus of straf. Behaalde doelen blijven bewaard; een oudere save krijgt geen achteraf verzonnen uitslagen.
+**Wensen** verschijnen af en toe als een klein wegklikbaar wolkje. In het tabblad Wensen lees je de vraag terug en kun je de plek opzoeken. Wolkjes zijn ook helemaal uit te zetten. Regen, een boomfeest, een vreugdevuur, hulp bij brand of een bron openen kunnen het vertrouwen vergroten; wie vaak helpt maakt het eiland ook afhankelijker. Afwachten laat ruimte voor eigen oplossingen. Wensen worden met je eiland opgeslagen.
 
-**Verzameling** bewaart eindes, bijzondere momenten en voltooide uitdagingen over al je eilanden heen. Onbekende items tonen een silhouet en een vage hint. Alleen zelf openen toont je voortgang; er verschijnen geen verzamelmeldingen over het eiland. De verzameling blijft in dezelfde browser bewaard bij Nieuw eiland, Herstel vorig eiland en herladen. Aantoonbare vondsten uit oude saves worden meegenomen.
+Het tabblad **Uitdagingen** bevat één tot drie vrijblijvende doelen per seed. Ze worden stil bijgehouden en zijn alleen zichtbaar als je het tabblad zelf opent. Bijvoorbeeld: een vroeg landhuis, de Renaissance zonder ingreep, een bibliotheek of een vuurtraditie. Ze geven geen bonus of straf. Behaalde doelen blijven bewaard; een oudere save krijgt geen achteraf verzonnen uitslagen.
+
+Het tabblad **Verzameling** bewaart eindes, bijzondere momenten en voltooide uitdagingen over al je eilanden heen. Onbekende items tonen een silhouet en een vage hint. Alleen zelf openen toont je voortgang; er verschijnen geen verzamelmeldingen over het eiland. De verzameling blijft in dezelfde browser bewaard bij Nieuw eiland, Herstel vorig eiland en herladen. Aantoonbare vondsten uit oude saves worden meegenomen.
 
 **Geheimen** ontstaan door experimenten. Drie gerichte regenbuien geven de oude boom blijvende bloesem. Een beving bij een vulkaan, bewegen van natte grond en vuur op een feestende vuurplaats hebben eigen gevolgen. Alle acht ontdekkingen komen stil in de verzameling, met de seed en het vastgelegde jaar. De onbekende vakjes verklappen alleen een hint. Ook bestaande ontdekkingen uit oude saves tellen mee.
 
@@ -24,17 +26,17 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 Open **`start.html`** rechtstreeks in een moderne browser. Dit bestand bevat het volledige spel; installatie en een server zijn niet nodig. De interface is Nederlands. De eerste keer verschijnen drie korte introschermen, waarna het eiland op **1×** begint.
 
-- **Help:** klik op een inwoner met een hartje of open Wensen. Met de knop Help geef je precies de gevraagde hulp. Een klik op andere gebouwen toont hun bewoners en geschiedenis, zonder ingreep.
+- **Help:** klik op een inwoner met een hartje of open Wensen in het eilandboek. Met de knop Help geef je precies de gevraagde hulp. Een klik op andere gebouwen toont hun bewoners en geschiedenis, zonder ingreep.
 - **Bouw:** help een bouwplaats, geef een huis een aanbouw of verbeter een akker.
 - **Regen:** vul de voedselvoorraad aan, verbeter de oogst of blus brand.
 - **Beving:** beschadig bebouwing en verander, afhankelijk van de plek, het landschap.
 - **Vuur:** maak een vuurplaats of steek een gewone bebouwde plek in brand.
 
-De pauzeknop, snelheden **1× / 2× / 3× / 10×** en het logboek staan op het eiland. Automatische verhaalkaarten staan standaard uit; in instellingen kun je ze aanzetten. Gebeurtenissen blijven altijd in het logboek. Kaarten pauzeren of verplaatsen de camera niet automatisch. Iedere kaart heeft een sluitknop; ook intro, eindscène en naschrift zijn meteen met × of Escape te verbergen.
+De pauzeknop, snelheden **1× / 2× / 3× / 10×** en het eilandboek staan op het eiland. Automatische verhaalkaarten staan standaard uit; in instellingen kun je ze aanzetten. Gebeurtenissen blijven altijd in het logboek. Kaarten pauzeren of verplaatsen de camera niet automatisch. Iedere kaart heeft een sluitknop; ook intro, eindscène en naschrift zijn meteen met × of Escape te verbergen.
 
 Op **1×** duurt een jaar in het begin bijna twee seconden, zodat elke generatie van de familie ongeveer een minuut meegaat. In latere tijdperken gaat het rustig naar ruim een seconde per jaar. Een heel eiland duurt op 1× zo'n vijftig minuten; 2×, 3× en 10× zijn er voor wie sneller wil. Zonder ‘Steeds wat sneller’ duurt elk jaar anderhalve seconde.
 
-Spatie pauzeert. Scroll of +/− zoomt; sleep om de rest van het eiland te verkennen. Open vensters zoals het logboek, de handleiding en instellingen pauzeren de wereld.
+Spatie pauzeert. Scroll of +/− zoomt; sleep om de rest van het eiland te verkennen. Open vensters zoals het eilandboek, de handleiding en instellingen pauzeren de wereld.
 
 De bewoners kunnen zonder wegen door het landschap lopen, ook naar het achterland en de zijkanten. Vlakke zandwegen verbinden echte bouwplaatsen en gebouwen. Later worden ze straten met een grijs wegdek en markering. Bos, strand en uitzichtpunten veroorzaken geen automatisch wegennet. Karren, fietsen en auto's gebruiken de aangelegde wegen.
 
