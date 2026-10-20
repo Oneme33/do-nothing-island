@@ -4,7 +4,7 @@ import {ensureFamily,advanceFamily,rememberInFamily} from './family.js';
 import {ensureWishes,advanceWishes,answerWish} from './wishes.js';
 import {ensureChallenges,advanceChallenges} from './challenges.js';
 import {advanceCollection} from './collection.js';
-import {advanceCoast} from './coast.js';
+import {advanceCoast,coastNotice} from './coast.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 export const WORLD_RADIUS = 12;
@@ -262,7 +262,7 @@ export class Civilization {
     const entry={year:this.year,text,type,id:`event-${++this.storySequence}`,priority:eventPriority(type),...details};
     this.history.push(entry);
     if(this.history.length>350){let index=this.history.findIndex((e,i)=>i>0&&(e.priority||eventPriority(e.type))<82);if(index<0)index=1;this.history.splice(index,1);}
-    this.events.push(entry);rememberInFamily(this,entry);return entry;
+    this.events.push(entry);rememberInFamily(this,entry);coastNotice(this,entry);return entry;
   }
   signal(type,tile,label) {
     this.signals.push({type,x:tile?.x??0,y:tile?.y??0,label,priority:eventPriority(type)});

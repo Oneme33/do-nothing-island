@@ -24,3 +24,23 @@ test('more beaches appear over the centuries, far apart, on the real coast',()=>
  for(let i=0;i<s.coast.beaches.length;i++)for(let j=i+1;j<s.coast.beaches.length;j++){const a=s.coast.beaches[i],b=s.coast.beaches[j];assert.ok(Math.hypot(a.x-b.x,a.y-b.y)>=6);}
  assert.ok(!s.land.some(t=>t.building==='beach'&&t.foundingHome));
 });
+import {findTreasure,TREASURE_CATALOG,coastNotice} from '../src/coast.js';
+import {COLLECTION_CATALOG} from '../src/collection.js';
+test('treasures are found once each, logged, remembered by the family and collected',()=>{
+ const s=new Civilization(31);let found=null;
+ for(let i=0;i<200&&!found;i++){s.year++;found=findTreasure(s,'rumble',s.tile(1,1));}
+ assert.ok(found,'a tremor eventually uncovers something');const def=TREASURE_CATALOG.find(t=>t.id===found.id);
+ assert.equal(s.tile(1,1).treasure.id,found.id);assert.ok(s.history.some(e=>e.type==='treasure'&&e.treasureId===found.id));
+ const holder=s.family.generations.find(p=>p.id===s.family.currentId);assert.ok(holder.moments.some(m=>m.kind==='treasure'&&m.memory.startsWith(def.short)));
+ assert.match(describePlot(s,s.tile(1,1)),new RegExp(def.short));
+ for(let i=0;i<400;i++){s.year++;findTreasure(s,'rumble',s.tile(2,1));}
+ const rumbleFinds=s.coast.treasures.filter(t=>TREASURE_CATALOG.find(c=>c.id===t.id).cause==='rumble');assert.equal(new Set(rumbleFinds.map(t=>t.id)).size,rumbleFinds.length);assert.ok(rumbleFinds.length<=2);
+ assert.ok(COLLECTION_CATALOG.some(c=>c.id===`treasure:${found.id}`&&c.group==='treasures'));
+ s.tick();assert.ok(Number.isInteger(s.collectionRecords[`treasure:${found.id}`]));
+});
+test('a deliberate tremor can uncover treasure without using island randomness',()=>{
+ const a=new Civilization(31),b=new Civilization(31);
+ for(let i=0;i<30;i++){a.tick();b.tick();}
+ for(let i=0;i<12;i++){a.interfere(1+i%3,1,'rumble');b.interfere(1+i%3,1,'rumble');a.tick();b.tick();}
+ assert.deepEqual(a.coast,b.coast);assert.equal(a.randomState,b.randomState);
+});

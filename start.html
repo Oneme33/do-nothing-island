@@ -828,6 +828,7 @@ function storyFor(s,family,entry){
   if(type==='nudge')return{priority:1,kind:'nudge',text:'zag de bouwers ineens twee keer zo hard werken en nam er stilletjes de eer voor.',memory:`de vreemde bouwhaast in jaar ${y}`};
   return null;
  }
+ if(entry.type==='treasure'){const t=TREASURE_CATALOG.find(c=>c.id===entry.treasureId);if(!t)return null;return{priority:3,kind:'treasure',text:`was erbij toen ${t.short} werd gevonden${nearFamilyHome(family,entry,4)?', vlak bij huis':''}. Het verhaal wordt elk jaar een beetje groter.`,memory:`${t.short} uit jaar ${y}`};}
  if(entry.type==='palace'){const b=s.tile(family.home.x,family.home.y)?.building;return{priority:3,kind:'home',text:b==='palace'?'zag het eerste huis uitgroeien tot een paleis en bleef gewoon de oude voordeur gebruiken.':'zag het eerste huis een landhuis worden en kocht er meteen een deurmat voor.',memory:b==='palace'?'de dag dat het huis een paleis werd':'de dag dat het huis een landhuis werd'};}
  if(entry.type==='flood'&&nearFamilyHome(family,entry,5))return{priority:3,kind:'flood',text:'zette de stoelen op tafel toen het water kwam, en daarna de kat.',memory:`het hoge water in jaar ${y}`};
  if(entry.type==='volcano')return{priority:2,kind:'volcano',text:'zag de vulkaan haar mening geven en verhuisde de moestuin een stukje.',memory:`de vulkaan in jaar ${y}`};
@@ -1040,6 +1041,8 @@ function describePlot(s,t){
  lines.push(t.foundingHome?`${heading} · het allereerste huis`:heading);
  if(t.building){lines.push(t.builtYear?`Gebouwd in jaar ${t.builtYear}${t.rebuiltYear?`; herbouwd in ${t.rebuiltYear}`:''}.`:'Dit gebouw staat hier al sinds de oude eilandgeschiedenis.');}
  const index=s.houses.findIndex(home=>home.x===t.x&&home.y===t.y);
+ const treasure=t.treasure&&TREASURE_CATALOG.find(c=>c.id===t.treasure.id);
+ if(treasure)lines.push(`Hier werd in jaar ${t.treasure.year} ${treasure.short} gevonden.`);
  if(t.foundingHome){
   const person=currentRelative(s);lines.push(`Hier hoort familie ${person.lastName} thuis. ${person.name} bewaart nu de sleutel (generatie ${person.generation}).`);
   lines.push(`Beroep: ${person.occupation}. ${person.name} ${person.quirk}.`);
@@ -1548,97 +1551,6 @@ function advanceFinale(s){
 }
 function resumeSandbox(s){s.sandbox=true;s.ending=false;s.endingSeen=true;if(s.cinematic)s.cinematic.completed=true;}
 
-
-const COLLECTION_STORAGE_KEY='do-nothing-island-collection-v1';
-const endingHints={independent:'Soms is blijven kijken genoeg.',sanctuary:'Misschien hoeft vooruitgang niet alles te vullen.',miracles:'Wat als de hemel deel van de begroting wordt?',fortress:'Een onrustige grond laat sporen in een cultuur.',phoenix:'As kan het begin van iets moois zijn.',retreat:'Een stap terug kan ook een toekomst zijn.','last-drop':'Er bestaat een grens aan winnen van de zee.'};
-const SECRET_CATALOG=[
- {discovery:'old-tree-bloom',title:'Hij wist nog hoe het moest',description:'Na drie gerichte regenbuien bloeit de oude boom. De bloesem blijft als herinnering.',hint:'Misschien herinnert een oude vriend zich de lente nog.'},
- {discovery:'quake-volcano',title:'De slapende berg',description:'Een beving bij de vulkaan veroorzaakte een uitbarsting. As verrijkte de grond.',hint:'Sommige slapende reuzen voelen de grond bewegen.'},
- {discovery:'rain-quake',title:'De grond stroomt',description:'Een beving na regen werd een modderstroom. Een laag vruchtbaar slib bleef achter.',hint:'Wat doet bewegende grond die pas nog doorweekt raakte?'},
- {discovery:'landslide',title:'Wat er onder de berg zit',description:'Een aardverschuiving legde gesteente bloot. De bouwers vonden er een steengroeve.',hint:'Een berg bewaart meer dan alleen een uitzicht.'},
- {discovery:'uplift',title:'Land uit de zee',description:'Een beving tilde de kust op. Er ontstond nieuw land zonder inpoldering.',hint:'De zee hoeft niet altijd te vertrekken door een pomp.'},
- {discovery:'rift',title:'De overkant bleef liggen',description:'Een beving opende een kloof. Een brug kan de twee kanten weer verbinden.',hint:'De grond onthoudt herhaalde onrust.'},
- {discovery:'spring',title:'De verborgen bron',description:'Een beving opende een blijvende zoetwaterbron.',hint:'Soms ligt het antwoord op dorst onder je voeten.'},
- {discovery:'fire-tradition',title:'Een feest dat terugkomt',description:'Een bestaand kampvuur werd een jaarlijkse traditie. Ook vuur tijdens een feest kan zo een lichtfeest worden.',hint:'Een vuurplaats kent misschien een tweede begin. Er mogen hapjes bij.'}
-];
-const COLLECTION_CATALOG=[
- ...Object.entries(ENDINGS).map(([id,ending])=>({id:`ending:${id}`,group:'endings',title:nl(ending.title),description:nl(ending.description),hint:endingHints[id]})),
- {id:'moment:manor',group:'moments',title:'De eerste grote voordeur',description:'De eerste hut groeide uit tot een landhuis. De sleutel bleef in de familie.',hint:'Ook een bescheiden voordeur kan ambities krijgen.'},
- {id:'moment:palace',group:'moments',title:'Van hut tot paleis',description:'Op de plek van de eerste hut staat nu een paleis, met tuinen en bijzonder veel gordijnen.',hint:'Sommige uitbouwen lopen een beetje uit de hand.'},
- {id:'moment:generations',group:'moments',title:'Tien keer de sleutel',description:'Tien generaties hebben de sleutel van het eerste huis doorgegeven.',hint:'Niet alles wat groeit, staat op de kaart.'},
- {id:'moment:volcano',group:'moments',title:'De berg heeft een mening',description:'Je zag een vulkaan ontwaken. De bouwers houden de gratis steen.',hint:'Niet iedere berg blijft voor altijd stil.'},
- {id:'moment:rebirth',group:'moments',title:'Sterker uit de as',description:'Een uitgebrand gebouw werd herbouwd in steen. De oude brand bleef in de gevel herdacht.',hint:'Een ruïne hoeft geen eindpunt te zijn.'},
- {id:'moment:waterfront',group:'moments',title:'De wijk komt terug',description:'Een overstroomde wijk heropende met hoogwaterstrepen en sterkere funderingen.',hint:'Zoek een nieuw begin waar het water net vertrokken is.'},
- ...SECRET_CATALOG.map(secret=>({...secret,id:`secret:${secret.discovery}`,group:'secrets'})),
- ...CHALLENGE_CATALOG.map(goal=>({id:`challenge:${goal.id}`,group:'challenges',title:goal.title,description:goal.description,hint:goal.experiment?'Een ongewoon idee van een eiland wacht op uitvoering.':'Sommige eilanden hebben een klein extra idee. Zoek hun uitdagingen op.'}))
-];
-const COLLECTION_GROUPS={endings:'Eindes',moments:'Bijzondere momenten',challenges:'Uitdagingen',secrets:'Geheimen'};
-const validCollectionRecord=r=>r&&Number.isInteger(r.seed)&&r.seed>=0&&r.seed<=0xffffffff&&Number.isInteger(r.year)&&r.year>=1;
-function readCollection(raw){
- const result={version:1,entries:{}};let parsed;
- try{parsed=typeof raw==='string'?JSON.parse(raw):raw;}catch{return result;}
- if(parsed?.version!==1||!parsed.entries||typeof parsed.entries!=='object')return result;
- for(const {id} of COLLECTION_CATALOG){const record=parsed.entries[id];if(validCollectionRecord(record))result.entries[id]={seed:record.seed,year:record.year};}
- return result;
-}
-function mergeCollections(target,source){
- let changed=false;
- for(const {id} of COLLECTION_CATALOG){const record=source.entries?.[id];if(!target.entries[id]&&validCollectionRecord(record)){target.entries[id]={seed:record.seed,year:record.year};changed=true;}}
- return changed;
-}
-function advanceCollection(s){
- s.collectionRecords ||= {};
- const remember=(id,year=s.year)=>{if(!Number.isInteger(s.collectionRecords[id]))s.collectionRecords[id]=Number.isInteger(year)&&year>0?year:s.year;};
- if(s.outcome&&ENDINGS[s.outcome.id])remember(`ending:${s.outcome.id}`,s.outcome.year);
- for(const goal of s.challenges?.goals||[])if(goal.status==='completed'&&CHALLENGE_CATALOG.some(g=>g.id===goal.id))remember(`challenge:${goal.id}`,goal.completedAt);
- for(const secret of SECRET_CATALOG){
-  if(!s.discoveries?.includes(secret.discovery))continue;
-  const field={'old-tree-bloom':'bloomYear','quake-volcano':'volcanicAshYear','rain-quake':'mudflowYear',landslide:'landslideYear',uplift:'upliftedYear',rift:'riftYear',spring:'springYear','fire-tradition':'traditionYear'}[secret.discovery];
-  const evidence=s.land.find(t=>Number.isInteger(t[field]));
-  remember(`secret:${secret.discovery}`,s.discoveryRecords?.[secret.discovery]?.year||evidence?.[field]);
- }
- const home=s.tile(-1,1),building=home?.building==='ruins'?home.rebuildFrom:home?.building;
- if(['manor','palace'].includes(building))remember('moment:manor',s.snapshots.find(p=>p.label==='The first manor')?.year||(building==='manor'?home.builtYear:s.year));
- if(building==='palace')remember('moment:palace',s.snapshots.find(p=>p.label==='The palace and its gardens')?.year||home.builtYear);
- const tenth=s.family?.generations.find(p=>p.generation>=10&&!p.reconstructed);if(tenth)remember('moment:generations',tenth.since);
- if(s.volcanoActiveUntil>0)remember('moment:volcano');
- if(s.rebuiltFires>0)remember('moment:rebirth',s.land.find(t=>t.rebuiltYear&&t.material==='stone')?.rebuiltYear);
- const repaired=s.land.find(t=>t.floodMemorial);if(repaired)remember('moment:waterfront',repaired.rebuiltYear);
- return s.collectionRecords;
-}
-function collectIsland(collection,s){
- const facts=advanceCollection(s);let changed=false;
- for(const {id} of COLLECTION_CATALOG){const year=facts[id];if(!collection.entries[id]&&Number.isInteger(year)&&year>=1){collection.entries[id]={seed:s.seed,year};changed=true;}}
- return changed;
-}
-
-
-const MAX_AWAY_YEARS=300;
-const MIN_AWAY_MS=60_000;
-function returnFromAway(s,now=Date.now()){
- const previous=s.lastVisitAt;s.lastVisitAt=now;
- if(!Number.isFinite(previous)||!Number.isFinite(now)||now-previous<MIN_AWAY_MS||s.lastVisitPaused||s.ending||s.config.offlineProgress===false)return null;
- const from=s.year,floods=s.storyStats?.floods||0,relative=currentRelative(s);let seconds=Math.min(6*60*60,(now-previous)/1000),years=0,biggest=null;
- const speed=[1,2,3,10].includes(s.config.speedMultiplier)?s.config.speedMultiplier:1;
- while(years<MAX_AWAY_YEARS&&!s.ending){
-  const duration=s.yearDuration/speed;if(seconds<duration)break;seconds-=duration;s.events=[];s.tick();years++;
-  for(const entry of s.events){
-   const priority=eventPriority(entry.type)+(entry.type==='family'?3:0);
-   if(!biggest||priority>biggest.priority)biggest={...entry,priority};
-  }
-  s.events=[];s.signals=[];
- }
- if(!years)return null;
- const descendant=currentRelative(s),floodCount=Math.max(0,(s.storyStats?.floods||0)-floods);
- const elapsed=years%100===0?`${years/100} ${years===100?'eeuw':'eeuwen'}`:`${years} jaar`;
- const family=descendant.id!==relative.id?`${descendant.name} nam de familiesleutel over en werkt als ${descendant.occupation}.`:`${descendant.name} houdt de sleutel van het eerste huis nog bij zich.`;
- const report={from,to:s.year,years,floods:floodCount,summary:`${elapsed}, ${floodCount} ${floodCount===1?'overstroming':'overstromingen'}. ${family}`,biggest:biggest||{type:'family',text:family,year:s.year,x:-1,y:1},limited:years===MAX_AWAY_YEARS&&seconds>0,dismissed:false};
- s.awayReport=report;
- // An ending reached while absent remains available through an explicit recap button.
- if(s.ending){s.endingSeen=true;if(s.cinematic)s.cinematic.completed=true;}
- return report;
-}
-
 // The coast keeps its own small stories. Nothing here draws on the simulation's random numbers.
 const LIGHTHOUSE_YEAR=400;
 const coastAround=t=>[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].map(([dx,dy])=>({x:t.x+dx,y:t.y+dy}));
@@ -1689,6 +1601,136 @@ function advanceCoast(s){
  ensureCoast(s);
  if(s.year%7===0)placeLighthouse(s);
  if(s.year>=s.coast.nextBeachAt)growBeach(s);
+ seasonalFinds(s);
+}
+// Treasures: found once per island, by tremors, storms, volcanoes or builders who dig a little deeper.
+const TREASURE_CATALOG=[
+ {id:'buttons',cause:'rumble',title:'De knopenkist',short:'de knopenkist',description:'Een kist met zeventien knopen en één heel goede schaar. Niemand weet van wie.',hint:'Wat de grond schudt, komt soms boven.'},
+ {id:'chicken',cause:'rumble',title:'Het heilige kippenbeeldje',short:'het heilige kippenbeeldje',description:'Een stenen beeldje van een kip, onmiskenbaar heilig. Het krijgt een eigen plankje in het eerste huis.',hint:'Onder een trillende akker ligt misschien iets kakelends.'},
+ {id:'bottle',cause:'storm',title:'Post van de zee',short:'de fles met post van de zee',description:'Een fles met een briefje: “Ik ben er bijna. Groetjes, de zee.”',hint:'Na een storm ligt er van alles op het strand.'},
+ {id:'anchor',cause:'storm',since:900,title:'Het anker van niemand',short:'het anker van niemand',description:'Een anker van een schip dat nooit is aangekomen. Het staat nu bij de haven, als wegwijzer.',hint:'Hoog water brengt soms iets zwaars mee.'},
+ {id:'map',cause:'build',title:'De verkeerde kaart',short:'de verkeerde kaart',description:'Een oude kaart van het eiland, met de kust op een heel andere plek. Of was dat ooit zo?',hint:'Bouwers graven soms dieper dan nodig.'},
+ {id:'coin',cause:'build',since:300,title:'De onbekende munt',short:'de onbekende munt',description:'Een gouden munt met een hoofd dat niemand herkent. De bakker geeft er toch brood voor.',hint:'Een nieuwe fundering kan een oude zak geld raken.'},
+ {id:'armour',cause:'build',since:1100,title:'Een harnas op maat',short:'het harnas van de bakker',description:'Een oud harnas dat precies past bij de bakker. Hij draagt het op zondag.',hint:'Wie in een oude stad bouwt, vindt soms iets van ridders.'},
+ {id:'radio',cause:'build',since:1900,title:'De walvisradio',short:'de walvisradio',description:'Een kapotte radio die alleen walvisliedjes ontvangt. Iedereen doet alsof dat de bedoeling is.',hint:'Ook moderne funderingen raken soms iets wonderlijks.'},
+ {id:'capsule',cause:'build',since:2000,title:'De tijdcapsule',short:'de tijdcapsule van de eerste school',description:'Een tijdcapsule van de eerste school, met een kindertekening van precies deze stad.',hint:'Wie lang genoeg wacht, vindt een brief van vroeger.'},
+ {id:'seeds',cause:'volcano',title:'Zaden van ergens anders',short:'de vreemde zaden',description:'Een kistje met zaden van een boom die niemand kent. Ze groeien vrolijk, zonder uitleg.',hint:'Een berg met een mening laat soms iets los.'}
+];
+const coastHash=(seed,a,b,c)=>{let x=(seed^Math.imul(a+7,0x27d4eb2d)^Math.imul(b+101,0x165667b1)^Math.imul(c+307,0x9e3779b1))>>>0;x=Math.imul(x^(x>>>15),0x2c1b3c6d);x^=x>>>12;return(x>>>0)/4294967296;};
+const TREASURE_CHANCE={rumble:.4,storm:.05,build:.006,volcano:.5};
+function findTreasure(s,cause,tile){
+ const coast=ensureCoast(s);coast.treasures??=[];
+ if(!tile||s.ending||coastHash(s.seed,s.year,tile.x,tile.y)>=TREASURE_CHANCE[cause])return null;
+ const found=new Set(coast.treasures.map(t=>t.id)),treasure=TREASURE_CATALOG.find(t=>t.cause===cause&&!found.has(t.id)&&s.year>=(t.since||0));
+ if(!treasure)return null;
+ const record={id:treasure.id,year:s.year,x:tile.x,y:tile.y};coast.treasures.push(record);tile.treasure={id:treasure.id,year:s.year};
+ s.prosperity=Math.min(94,s.prosperity+3);
+ s.log(`Een schat! ${treasure.description}`,'treasure',{x:tile.x,y:tile.y,treasureId:treasure.id});
+ s.signal('celebrate',tile,`Een schat: ${treasure.title.toLowerCase()}`);
+ return record;
+}
+// Called for every logged event: some events uncover what was hidden.
+function coastNotice(s,entry){
+ if(entry.type==='interference'){const type=s.interventionLedger?.find(t=>t.id===entry.interventionId)?.type;if(type==='rumble')findTreasure(s,'rumble',s.tile(entry.x,entry.y));}
+ else if(entry.type==='volcano'){const peak=s.land.find(t=>t.landform==='volcano');if(peak)findTreasure(s,'volcano',s.land.find(t=>!t.landform&&Math.hypot(t.x-peak.x,t.y-peak.y)<=2)||peak);}
+}
+function seasonalFinds(s){
+ if(s.storm){const beach=s.land.filter(t=>t.building==='beach')[s.year%7];if(beach)findTreasure(s,'storm',beach);}
+ const fresh=s.land.find(t=>t.builtYear===s.year&&t.building&&!['beach','lighthouse'].includes(t.building));
+ if(fresh)findTreasure(s,'build',fresh);
+}
+
+
+const COLLECTION_STORAGE_KEY='do-nothing-island-collection-v1';
+const endingHints={independent:'Soms is blijven kijken genoeg.',sanctuary:'Misschien hoeft vooruitgang niet alles te vullen.',miracles:'Wat als de hemel deel van de begroting wordt?',fortress:'Een onrustige grond laat sporen in een cultuur.',phoenix:'As kan het begin van iets moois zijn.',retreat:'Een stap terug kan ook een toekomst zijn.','last-drop':'Er bestaat een grens aan winnen van de zee.'};
+const SECRET_CATALOG=[
+ {discovery:'old-tree-bloom',title:'Hij wist nog hoe het moest',description:'Na drie gerichte regenbuien bloeit de oude boom. De bloesem blijft als herinnering.',hint:'Misschien herinnert een oude vriend zich de lente nog.'},
+ {discovery:'quake-volcano',title:'De slapende berg',description:'Een beving bij de vulkaan veroorzaakte een uitbarsting. As verrijkte de grond.',hint:'Sommige slapende reuzen voelen de grond bewegen.'},
+ {discovery:'rain-quake',title:'De grond stroomt',description:'Een beving na regen werd een modderstroom. Een laag vruchtbaar slib bleef achter.',hint:'Wat doet bewegende grond die pas nog doorweekt raakte?'},
+ {discovery:'landslide',title:'Wat er onder de berg zit',description:'Een aardverschuiving legde gesteente bloot. De bouwers vonden er een steengroeve.',hint:'Een berg bewaart meer dan alleen een uitzicht.'},
+ {discovery:'uplift',title:'Land uit de zee',description:'Een beving tilde de kust op. Er ontstond nieuw land zonder inpoldering.',hint:'De zee hoeft niet altijd te vertrekken door een pomp.'},
+ {discovery:'rift',title:'De overkant bleef liggen',description:'Een beving opende een kloof. Een brug kan de twee kanten weer verbinden.',hint:'De grond onthoudt herhaalde onrust.'},
+ {discovery:'spring',title:'De verborgen bron',description:'Een beving opende een blijvende zoetwaterbron.',hint:'Soms ligt het antwoord op dorst onder je voeten.'},
+ {discovery:'fire-tradition',title:'Een feest dat terugkomt',description:'Een bestaand kampvuur werd een jaarlijkse traditie. Ook vuur tijdens een feest kan zo een lichtfeest worden.',hint:'Een vuurplaats kent misschien een tweede begin. Er mogen hapjes bij.'}
+];
+const COLLECTION_CATALOG=[
+ ...Object.entries(ENDINGS).map(([id,ending])=>({id:`ending:${id}`,group:'endings',title:nl(ending.title),description:nl(ending.description),hint:endingHints[id]})),
+ {id:'moment:manor',group:'moments',title:'De eerste grote voordeur',description:'De eerste hut groeide uit tot een landhuis. De sleutel bleef in de familie.',hint:'Ook een bescheiden voordeur kan ambities krijgen.'},
+ {id:'moment:palace',group:'moments',title:'Van hut tot paleis',description:'Op de plek van de eerste hut staat nu een paleis, met tuinen en bijzonder veel gordijnen.',hint:'Sommige uitbouwen lopen een beetje uit de hand.'},
+ {id:'moment:generations',group:'moments',title:'Tien keer de sleutel',description:'Tien generaties hebben de sleutel van het eerste huis doorgegeven.',hint:'Niet alles wat groeit, staat op de kaart.'},
+ {id:'moment:volcano',group:'moments',title:'De berg heeft een mening',description:'Je zag een vulkaan ontwaken. De bouwers houden de gratis steen.',hint:'Niet iedere berg blijft voor altijd stil.'},
+ {id:'moment:rebirth',group:'moments',title:'Sterker uit de as',description:'Een uitgebrand gebouw werd herbouwd in steen. De oude brand bleef in de gevel herdacht.',hint:'Een ruïne hoeft geen eindpunt te zijn.'},
+ {id:'moment:waterfront',group:'moments',title:'De wijk komt terug',description:'Een overstroomde wijk heropende met hoogwaterstrepen en sterkere funderingen.',hint:'Zoek een nieuw begin waar het water net vertrokken is.'},
+ ...SECRET_CATALOG.map(secret=>({...secret,id:`secret:${secret.discovery}`,group:'secrets'})),
+ ...TREASURE_CATALOG.map(t=>({id:`treasure:${t.id}`,group:'treasures',title:t.title,description:t.description,hint:t.hint})),
+ ...CHALLENGE_CATALOG.map(goal=>({id:`challenge:${goal.id}`,group:'challenges',title:goal.title,description:goal.description,hint:goal.experiment?'Een ongewoon idee van een eiland wacht op uitvoering.':'Sommige eilanden hebben een klein extra idee. Zoek hun uitdagingen op.'}))
+];
+const COLLECTION_GROUPS={endings:'Eindes',moments:'Bijzondere momenten',challenges:'Uitdagingen',secrets:'Geheimen',treasures:'Schatten'};
+const validCollectionRecord=r=>r&&Number.isInteger(r.seed)&&r.seed>=0&&r.seed<=0xffffffff&&Number.isInteger(r.year)&&r.year>=1;
+function readCollection(raw){
+ const result={version:1,entries:{}};let parsed;
+ try{parsed=typeof raw==='string'?JSON.parse(raw):raw;}catch{return result;}
+ if(parsed?.version!==1||!parsed.entries||typeof parsed.entries!=='object')return result;
+ for(const {id} of COLLECTION_CATALOG){const record=parsed.entries[id];if(validCollectionRecord(record))result.entries[id]={seed:record.seed,year:record.year};}
+ return result;
+}
+function mergeCollections(target,source){
+ let changed=false;
+ for(const {id} of COLLECTION_CATALOG){const record=source.entries?.[id];if(!target.entries[id]&&validCollectionRecord(record)){target.entries[id]={seed:record.seed,year:record.year};changed=true;}}
+ return changed;
+}
+function advanceCollection(s){
+ s.collectionRecords ||= {};
+ const remember=(id,year=s.year)=>{if(!Number.isInteger(s.collectionRecords[id]))s.collectionRecords[id]=Number.isInteger(year)&&year>0?year:s.year;};
+ if(s.outcome&&ENDINGS[s.outcome.id])remember(`ending:${s.outcome.id}`,s.outcome.year);
+ for(const goal of s.challenges?.goals||[])if(goal.status==='completed'&&CHALLENGE_CATALOG.some(g=>g.id===goal.id))remember(`challenge:${goal.id}`,goal.completedAt);
+ for(const secret of SECRET_CATALOG){
+  if(!s.discoveries?.includes(secret.discovery))continue;
+  const field={'old-tree-bloom':'bloomYear','quake-volcano':'volcanicAshYear','rain-quake':'mudflowYear',landslide:'landslideYear',uplift:'upliftedYear',rift:'riftYear',spring:'springYear','fire-tradition':'traditionYear'}[secret.discovery];
+  const evidence=s.land.find(t=>Number.isInteger(t[field]));
+  remember(`secret:${secret.discovery}`,s.discoveryRecords?.[secret.discovery]?.year||evidence?.[field]);
+ }
+ for(const t of s.coast?.treasures||[])if(TREASURE_CATALOG.some(c=>c.id===t.id))remember(`treasure:${t.id}`,t.year);
+ const home=s.tile(-1,1),building=home?.building==='ruins'?home.rebuildFrom:home?.building;
+ if(['manor','palace'].includes(building))remember('moment:manor',s.snapshots.find(p=>p.label==='The first manor')?.year||(building==='manor'?home.builtYear:s.year));
+ if(building==='palace')remember('moment:palace',s.snapshots.find(p=>p.label==='The palace and its gardens')?.year||home.builtYear);
+ const tenth=s.family?.generations.find(p=>p.generation>=10&&!p.reconstructed);if(tenth)remember('moment:generations',tenth.since);
+ if(s.volcanoActiveUntil>0)remember('moment:volcano');
+ if(s.rebuiltFires>0)remember('moment:rebirth',s.land.find(t=>t.rebuiltYear&&t.material==='stone')?.rebuiltYear);
+ const repaired=s.land.find(t=>t.floodMemorial);if(repaired)remember('moment:waterfront',repaired.rebuiltYear);
+ return s.collectionRecords;
+}
+function collectIsland(collection,s){
+ const facts=advanceCollection(s);let changed=false;
+ for(const {id} of COLLECTION_CATALOG){const year=facts[id];if(!collection.entries[id]&&Number.isInteger(year)&&year>=1){collection.entries[id]={seed:s.seed,year};changed=true;}}
+ return changed;
+}
+
+
+const MAX_AWAY_YEARS=300;
+const MIN_AWAY_MS=60_000;
+function returnFromAway(s,now=Date.now()){
+ const previous=s.lastVisitAt;s.lastVisitAt=now;
+ if(!Number.isFinite(previous)||!Number.isFinite(now)||now-previous<MIN_AWAY_MS||s.lastVisitPaused||s.ending||s.config.offlineProgress===false)return null;
+ const from=s.year,floods=s.storyStats?.floods||0,relative=currentRelative(s);let seconds=Math.min(6*60*60,(now-previous)/1000),years=0,biggest=null;
+ const speed=[1,2,3,10].includes(s.config.speedMultiplier)?s.config.speedMultiplier:1;
+ while(years<MAX_AWAY_YEARS&&!s.ending){
+  const duration=s.yearDuration/speed;if(seconds<duration)break;seconds-=duration;s.events=[];s.tick();years++;
+  for(const entry of s.events){
+   const priority=eventPriority(entry.type)+(entry.type==='family'?3:0);
+   if(!biggest||priority>biggest.priority)biggest={...entry,priority};
+  }
+  s.events=[];s.signals=[];
+ }
+ if(!years)return null;
+ const descendant=currentRelative(s),floodCount=Math.max(0,(s.storyStats?.floods||0)-floods);
+ const elapsed=years%100===0?`${years/100} ${years===100?'eeuw':'eeuwen'}`:`${years} jaar`;
+ const family=descendant.id!==relative.id?`${descendant.name} nam de familiesleutel over en werkt als ${descendant.occupation}.`:`${descendant.name} houdt de sleutel van het eerste huis nog bij zich.`;
+ const report={from,to:s.year,years,floods:floodCount,summary:`${elapsed}, ${floodCount} ${floodCount===1?'overstroming':'overstromingen'}. ${family}`,biggest:biggest||{type:'family',text:family,year:s.year,x:-1,y:1},limited:years===MAX_AWAY_YEARS&&seconds>0,dismissed:false};
+ s.awayReport=report;
+ // An ending reached while absent remains available through an explicit recap button.
+ if(s.ending){s.endingSeen=true;if(s.cinematic)s.cinematic.completed=true;}
+ return report;
 }
 
 const SAVE_VERSION = 1;
@@ -1947,7 +1989,7 @@ class Civilization {
     const entry={year:this.year,text,type,id:`event-${++this.storySequence}`,priority:eventPriority(type),...details};
     this.history.push(entry);
     if(this.history.length>350){let index=this.history.findIndex((e,i)=>i>0&&(e.priority||eventPriority(e.type))<82);if(index<0)index=1;this.history.splice(index,1);}
-    this.events.push(entry);rememberInFamily(this,entry);return entry;
+    this.events.push(entry);rememberInFamily(this,entry);coastNotice(this,entry);return entry;
   }
   signal(type,tile,label) {
     this.signals.push({type,x:tile?.x??0,y:tile?.y??0,label,priority:eventPriority(type)});
@@ -2881,6 +2923,7 @@ class IslandRenderer {
     for(const t of sorted){
       this.drawDetails(t);
       const p=this.p(t.x,t.y),depth=p.y+(t.landform?10:['tree','original-tree'].includes(t.building)?0:5);
+      if(t.treasure&&this.sim.year-t.treasure.year<40)this.scene.push({depth:depth+1,draw:()=>this.treasureChest(t)});
       if(t.landform||t.building||t.buildSite)this.scene.push({depth,draw:()=>{if(t.landform)this.drawLandform(t);if(t.building)this.drawBuilding(t);if(t.buildSite)this.drawBuildingSite(t);}});
     }
     this.drawWorkers();
@@ -3483,6 +3526,15 @@ class IslandRenderer {
     c.restore();
   }
   leaf(color){return seasonalLeaf(color,this.light);}
+  treasureChest(t){
+    const p=this.p(t.x,t.y),c=this.ctx;c.save();c.translate(p.x+11,p.y+3);
+    this.ellipse(1,2,7,2.5,'#5a5a3d22');
+    this.poly([[-5,-1],[0,1.5],[0,-3.5],[-5,-6]],'#8d6542');this.poly([[0,1.5],[5,-1],[5,-6],[0,-3.5]],'#74543a');
+    this.poly([[-5,-6],[0,-3.5],[2,-10],[-3,-12.5]],'#a37a4f');this.line([[-2.5,-4.6],[-2.5,-.4]],'#d8b45c',1);
+    this.ellipse(-1,-5,3,1.3,'#f1d77a');
+    if(!this.reduced)for(let i=0;i<3;i++){const f=(this.time*.5+i*.33)%1;this.ellipse(-1+Math.sin(i*2+f*4)*3,-7-f*10,.9,.9,`rgba(255,236,160,${(1-f)*.9})`);}
+    c.restore();
+  }
   lighthouse(){
     const c=this.ctx;
     this.ellipse(4,4,20,7,'#58654418');
@@ -3890,7 +3942,7 @@ function renderCollection(){
   const total=COLLECTION_CATALOG.length,found=Object.keys(collection.entries).length;
   $('collection-progress').textContent=`${found} van ${total} vondsten`;
   $('collection-storage').textContent=collectionStorageAvailable?'Bewaard in deze browser, over al je eilanden heen. Nieuw eiland en Herstel vorig eiland wissen je vondsten niet.':'Bewaren lukt hier niet. Deze verzameling blijft tijdens dit bezoek in het geheugen.';
-  const silhouettes={endings:'M3 17 Q3 11 7 12 L10 5 14 11 Q21 10 21 17 Z',moments:'M3 20 V10 L12 3 21 10 V20 Z',challenges:'M8 2 H16 V9 L12 14 8 9 Z M12 12 L17 21 12 18 7 21 Z',secrets:'M12 2 L15 8 22 12 15 16 12 22 9 16 2 12 9 8 Z'};
+  const silhouettes={endings:'M3 17 Q3 11 7 12 L10 5 14 11 Q21 10 21 17 Z',moments:'M3 20 V10 L12 3 21 10 V20 Z',challenges:'M8 2 H16 V9 L12 14 8 9 Z M12 12 L17 21 12 18 7 21 Z',secrets:'M12 2 L15 8 22 12 15 16 12 22 9 16 2 12 9 8 Z',treasures:'M3 10 H21 V20 H3 Z M3 10 Q12 2 21 10 M10 13 H14 V16 H10 Z'};
   $('collection-groups').replaceChildren(...Object.entries(COLLECTION_GROUPS).map(([group,label])=>{
     const section=document.createElement('section'),heading=document.createElement('h3'),list=document.createElement('ol'),items=COLLECTION_CATALOG.filter(item=>item.group===group);
     heading.textContent=`${label} · ${items.filter(item=>collection.entries[item.id]).length} / ${items.length}`;list.className='collection-grid';

@@ -144,6 +144,7 @@ export class IslandRenderer {
     for(const t of sorted){
       this.drawDetails(t);
       const p=this.p(t.x,t.y),depth=p.y+(t.landform?10:['tree','original-tree'].includes(t.building)?0:5);
+      if(t.treasure&&this.sim.year-t.treasure.year<40)this.scene.push({depth:depth+1,draw:()=>this.treasureChest(t)});
       if(t.landform||t.building||t.buildSite)this.scene.push({depth,draw:()=>{if(t.landform)this.drawLandform(t);if(t.building)this.drawBuilding(t);if(t.buildSite)this.drawBuildingSite(t);}});
     }
     this.drawWorkers();
@@ -746,6 +747,15 @@ export class IslandRenderer {
     c.restore();
   }
   leaf(color){return seasonalLeaf(color,this.light);}
+  treasureChest(t){
+    const p=this.p(t.x,t.y),c=this.ctx;c.save();c.translate(p.x+11,p.y+3);
+    this.ellipse(1,2,7,2.5,'#5a5a3d22');
+    this.poly([[-5,-1],[0,1.5],[0,-3.5],[-5,-6]],'#8d6542');this.poly([[0,1.5],[5,-1],[5,-6],[0,-3.5]],'#74543a');
+    this.poly([[-5,-6],[0,-3.5],[2,-10],[-3,-12.5]],'#a37a4f');this.line([[-2.5,-4.6],[-2.5,-.4]],'#d8b45c',1);
+    this.ellipse(-1,-5,3,1.3,'#f1d77a');
+    if(!this.reduced)for(let i=0;i<3;i++){const f=(this.time*.5+i*.33)%1;this.ellipse(-1+Math.sin(i*2+f*4)*3,-7-f*10,.9,.9,`rgba(255,236,160,${(1-f)*.9})`);}
+    c.restore();
+  }
   lighthouse(){
     const c=this.ctx;
     this.ellipse(4,4,20,7,'#58654418');

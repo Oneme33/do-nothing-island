@@ -48,4 +48,41 @@ export function advanceCoast(s){
  ensureCoast(s);
  if(s.year%7===0)placeLighthouse(s);
  if(s.year>=s.coast.nextBeachAt)growBeach(s);
+ seasonalFinds(s);
+}
+// Treasures: found once per island, by tremors, storms, volcanoes or builders who dig a little deeper.
+export const TREASURE_CATALOG=[
+ {id:'buttons',cause:'rumble',title:'De knopenkist',short:'de knopenkist',description:'Een kist met zeventien knopen en één heel goede schaar. Niemand weet van wie.',hint:'Wat de grond schudt, komt soms boven.'},
+ {id:'chicken',cause:'rumble',title:'Het heilige kippenbeeldje',short:'het heilige kippenbeeldje',description:'Een stenen beeldje van een kip, onmiskenbaar heilig. Het krijgt een eigen plankje in het eerste huis.',hint:'Onder een trillende akker ligt misschien iets kakelends.'},
+ {id:'bottle',cause:'storm',title:'Post van de zee',short:'de fles met post van de zee',description:'Een fles met een briefje: “Ik ben er bijna. Groetjes, de zee.”',hint:'Na een storm ligt er van alles op het strand.'},
+ {id:'anchor',cause:'storm',since:900,title:'Het anker van niemand',short:'het anker van niemand',description:'Een anker van een schip dat nooit is aangekomen. Het staat nu bij de haven, als wegwijzer.',hint:'Hoog water brengt soms iets zwaars mee.'},
+ {id:'map',cause:'build',title:'De verkeerde kaart',short:'de verkeerde kaart',description:'Een oude kaart van het eiland, met de kust op een heel andere plek. Of was dat ooit zo?',hint:'Bouwers graven soms dieper dan nodig.'},
+ {id:'coin',cause:'build',since:300,title:'De onbekende munt',short:'de onbekende munt',description:'Een gouden munt met een hoofd dat niemand herkent. De bakker geeft er toch brood voor.',hint:'Een nieuwe fundering kan een oude zak geld raken.'},
+ {id:'armour',cause:'build',since:1100,title:'Een harnas op maat',short:'het harnas van de bakker',description:'Een oud harnas dat precies past bij de bakker. Hij draagt het op zondag.',hint:'Wie in een oude stad bouwt, vindt soms iets van ridders.'},
+ {id:'radio',cause:'build',since:1900,title:'De walvisradio',short:'de walvisradio',description:'Een kapotte radio die alleen walvisliedjes ontvangt. Iedereen doet alsof dat de bedoeling is.',hint:'Ook moderne funderingen raken soms iets wonderlijks.'},
+ {id:'capsule',cause:'build',since:2000,title:'De tijdcapsule',short:'de tijdcapsule van de eerste school',description:'Een tijdcapsule van de eerste school, met een kindertekening van precies deze stad.',hint:'Wie lang genoeg wacht, vindt een brief van vroeger.'},
+ {id:'seeds',cause:'volcano',title:'Zaden van ergens anders',short:'de vreemde zaden',description:'Een kistje met zaden van een boom die niemand kent. Ze groeien vrolijk, zonder uitleg.',hint:'Een berg met een mening laat soms iets los.'}
+];
+const coastHash=(seed,a,b,c)=>{let x=(seed^Math.imul(a+7,0x27d4eb2d)^Math.imul(b+101,0x165667b1)^Math.imul(c+307,0x9e3779b1))>>>0;x=Math.imul(x^(x>>>15),0x2c1b3c6d);x^=x>>>12;return(x>>>0)/4294967296;};
+const TREASURE_CHANCE={rumble:.4,storm:.05,build:.006,volcano:.5};
+export function findTreasure(s,cause,tile){
+ const coast=ensureCoast(s);coast.treasures??=[];
+ if(!tile||s.ending||coastHash(s.seed,s.year,tile.x,tile.y)>=TREASURE_CHANCE[cause])return null;
+ const found=new Set(coast.treasures.map(t=>t.id)),treasure=TREASURE_CATALOG.find(t=>t.cause===cause&&!found.has(t.id)&&s.year>=(t.since||0));
+ if(!treasure)return null;
+ const record={id:treasure.id,year:s.year,x:tile.x,y:tile.y};coast.treasures.push(record);tile.treasure={id:treasure.id,year:s.year};
+ s.prosperity=Math.min(94,s.prosperity+3);
+ s.log(`Een schat! ${treasure.description}`,'treasure',{x:tile.x,y:tile.y,treasureId:treasure.id});
+ s.signal('celebrate',tile,`Een schat: ${treasure.title.toLowerCase()}`);
+ return record;
+}
+// Called for every logged event: some events uncover what was hidden.
+export function coastNotice(s,entry){
+ if(entry.type==='interference'){const type=s.interventionLedger?.find(t=>t.id===entry.interventionId)?.type;if(type==='rumble')findTreasure(s,'rumble',s.tile(entry.x,entry.y));}
+ else if(entry.type==='volcano'){const peak=s.land.find(t=>t.landform==='volcano');if(peak)findTreasure(s,'volcano',s.land.find(t=>!t.landform&&Math.hypot(t.x-peak.x,t.y-peak.y)<=2)||peak);}
+}
+function seasonalFinds(s){
+ if(s.storm){const beach=s.land.filter(t=>t.building==='beach')[s.year%7];if(beach)findTreasure(s,'storm',beach);}
+ const fresh=s.land.find(t=>t.builtYear===s.year&&t.building&&!['beach','lighthouse'].includes(t.building));
+ if(fresh)findTreasure(s,'build',fresh);
 }

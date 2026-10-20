@@ -56,7 +56,7 @@ function renderCollection(){
   const total=COLLECTION_CATALOG.length,found=Object.keys(collection.entries).length;
   $('collection-progress').textContent=`${found} van ${total} vondsten`;
   $('collection-storage').textContent=collectionStorageAvailable?'Bewaard in deze browser, over al je eilanden heen. Nieuw eiland en Herstel vorig eiland wissen je vondsten niet.':'Bewaren lukt hier niet. Deze verzameling blijft tijdens dit bezoek in het geheugen.';
-  const silhouettes={endings:'M3 17 Q3 11 7 12 L10 5 14 11 Q21 10 21 17 Z',moments:'M3 20 V10 L12 3 21 10 V20 Z',challenges:'M8 2 H16 V9 L12 14 8 9 Z M12 12 L17 21 12 18 7 21 Z',secrets:'M12 2 L15 8 22 12 15 16 12 22 9 16 2 12 9 8 Z'};
+  const silhouettes={endings:'M3 17 Q3 11 7 12 L10 5 14 11 Q21 10 21 17 Z',moments:'M3 20 V10 L12 3 21 10 V20 Z',challenges:'M8 2 H16 V9 L12 14 8 9 Z M12 12 L17 21 12 18 7 21 Z',secrets:'M12 2 L15 8 22 12 15 16 12 22 9 16 2 12 9 8 Z',treasures:'M3 10 H21 V20 H3 Z M3 10 Q12 2 21 10 M10 13 H14 V16 H10 Z'};
   $('collection-groups').replaceChildren(...Object.entries(COLLECTION_GROUPS).map(([group,label])=>{
     const section=document.createElement('section'),heading=document.createElement('h3'),list=document.createElement('ol'),items=COLLECTION_CATALOG.filter(item=>item.group===group);
     heading.textContent=`${label} · ${items.filter(item=>collection.entries[item.id]).length} / ${items.length}`;list.className='collection-grid';

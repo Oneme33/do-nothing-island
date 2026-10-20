@@ -1,4 +1,5 @@
 import {nl} from './language.js';
+import {TREASURE_CATALOG} from './coast.js';
 // One continuous line of keyholders; its own hash never consumes simulation randomness.
 export const FAMILY_GENERATION_YEARS=32;
 const familyFirstNames=['Noor','Sam','Bo','Mila','Daan','Lou','Iris','Mo','Tess','Finn','Ada','Jip','Bep','Bram','Fien','Otis','Lena','Ravi','Roos','Nora','Teun','Liv','Evi','Sem','Pip','Niek','Cato','Abel','Linde','Mika','Els','Jo'];
@@ -74,6 +75,7 @@ function storyFor(s,family,entry){
   if(type==='nudge')return{priority:1,kind:'nudge',text:'zag de bouwers ineens twee keer zo hard werken en nam er stilletjes de eer voor.',memory:`de vreemde bouwhaast in jaar ${y}`};
   return null;
  }
+ if(entry.type==='treasure'){const t=TREASURE_CATALOG.find(c=>c.id===entry.treasureId);if(!t)return null;return{priority:3,kind:'treasure',text:`was erbij toen ${t.short} werd gevonden${nearFamilyHome(family,entry,4)?', vlak bij huis':''}. Het verhaal wordt elk jaar een beetje groter.`,memory:`${t.short} uit jaar ${y}`};}
  if(entry.type==='palace'){const b=s.tile(family.home.x,family.home.y)?.building;return{priority:3,kind:'home',text:b==='palace'?'zag het eerste huis uitgroeien tot een paleis en bleef gewoon de oude voordeur gebruiken.':'zag het eerste huis een landhuis worden en kocht er meteen een deurmat voor.',memory:b==='palace'?'de dag dat het huis een paleis werd':'de dag dat het huis een landhuis werd'};}
  if(entry.type==='flood'&&nearFamilyHome(family,entry,5))return{priority:3,kind:'flood',text:'zette de stoelen op tafel toen het water kwam, en daarna de kat.',memory:`het hoge water in jaar ${y}`};
  if(entry.type==='volcano')return{priority:2,kind:'volcano',text:'zag de vulkaan haar mening geven en verhuisde de moestuin een stukje.',memory:`de vulkaan in jaar ${y}`};

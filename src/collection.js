@@ -1,6 +1,7 @@
 import {ENDINGS} from './story.js';
 import {CHALLENGE_CATALOG} from './challenges.js';
 import {nl} from './language.js';
+import {TREASURE_CATALOG} from './coast.js';
 
 export const COLLECTION_STORAGE_KEY='do-nothing-island-collection-v1';
 const endingHints={independent:'Soms is blijven kijken genoeg.',sanctuary:'Misschien hoeft vooruitgang niet alles te vullen.',miracles:'Wat als de hemel deel van de begroting wordt?',fortress:'Een onrustige grond laat sporen in een cultuur.',phoenix:'As kan het begin van iets moois zijn.',retreat:'Een stap terug kan ook een toekomst zijn.','last-drop':'Er bestaat een grens aan winnen van de zee.'};
@@ -23,9 +24,10 @@ export const COLLECTION_CATALOG=[
  {id:'moment:rebirth',group:'moments',title:'Sterker uit de as',description:'Een uitgebrand gebouw werd herbouwd in steen. De oude brand bleef in de gevel herdacht.',hint:'Een ruïne hoeft geen eindpunt te zijn.'},
  {id:'moment:waterfront',group:'moments',title:'De wijk komt terug',description:'Een overstroomde wijk heropende met hoogwaterstrepen en sterkere funderingen.',hint:'Zoek een nieuw begin waar het water net vertrokken is.'},
  ...SECRET_CATALOG.map(secret=>({...secret,id:`secret:${secret.discovery}`,group:'secrets'})),
+ ...TREASURE_CATALOG.map(t=>({id:`treasure:${t.id}`,group:'treasures',title:t.title,description:t.description,hint:t.hint})),
  ...CHALLENGE_CATALOG.map(goal=>({id:`challenge:${goal.id}`,group:'challenges',title:goal.title,description:goal.description,hint:goal.experiment?'Een ongewoon idee van een eiland wacht op uitvoering.':'Sommige eilanden hebben een klein extra idee. Zoek hun uitdagingen op.'}))
 ];
-export const COLLECTION_GROUPS={endings:'Eindes',moments:'Bijzondere momenten',challenges:'Uitdagingen',secrets:'Geheimen'};
+export const COLLECTION_GROUPS={endings:'Eindes',moments:'Bijzondere momenten',challenges:'Uitdagingen',secrets:'Geheimen',treasures:'Schatten'};
 const validCollectionRecord=r=>r&&Number.isInteger(r.seed)&&r.seed>=0&&r.seed<=0xffffffff&&Number.isInteger(r.year)&&r.year>=1;
 export function readCollection(raw){
  const result={version:1,entries:{}};let parsed;
@@ -50,6 +52,7 @@ export function advanceCollection(s){
   const evidence=s.land.find(t=>Number.isInteger(t[field]));
   remember(`secret:${secret.discovery}`,s.discoveryRecords?.[secret.discovery]?.year||evidence?.[field]);
  }
+ for(const t of s.coast?.treasures||[])if(TREASURE_CATALOG.some(c=>c.id===t.id))remember(`treasure:${t.id}`,t.year);
  const home=s.tile(-1,1),building=home?.building==='ruins'?home.rebuildFrom:home?.building;
  if(['manor','palace'].includes(building))remember('moment:manor',s.snapshots.find(p=>p.label==='The first manor')?.year||(building==='manor'?home.builtYear:s.year));
  if(building==='palace')remember('moment:palace',s.snapshots.find(p=>p.label==='The palace and its gardens')?.year||home.builtYear);
