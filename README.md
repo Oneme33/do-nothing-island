@@ -6,6 +6,8 @@ Een eiland groeit vanzelf: van één huisje en een kleine akker naar een stad me
 
 De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per commit en testmoment uitgevoerd.
 
+**Huizen verschillen van elkaar.** Elk huis krijgt vanuit zijn plek een eigen gevelkleur, dakkleur, kleur luiken en eigen verhoudingen; sommige hebben bloembakken, andere geen schoorsteen. Een straat ziet er daardoor nooit gekopieerd uit, en hetzelfde huis houdt altijd hetzelfde uiterlijk.
+
 **Dag, nacht en seizoenen** geven het eiland een eigen ritme. Een dag duurt op 1× tweeënhalve minuut (op hogere snelheden tot vier keer zo snel) en elk seizoen twee dagen. 's Avonds kleurt het licht warm, 's nachts branden ramen, kampvuren en later straatlantaarns, in de herfst verkleuren de bomen en in de winter ligt er sneeuw op de grond, de heuvels en de dennen. Het weerbericht op het eiland vertelt mee. Dit is alleen sfeer: de simulatie en haar uitkomsten veranderen er niet door. In de instellingen kun je het uitzetten; dan blijft het een zomerse middag.
 
 **Het eilandboek** bundelt alles wat je terugleest op één plek: de knop **Eilandboek ↗** op het eiland opent tabbladen voor Kroniek, Familie, Wensen, Uitdagingen en Verzameling. Het boek onthoudt het laatst gelezen tabblad, pauzeert het eiland zolang het open is en markeert het tabblad Wensen met een stipje als iemand iets vraagt. Pijltjestoetsen wisselen tussen tabbladen.

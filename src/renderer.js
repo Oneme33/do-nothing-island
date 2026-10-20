@@ -8,6 +8,17 @@ const TAU=Math.PI*2;
 const hash=(x,y=0)=>{const n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n);};
 const mix=(a,b,t)=>a+(b-a)*t;
 const palette=['#9daf78','#a8b981','#a1b47b','#a9bb81','#a6b77e','#afbf87'];
+// Every home gets its own colours and proportions from its plot, so streets never look copied.
+const HOUSE_WALLS=['#d7cdb0','#e2d6bd','#d9c3a5','#cfd3bd','#e0c9b8','#d2c8a8','#e6dcc6','#cbd1c2','#dcc7a0','#e3d2c4'];
+const HOUSE_ROOFS=['#ad785c','#a46f56','#8e8f6c','#9b6a5c','#7f8b7a','#b08a5e','#8c6f62','#a77c66','#6f8278','#b4795f'];
+const HOUSE_SHUTTERS=['#6c806c','#7b8c79','#8a6f5c','#6f7f95','#9a7a56','#7d6b84','#5f7d7a'];
+const shadeColor=(hex,f)=>'#'+[1,3,5].map(i=>Math.round(Math.max(0,Math.min(255,parseInt(hex.slice(i,i+2),16)*f))).toString(16).padStart(2,'0')).join('');
+const DEFAULT_LOOK={wall:'#d7cdb0',side:'#b9b99b',roof:null,gable:null,shutter:'#6c806c',shutterSide:'#7b8c79',sx:1,sy:1,extra:0,flowers:null,chimney:null};
+function houseLook(t){
+ const a=hash(t.x,t.y),b=hash(t.y+31,t.x-17),c=hash(t.x*3+7,t.y*5-2);
+ const wall=HOUSE_WALLS[Math.floor(a*HOUSE_WALLS.length)],roof=HOUSE_ROOFS[Math.floor(b*HOUSE_ROOFS.length)],shutter=HOUSE_SHUTTERS[Math.floor(c*HOUSE_SHUTTERS.length)];
+ return{wall,side:shadeColor(wall,.86),roof,gable:shadeColor(roof,1.12),shutter,shutterSide:shadeColor(shutter,1.1),sx:.86+b*.3,sy:.9+c*.24,extra:Math.floor(a*3)*3,flowers:c<.35?['#d58f7a','#e2c26a','#c98fb0'][Math.floor(a*3)]:null,chimney:b>.25};
+}
 
 export class IslandRenderer {
   constructor(canvas,simulation) {
@@ -406,6 +417,8 @@ export class IslandRenderer {
     if(t.kind==='flooded')c.globalAlpha=.78;
     if(this.focus&&['tower','house','townhouse'].includes(t.building)){const f=this.p(this.focus.x,this.focus.y);if(p.y>f.y&&Math.abs(p.x-f.x)<65)c.globalAlpha=.26;}
     const b=t.building;
+    this.look=['hut','house','townhouse'].includes(b)?houseLook(t):null;
+    if(this.look)c.scale(this.look.sx,this.look.sy);
     if(b==='original-tree')this.tree(true,t.variant,!!t.bloomYear);
     else if(b==='tree')this.tree(false,t.variant);
     else if(b==='forest')this.forest(t.variant);
@@ -726,24 +739,25 @@ export class IslandRenderer {
   house(v,level){
     const c=this.ctx;
     if(level>0&&['classical','medieval','renaissance'].includes(this.archStyle)){this.historicalHouse(v,this.archStyle);return;}
-    const h=level===0?13:level===1?20:31;
-    const roof=level===0?'#ad785c':v>.5?'#a46f56':'#8e8f6c';
+    const L=this.look||DEFAULT_LOOK,h=(level===0?13:level===1?20:31)+(level>0?L.extra:0);
+    const roof=L.roof||(level===0?'#ad785c':v>.5?'#a46f56':'#8e8f6c');
     this.ellipse(5,4,18,6,'#58654413');
     this.poly([[-14,-5],[0,2],[14,-5],[0,-12]],'#b5af87');
-    this.poly([[-13,-5],[0,2],[0,2-h],[-13,-5-h]],'#d7cdb0');
-    this.poly([[0,2],[13,-5],[13,-5-h],[0,2-h]],'#b9b99b');
+    this.poly([[-13,-5],[0,2],[0,2-h],[-13,-5-h]],L.wall);
+    this.poly([[0,2],[13,-5],[13,-5-h],[0,2-h]],L.side);
     this.poly([[-17,-h-3],[-2,-h-20],[17,-h-11],[2,-h-1]],roof);
     this.poly([[-17,-h-3],[0,-h+5],[17,-h-3],[2,-h-20]],roof);
     // Visible gable and two sloped roof planes.
-    this.poly([[-17,-h-3],[-2,-h-17],[12,-h-10],[-2,-h+4]],v>.5?'#bd8b69':'#af805e');
+    this.poly([[-17,-h-3],[-2,-h-17],[12,-h-10],[-2,-h+4]],L.gable||(v>.5?'#bd8b69':'#af805e'));
     this.poly([[-2,-h-17],[17,-h-7],[2,-h+5],[-2,-h+4]],roof);
     for(let i=0;i<3;i++)this.line([[-13+i*5,-h-4-i*4],[-1+i*5,-h+2-i*4]],'#e0b78a45',.6);
     this.poly([[-8,-2],[-3,0],[-3,-8],[-8,-10]],'#897957');
-    this.poly([[5,-7],[9,-9],[9,-14],[5,-12]],'#6c806c');
+    this.poly([[5,-7],[9,-9],[9,-14],[5,-12]],L.shutter);
+    if(L.flowers){this.poly([[4,-6],[10,-9],[10,-7],[4,-4]],'#8d7a5a');for(let i=0;i<3;i++)this.ellipse(5.5+i*2,-6.6-i,1.2,1,L.flowers);}
     this.line([[7,-8],[7,-13]],'#b7c0a0',.6);
-    if(level>0){this.poly([[-9,-14],[-5,-12],[-5,-17],[-9,-19]],'#7b8c79');this.poly([[5,-19],[9,-21],[9,-25],[5,-23]],'#748673');}
-    if(level>1){this.poly([[-9,-24],[-5,-22],[-5,-27],[-9,-29]],'#7b8c79');this.poly([[5,-29],[9,-31],[9,-35],[5,-33]],'#748673');}
-    if(v>.4 || level>0){
+    if(level>0){this.poly([[-9,-14],[-5,-12],[-5,-17],[-9,-19]],L.shutterSide);this.poly([[5,-19],[9,-21],[9,-25],[5,-23]],L.shutter);}
+    if(level>1){this.poly([[-9,-24],[-5,-22],[-5,-27],[-9,-29]],L.shutterSide);this.poly([[5,-29],[9,-31],[9,-35],[5,-33]],L.shutter);}
+    if(L.chimney!==false&&(v>.4 || level>0)){
       this.poly([[7,-h-15],[11,-h-17],[11,-h-25],[7,-h-23]],'#a7a18a');
       this.poly([[4,-h-17],[7,-h-15],[7,-h-23],[4,-h-25]],'#c7bca0');
       for(let i=0;i<3;i++){
@@ -763,11 +777,11 @@ export class IslandRenderer {
       this.poly([[5,-5],[10,-8],[10,-17],[5,-14]],'#84977e');
       this.diamond(-3,5,10,5,'#c8bd98');this.ellipse(12,2,2.5,1.5,'#a7ad75');return;
     }
-    const medieval=style==='medieval',h=medieval?22:27,roof=medieval?'#958663':v>.5?'#ae7e65':'#8c9879';
-    this.poly([[-14,-4],[0,4],[14,-4],[14,-4-h],[0,4-h],[-14,-4-h]],medieval?'#d4c3a1':'#d6b498');
-    this.poly([[0,4],[14,-4],[14,-4-h],[0,4-h]],medieval?'#bcc0a0':'#b6b69a');
+    const L=this.look||DEFAULT_LOOK,medieval=style==='medieval',h=(medieval?22:27)+L.extra,roof=L.roof?(medieval?shadeColor(L.roof,.95):L.roof):medieval?'#958663':v>.5?'#ae7e65':'#8c9879';
+    this.poly([[-14,-4],[0,4],[14,-4],[14,-4-h],[0,4-h],[-14,-4-h]],this.look?L.wall:medieval?'#d4c3a1':'#d6b498');
+    this.poly([[0,4],[14,-4],[14,-4-h],[0,4-h]],this.look?L.side:medieval?'#bcc0a0':'#b6b69a');
     this.poly([[-18,-h-3],[-4,-h-24],[18,-h-11],[3,-h+5]],roof);
-    this.poly([[-18,-h-3],[-4,-h-24],[3,-h+5]],medieval?'#b0a078':'#c29879');
+    this.poly([[-18,-h-3],[-4,-h-24],[3,-h+5]],this.look?L.gable:medieval?'#b0a078':'#c29879');
     this.poly([[-8,-1],[-3,2],[-3,-9],[-8,-12]],'#8c7958');
     if(medieval){
       for(const x of [-12,-2])this.line([[x,-3+(x+12)*.5],[x,-25+(x+12)*.5]],'#8e7857',1.4);
@@ -776,7 +790,8 @@ export class IslandRenderer {
       for(let i=0;i<2;i++){const x=-11+i*7;this.poly([[x,-18+i*3],[x+3,-16+i*3],[x+3,-23+i*3],[x,-25+i*3]],'#849580');}
       this.line([[-15,-26],[0,-18],[15,-26]],'#e4cba7',1.8);this.poly([[-4,-45],[0,-40],[4,-35],[-1,-34]],'#dcc09b');
     }
-    for(let i=0;i<2;i++)this.poly([[5,-10-i*12],[9,-12-i*12],[9,-17-i*12],[5,-15-i*12]],'#7d937c');
+    for(let i=0;i<2;i++)this.poly([[5,-10-i*12],[9,-12-i*12],[9,-17-i*12],[5,-15-i*12]],this.look?L.shutter:'#7d937c');
+    if(L.flowers)for(let i=0;i<3;i++)this.ellipse(6+i*1.5,-9.5-i*.8,1.1,.9,L.flowers);
     this.ellipse(-15,3,2,1.2,'#b7a37a');
   }
   farm(v){
