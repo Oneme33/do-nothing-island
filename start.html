@@ -1068,7 +1068,7 @@ function drawFinale(c,w,h,s,m,reduced=false){
  c.restore();
 }
 
-const PLACE_NAMES={hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',lighthouse:'Vuurtoren','town-square':'Dorpsplein',ruins:'Ruïne'};
+const PLACE_NAMES={hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',lighthouse:'Vuurtoren','town-square':'Dorpsplein','petting-farm':'Kinderboerderij',observatory:'Sterrenwacht','ice-cream':'IJssalon',greenhouse:'Kas',ruins:'Ruïne'};
 const names=['Noor','Sam','Bo','Mila','Daan','Lou','Iris','Mo','Tess','Finn','Ada','Jip'];
 const surnames=['de Vries','van de Kust','Bos','van Dijk','de Boer','Steen','van de Berg','Visser'];
 function describePlot(s,t){
@@ -1258,7 +1258,7 @@ function reshapeAfterQuake(s,spot){
 // Small pleasures and an ending performed by the island, in real time.
 const adjacent=t=>[[t.x+1,t.y],[t.x-1,t.y],[t.x,t.y+1],[t.x,t.y-1]];
 const id=t=>`${t.x},${t.y}`;
-const RECREATION=['park','garden','beach','playground','fairground','theater','bonfire','festival-ground'];
+const RECREATION=['park','garden','beach','playground','fairground','theater','bonfire','festival-ground','petting-farm','ice-cream','greenhouse'];
 function ensureSpectacle(s){
  ensureConsequences(s);
  s.nextFestival??=18;s.festival??=null;s.liveJoke??=null;s.fireCount??=0;
@@ -1802,6 +1802,33 @@ function advanceSquare(s){
  s.signal('celebrate',tiles[0],'Een dorpsplein!');s.rebuildRoads();
 }
 
+// Small delights: one of each per island, each in a place that suits it.
+const delightAround=t=>[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:t.x+dx,y:t.y+dy}));
+const DELIGHTS=[
+ {type:'petting-farm',since:150,population:40,name:'Kinderboerderij',label:'Mèèh!',opening:'Een kinderboerderij opent. De geit wordt direct verkozen tot burgemeester van de kinderen.',where:(s,t)=>Math.hypot(t.x,t.y)>=3&&Math.hypot(t.x,t.y)<=8},
+ {type:'observatory',since:1600,population:200,name:'Sterrenwacht',label:'Sterren kijken',opening:'Een sterrenwacht verrijst bij de berg. De eerste ontdekking: de maan is er nog.',where:(s,t,near)=>near(t,p=>!!p?.landform)},
+ {type:'ice-cream',since:1800,population:300,name:'IJssalon',label:'Een ijsje!',opening:'Een ijssalon opent bij het strand. Het eiland leert het woord ‘nog eentje’.',where:(s,t,near)=>near(t,p=>p?.building==='beach')},
+ {type:'greenhouse',since:1850,population:300,name:'Kas',label:'Tomaten onder glas',opening:'Een glazen kas vol tomaten en twijfelachtige cactussen opent. De tuiniers praten er alleen fluisterend.',where:(s,t)=>delightAround(t).some(p=>['farm','garden','park'].includes(s.tile(p.x,p.y)?.building))}
+];
+const DELIGHT_TYPES=DELIGHTS.map(d=>d.type);
+const DELIGHT_NAMES=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.name]));
+const DELIGHT_LABELS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.label]));
+const DELIGHT_OPENINGS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.opening]));
+// Plans at most one delight at a time; returns true when something was planned.
+function planDelight(s){
+ const planned=[...s.tiles.values()].some(t=>t.buildSite&&DELIGHT_TYPES.includes(t.buildSite.type));if(planned)return false;
+ for(const d of DELIGHTS){
+  if(s.year<d.since||s.population<d.population||s.buildings.some(t=>t.building===d.type))continue;
+  // A lone tree may make way; homes, farms and reserved plots never do.
+  const near=(t,r)=>delightAround(t).some(p=>r(s.tile(p.x,p.y)))||[[1,1],[-1,-1],[1,-1],[-1,1],[2,0],[-2,0],[0,2],[0,-2]].some(([dx,dy])=>r(s.tile(t.x+dx,t.y+dy)));
+  const spots=s.land.filter(t=>(!t.building||t.building==='tree')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
+  const spot=spots[(s.year*13+s.seed)%spots.length],tree=spot.building;if(tree)spot.building=null;
+  if(s.planBuilding(spot,d.type))return true;
+  if(tree)spot.building=tree;
+ }
+ return false;
+}
+
 const SAVE_VERSION = 1;
 const WORLD_RADIUS = 12;
 const ERAS = [
@@ -2154,6 +2181,8 @@ class Civilization {
     this.repairFloods();
     this.advanceGeology();
     advancePleasures(this);advanceCoast(this);advanceSquare(this);
+    // Delights do not wait for a housing lull: they claim a fitting free plot when their time comes.
+    if(this.year%9===4&&!this.storm)planDelight(this);
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);
@@ -2349,11 +2378,12 @@ class Civilization {
       const type=t.buildSite.type;t.architecture=t.buildSite.architecture||this.age.id;t.building=type;if(['hut','house','townhouse','tower'].includes(type)&&this.policies.safety)t.retrofitted=true;t.builtYear=this.year;t.buildSite=null;changed=true;
       if(this.fireCode&&['hut','house','townhouse','tower'].includes(type))t.material='stone';
       const labels={farm:'New farm',well:'Fresh water',market:'Market open',windmill:'Grain, but faster',park:'A park for the locals',forest:'A little more woodland',beach:'Room for a beach towel',shop:'Open for business',bakery:'Fresh bread!',cafe:'The terrace is open',playground:'Time to play!',fairground:'A very small funfair!',school:'School is open!','science-center':'The laboratories are open'};
-      this.signal('built',t,labels[type]||(['hut','house','townhouse','tower'].includes(type)?'New home':'A new place for the locals'));
+      this.signal('built',t,labels[type]||DELIGHT_LABELS[type]||(['hut','house','townhouse','tower'].includes(type)?'New home':'A new place for the locals'));
       if(t.reclaimed && !this.history.some(e=>e.type==='district'))this.log('The first buildings on reclaimed land. Sea views, technically.','district');
       const openings={well:'A village well. Water is now a local amenity.',market:'The market opens. Someone immediately complains about the prices.',windmill:'A windmill begins turning. The wind receives no compensation.','fire-station':'De brandweerkazerne opent. De emmers hebben nu een vaste ploeg.',library:'A library opens. Silence becomes an official policy.',factory:'The first factory starts up. The morning now has a whistle.',powerplant:'A wood-fired steam generator brings electricity. The sunset loses its monopoly.',solar:'Solar panels join the power grid. The weather gets a second job.',turbine:'A wind turbine joins the grid. The wind has been promoted.',statue:'A statue appears in the square. Its subject is open to interpretation.',garden:'A public garden opens. Sitting becomes a civic activity.',theater:'A theater opens. The island develops a dramatic side.',shrine:'A little shrine follows the strange events. The sky is officially under investigation.',church:'A church rises after the miracles. The villagers would like to know who to thank. Or blame.'};
       Object.assign(openings,{park:'A public park opens. Doing nothing is now an approved land use.',forest:'A woodland is planted. The squirrels establish a rival economy.',beach:'A beach opens on the new shore. The sea asks everyone to take their towels home.',shop:'The first shop opens. Wanting things becomes a local industry.',bakery:'A bakery opens. The village begins scheduling its mornings around bread.',cafe:'A café terrace opens. The gossip now comes with a small cup.',playground:'A playground opens. The children test gravity. Repeatedly.',fairground:'A Ferris wheel begins turning. The island invents a recreational queue.'});
       Object.assign(openings,{school:'A school opens. The children immediately question the entire system.','science-center':'A science center opens. The researchers request more funding before lunch.'});
+      Object.assign(openings,DELIGHT_OPENINGS);
       if(type==='powerplant'&&this.year>=1980)openings.powerplant='Een regelbare reservecentrale versterkt het stroomnet. De stad kiest voor leveringszekerheid.';
       if(['school','library','science-center'].includes(type)){const court=neighbors(t).map(([x,y])=>this.tile(x,y)).find(p=>p?.kind==='land'&&!p.building&&!p.buildSite&&!p.landform&&(!p.reservedFor||p.reservedFor==='knowledge')&&p.district==='knowledge');if(court&&!this.buildings.some(p=>p.building==='campus-square')){court.building='campus-square';court.civicLegacy='The knowledge quarter';court.builtYear=this.year;}}
       if(openings[type])this.log(this.buildings.filter(t=>t.building===type).length>1?`${openings[type].replace(/The first /,'Another ')} A new neighborhood gets its turn.`:openings[type],['statue','garden','theater','park','forest','beach','playground','fairground'].includes(type)?'culture':['shop','bakery','cafe'].includes(type)?'trade':'technology',{x:t.x,y:t.y});
@@ -3369,6 +3399,10 @@ class IslandRenderer {
     else if(b==='tower')this.tower(t.variant);
     else if(b==='lighthouse')this.lighthouse();
     else if(b==='town-square')this.townSquare(t);
+    else if(b==='petting-farm')this.pettingFarm(t);
+    else if(b==='observatory')this.observatory();
+    else if(b==='ice-cream')this.iceCream(t);
+    else if(b==='greenhouse')this.greenhouse();
     else if(b==='manor'||b==='palace'){if(b==='palace')c.scale(1.45,1.45);this.palace(b==='palace',t.variant);}
     else if(b==='palace-wing'){this.house(t.variant,2);this.line([[0,-40],[0,-53]],'#a39668',1);this.poly([[0,-53],[9,-50],[0,-47]],'#c8af64');}
     else if(b==='royal-garden')this.formalGarden();
@@ -3734,6 +3768,36 @@ class IslandRenderer {
     if(v<.35){this.ellipse(0,0,7,2.5,'#55703a18');this.ellipse(0,-3,6,4,this.leaf('#86a062'));this.ellipse(3,-4,4,3,this.leaf('#9bb173'));}
     else{c.scale(.55,.55);this.tree(false,v);}
     c.restore();
+  }
+  pettingFarm(t){
+    this.diamond(0,0,21,10.5,'#c9b77f');this.diamond(0,0,18,9,'#d8c68c');
+    for(const [a,b] of [[[-21,0],[0,-10.5]],[[0,-10.5],[21,0]],[[21,0],[0,10.5]],[[0,10.5],[-21,0]]]){this.line([a,b],'#94805a',1);this.line([[a[0],a[1]-3],[b[0],b[1]-3]],'#a8946a',.9);}
+    this.poly([[-14,-4],[-6,0],[-6,-9],[-14,-13]],'#b97a58');this.poly([[-6,0],[-1,-3],[-1,-12],[-6,-9]],'#9c6649');this.poly([[-16,-12],[-9,-18],[1,-12],[-6,-8]],'#8e8f6c');
+    const walk=this.reduced?0:Math.sin(this.time*.7+t.x)*3;
+    for(const [i,[x,y]] of [[3+walk,1],[9-walk*.6,-3],[-1,5]].entries()){const goat=i===1;this.ellipse(x,y-3,4,2.6,goat?'#e9e2cf':'#f4f1e6');this.ellipse(x+3.6,y-5,1.8,1.6,goat?'#7d6a55':'#5f5a50');this.line([[x-2,y-1],[x-2,y+1]],'#6f665a',.8);this.line([[x+2,y-1],[x+2,y+1]],'#6f665a',.8);}
+  }
+  observatory(){
+    this.ellipse(4,4,16,5,'#58654418');
+    this.poly([[-9,-3],[0,1],[0,-20],[-9,-24]],'#e2dbc4');this.poly([[0,1],[9,-3],[9,-24],[0,-20]],'#c7c0a8');
+    this.ellipse(0,-23,10,4.5,'#b9b39b');this.poly([[-10,-23],[-8,-30],[-3,-34],[3,-34],[8,-30],[10,-23],[0,-19]],'#a9b4b2');this.poly([[0,-19],[10,-23],[8,-30],[3,-34],[1,-34]],'#8f9b99');
+    this.poly([[-1.5,-34],[1.5,-34],[1.5,-22],[-1.5,-21]],'#4f5d66');
+    this.line([[1,-30],[11,-38]],'#6d6556',2);this.ellipse(11.5,-38.5,1.6,1.2,'#d6d1b8');
+    this.poly([[-5,-7],[-2,-6],[-2,-11],[-5,-12]],'#7d8f8c');
+  }
+  iceCream(t){
+    const stripe=['#e9a8a2','#a9cfc6','#efd58e'][Math.floor(hash(t.x,t.y)*3)];
+    this.poly([[-10,-2],[0,3],[0,-10],[-10,-15]],'#f3ecd9');this.poly([[0,3],[10,-2],[10,-15],[0,-10]],'#ddd3bb');
+    this.poly([[-12,-15],[0,-9],[12,-15],[0,-21]],stripe);for(let i=0;i<3;i++)this.line([[-9+i*6,-14+i*3],[-3+i*6,-17+i*3]],'#fbf7ea',1.4);
+    this.poly([[-7,-6],[-2,-4],[-2,-9],[-7,-11]],'#8aa7a2');
+    this.poly([[12,-6],[15,-22],[18,-6]],'#d2a868');this.ellipse(15,-23,4.2,3.6,'#f2c6c9');this.ellipse(15,-26,3,2.6,'#fbf3e4');this.ellipse(16,-28.5,1.2,1.2,'#c0574d');
+  }
+  greenhouse(){
+    this.ellipse(4,4,18,6,'#58654414');
+    this.poly([[-14,-3],[0,4],[0,-9],[-14,-16]],'rgba(206,229,226,.75)');this.poly([[0,4],[14,-3],[14,-16],[0,-9]],'rgba(183,212,208,.75)');
+    this.poly([[-14,-16],[0,-9],[0,-17],[-14,-24]].map(([x,y],i)=>[x,i>2?-21:y]),'rgba(222,238,235,.8)');this.poly([[0,-9],[14,-16],[14,-21],[0,-17]],'rgba(200,225,221,.8)');this.line([[-14,-21],[0,-17],[14,-21]],'#9fb7b2',1);
+    for(let i=0;i<4;i++){this.ellipse(-10+i*3.5,-4+i*1.8,2.4,3,this.leaf(i%2?'#7e965c':'#91a763'));this.ellipse(3+i*3,-1-i*1.5,2.2,2.6,this.leaf('#86a062'));}
+    this.ellipse(-6,-8,1,1,'#d4644f');this.ellipse(6,-6,1,1,'#d4644f');
+    for(const x of [-7,7])this.line([[x,x<0?.5:.5],[x,x<0?-19:-19]],'#a9bdb8',.6);
   }
   lighthouse(){
     const c=this.ctx;

@@ -442,6 +442,10 @@ export class IslandRenderer {
     else if(b==='tower')this.tower(t.variant);
     else if(b==='lighthouse')this.lighthouse();
     else if(b==='town-square')this.townSquare(t);
+    else if(b==='petting-farm')this.pettingFarm(t);
+    else if(b==='observatory')this.observatory();
+    else if(b==='ice-cream')this.iceCream(t);
+    else if(b==='greenhouse')this.greenhouse();
     else if(b==='manor'||b==='palace'){if(b==='palace')c.scale(1.45,1.45);this.palace(b==='palace',t.variant);}
     else if(b==='palace-wing'){this.house(t.variant,2);this.line([[0,-40],[0,-53]],'#a39668',1);this.poly([[0,-53],[9,-50],[0,-47]],'#c8af64');}
     else if(b==='royal-garden')this.formalGarden();
@@ -807,6 +811,36 @@ export class IslandRenderer {
     if(v<.35){this.ellipse(0,0,7,2.5,'#55703a18');this.ellipse(0,-3,6,4,this.leaf('#86a062'));this.ellipse(3,-4,4,3,this.leaf('#9bb173'));}
     else{c.scale(.55,.55);this.tree(false,v);}
     c.restore();
+  }
+  pettingFarm(t){
+    this.diamond(0,0,21,10.5,'#c9b77f');this.diamond(0,0,18,9,'#d8c68c');
+    for(const [a,b] of [[[-21,0],[0,-10.5]],[[0,-10.5],[21,0]],[[21,0],[0,10.5]],[[0,10.5],[-21,0]]]){this.line([a,b],'#94805a',1);this.line([[a[0],a[1]-3],[b[0],b[1]-3]],'#a8946a',.9);}
+    this.poly([[-14,-4],[-6,0],[-6,-9],[-14,-13]],'#b97a58');this.poly([[-6,0],[-1,-3],[-1,-12],[-6,-9]],'#9c6649');this.poly([[-16,-12],[-9,-18],[1,-12],[-6,-8]],'#8e8f6c');
+    const walk=this.reduced?0:Math.sin(this.time*.7+t.x)*3;
+    for(const [i,[x,y]] of [[3+walk,1],[9-walk*.6,-3],[-1,5]].entries()){const goat=i===1;this.ellipse(x,y-3,4,2.6,goat?'#e9e2cf':'#f4f1e6');this.ellipse(x+3.6,y-5,1.8,1.6,goat?'#7d6a55':'#5f5a50');this.line([[x-2,y-1],[x-2,y+1]],'#6f665a',.8);this.line([[x+2,y-1],[x+2,y+1]],'#6f665a',.8);}
+  }
+  observatory(){
+    this.ellipse(4,4,16,5,'#58654418');
+    this.poly([[-9,-3],[0,1],[0,-20],[-9,-24]],'#e2dbc4');this.poly([[0,1],[9,-3],[9,-24],[0,-20]],'#c7c0a8');
+    this.ellipse(0,-23,10,4.5,'#b9b39b');this.poly([[-10,-23],[-8,-30],[-3,-34],[3,-34],[8,-30],[10,-23],[0,-19]],'#a9b4b2');this.poly([[0,-19],[10,-23],[8,-30],[3,-34],[1,-34]],'#8f9b99');
+    this.poly([[-1.5,-34],[1.5,-34],[1.5,-22],[-1.5,-21]],'#4f5d66');
+    this.line([[1,-30],[11,-38]],'#6d6556',2);this.ellipse(11.5,-38.5,1.6,1.2,'#d6d1b8');
+    this.poly([[-5,-7],[-2,-6],[-2,-11],[-5,-12]],'#7d8f8c');
+  }
+  iceCream(t){
+    const stripe=['#e9a8a2','#a9cfc6','#efd58e'][Math.floor(hash(t.x,t.y)*3)];
+    this.poly([[-10,-2],[0,3],[0,-10],[-10,-15]],'#f3ecd9');this.poly([[0,3],[10,-2],[10,-15],[0,-10]],'#ddd3bb');
+    this.poly([[-12,-15],[0,-9],[12,-15],[0,-21]],stripe);for(let i=0;i<3;i++)this.line([[-9+i*6,-14+i*3],[-3+i*6,-17+i*3]],'#fbf7ea',1.4);
+    this.poly([[-7,-6],[-2,-4],[-2,-9],[-7,-11]],'#8aa7a2');
+    this.poly([[12,-6],[15,-22],[18,-6]],'#d2a868');this.ellipse(15,-23,4.2,3.6,'#f2c6c9');this.ellipse(15,-26,3,2.6,'#fbf3e4');this.ellipse(16,-28.5,1.2,1.2,'#c0574d');
+  }
+  greenhouse(){
+    this.ellipse(4,4,18,6,'#58654414');
+    this.poly([[-14,-3],[0,4],[0,-9],[-14,-16]],'rgba(206,229,226,.75)');this.poly([[0,4],[14,-3],[14,-16],[0,-9]],'rgba(183,212,208,.75)');
+    this.poly([[-14,-16],[0,-9],[0,-17],[-14,-24]].map(([x,y],i)=>[x,i>2?-21:y]),'rgba(222,238,235,.8)');this.poly([[0,-9],[14,-16],[14,-21],[0,-17]],'rgba(200,225,221,.8)');this.line([[-14,-21],[0,-17],[14,-21]],'#9fb7b2',1);
+    for(let i=0;i<4;i++){this.ellipse(-10+i*3.5,-4+i*1.8,2.4,3,this.leaf(i%2?'#7e965c':'#91a763'));this.ellipse(3+i*3,-1-i*1.5,2.2,2.6,this.leaf('#86a062'));}
+    this.ellipse(-6,-8,1,1,'#d4644f');this.ellipse(6,-6,1,1,'#d4644f');
+    for(const x of [-7,7])this.line([[x,x<0?.5:.5],[x,x<0?-19:-19]],'#a9bdb8',.6);
   }
   lighthouse(){
     const c=this.ctx;

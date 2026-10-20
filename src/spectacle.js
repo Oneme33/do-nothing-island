@@ -2,7 +2,7 @@ import {ensureConsequences,startBlaze,finishBlaze,tendFires,keepFireTradition,ad
 // Small pleasures and an ending performed by the island, in real time.
 const adjacent=t=>[[t.x+1,t.y],[t.x-1,t.y],[t.x,t.y+1],[t.x,t.y-1]];
 const id=t=>`${t.x},${t.y}`;
-export const RECREATION=['park','garden','beach','playground','fairground','theater','bonfire','festival-ground'];
+export const RECREATION=['park','garden','beach','playground','fairground','theater','bonfire','festival-ground','petting-farm','ice-cream','greenhouse'];
 export function ensureSpectacle(s){
  ensureConsequences(s);
  s.nextFestival??=18;s.festival??=null;s.liveJoke??=null;s.fireCount??=0;

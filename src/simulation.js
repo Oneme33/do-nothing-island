@@ -6,6 +6,7 @@ import {ensureChallenges,advanceChallenges} from './challenges.js';
 import {advanceCollection} from './collection.js';
 import {advanceCoast,coastNotice} from './coast.js';
 import {ensureSquare,advanceSquare} from './square.js';
+import {planDelight,DELIGHT_LABELS,DELIGHT_OPENINGS} from './delights.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 export const WORLD_RADIUS = 12;
@@ -359,6 +360,8 @@ export class Civilization {
     this.repairFloods();
     this.advanceGeology();
     advancePleasures(this);advanceCoast(this);advanceSquare(this);
+    // Delights do not wait for a housing lull: they claim a fitting free plot when their time comes.
+    if(this.year%9===4&&!this.storm)planDelight(this);
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);
@@ -554,11 +557,12 @@ export class Civilization {
       const type=t.buildSite.type;t.architecture=t.buildSite.architecture||this.age.id;t.building=type;if(['hut','house','townhouse','tower'].includes(type)&&this.policies.safety)t.retrofitted=true;t.builtYear=this.year;t.buildSite=null;changed=true;
       if(this.fireCode&&['hut','house','townhouse','tower'].includes(type))t.material='stone';
       const labels={farm:'New farm',well:'Fresh water',market:'Market open',windmill:'Grain, but faster',park:'A park for the locals',forest:'A little more woodland',beach:'Room for a beach towel',shop:'Open for business',bakery:'Fresh bread!',cafe:'The terrace is open',playground:'Time to play!',fairground:'A very small funfair!',school:'School is open!','science-center':'The laboratories are open'};
-      this.signal('built',t,labels[type]||(['hut','house','townhouse','tower'].includes(type)?'New home':'A new place for the locals'));
+      this.signal('built',t,labels[type]||DELIGHT_LABELS[type]||(['hut','house','townhouse','tower'].includes(type)?'New home':'A new place for the locals'));
       if(t.reclaimed && !this.history.some(e=>e.type==='district'))this.log('The first buildings on reclaimed land. Sea views, technically.','district');
       const openings={well:'A village well. Water is now a local amenity.',market:'The market opens. Someone immediately complains about the prices.',windmill:'A windmill begins turning. The wind receives no compensation.','fire-station':'De brandweerkazerne opent. De emmers hebben nu een vaste ploeg.',library:'A library opens. Silence becomes an official policy.',factory:'The first factory starts up. The morning now has a whistle.',powerplant:'A wood-fired steam generator brings electricity. The sunset loses its monopoly.',solar:'Solar panels join the power grid. The weather gets a second job.',turbine:'A wind turbine joins the grid. The wind has been promoted.',statue:'A statue appears in the square. Its subject is open to interpretation.',garden:'A public garden opens. Sitting becomes a civic activity.',theater:'A theater opens. The island develops a dramatic side.',shrine:'A little shrine follows the strange events. The sky is officially under investigation.',church:'A church rises after the miracles. The villagers would like to know who to thank. Or blame.'};
       Object.assign(openings,{park:'A public park opens. Doing nothing is now an approved land use.',forest:'A woodland is planted. The squirrels establish a rival economy.',beach:'A beach opens on the new shore. The sea asks everyone to take their towels home.',shop:'The first shop opens. Wanting things becomes a local industry.',bakery:'A bakery opens. The village begins scheduling its mornings around bread.',cafe:'A café terrace opens. The gossip now comes with a small cup.',playground:'A playground opens. The children test gravity. Repeatedly.',fairground:'A Ferris wheel begins turning. The island invents a recreational queue.'});
       Object.assign(openings,{school:'A school opens. The children immediately question the entire system.','science-center':'A science center opens. The researchers request more funding before lunch.'});
+      Object.assign(openings,DELIGHT_OPENINGS);
       if(type==='powerplant'&&this.year>=1980)openings.powerplant='Een regelbare reservecentrale versterkt het stroomnet. De stad kiest voor leveringszekerheid.';
       if(['school','library','science-center'].includes(type)){const court=neighbors(t).map(([x,y])=>this.tile(x,y)).find(p=>p?.kind==='land'&&!p.building&&!p.buildSite&&!p.landform&&(!p.reservedFor||p.reservedFor==='knowledge')&&p.district==='knowledge');if(court&&!this.buildings.some(p=>p.building==='campus-square')){court.building='campus-square';court.civicLegacy='The knowledge quarter';court.builtYear=this.year;}}
       if(openings[type])this.log(this.buildings.filter(t=>t.building===type).length>1?`${openings[type].replace(/The first /,'Another ')} A new neighborhood gets its turn.`:openings[type],['statue','garden','theater','park','forest','beach','playground','fairground'].includes(type)?'culture':['shop','bakery','cafe'].includes(type)?'trade':'technology',{x:t.x,y:t.y});
