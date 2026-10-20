@@ -146,6 +146,7 @@ export class IslandRenderer {
     for(const t of sorted){
       this.drawDetails(t);
       const p=this.p(t.x,t.y),depth=p.y+(t.landform?10:['tree','original-tree'].includes(t.building)?0:5);
+      if(t.kind==='land'&&!t.building&&!t.buildSite&&!t.landform&&!t.road&&t.reservedFor!=='square'&&!t.foundingHome&&hash(t.x*5+1,t.y*3-2)<.24)this.scene.push({depth:depth-2,draw:()=>this.meadowTree(t)});
       if(t.treasure&&this.sim.year-t.treasure.year<40)this.scene.push({depth:depth+1,draw:()=>this.treasureChest(t)});
       if(t.landform||t.building||t.buildSite)this.scene.push({depth,draw:()=>{if(t.landform)this.drawLandform(t);if(t.building)this.drawBuilding(t);if(t.buildSite)this.drawBuildingSite(t);}});
     }
@@ -798,6 +799,14 @@ export class IslandRenderer {
       this.diamond(0,1,9,4.5,'#b9a77d');for(let i=0;i<6;i++)this.ellipse(-5+i*2,1+(i%2?-1:1),1.3,1.1,['#d58f7a','#e2c26a','#c98fb0'][i%3]);
       bench(-13,6);bench(13,-4);lamp(0,-8);
     }
+  }
+  // Loose trees and shrubs on empty ground; they simply make way when something is built.
+  meadowTree(t){
+    const p=this.p(t.x,t.y),c=this.ctx,v=hash(t.y*3,t.x*7),dx=(hash(t.x,t.y*9)-.5)*20,dy=(hash(t.x*9,t.y)-.5)*7;
+    c.save();c.translate(p.x+dx,p.y+dy);
+    if(v<.35){this.ellipse(0,0,7,2.5,'#55703a18');this.ellipse(0,-3,6,4,this.leaf('#86a062'));this.ellipse(3,-4,4,3,this.leaf('#9bb173'));}
+    else{c.scale(.55,.55);this.tree(false,v);}
+    c.restore();
   }
   lighthouse(){
     const c=this.ctx;

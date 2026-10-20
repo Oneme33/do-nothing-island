@@ -17,9 +17,15 @@ test('housing placement counts completed homes and planned neighbors while still
 test('three centuries of real growth spread homes without sacrificing population or progression',()=>{
  const s=new Civilization(31);while(s.year<301)s.tick();const homes=s.houses;
  const touching=homes.reduce((n,t)=>n+homes.filter(p=>p!==t&&Math.max(Math.abs(p.x-t.x),Math.abs(p.y-t.y))<=1).length,0)/homes.length;
- assert.ok(homes.length>=30);assert.ok(touching<1,`${touching} immediate neighbors per home`);assert.ok(s.population>=100);assert.equal(s.tile(-1,1).building,'manor');assert.ok(s.routes.length>0);
+ assert.ok(homes.length>=20&&homes.length<30,`${homes.length} homes: a slow village before the windmill age`);assert.ok(touching<1,`${touching} immediate neighbors per home`);assert.ok(s.population>=100);assert.equal(s.tile(-1,1).building,'manor');assert.ok(s.routes.length>0);
 });
 test('legacy islands keep every existing plot, house and road when loading the larger-island update',()=>{
  const s=new Civilization(31);while(s.year<200)s.tick();const old=JSON.parse(s.serialize());delete old.geographyVersion;old.geography.radiusX=9;old.geography.radiusY=8;
  const restored=Civilization.restore(JSON.stringify(old));assert.ok(restored);assert.equal(restored.geographyVersion,2);assert.deepEqual([...restored.tiles],old.tiles);assert.equal(restored.originalArea,old.originalArea);assert.equal(restored.year,old.year);assert.equal(restored.population,old.population);assert.deepEqual(restored.history,old.history);
+});
+test('homes come slowly at first and faster in the windmill age',()=>{
+ const s=new Civilization(31);while(s.year<1000)s.tick();assert.equal(s.housingBoom,0);
+ let before=s.houses.length;while(s.year<1250)s.tick();const slow=s.houses.length-before;
+ before=s.houses.length;while(s.year<1500)s.tick();assert.ok(s.housingBoom>=1);const fast=s.houses.length-before;
+ assert.ok(fast>slow,`${slow} homes in the 250 years before windmills, ${fast} after`);
 });

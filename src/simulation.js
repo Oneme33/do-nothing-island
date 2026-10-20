@@ -185,6 +185,8 @@ export class Civilization {
   get yearDuration() { const base=this.config.accelerating?secondsPerYear(this.year,this.era):FIXED_SECONDS_PER_YEAR;return Math.max(base,this.endgameStarted&&!this.sandbox?.65:this.year>=1920?.6:this.year>=1750?.38:0); }
   get age() { return [...AGES].reverse().find(age=>this.year>=age.year)||AGES[0]; }
   get temperament() { return CHARACTERS.find(p=>p.id===this.character)||{food:1,trade:1,science:1,growth:1}; }
+  // 0: a slow village; 1: the windmill age from 1250; 2: land actually won from the sea.
+  get housingBoom() { return this.reclaimed.length>0?2:this.year>=1250&&this.buildings.some(t=>t.building==='windmill')?1:0; }
   get pressure() { return this.population / Math.max(1,this.capacity); }
   get happiness() { return this.food < 5 ? 'Hungry' : this.protestUntil>this.year?'Restless':this.storm ? 'Concerned' : this.prosperity>78?'Thriving':this.prosperity>40?'Content':'Getting by'; }
   get populationNote() { return /^Six people\./.test(this.currentRemark)&&Math.floor(this.population)!==6?`${Math.floor(this.population)} inwoners. Nog steeds geen vergadering.`:this.currentRemark; }
@@ -374,7 +376,9 @@ export class Civilization {
     }
     const needFood=this.food<Math.max(25,this.population*.9) || this.balance.food<-.5;
     const planned=[...this.tiles.values()].filter(t=>t.buildSite);
-    const needHome=this.population/(this.capacity+planned.filter(t=>['hut','house','townhouse','tower'].includes(t.buildSite.type)).length*ERAS[this.era].housing)>.68;
+    // Homes come slowly until windmills and reclaimed land give the island room for a real building boom.
+    const boom=this.housingBoom,homeSites=planned.filter(t=>['hut','house','townhouse','tower'].includes(t.buildSite.type)).length;
+    const needHome=this.population/(this.capacity+homeSites*ERAS[this.era].housing)>[.9,.75,.68][boom]&&homeSites<[1,2+this.era,3+this.era][boom];
     if(needHome || needFood) {
       if(needFood && planned.some(t=>t.buildSite.type==='farm'))return;
       if(planned.length>=2+this.era)return;
@@ -387,6 +391,8 @@ export class Civilization {
       else if(this.population>=12 && !has('market'))this.planBuilding(free[0],'market');
       else if(this.era>=1 && this.farms.length>=3 && !has('windmill'))this.planBuilding(free[0],'windmill');
       else if(this.year%30===0 && free.length>12 && this.random()<.3)free.at(-1).building='tree';
+      // Groves keep the island green: a tree on the quiet edge every so often, chosen without randomness.
+      else if(this.year%11===0&&free.length>20){const edge=free.filter(t=>!t.road&&!this.isCoast(t)&&Math.hypot(t.x,t.y)>4);const t=edge[(this.year*7+this.seed)%Math.max(1,edge.length)];if(t)t.building=this.forests.some(f=>Math.hypot(f.x-t.x,f.y-t.y)<2)?'forest':'tree';}
     }
   }
   planBuilding(tile,type,free=false) {
