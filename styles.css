@@ -67,3 +67,9 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .family-current .family-moments li{font-size:12px}
 @media (max-width:600px){.book-bar{margin:0 -8px 18px;padding:12px 4px 10px}.book-tabs button{font-size:10px;padding:7px 9px}}
 .family-lore{font-size:11px;font-style:italic;color:#6f7f61;margin-top:8px}
+.island-heading,.weather,.map-coordinate,.civic-overview span{transition:color 1.2s ease}
+.island-window.is-night .island-heading,.island-window.is-night .weather,.island-window.is-night .civic-overview span{color:#e9ecdf}
+.island-window.is-night .map-coordinate{color:#c3cdbf}
+.island-window.is-night .weather svg{stroke:#e9ecdf}
+.island-window.is-night #chapter-status{color:#cdd6c2}
+.island-window.is-night .instruction,.island-window.is-night .instruction small{color:#dfe5d6}

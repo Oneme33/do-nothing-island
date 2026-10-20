@@ -32,10 +32,15 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 
 ## Nu aan de beurt
 
-**2.1–2.7 zijn gereed voor Coens test**, elk met een eigen commit en push. Aanvullende feedback is verwerkt in aparte commits: Help in plaats van Kijk, meer natuurlijke landtegels en ruimte tussen huizen, vlakke wegen en het verwijderen van het grijze boomlabel.
+**Klaar voor Coens test, lokaal gecommit (nog niet gepusht):**
 
-Aanvullende visuele feedback, na het afronden en testen van deze reeks:
+1. **Rustiger tempo.** Op 1× duurt een generatie ongeveer een minuut; een heel eiland zo'n vijftig minuten.
+2. **Eén eilandboek.** Kroniek, Familie, Wensen, Uitdagingen en Verzameling zijn tabbladen in één venster met één knop op het eiland.
+3. **Familieverhalen.** Sleutelhouders onthouden ingrepen bij huis, wensen, brand, beving, hoog water en het eerste huis dat groeit, en vertellen het door aan de volgende generatie.
+4. **2.9 Dag, nacht en seizoenen.** Avondlicht, verlichte ramen en lantaarns, herfstbladeren en sneeuw; uit te zetten in de instellingen.
+
+Aanvullende visuele feedback, na het testen van deze reeks:
 
 - [ ] **Meer herkenbare mensjes.** Duidelijkere menselijke vormen en wat meer persoonlijkheid in de bewoners; behoud de kleine schaal en rustige uitstraling.
 
-Het volgende onderdeel van Ronde 2 is **2.8 (filmisch einde op het echte eiland)**, na feedback of een nieuwe opdracht. Ronde 3 blijft open.
+Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.

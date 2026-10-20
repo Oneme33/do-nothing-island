@@ -27,7 +27,7 @@ let paused=false,speed=[1,2,3,10].includes(sim.config.speedMultiplier)?sim.confi
 let audio=null,audioNodes=[],audioEnabled=false;
 let interferenceMode='nudge',interventionTimer,lastRemarkAt=0,shownRemark='';
 let previousIsland=null,undoTimer;
-let introStep=0,inspectionPinned=false;
+let introStep=0,inspectionPinned=false,nightShown=false;
 const introKey='do-nothing-island-intro-v1';
 const introScreens=[['Dit is jouw eiland.','Eén huisje, een akker en een handvol mensen. Geef ze even de tijd. Er hoeft niets af.'],['Ze redden zich prima.','Ze bouwen, ontdekken en maken er op hun eigen manier iets van. Jij mag gewoon kijken.'],['Probeer niets aan te raken…','Of toch wel. Elke ingreep laat sporen achter. Wat je achter elkaar doet, kan iets onverwachts losmaken.']];
 function otherDialogOpen(){return [...document.querySelectorAll('dialog[open]')].some(d=>d!==$('cinema-dialog'));}
@@ -42,6 +42,7 @@ $('rare-endings').checked=sim.config.rareEndings;
 $('accelerating').checked=sim.config.accelerating;
 $('story-cards').checked=sim.config.storyCards===true;
 $('offline-life').checked=sim.config.offlineProgress!==false;
+$('day-night').checked=sim.config.dayNight!==false;renderer.dayNight=sim.config.dayNight!==false;
 
 function showToast(message,duration=4200){$('toast-text').textContent=nl(message);$('toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),duration);}
 function dismissStory(){beatHoldUntil=0;momentQueue=[];activeMoment=null;momentAt=performance.now();$('moment-card').hidden=true;updateClock();}
@@ -90,7 +91,7 @@ function updateClock(){
   const held=performance.now()<beatHoldUntil,modal=otherDialogOpen();
   const rate=speed/sim.yearDuration;
   $('pace-readout').textContent=sim.ending?"Een compleet eilandverhaal.":held?"Even kijken · Verder om over te slaan":paused?"De tijd neemt even pauze.":`${rate.toFixed(1)} jaar / seconde${sim.config.accelerating?" · steeds wat sneller":''}`;
-  renderer.activityRate=cinemaActive()?1:rate*.68;renderer.paused=paused||modal||!cinemaActive()&&(sim.ending||held);
+  renderer.daySpeed=speed;renderer.activityRate=cinemaActive()?1:rate*.68;renderer.paused=paused||modal||!cinemaActive()&&(sim.ending||held);
 }
 const icons={legacy:'✳',reform:'✧',crisis:'⚑',age:'✧',tree:'♧',farm:'♧',home:'⌂',life:'✳',dock:'⚑',technology:'✧',dike:'≋',land:'▱',district:'⌂',storm:'☂',flood:'≈',repair:'⚒',beach:'◌',abandon:'↗',interference:'✳',ending:'◉',road:'⌁',trade:'⚑',palace:'♜',culture:'♫',bridge:'⌒',protest:'⚑',endgame:'✧',volcano:'△'};
 function historyItem(entry,locate=false){
@@ -200,6 +201,14 @@ function updateAwayReport(){
   $('away-heading').textContent=report.focused?'Het grootste moment':'Terwijl je weg was…';$('away-show').hidden=!!report.focused;
   $('away-text').textContent=report.focused?nl(report.biggest.text):report.summary;$('away-range').textContent=report.focused?`Jaar ${report.biggest.year}`:`Jaar ${report.from}–${report.to}${report.limited?' · maximaal drie eeuwen bijgewerkt':''}`;
 }
+const seasonLines={lente:'Lente. Alles loopt uit, ook de vergaderingen.',zomer:'Zomer. Iedereen weet een beter strand.',herfst:'Herfst. De bladeren nemen ontslag.',winter:'Winter. Sneeuw op de bergen, soep in de pannen.'};
+function ambienceLine(){
+  const light=renderer.light;
+  if(sim.config.dayNight===false||!light)return sim.era>=3?"Stijgende zee. Optimistische ingenieurs.":"Kalme zee. Kleine ambities.";
+  if(light.night)return sim.power>0?'Nacht. De straatlantaarns doen het werk.':'Nacht. Een paar ramen houden de wacht.';
+  if(light.dusk>.6)return light.phase<.5?'Ochtendgloren. De eerste bakker is al op.':'Avondrood. Iemand roept dat het eten klaar is.';
+  return seasonLines[light.seasonName];
+}
 function updateUI(){
   updateAwayReport();
   syncCollection();
@@ -241,7 +250,7 @@ function updateUI(){
   $('mobility-status').textContent=sim.carCount||sim.bikeCount?`${sim.carCount} auto’s · ${sim.bikeCount} fietsen`:"Te voet over het eiland";
   const moods=["Een behoorlijk rustig begin","Een klein dorp. Een paar grote ideeën.","De kustlijn staat ter discussie","Een kleine wereld met heel grote plannen","Aardrijkskunde is meer een suggestie"];
   $('island-mood').textContent=sim.ending?nl(sim.outcome.consequence):sim.volcanoActiveUntil>sim.year?"De vulkaan heeft een mening":sim.storm?"De oceaan heeft iets te melden":sim.endgameStarted?"Het eiland maakt zijn laatste grote plannen":moods[sim.era];
-  $('weather').querySelector('span').textContent=sim.storm?"Hoogwater. Bezorgde commissies.":sim.pumpBroken?"Een pomp neemt onverwacht vrij.":sim.era>=3?"Stijgende zee. Optimistische ingenieurs.":"Kalme zee. Kleine ambities.";
+  $('weather').querySelector('span').textContent=sim.storm?"Hoogwater. Bezorgde commissies.":sim.pumpBroken?"Een pomp neemt onverwacht vrij.":ambienceLine();
   const p=sim.project;$('project-overlay').hidden=!p||sim.ending||cinemaActive();
   if(sim.ending)$('moment-card').hidden=true;
   if(p&&!sim.ending){
@@ -338,6 +347,7 @@ function frame(now){
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending||now<beatHoldUntil;renderer.draw(now);
+  const night=renderer.light.darkness>.3;if(night!==nightShown){nightShown=night;$('island-window').classList.toggle('is-night',night);updateUI();}
   if(cinemaActive()){
     const stage=$('finale-canvas'),box=stage.getBoundingClientRect(),w=Math.max(300,Math.round(box.width)),h=Math.max(200,Math.round(box.height));
     if(stage.width!==w||stage.height!==h){stage.width=w;stage.height=h;}
@@ -427,6 +437,7 @@ $('rare-endings').addEventListener('change',e=>{sim.config.rareEndings=e.target.
 $('accelerating').addEventListener('change',e=>{sim.config.accelerating=e.target.checked;accumulator=0;updateClock();save();});
 $('story-cards').addEventListener('change',e=>{sim.config.storyCards=e.target.checked;if(!e.target.checked){dismissStory();$('intervention-result').hidden=true;}save();});
 $('reduce-motion').addEventListener('change',e=>{renderer.reduced=e.target.checked;});
+$('day-night').addEventListener('change',e=>{sim.config.dayNight=e.target.checked;renderer.dayNight=e.target.checked;updateUI();save();});
 $('restart').addEventListener('click',()=>{$('restart-confirm').hidden=false;$('restart').hidden=true;});
 $('cancel-restart').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;});
 function switchIsland(next,message){
@@ -434,6 +445,7 @@ function switchIsland(next,message){
   sim=next;renderer.sim=sim;renderer.effects=[];renderer.ripples=[];renderer.visibleTiles=[];renderer.hover=null;renderer.center={x:0,y:0};renderer.zoom=1;renderer.activityTime=0;renderer.wheelTime=0;renderer.recenter();
   sim.config.speedMultiplier=speed;
   $('story-cards').checked=sim.config.storyCards===true;$('offline-life').checked=sim.config.offlineProgress!==false;
+  sim.config.dayNight=renderer.dayNight;$('day-night').checked=renderer.dayNight;
   accumulator=0;paused=false;dirtyHistory=true;shownRemark='';drag=null;momentQueue=[];seenMoments=new Set();activeMoment=null;beatHoldUntil=0;momentAt=-Infinity;snapshotSignature='';renderer.showHistory=false;renderer.historySnapshot=null;$('history-layer').checked=false;$('history-snapshot').hidden=true;$('history-legend').hidden=true;$('moment-card').hidden=true;
   clearTimeout(interventionTimer);$('intervention-result').hidden=true;$('tile-inspector').hidden=true;inspectionPinned=false;
   for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();

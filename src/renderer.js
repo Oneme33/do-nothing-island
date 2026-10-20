@@ -1,5 +1,6 @@
 import { cinemaVisible } from './spectacle.js';
 import {nl} from './language.js';
+import {daylightAt,drawDaylight,seasonalLeaf,DAYLIGHT_START} from './daylight.js';
 import { drawFlames, drawBonfire, drawFestivalGround, drawLifeWorld, drawComicBubbles } from './pageants.js';
 const aroundLand=(s,t)=>neighbors(t).every(([x,y])=>s.tile(x,y)?.kind==='land');
 import { neighbors, key } from './simulation.js';
@@ -18,6 +19,7 @@ export class IslandRenderer {
     this.center={x:0,y:0}; this.time=0;
     this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.ripples=[];this.hover=null;this.particles=[];
+    this.dayClock=DAYLIGHT_START;this.daySpeed=1;this.dayNight=true;this.light=daylightAt(this.dayClock);
     this.effects=[];this.activityTime=0;this.wheelTime=0;this.activityRate=1;this.paused=false;this.mode='nudge';
     this.lastFrame=0;this.fitZoom=1;this.focus=null;this.showHistory=false;this.historySnapshot=null;this.showDistricts=true;
     this.resizeObserver=new ResizeObserver(()=>this.resize());
@@ -75,8 +77,12 @@ export class IslandRenderer {
   diamond(x,y,w,h,color,stroke=null){this.poly([[x,y-h],[x+w,y],[x,y+h],[x-w,y]],color,stroke,.5);}
   draw(now){
     this.labelBoxes=[];
+    // Daylight follows the wall clock, so a slow frame rate never stretches the day.
+    const clockDt=Math.max(0,Math.min(.5,(now-this.lastFrame)/1000||.016));
     const dt=Math.max(0,Math.min(.08,(now-this.lastFrame)/1000||.016));this.lastFrame=now;
     if(!this.reduced) this.time+=dt;
+    if(!this.paused)this.dayClock+=clockDt*Math.min(4,Math.max(1,this.daySpeed||1));
+    this.light=daylightAt(this.dayClock,this.dayNight!==false);
     if(!this.reduced && !this.paused)this.activityTime+=dt*Math.min(5,Math.max(.5,this.activityRate));
     if(!this.reduced && !this.paused && this.sim.power>0 && !this.sim.storm)this.wheelTime+=dt*Math.min(3,Math.max(.5,this.activityRate));
     for(const effect of this.effects)effect.elapsed+=dt;
@@ -145,6 +151,7 @@ export class IslandRenderer {
     this.drawBirds();
     this.drawRipples();
     if(this.sim.storm)this.drawRain();
+    drawDaylight(this,this.light);
     this.drawEffectLabels();
     this.drawDistrictLabels();
     if(!cinemaVisible(this.sim))this.drawLandmarkLabels();
@@ -201,6 +208,7 @@ export class IslandRenderer {
       this.poly([[-4,-h],[7,-h*.75],[25,-3],[7,9],[2,-5]],'#a6b784');
       this.line([[-20,0],[-9,-7],[5,-10],[16,-4]],'#c5c69a66',1);
       this.line([[-13,-8],[-4,-17],[4,-15]],'#c5c69a55',.8);
+      if(this.light.winter>0)this.poly([[-4,-h],[7,-h*.75],[3,-h*.62],[-3,-h*.7],[-11,-h*.72]],`rgba(246,248,249,${(this.light.winter*.85).toFixed(3)})`);
     }else if(tile.landform==='mountain'){
       this.poly([[-30,2],[-8,-h],[4,-h*.78],[30,0],[7,10]],'#9aab97');
       this.poly([[-8,-h],[4,-h*.78],[30,0],[7,10],[-2,-h*.43]],'#bac0a6');
@@ -268,6 +276,8 @@ export class IslandRenderer {
     const districtColors={heritage:'#bfc29d',knowledge:'#bec9b3',industry:'#b3b8a1',fields:'#afbe7d',town:'#c2c3a1',gardens:'#a4b984',skyline:'#b5c2a3'};
     const terrain={beach:'#e0d2a2',forest:'#91a574',park:'#acc28a',playground:'#c8bc8c',fairground:'#c7bc93',factory:'#b7bba3',powerplant:'#b7bba3','science-center':'#c1d0b8',school:'#c8d2b3'};
     this.diamond(x,y-2,23.2,11.6,terrain[t.building]||(this.showDistricts&&t.building&&t.district?districtColors[t.district]:null)||(t.reclaimed?'#b2bc86':palette[Math.floor(t.variant*palette.length)]));
+    if(this.light.autumn>0&&t.building!=='beach')this.diamond(x,y-2,23.2,11.6,`rgba(206,150,80,${(this.light.autumn*.13).toFixed(3)})`);
+    if(this.light.winter>0)this.diamond(x,y-2,23.2,11.6,`rgba(244,246,247,${(this.light.winter*.5).toFixed(3)})`);
     if(t.reclaimed){
       const edge=neighbors(t).some(([x,y])=>this.sim.tile(x,y)?.kind==='water');
       if(edge)this.line([[x-23,y-1],[x,y+10],[x+23,y-1]],'#a59c7a',2.2);
@@ -682,6 +692,7 @@ export class IslandRenderer {
       this.poly([[-11,-17],[0,-39],[11,-17]],'#829866');
       this.poly([[-8,-26],[0,-45],[8,-26]],'#93a570');
       this.line([[0,-39],[0,-11]],'#9caf762b',1);
+      if(this.light.winter>0){const snow=`rgba(246,248,249,${(this.light.winter*.9).toFixed(3)})`;this.poly([[-5,-34],[0,-45],[5,-34],[0,-37]],snow);this.poly([[-9,-21],[-3,-27],[1,-24],[-5,-19]],snow);}
       return;
     }
     const s=original?1.23:.85;c.save();c.scale(s,s);
@@ -690,15 +701,16 @@ export class IslandRenderer {
     this.line([[-1,-15],[7,-29],[12,-36]],'#80764b',2.7);
     this.line([[-1,-21],[-10,-28]],'#756b45',2.2);
     c.translate(sway,0);
-    this.ellipse(0,-40,19,15,'#6f8752');
-    this.ellipse(-12,-35,12,12,'#7e965c');
-    this.ellipse(13,-37,13,11,'#789151');
-    this.ellipse(-6,-48,13,11,'#8da368');
-    this.ellipse(8,-49,11,9,'#98ad71');
-    this.ellipse(-16,-41,7,7,'#8fa66a');
-    this.ellipse(16,-42,8,8,'#91a763');
-    this.ellipse(1,-37,10,9,'#819856');
-    this.ellipse(-5,-48,4,2,'#a7b97755');
+    this.ellipse(0,-40,19,15,this.leaf('#6f8752'));
+    this.ellipse(-12,-35,12,12,this.leaf('#7e965c'));
+    this.ellipse(13,-37,13,11,this.leaf('#789151'));
+    this.ellipse(-6,-48,13,11,this.leaf('#8da368'));
+    this.ellipse(8,-49,11,9,this.leaf('#98ad71'));
+    this.ellipse(-16,-41,7,7,this.leaf('#8fa66a'));
+    this.ellipse(16,-42,8,8,this.leaf('#91a763'));
+    this.ellipse(1,-37,10,9,this.leaf('#819856'));
+    this.ellipse(-5,-48,4,2,this.leaf('#a7b97755'));
+    if(this.light.spring>.2&&!bloom)for(const [x,y] of [[-12,-40],[-4,-50],[8,-47],[14,-38],[2,-36],[-15,-33]].filter((_,i)=>(v*7+i)%3<2))this.ellipse(x,y,1.7,1.4,`rgba(241,206,212,${(this.light.spring*.9).toFixed(3)})`);
     if(original&&bloom){
       for(const [i,[x,y]] of [[-14,-40],[-7,-49],[3,-53],[13,-46],[17,-36],[5,-38],[-5,-32],[-17,-32],[9,-29]].entries()){
         const color=i%2?'#f3d6c5':'#f7e7d1';
@@ -710,6 +722,7 @@ export class IslandRenderer {
     if(original){this.line([[-11,5],[7,10]],'#897c58',1.6);this.line([[-11,3],[7,8]],'#b4aa79',2.3);this.line([[-8,5],[-8,8]],'#7e7650',1.1);this.line([[4,8],[4,11]],'#7e7650',1.1);}
     c.restore();
   }
+  leaf(color){return seasonalLeaf(color,this.light);}
   house(v,level){
     const c=this.ctx;
     if(level>0&&['classical','medieval','renaissance'].includes(this.archStyle)){this.historicalHouse(v,this.archStyle);return;}

@@ -76,6 +76,12 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .family-current .family-moments li{font-size:12px}
 @media (max-width:600px){.book-bar{margin:0 -8px 18px;padding:12px 4px 10px}.book-tabs button{font-size:10px;padding:7px 9px}}
 .family-lore{font-size:11px;font-style:italic;color:#6f7f61;margin-top:8px}
+.island-heading,.weather,.map-coordinate,.civic-overview span{transition:color 1.2s ease}
+.island-window.is-night .island-heading,.island-window.is-night .weather,.island-window.is-night .civic-overview span{color:#e9ecdf}
+.island-window.is-night .map-coordinate{color:#c3cdbf}
+.island-window.is-night .weather svg{stroke:#e9ecdf}
+.island-window.is-night #chapter-status{color:#cdd6c2}
+.island-window.is-night .instruction,.island-window.is-night .instruction small{color:#dfe5d6}
 </style>
 </head>
 <body>
@@ -149,7 +155,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
   <dialog id="guide-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN KLEINE HANDLEIDING</span><h2>Welkom bij het nietsdoen.</h2><p>Eén huisje, een kleine akker en zes mensen. De beschaving groeit vanzelf. Jij kiest of je toekijkt of ingrijpt.</p><div class="guide-steps"><div><span>01</span><p><strong>Neem de tijd.</strong> Het eiland begint op 1×. Met de balk op het eiland kies je de snelheid of pauzeer je. Een open eilandboek, handleiding of instellingenvenster zet het leven even stil.</p></div><div><span>02</span><p><strong>Alles laat sporen achter.</strong> Bouw helpt de bewoners. Regen voedt de akkers. Vuur en bevingen kunnen blijvende veranderingen veroorzaken. Probeer dingen uit en kijk wat de bewoners ermee doen.</p></div><div><span>03</span><p><strong>Help een inwoner.</strong> Kies Help en klik op de inwoner met een hartje. Lees de wens en kies of je helpt. Een klik op andere gebouwen toont bewoners, bouwjaar en herinneringen. Versleep de kaart of zoom om de rest te zien. Rond 2100 begint het laatste hoofdstuk, met een eigen eindscène en eilandscore.</p></div></div><p class="dialog-note">Spatie: pauze · Scroll of +/−: zoom · Slepen: verkennen<br>Je eiland wordt automatisch in deze browser bewaard.</p><button class="primary-button" data-close>Ik laat ze even hun gang gaan ↗</button></dialog>
 
   <dialog id="book-dialog" class="book-dialog" aria-label="Het eilandboek"><div class="book-bar"><div class="book-tabs" role="tablist" aria-label="Hoofdstukken van het eilandboek"><button id="book-tab-journal" role="tab" aria-controls="book-journal" aria-selected="true" tabindex="0"><span aria-hidden="true">✳</span> Kroniek</button><button id="book-tab-family" role="tab" aria-controls="book-family" aria-selected="false" tabindex="-1"><span aria-hidden="true">♧</span> Familie</button><button id="book-tab-wishes" role="tab" aria-controls="book-wishes" aria-selected="false" tabindex="-1"><span aria-hidden="true">♡</span> Wensen</button><button id="book-tab-challenges" role="tab" aria-controls="book-challenges" aria-selected="false" tabindex="-1"><span aria-hidden="true">✧</span> Uitdagingen</button><button id="book-tab-collection" role="tab" aria-controls="book-collection" aria-selected="false" tabindex="-1"><span aria-hidden="true">▧</span> Verzameling</button></div><button id="book-close" class="dialog-close book-close" aria-label="Sluit het eilandboek">×</button></div><section id="book-journal" class="book-page journal-page" role="tabpanel" aria-labelledby="book-tab-journal"><span class="eyebrow">HET EILANDARCHIEF</span><h2>De kroniek van jouw eiland.</h2><p>Hoofdstukken vol familie, eigen ideeën en jouw ingrepen. Laat zien brengt je naar de plek zoals die er nu bij ligt.</p><div class="chronicle-legend"><span>♧ Familie</span><span>✳ Jouw ingreep</span></div><nav id="journal-chapters" class="journal-chapters" aria-label="Hoofdstukken van de kroniek"></nav><p class="dialog-note">De kroniek bewaart maximaal 350 berichten. Grote momenten en familie krijgen voorrang op dagelijkse nieuwtjes.</p><div id="journal-entries"></div></section><section id="book-family" class="book-page family-page" role="tabpanel" aria-labelledby="book-tab-family" hidden><span class="eyebrow">DE FAMILIE VAN HET EERSTE HUIS</span><h2 id="family-title"></h2><p>Het huis blijft. Iedere generatie geeft de sleutel door.</p><section id="family-current" class="family-current"></section><p id="family-note" class="dialog-note"></p><div class="family-navigation"><button id="family-oldest">Naar de eerste generatie ↑</button><button id="family-latest">Naar de huidige generatie ↓</button><button id="family-find-home">Bekijk hun huis ↗</button></div><ol id="family-generations" class="family-generations" aria-label="Generaties van de eerste familie"></ol></section><section id="book-wishes" class="book-page wishes-page" role="tabpanel" aria-labelledby="book-tab-wishes" hidden><span class="eyebrow">EEN VRAAG VAN HET EILAND</span><h2 id="wishes-title">Wensen van inwoners</h2><p>Je mag helpen of gewoon blijven kijken. Hulp vergroot hun vertrouwen én de verwachting dat je terugkomt. Zonder ingreep zoeken ze hun eigen weg.</p><section id="wish-current" class="family-current"></section><div class="wish-actions"><button id="wish-help" class="primary-button" hidden>Help deze inwoner</button><button id="wish-find" class="secondary-button" hidden>Bekijk inwoner ↗</button></div><label class="setting-row"><span>Toon kleine wenswolkjes</span><input id="wish-bubbles" type="checkbox"></label><h3>Eerdere wensen</h3><ol id="wish-history" class="wish-history"></ol></section><section id="book-challenges" class="book-page challenges-page" role="tabpanel" aria-labelledby="book-tab-challenges" hidden><span class="eyebrow">ALLEEN ALS JE ZIN HEBT</span><h2 id="challenges-title">Kleine uitdagingen</h2><p>Dit eiland heeft een paar vrijblijvende ideeën. Er hangt geen beloning of straf aan. Gewoon kijken blijft genoeg.</p><p id="challenge-note" class="dialog-note"></p><ol id="challenge-list" class="challenge-list"></ol></section><section id="book-collection" class="book-page collection-page" role="tabpanel" aria-labelledby="book-tab-collection" hidden><span class="eyebrow">SPOREN VAN AL JE EILANDEN</span><h2 id="collection-title">De verzameling</h2><p id="collection-progress"></p><p id="collection-storage" class="dialog-note"></p><div id="collection-groups"></div></section></dialog>
-  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Leven tijdens afwezigheid</strong><small>Bij terugkomst maximaal drie eeuwen verder, behalve wanneer je pauzeert.</small></span><input type="checkbox" id="offline-life" checked></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Ongeveer een minuut per generatie, later iets vlotter.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
+  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Leven tijdens afwezigheid</strong><small>Bij terugkomst maximaal drie eeuwen verder, behalve wanneer je pauzeert.</small></span><input type="checkbox" id="offline-life" checked></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Ongeveer een minuut per generatie, later iets vlotter.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Dag, nacht en seizoenen</strong><small>Avondlicht, lantaarns, herfstbladeren en sneeuw. Alleen sfeer: het eiland zelf merkt er niets van.</small></span><input type="checkbox" id="day-night" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
 
   <dialog id="ending-dialog" class="ending-dialog"><button id="ending-close" class="dialog-close" aria-label="Sluit het naschrift">×</button><span class="eyebrow">HET EILAND HEEFT EEN VERHAAL</span><div class="ending-symbol">◉</div><h2 id="ending-title">De erfenis van het eiland.</h2><p class="ending-quote" id="ending-quote"></p><p id="ending-description"></p><div class="ending-shortage"><span>WAT ZE ACHTERLATEN</span><strong id="ending-consequence"></strong><p id="ending-detail"></p></div><section class="island-scores" aria-label="Eilandscores"><span class="eyebrow">HUN EILANDSCORE</span><strong id="ending-score"></strong><div id="score-breakdown"></div><p>Het gemiddelde van vijf kanten van hun beschaving. Er is meer dan één manier om het goed te doen.</p></section><p id="ending-stats"></p><div class="ending-maps"><figure><svg id="ending-before" viewBox="0 0 250 250" role="img" aria-label="Het oorspronkelijke eiland"></svg><figcaption>Het begin</figcaption></figure><figure><svg id="ending-after" viewBox="0 0 250 250" role="img" aria-label="Het uiteindelijke eiland"></svg><figcaption>Het eiland dat zij maakten</figcaption></figure></div><p id="ending-causes"></p><div id="ending-chronicle"></div><button id="ending-continue" class="primary-button">Bekijk het uiteindelijke eiland ↗</button><button id="ending-replay" class="secondary-button">Speel de eindscène opnieuw ↻</button><button id="ending-sandbox" class="secondary-button">Speel vrij verder →</button><button id="ending-new" class="secondary-button">Begin een nieuw eiland ↻</button></dialog>
   <script>(()=>{
@@ -2617,6 +2623,64 @@ function drawComicBubbles(r){
  }
 }
 
+// Days, nights and seasons are ambience only: they never touch the simulation or its randomness.
+const DAY_SECONDS=150;
+const SEASON_DAYS=2;
+const SEASON_NAMES=['lente','zomer','herfst','winter'];
+const DAYLIGHT_START=DAY_SECONDS*.32;
+const dayClamp=n=>Math.max(0,Math.min(1,n));
+const DAY_TAU=Math.PI*2;
+const SUMMER_NOON={phase:.5,darkness:0,dusk:0,night:false,season:1,seasonName:'zomer',spring:0,summer:1,autumn:0,winter:0};
+// A season has a plateau and soft edges, so leaves turn gradually instead of switching.
+function seasonAmount(position,index){
+ let distance=Math.abs(position-(index+.5));distance=Math.min(distance,4-distance);
+ return dayClamp((.62-distance)/.24);
+}
+function daylightAt(clock,enabled=true){
+ if(!enabled||!Number.isFinite(clock))return SUMMER_NOON;
+ const phase=((clock/DAY_SECONDS)%1+1)%1,sun=-Math.cos(DAY_TAU*phase);
+ const darkness=dayClamp((.2-sun)/.7),dusk=dayClamp(1-Math.abs(sun-.05)/.3)*(1-darkness*.5);
+ const position=((clock/DAY_SECONDS/SEASON_DAYS)%4+4)%4,season=Math.floor(position);
+ return{phase,darkness,dusk,night:darkness>.5,season,seasonName:SEASON_NAMES[season],spring:seasonAmount(position,0),summer:seasonAmount(position,1),autumn:seasonAmount(position,2),winter:seasonAmount(position,3)};
+}
+const leafCache=new Map();
+const toRgb=hex=>{const n=parseInt(hex.slice(1,7),16);return[n>>16&255,n>>8&255,n&255];};
+const toHex=rgb=>'#'+rgb.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');
+// Deciduous leaves turn amber in autumn and frosted in winter.
+function seasonalLeaf(hex,light){
+ if(!light||(!light.autumn&&!light.winter)||typeof hex!=='string'||hex[0]!=='#'||hex.length<7)return hex;
+ const autumn=Math.round(light.autumn*8)/8,winter=Math.round(light.winter*8)/8,cacheKey=`${hex}|${autumn}|${winter}`;
+ if(leafCache.has(cacheKey))return leafCache.get(cacheKey);
+ let rgb=toRgb(hex);const warm=(rgb[0]+rgb[1])%3===0?[204,132,70]:(rgb[0]+rgb[1])%3===1?[219,166,82]:[190,112,72];
+ rgb=rgb.map((v,i)=>v+(warm[i]-v)*autumn*.85);
+ rgb=rgb.map((v,i)=>v+([222,226,219][i]-v)*winter*.5);
+ const result=toHex(rgb)+hex.slice(7);
+ if(leafCache.size>600)leafCache.clear();leafCache.set(cacheKey,result);return result;
+}
+const UNLIT=new Set(['farm','forest','beach','park','garden','tree','original-tree','ruins','royal-garden','palace-square','campus-square','playground','windmill','solar','wind-turbine','statue','sculpture']);
+const FIRES=new Set(['campfire','bonfire']);
+const lightHash=(x,y)=>{const n=Math.sin(x*91.7+y*47.3)*15731.13;return n-Math.floor(n);};
+// Darkness is multiplied over the finished island; windows, fires and streetlights glow on top.
+function drawDaylight(r,light){
+ if(!light||(!light.darkness&&!light.dusk))return;
+ const c=r.ctx;c.save();c.setTransform(r.dpr,0,0,r.dpr,0,0);
+ if(light.dusk>0){c.globalCompositeOperation='source-over';c.fillStyle=`rgba(240,160,96,${(light.dusk*.14).toFixed(3)})`;c.fillRect(0,0,r.width,r.height);}
+ if(light.darkness>0){
+  const k=light.darkness*.52,night=[56,72,118].map(v=>Math.round(255+(v-255)*k));
+  c.globalCompositeOperation='multiply';c.fillStyle=`rgb(${night.join(',')})`;c.fillRect(0,0,r.width,r.height);
+  c.globalCompositeOperation='lighter';c.translate(r.origin.x,r.origin.y);c.scale(r.zoom,r.zoom);
+  const d=light.darkness,glow=(x,y,rx,ry,color)=>{c.beginPath();c.ellipse(x,y,rx,ry,0,0,DAY_TAU);c.fillStyle=color;c.fill();};
+  const powered=r.sim.power>0;
+  for(const t of r.visibleTiles||[]){
+   if(t.kind!=='land')continue;const p=r.p(t.x,t.y);
+   if(FIRES.has(t.building)||t.fire){glow(p.x,p.y-8,34,17,`rgba(255,150,70,${(.13*d).toFixed(3)})`);glow(p.x,p.y-8,12,7,`rgba(255,190,110,${(.22*d).toFixed(3)})`);continue;}
+   if(t.building&&!UNLIT.has(t.building)&&lightHash(t.x,t.y)<.85){glow(p.x+3,p.y-11,15,8,`rgba(255,175,95,${(.06*d).toFixed(3)})`);glow(p.x+3,p.y-11,4.5,3,`rgba(255,205,130,${(.34*d).toFixed(3)})`);}
+   if(powered&&t.road&&lightHash(t.y,t.x)<.45){glow(p.x,p.y+11,9,5,`rgba(255,215,150,${(.08*d).toFixed(3)})`);glow(p.x,p.y+11,2,1.5,`rgba(255,230,170,${(.4*d).toFixed(3)})`);}
+  }
+ }
+ c.restore();
+}
+
 const aroundLand=(s,t)=>neighbors(t).every(([x,y])=>s.tile(x,y)?.kind==='land');
 const TAU=Math.PI*2;
 const hash=(x,y=0)=>{const n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n);};
@@ -2633,6 +2697,7 @@ class IslandRenderer {
     this.center={x:0,y:0}; this.time=0;
     this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.ripples=[];this.hover=null;this.particles=[];
+    this.dayClock=DAYLIGHT_START;this.daySpeed=1;this.dayNight=true;this.light=daylightAt(this.dayClock);
     this.effects=[];this.activityTime=0;this.wheelTime=0;this.activityRate=1;this.paused=false;this.mode='nudge';
     this.lastFrame=0;this.fitZoom=1;this.focus=null;this.showHistory=false;this.historySnapshot=null;this.showDistricts=true;
     this.resizeObserver=new ResizeObserver(()=>this.resize());
@@ -2690,8 +2755,12 @@ class IslandRenderer {
   diamond(x,y,w,h,color,stroke=null){this.poly([[x,y-h],[x+w,y],[x,y+h],[x-w,y]],color,stroke,.5);}
   draw(now){
     this.labelBoxes=[];
+    // Daylight follows the wall clock, so a slow frame rate never stretches the day.
+    const clockDt=Math.max(0,Math.min(.5,(now-this.lastFrame)/1000||.016));
     const dt=Math.max(0,Math.min(.08,(now-this.lastFrame)/1000||.016));this.lastFrame=now;
     if(!this.reduced) this.time+=dt;
+    if(!this.paused)this.dayClock+=clockDt*Math.min(4,Math.max(1,this.daySpeed||1));
+    this.light=daylightAt(this.dayClock,this.dayNight!==false);
     if(!this.reduced && !this.paused)this.activityTime+=dt*Math.min(5,Math.max(.5,this.activityRate));
     if(!this.reduced && !this.paused && this.sim.power>0 && !this.sim.storm)this.wheelTime+=dt*Math.min(3,Math.max(.5,this.activityRate));
     for(const effect of this.effects)effect.elapsed+=dt;
@@ -2760,6 +2829,7 @@ class IslandRenderer {
     this.drawBirds();
     this.drawRipples();
     if(this.sim.storm)this.drawRain();
+    drawDaylight(this,this.light);
     this.drawEffectLabels();
     this.drawDistrictLabels();
     if(!cinemaVisible(this.sim))this.drawLandmarkLabels();
@@ -2816,6 +2886,7 @@ class IslandRenderer {
       this.poly([[-4,-h],[7,-h*.75],[25,-3],[7,9],[2,-5]],'#a6b784');
       this.line([[-20,0],[-9,-7],[5,-10],[16,-4]],'#c5c69a66',1);
       this.line([[-13,-8],[-4,-17],[4,-15]],'#c5c69a55',.8);
+      if(this.light.winter>0)this.poly([[-4,-h],[7,-h*.75],[3,-h*.62],[-3,-h*.7],[-11,-h*.72]],`rgba(246,248,249,${(this.light.winter*.85).toFixed(3)})`);
     }else if(tile.landform==='mountain'){
       this.poly([[-30,2],[-8,-h],[4,-h*.78],[30,0],[7,10]],'#9aab97');
       this.poly([[-8,-h],[4,-h*.78],[30,0],[7,10],[-2,-h*.43]],'#bac0a6');
@@ -2883,6 +2954,8 @@ class IslandRenderer {
     const districtColors={heritage:'#bfc29d',knowledge:'#bec9b3',industry:'#b3b8a1',fields:'#afbe7d',town:'#c2c3a1',gardens:'#a4b984',skyline:'#b5c2a3'};
     const terrain={beach:'#e0d2a2',forest:'#91a574',park:'#acc28a',playground:'#c8bc8c',fairground:'#c7bc93',factory:'#b7bba3',powerplant:'#b7bba3','science-center':'#c1d0b8',school:'#c8d2b3'};
     this.diamond(x,y-2,23.2,11.6,terrain[t.building]||(this.showDistricts&&t.building&&t.district?districtColors[t.district]:null)||(t.reclaimed?'#b2bc86':palette[Math.floor(t.variant*palette.length)]));
+    if(this.light.autumn>0&&t.building!=='beach')this.diamond(x,y-2,23.2,11.6,`rgba(206,150,80,${(this.light.autumn*.13).toFixed(3)})`);
+    if(this.light.winter>0)this.diamond(x,y-2,23.2,11.6,`rgba(244,246,247,${(this.light.winter*.5).toFixed(3)})`);
     if(t.reclaimed){
       const edge=neighbors(t).some(([x,y])=>this.sim.tile(x,y)?.kind==='water');
       if(edge)this.line([[x-23,y-1],[x,y+10],[x+23,y-1]],'#a59c7a',2.2);
@@ -3297,6 +3370,7 @@ class IslandRenderer {
       this.poly([[-11,-17],[0,-39],[11,-17]],'#829866');
       this.poly([[-8,-26],[0,-45],[8,-26]],'#93a570');
       this.line([[0,-39],[0,-11]],'#9caf762b',1);
+      if(this.light.winter>0){const snow=`rgba(246,248,249,${(this.light.winter*.9).toFixed(3)})`;this.poly([[-5,-34],[0,-45],[5,-34],[0,-37]],snow);this.poly([[-9,-21],[-3,-27],[1,-24],[-5,-19]],snow);}
       return;
     }
     const s=original?1.23:.85;c.save();c.scale(s,s);
@@ -3305,15 +3379,16 @@ class IslandRenderer {
     this.line([[-1,-15],[7,-29],[12,-36]],'#80764b',2.7);
     this.line([[-1,-21],[-10,-28]],'#756b45',2.2);
     c.translate(sway,0);
-    this.ellipse(0,-40,19,15,'#6f8752');
-    this.ellipse(-12,-35,12,12,'#7e965c');
-    this.ellipse(13,-37,13,11,'#789151');
-    this.ellipse(-6,-48,13,11,'#8da368');
-    this.ellipse(8,-49,11,9,'#98ad71');
-    this.ellipse(-16,-41,7,7,'#8fa66a');
-    this.ellipse(16,-42,8,8,'#91a763');
-    this.ellipse(1,-37,10,9,'#819856');
-    this.ellipse(-5,-48,4,2,'#a7b97755');
+    this.ellipse(0,-40,19,15,this.leaf('#6f8752'));
+    this.ellipse(-12,-35,12,12,this.leaf('#7e965c'));
+    this.ellipse(13,-37,13,11,this.leaf('#789151'));
+    this.ellipse(-6,-48,13,11,this.leaf('#8da368'));
+    this.ellipse(8,-49,11,9,this.leaf('#98ad71'));
+    this.ellipse(-16,-41,7,7,this.leaf('#8fa66a'));
+    this.ellipse(16,-42,8,8,this.leaf('#91a763'));
+    this.ellipse(1,-37,10,9,this.leaf('#819856'));
+    this.ellipse(-5,-48,4,2,this.leaf('#a7b97755'));
+    if(this.light.spring>.2&&!bloom)for(const [x,y] of [[-12,-40],[-4,-50],[8,-47],[14,-38],[2,-36],[-15,-33]].filter((_,i)=>(v*7+i)%3<2))this.ellipse(x,y,1.7,1.4,`rgba(241,206,212,${(this.light.spring*.9).toFixed(3)})`);
     if(original&&bloom){
       for(const [i,[x,y]] of [[-14,-40],[-7,-49],[3,-53],[13,-46],[17,-36],[5,-38],[-5,-32],[-17,-32],[9,-29]].entries()){
         const color=i%2?'#f3d6c5':'#f7e7d1';
@@ -3325,6 +3400,7 @@ class IslandRenderer {
     if(original){this.line([[-11,5],[7,10]],'#897c58',1.6);this.line([[-11,3],[7,8]],'#b4aa79',2.3);this.line([[-8,5],[-8,8]],'#7e7650',1.1);this.line([[4,8],[4,11]],'#7e7650',1.1);}
     c.restore();
   }
+  leaf(color){return seasonalLeaf(color,this.light);}
   house(v,level){
     const c=this.ctx;
     if(level>0&&['classical','medieval','renaissance'].includes(this.archStyle)){this.historicalHouse(v,this.archStyle);return;}
@@ -3684,7 +3760,7 @@ let paused=false,speed=[1,2,3,10].includes(sim.config.speedMultiplier)?sim.confi
 let audio=null,audioNodes=[],audioEnabled=false;
 let interferenceMode='nudge',interventionTimer,lastRemarkAt=0,shownRemark='';
 let previousIsland=null,undoTimer;
-let introStep=0,inspectionPinned=false;
+let introStep=0,inspectionPinned=false,nightShown=false;
 const introKey='do-nothing-island-intro-v1';
 const introScreens=[['Dit is jouw eiland.','Eén huisje, een akker en een handvol mensen. Geef ze even de tijd. Er hoeft niets af.'],['Ze redden zich prima.','Ze bouwen, ontdekken en maken er op hun eigen manier iets van. Jij mag gewoon kijken.'],['Probeer niets aan te raken…','Of toch wel. Elke ingreep laat sporen achter. Wat je achter elkaar doet, kan iets onverwachts losmaken.']];
 function otherDialogOpen(){return [...document.querySelectorAll('dialog[open]')].some(d=>d!==$('cinema-dialog'));}
@@ -3699,6 +3775,7 @@ $('rare-endings').checked=sim.config.rareEndings;
 $('accelerating').checked=sim.config.accelerating;
 $('story-cards').checked=sim.config.storyCards===true;
 $('offline-life').checked=sim.config.offlineProgress!==false;
+$('day-night').checked=sim.config.dayNight!==false;renderer.dayNight=sim.config.dayNight!==false;
 
 function showToast(message,duration=4200){$('toast-text').textContent=nl(message);$('toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),duration);}
 function dismissStory(){beatHoldUntil=0;momentQueue=[];activeMoment=null;momentAt=performance.now();$('moment-card').hidden=true;updateClock();}
@@ -3747,7 +3824,7 @@ function updateClock(){
   const held=performance.now()<beatHoldUntil,modal=otherDialogOpen();
   const rate=speed/sim.yearDuration;
   $('pace-readout').textContent=sim.ending?"Een compleet eilandverhaal.":held?"Even kijken · Verder om over te slaan":paused?"De tijd neemt even pauze.":`${rate.toFixed(1)} jaar / seconde${sim.config.accelerating?" · steeds wat sneller":''}`;
-  renderer.activityRate=cinemaActive()?1:rate*.68;renderer.paused=paused||modal||!cinemaActive()&&(sim.ending||held);
+  renderer.daySpeed=speed;renderer.activityRate=cinemaActive()?1:rate*.68;renderer.paused=paused||modal||!cinemaActive()&&(sim.ending||held);
 }
 const icons={legacy:'✳',reform:'✧',crisis:'⚑',age:'✧',tree:'♧',farm:'♧',home:'⌂',life:'✳',dock:'⚑',technology:'✧',dike:'≋',land:'▱',district:'⌂',storm:'☂',flood:'≈',repair:'⚒',beach:'◌',abandon:'↗',interference:'✳',ending:'◉',road:'⌁',trade:'⚑',palace:'♜',culture:'♫',bridge:'⌒',protest:'⚑',endgame:'✧',volcano:'△'};
 function historyItem(entry,locate=false){
@@ -3857,6 +3934,14 @@ function updateAwayReport(){
   $('away-heading').textContent=report.focused?'Het grootste moment':'Terwijl je weg was…';$('away-show').hidden=!!report.focused;
   $('away-text').textContent=report.focused?nl(report.biggest.text):report.summary;$('away-range').textContent=report.focused?`Jaar ${report.biggest.year}`:`Jaar ${report.from}–${report.to}${report.limited?' · maximaal drie eeuwen bijgewerkt':''}`;
 }
+const seasonLines={lente:'Lente. Alles loopt uit, ook de vergaderingen.',zomer:'Zomer. Iedereen weet een beter strand.',herfst:'Herfst. De bladeren nemen ontslag.',winter:'Winter. Sneeuw op de bergen, soep in de pannen.'};
+function ambienceLine(){
+  const light=renderer.light;
+  if(sim.config.dayNight===false||!light)return sim.era>=3?"Stijgende zee. Optimistische ingenieurs.":"Kalme zee. Kleine ambities.";
+  if(light.night)return sim.power>0?'Nacht. De straatlantaarns doen het werk.':'Nacht. Een paar ramen houden de wacht.';
+  if(light.dusk>.6)return light.phase<.5?'Ochtendgloren. De eerste bakker is al op.':'Avondrood. Iemand roept dat het eten klaar is.';
+  return seasonLines[light.seasonName];
+}
 function updateUI(){
   updateAwayReport();
   syncCollection();
@@ -3898,7 +3983,7 @@ function updateUI(){
   $('mobility-status').textContent=sim.carCount||sim.bikeCount?`${sim.carCount} auto’s · ${sim.bikeCount} fietsen`:"Te voet over het eiland";
   const moods=["Een behoorlijk rustig begin","Een klein dorp. Een paar grote ideeën.","De kustlijn staat ter discussie","Een kleine wereld met heel grote plannen","Aardrijkskunde is meer een suggestie"];
   $('island-mood').textContent=sim.ending?nl(sim.outcome.consequence):sim.volcanoActiveUntil>sim.year?"De vulkaan heeft een mening":sim.storm?"De oceaan heeft iets te melden":sim.endgameStarted?"Het eiland maakt zijn laatste grote plannen":moods[sim.era];
-  $('weather').querySelector('span').textContent=sim.storm?"Hoogwater. Bezorgde commissies.":sim.pumpBroken?"Een pomp neemt onverwacht vrij.":sim.era>=3?"Stijgende zee. Optimistische ingenieurs.":"Kalme zee. Kleine ambities.";
+  $('weather').querySelector('span').textContent=sim.storm?"Hoogwater. Bezorgde commissies.":sim.pumpBroken?"Een pomp neemt onverwacht vrij.":ambienceLine();
   const p=sim.project;$('project-overlay').hidden=!p||sim.ending||cinemaActive();
   if(sim.ending)$('moment-card').hidden=true;
   if(p&&!sim.ending){
@@ -3995,6 +4080,7 @@ function frame(now){
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending||now<beatHoldUntil;renderer.draw(now);
+  const night=renderer.light.darkness>.3;if(night!==nightShown){nightShown=night;$('island-window').classList.toggle('is-night',night);updateUI();}
   if(cinemaActive()){
     const stage=$('finale-canvas'),box=stage.getBoundingClientRect(),w=Math.max(300,Math.round(box.width)),h=Math.max(200,Math.round(box.height));
     if(stage.width!==w||stage.height!==h){stage.width=w;stage.height=h;}
@@ -4084,6 +4170,7 @@ $('rare-endings').addEventListener('change',e=>{sim.config.rareEndings=e.target.
 $('accelerating').addEventListener('change',e=>{sim.config.accelerating=e.target.checked;accumulator=0;updateClock();save();});
 $('story-cards').addEventListener('change',e=>{sim.config.storyCards=e.target.checked;if(!e.target.checked){dismissStory();$('intervention-result').hidden=true;}save();});
 $('reduce-motion').addEventListener('change',e=>{renderer.reduced=e.target.checked;});
+$('day-night').addEventListener('change',e=>{sim.config.dayNight=e.target.checked;renderer.dayNight=e.target.checked;updateUI();save();});
 $('restart').addEventListener('click',()=>{$('restart-confirm').hidden=false;$('restart').hidden=true;});
 $('cancel-restart').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;});
 function switchIsland(next,message){
@@ -4091,6 +4178,7 @@ function switchIsland(next,message){
   sim=next;renderer.sim=sim;renderer.effects=[];renderer.ripples=[];renderer.visibleTiles=[];renderer.hover=null;renderer.center={x:0,y:0};renderer.zoom=1;renderer.activityTime=0;renderer.wheelTime=0;renderer.recenter();
   sim.config.speedMultiplier=speed;
   $('story-cards').checked=sim.config.storyCards===true;$('offline-life').checked=sim.config.offlineProgress!==false;
+  sim.config.dayNight=renderer.dayNight;$('day-night').checked=renderer.dayNight;
   accumulator=0;paused=false;dirtyHistory=true;shownRemark='';drag=null;momentQueue=[];seenMoments=new Set();activeMoment=null;beatHoldUntil=0;momentAt=-Infinity;snapshotSignature='';renderer.showHistory=false;renderer.historySnapshot=null;$('history-layer').checked=false;$('history-snapshot').hidden=true;$('history-legend').hidden=true;$('moment-card').hidden=true;
   clearTimeout(interventionTimer);$('intervention-result').hidden=true;$('tile-inspector').hidden=true;inspectionPinned=false;
   for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();
