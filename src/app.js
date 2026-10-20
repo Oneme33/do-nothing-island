@@ -5,7 +5,7 @@ import { Civilization, ERAS, PROJECT_STAGES, AGES } from './simulation.js';
 import { IslandRenderer } from './renderer.js';
 import {describePlot} from './inspection.js';
 import {drawFinale,islandScores} from './finale.js';
-import {ensureFamily,currentRelative} from './family.js';
+import {ensureFamily,currentRelative,familyLore,sentenceCase} from './family.js';
 import {ensureWishes,dismissWish,WISH_OUTCOMES,canHelpWish,helpActiveWish} from './wishes.js';
 import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
 import {chronicleChapters,chroniclePlace,CHAPTER_ILLUSTRATIONS} from './chronicle.js';
@@ -127,17 +127,25 @@ function renderJournal(){
   });
   $('journal-chapters').replaceChildren(...navigation);$('journal-entries').replaceChildren(...sections);
 }
+function familyMoments(person,className='family-moments'){
+  const list=document.createElement('ul');list.className=className;
+  list.append(...(person.moments||[]).map(moment=>{const item=document.createElement('li');item.textContent=`Jaar ${moment.year}: ${person.name} ${moment.text}`;return item;}));
+  return list;
+}
 function renderFamily(){
   const family=ensureFamily(sim),current=currentRelative(sim);
   $('family-title').textContent=`Familie ${family.lastName}`;
-  const name=document.createElement('strong'),profile=document.createElement('p');name.textContent=`${current.name} ${family.lastName} · generatie ${current.generation}`;profile.textContent=`${current.occupation}. ${current.name} ${current.quirk}.`;$('family-current').replaceChildren(name,profile);
-  $('family-note').textContent=family.reconstructed?'De oudste bladzijden komen uit familieoverlevering. Nieuwe generaties worden vanaf nu bijgehouden.':'Van de eerste sleutelhouder tot de huidige generatie. Namen, beroepen en eigenaardigheden blijven bewaard.';
+  const name=document.createElement('strong'),profile=document.createElement('p');name.textContent=`${current.name} ${family.lastName} · generatie ${current.generation}`;profile.textContent=`${sentenceCase(current.occupation)}. ${current.name} ${current.quirk}.`;
+  const lore=familyLore(family),told=document.createElement('p');told.className='family-lore';
+  told.textContent=lore.length?`Aan tafel gaat het nog vaak over ${lore.map(m=>m.memory).join(', ').replace(/, ([^,]*)$/,' en $1')}.`:'Nog geen verhalen die aan tafel steeds terugkomen. Dat komt vanzelf.';
+  $('family-current').replaceChildren(name,profile,familyMoments(current),told);
+  $('family-note').textContent=family.reconstructed?'De oudste bladzijden komen uit familieoverlevering. Nieuwe generaties en hun herinneringen worden vanaf nu bijgehouden.':'Van de eerste sleutelhouder tot de huidige generatie. Namen, beroepen, eigenaardigheden en herinneringen blijven bewaard.';
   $('family-generations').replaceChildren(...family.generations.map((person,i)=>{
     const item=document.createElement('li'),heading=document.createElement('strong'),time=document.createElement('time'),line=document.createElement('p');
     item.dataset.relative=person.id;if(person.id===current.id)item.setAttribute('aria-current','true');
     heading.textContent=`${person.name} ${family.lastName}`;time.textContent=`Generatie ${person.generation} · sleutelhouder vanaf jaar ${person.since}${family.generations[i+1]?` tot ${family.generations[i+1].since-1}`:' · nu'}`;
-    const parent=i?family.generations[i-1]:null;line.textContent=`${parent?`Kind van ${parent.name}. `:'De eerste bewoner. '}${person.occupation}. ${person.name} ${person.quirk}.`;
-    item.append(heading,time,line);return item;
+    const parent=i?family.generations[i-1]:null;line.textContent=`${parent?`Kind van ${parent.name}. `:'De eerste bewoner. '}${sentenceCase(person.occupation)}. ${person.name} ${person.quirk}.`;
+    item.append(heading,time,line);if(person.moments?.length)item.append(familyMoments(person));return item;
   }));
 }
 function renderChallenges(){

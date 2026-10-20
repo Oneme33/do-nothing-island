@@ -66,3 +66,4 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .family-moments li:before{content:'·';position:absolute;left:3px;color:#a6b38c}
 .family-current .family-moments li{font-size:12px}
 @media (max-width:600px){.book-bar{margin:0 -8px 18px;padding:12px 4px 10px}.book-tabs button{font-size:10px;padding:7px 9px}}
+.family-lore{font-size:11px;font-style:italic;color:#6f7f61;margin-top:8px}

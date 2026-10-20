@@ -29,3 +29,27 @@ test('the family keeps its first home and identity while a burnt home is rebuilt
  assert.match(describePlot(s,home),new RegExp(person.name));assert.match(describePlot(s,home),/tijdelijk elders/);
  const restored=Civilization.restore(s.serialize());assert.deepEqual(currentRelative(restored),person);assert.deepEqual(restored.family.home,{x:-1,y:1});
 });
+test('no quirk returns within 32 generations',()=>{
+ const s=new Civilization(31);s.year=32*40;advanceFamily(s);const quirks=s.family.generations.map(p=>p.quirk);
+ for(let i=0;i+32<=quirks.length;i++)assert.equal(new Set(quirks.slice(i,i+32)).size,32);
+});
+test('what happens near the first home becomes a family memory that is told to the next generation',()=>{
+ const s=new Civilization(31);while(s.year<10)s.tick();const person=currentRelative(s);
+ s.interfere(s.family.home.x,s.family.home.y,'rain');
+ assert.equal(person.moments.length,1);assert.match(person.moments[0].text,/regen/);assert.match(person.moments[0].memory,/jaar 10/);
+ while(currentRelative(s).id===person.id)s.tick();
+ const handover=s.history.filter(e=>e.type==='family').at(-1);assert.match(handover.text,new RegExp(`${person.name}, die nog altijd vertelt over de regen uit het niets in jaar 10`));
+ assert.match(describePlot(s,s.tile(s.family.home.x,s.family.home.y)),/Aan tafel gaat het nog vaak over/);
+ const restored=Civilization.restore(s.serialize());assert.deepEqual(restored.family,s.family);
+});
+test('an ignored wish is remembered by whoever holds the key when it expires',()=>{
+ const s=new Civilization(31),first=currentRelative(s);
+ s.wishes.active={id:'wish-old',kind:'spring',mode:'rumble',speaker:`${first.name} ${first.lastName}`,text:'Een bron?',x:3,y:3,issuedAt:20,deadline:40,status:'active',hidden:false};s.wishes.nextAt=9999;
+ while(s.year<=41)s.tick();const holder=currentRelative(s);assert.notEqual(holder.id,first.id);
+ const memory=holder.moments.find(m=>m.kind==='wish');assert.ok(memory);assert.match(memory.text,new RegExp(`samen met ${first.name}`));assert.match(memory.memory,/^de bron die in jaar \d+ nooit kwam$/);
+});
+test('each keyholder keeps at most four memories and keeps the most important ones',()=>{
+ const s=new Civilization(31),person=currentRelative(s);
+ for(let i=0;i<6;i++)s.interfere(5,5,'nudge');s.interfere(s.family.home.x,s.family.home.y,'rumble');
+ assert.equal(person.moments.length,4);assert.ok(person.moments.some(m=>m.kind==='rumble'));
+});

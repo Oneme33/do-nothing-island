@@ -1,6 +1,6 @@
 import { ensureSpectacle, seedPleasures, reserveBeaches, advancePleasures, ignite, extinguish, jokeAfterTouch, RECREATION } from './spectacle.js';
 import {reshapeAfterQuake,rainOnOldTree} from './consequences.js';
-import {ensureFamily,advanceFamily} from './family.js';
+import {ensureFamily,advanceFamily,rememberInFamily} from './family.js';
 import {ensureWishes,advanceWishes,answerWish} from './wishes.js';
 import {ensureChallenges,advanceChallenges} from './challenges.js';
 import {advanceCollection} from './collection.js';
@@ -261,7 +261,7 @@ export class Civilization {
     const entry={year:this.year,text,type,id:`event-${++this.storySequence}`,priority:eventPriority(type),...details};
     this.history.push(entry);
     if(this.history.length>350){let index=this.history.findIndex((e,i)=>i>0&&(e.priority||eventPriority(e.type))<82);if(index<0)index=1;this.history.splice(index,1);}
-    this.events.push(entry);return entry;
+    this.events.push(entry);rememberInFamily(this,entry);return entry;
   }
   signal(type,tile,label) {
     this.signals.push({type,x:tile?.x??0,y:tile?.y??0,label,priority:eventPriority(type)});

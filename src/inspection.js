@@ -1,5 +1,5 @@
 export const PLACE_NAMES={hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',ruins:'Ruïne'};
-import {currentRelative} from './family.js';
+import {currentRelative,familyStory} from './family.js';
 const names=['Noor','Sam','Bo','Mila','Daan','Lou','Iris','Mo','Tess','Finn','Ada','Jip'];
 const surnames=['de Vries','van de Kust','Bos','van Dijk','de Boer','Steen','van de Berg','Visser'];
 export function describePlot(s,t){
@@ -12,6 +12,8 @@ export function describePlot(s,t){
  if(t.foundingHome){
   const person=currentRelative(s);lines.push(`Hier hoort familie ${person.lastName} thuis. ${person.name} bewaart nu de sleutel (generatie ${person.generation}).`);
   lines.push(`Beroep: ${person.occupation}. ${person.name} ${person.quirk}.`);
+  const parent=s.family.generations.find(p=>p.id===person.parentId),story=familyStory(s.family,person)||(parent&&familyStory(s.family,parent));
+  if(story)lines.push(`Aan tafel gaat het nog vaak over ${story}.`);
   if(t.building==='ruins')lines.push('De familie woont tijdelijk elders tot het eerste huis is herbouwd.');
  }
  if(index>=0){
