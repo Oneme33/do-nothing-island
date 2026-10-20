@@ -48,6 +48,13 @@ export function drawDaylight(r,light){
   const powered=r.sim.power>0;
   for(const t of r.visibleTiles||[]){
    if(t.kind!=='land')continue;const p=r.p(t.x,t.y);
+   if(t.building==='lighthouse'){
+    // A slow sweep of light over the sea; the beam is a soft wedge from the lantern room.
+    const angle=(r.dayClock*.8)%DAY_TAU,x=p.x,y=p.y-62,len=280,spread=.12;
+    c.beginPath();c.moveTo(x,y);c.lineTo(x+Math.cos(angle-spread)*len,y+Math.sin(angle-spread)*len*.5);c.lineTo(x+Math.cos(angle+spread)*len,y+Math.sin(angle+spread)*len*.5);c.closePath();
+    c.fillStyle=`rgba(255,236,170,${(.11*d).toFixed(3)})`;c.fill();
+    glow(x,y,20,14,`rgba(255,225,150,${(.22*d).toFixed(3)})`);glow(x,y,5,5,`rgba(255,245,200,${(.6*d).toFixed(3)})`);continue;
+   }
    if(FIRES.has(t.building)||t.fire){glow(p.x,p.y-8,34,17,`rgba(255,150,70,${(.13*d).toFixed(3)})`);glow(p.x,p.y-8,12,7,`rgba(255,190,110,${(.22*d).toFixed(3)})`);continue;}
    if(t.building&&!UNLIT.has(t.building)&&lightHash(t.x,t.y)<.85){glow(p.x+3,p.y-11,15,8,`rgba(255,175,95,${(.06*d).toFixed(3)})`);glow(p.x+3,p.y-11,4.5,3,`rgba(255,205,130,${(.34*d).toFixed(3)})`);}
    if(powered&&t.road&&lightHash(t.y,t.x)<.45){glow(p.x,p.y+11,9,5,`rgba(255,215,150,${(.08*d).toFixed(3)})`);glow(p.x,p.y+11,2,1.5,`rgba(255,230,170,${(.4*d).toFixed(3)})`);}

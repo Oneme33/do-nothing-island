@@ -431,6 +431,7 @@ export class IslandRenderer {
     else if(b==='house')this.house(t.variant,1);
     else if(b==='townhouse')this.house(t.variant,2);
     else if(b==='tower')this.tower(t.variant);
+    else if(b==='lighthouse')this.lighthouse();
     else if(b==='manor'||b==='palace'){if(b==='palace')c.scale(1.45,1.45);this.palace(b==='palace',t.variant);}
     else if(b==='palace-wing'){this.house(t.variant,2);this.line([[0,-40],[0,-53]],'#a39668',1);this.poly([[0,-53],[9,-50],[0,-47]],'#c8af64');}
     else if(b==='royal-garden')this.formalGarden();
@@ -736,6 +737,23 @@ export class IslandRenderer {
     c.restore();
   }
   leaf(color){return seasonalLeaf(color,this.light);}
+  lighthouse(){
+    const c=this.ctx;
+    this.ellipse(4,4,20,7,'#58654418');
+    this.poly([[-15,-2],[0,6],[15,-2],[0,-9]],'#a69f86');this.poly([[-15,-2],[0,6],[0,10],[-15,2]],'#8f8a73');this.poly([[0,6],[15,-2],[15,2],[0,10]],'#7d7a66');
+    // A tapering striped tower: four bands, alternating chalk and brick red.
+    for(let i=0;i<4;i++){
+      const y0=-4-i*13,y1=y0-13,w0=8-i*1.1,w1=8-(i+1)*1.1,color=i%2?'#b8644f':'#efe9d8',side=i%2?'#9c5444':'#d3cdb9';
+      this.poly([[-w0,y0],[0,y0+3],[0,y1+3],[-w1,y1]],color);this.poly([[0,y0+3],[w0,y0],[w1,y1],[0,y1+3]],side);
+    }
+    this.poly([[-1.5,-12],[1.5,-11],[1.5,-17],[-1.5,-18]],'#6f7a74');
+    this.diamond(0,-56,7.5,3.4,'#7d6f5c');
+    const lamp=this.light.darkness>.15?'#fff0b8':'#f2e2a8';
+    this.poly([[-4.2,-57],[0,-55.5],[0,-63],[-4.2,-64.5]],lamp);this.poly([[0,-55.5],[4.2,-57],[4.2,-64.5],[0,-63]],'#e3d197');
+    this.poly([[-5,-64.5],[0,-71],[5,-64.5],[0,-62.5]],'#8c5a48');this.line([[0,-71],[0,-75]],'#6d5a4a',1);
+    this.line([[-7,-56],[-7,-59]],'#6d675a',.6);this.line([[7,-56],[7,-59]],'#6d675a',.6);this.line([[-7,-59],[0,-56.5],[7,-59]],'#6d675a',.6);
+    c.save();c.globalAlpha=.5+this.light.darkness*.5;this.ellipse(0,-60,3,3,'#fff6cf');c.restore();
+  }
   house(v,level){
     const c=this.ctx;
     if(level>0&&['classical','medieval','renaissance'].includes(this.archStyle)){this.historicalHouse(v,this.archStyle);return;}

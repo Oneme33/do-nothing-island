@@ -4,6 +4,7 @@ import {ensureFamily,advanceFamily,rememberInFamily} from './family.js';
 import {ensureWishes,advanceWishes,answerWish} from './wishes.js';
 import {ensureChallenges,advanceChallenges} from './challenges.js';
 import {advanceCollection} from './collection.js';
+import {advanceCoast} from './coast.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 export const WORLD_RADIUS = 12;
@@ -353,7 +354,7 @@ export class Civilization {
     }
     this.repairFloods();
     this.advanceGeology();
-    advancePleasures(this);
+    advancePleasures(this);advanceCoast(this);
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);
