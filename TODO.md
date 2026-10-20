@@ -14,7 +14,7 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 - [x] **2.6 ‘Terwijl je weg was…’.** Een korte terugkomsamenvatting met eeuwen, gebeurtenissen en familieleden. ‘Laat zien’ brengt je naar het grootste moment. *(Rustige kijker)*
 - [x] **2.7 Kroniek per tijdperk.** Hoofdstukken met een kleine illustratie en per gebeurtenis ‘Laat zien’. Familie en jouw ingrepen springen eruit. *(Verhalenlezer)*
 - [ ] **2.8 Filmisch einde op het echte eiland.** De camera volgt plekken uit de kroniek en eindigt bij de laatste nazaat onder de oude boom. Het tekstoverzicht komt daarna. *(Allemaal)*
-- [ ] **2.9 Dag, nacht en seizoenen.** Avondlicht, lantaarns, verlichte ramen, herfstbomen en sneeuw op de bergen. *(Rustige kijker)*
+- [x] **2.9 Dag, nacht en seizoenen.** Avondlicht, lantaarns, verlichte ramen, herfstbomen en sneeuw op de bergen. *(Rustige kijker)*
 - [ ] **2.10 Organisch begin.** Geen zichtbaar raster in jaar 1. Loopsporen worden paden en later straten; de groei naar een stad wordt zichtbaar verdiend.
 
 ## Ronde 3 — afwerking die het onvergetelijk maakt
@@ -32,12 +32,15 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 
 ## Nu aan de beurt
 
-**Klaar voor Coens test, lokaal gecommit (nog niet gepusht):**
+**Gepusht en klaar voor Coens test:** rustiger tempo, één eilandboek, familieverhalen en 2.9 dag, nacht en seizoenen.
 
-1. **Rustiger tempo.** Op 1× duurt een generatie ongeveer een minuut; een heel eiland zo'n vijftig minuten.
-2. **Eén eilandboek.** Kroniek, Familie, Wensen, Uitdagingen en Verzameling zijn tabbladen in één venster met één knop op het eiland.
-3. **Familieverhalen.** Sleutelhouders onthouden ingrepen bij huis, wensen, brand, beving, hoog water en het eerste huis dat groeit, en vertellen het door aan de volgende generatie.
-4. **2.9 Dag, nacht en seizoenen.** Avondlicht, verlichte ramen en lantaarns, herfstbladeren en sneeuw; uit te zetten in de instellingen.
+**Meer leven op het eiland, elk als eigen commit:**
+
+- [x] **Huizen verschillen.** Eigen gevel-, dak- en luikkleur, verhoudingen, bloembakken en wel of geen schoorsteen per huis.
+- [x] **Vuurtoren.** Vanaf jaar 400 bij een haven, rood-wit gestreept, met een lichtbundel in de nacht.
+- [x] **Meer stranden.** Tot drie nieuwe, benoemde stranden met parasols, helmgras en later strandhuisjes.
+- [x] **Schatten.** Tien vondsten via bevingen, stormen, de vulkaan en bouwers; in kroniek, familie en verzameling.
+- [x] **Boten en vissen.** Vissersboten varen overdag uit, meeuwen, springende vissen en af en toe een walvis.
 
 Aanvullende visuele feedback, na het testen van deze reeks:
 

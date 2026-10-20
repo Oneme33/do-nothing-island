@@ -1,6 +1,7 @@
 import { cinemaVisible } from './spectacle.js';
 import {nl} from './language.js';
 import {daylightAt,drawDaylight,seasonalLeaf,DAYLIGHT_START} from './daylight.js';
+import {drawSeaLife} from './sea.js';
 import { drawFlames, drawBonfire, drawFestivalGround, drawLifeWorld, drawComicBubbles } from './pageants.js';
 const aroundLand=(s,t)=>neighbors(t).every(([x,y])=>s.tile(x,y)?.kind==='land');
 import { neighbors, key } from './simulation.js';
@@ -158,6 +159,7 @@ export class IslandRenderer {
       for(const t of land){const distance=Math.abs(t.x-this.hover.x)+Math.abs(t.y-this.hover.y);if(distance<=(['rain','rumble'].includes(this.mode)?2:0)){const p=this.p(t.x,t.y);this.diamond(p.x,p.y-1,23,11.5,this.mode==='rumble'?'#d39a6c22':'#ffffff22',this.mode==='rain'?'#e9f4e8aa':'#f9f9dbaa');}}
     }
     this.drawBoats();
+    drawSeaLife(this);
     c.restore();
     this.drawClouds();
     this.drawBirds();
