@@ -3292,6 +3292,9 @@ class IslandRenderer {
   drawRoads(tiles){
     const roads=tiles.filter(t=>t.road&&t.kind!=='flooded'&&t.kind!=='construction'),edges=[];
     const paved=t=>this.sim.era>=3&&!['forest','beach','park','garden','playground'].includes(t.building);
+    // Roads grow up: a fresh trail through the grass, a sandy path, cobbles in the old centre, then asphalt.
+    const stage=t=>paved(t)?3:this.sim.year>=1250&&Math.hypot(t.x,t.y)<=6?2:this.sim.year-(t.roadYear??-999)<35?0:1;
+    const ROAD_WIDTH=[2.6,4.8,5.6,6],ROAD_COLOR=['#c3bb8d','#c8b68e','#bfb49a','#a5aca1'],JOIN=[5,6.8,7.6,8.5];
     // Project a strip onto the ground plane, with no raised rim or circular couplings.
     const ribbon=(a,b,half,color)=>{
       const dx=b.x-a.x,dy=(b.y-a.y)*2,length=Math.hypot(dx,dy);if(!length)return;
@@ -3300,12 +3303,14 @@ class IslandRenderer {
     };
     for(const t of roads)for(const [nx,ny]of [[t.x+1,t.y],[t.x,t.y+1]]){
       const next=this.sim.tile(nx,ny);
-      if(next?.road&&next.kind!=='flooded'&&next.kind!=='construction'&&t.roadLinks?.includes(key(nx,ny)))edges.push({a:this.streetPoint(t),b:this.streetPoint(next),paved:paved(t)&&paved(next),tile:t});
+      if(next?.road&&next.kind!=='flooded'&&next.kind!=='construction'&&t.roadLinks?.includes(key(nx,ny)))edges.push({a:this.streetPoint(t),b:this.streetPoint(next),paved:paved(t)&&paved(next),stage:Math.min(stage(t),stage(next)),tile:t});
     }
-    for(const edge of edges)ribbon(edge.a,edge.b,edge.paved?6:4.8,edge.paved?'#a5aca1':'#c8b68e');
+    for(const edge of edges)ribbon(edge.a,edge.b,ROAD_WIDTH[edge.stage],ROAD_COLOR[edge.stage]);
     // Join every branch with the same flat surface, before any markings or texture.
-    for(const t of roads){const p=this.streetPoint(t),hard=paved(t);this.diamond(p.x,p.y,hard?8.5:6.8,hard?4.25:3.4,hard?'#a5aca1':'#c8b68e');}
-    for(const {a,b,paved:hard,tile} of edges){
+    for(const t of roads){const p=this.streetPoint(t),k=stage(t);this.diamond(p.x,p.y,JOIN[k],JOIN[k]/2,ROAD_COLOR[k]);}
+    for(const {a,b,paved:hard,stage:k,tile} of edges){
+      if(k===0)continue;
+      if(k===2){for(let i=1;i<6;i++){const f=i/6;this.ellipse(mix(a.x,b.x,f)+(i%2?1.4:-1.4),mix(a.y,b.y,f)+(i%2?.7:-.7),.9,.5,'#d6ceb5');}continue;}
       if(hard){
         ribbon({x:mix(a.x,b.x,.38),y:mix(a.y,b.y,.38)},{x:mix(a.x,b.x,.62),y:mix(a.y,b.y,.62)},.45,'#e8e4cf');
       }else{

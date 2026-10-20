@@ -15,7 +15,7 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 - [x] **2.7 Kroniek per tijdperk.** Hoofdstukken met een kleine illustratie en per gebeurtenis ‘Laat zien’. Familie en jouw ingrepen springen eruit. *(Verhalenlezer)*
 - [ ] **2.8 Filmisch einde op het echte eiland.** De camera volgt plekken uit de kroniek en eindigt bij de laatste nazaat onder de oude boom. Het tekstoverzicht komt daarna. *(Allemaal)*
 - [x] **2.9 Dag, nacht en seizoenen.** Avondlicht, lantaarns, verlichte ramen, herfstbomen en sneeuw op de bergen. *(Rustige kijker)*
-- [ ] **2.10 Organisch begin.** Geen zichtbaar raster in jaar 1. Loopsporen worden paden en later straten; de groei naar een stad wordt zichtbaar verdiend.
+- [x] **2.10 Organisch begin.** Geen zichtbaar raster in jaar 1. Loopsporen worden paden en later straten; de groei naar een stad wordt zichtbaar verdiend.
 
 ## Ronde 3 — afwerking die het onvergetelijk maakt
 
