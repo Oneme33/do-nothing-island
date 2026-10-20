@@ -17,3 +17,10 @@ test('a lost lighthouse is rebuilt elsewhere along the coast',()=>{
  const old=s.land.find(t=>t.building==='lighthouse');old.building=null;old.buildSite=null;old.reservedFor='test';
  const next=placeLighthouse(s);assert.ok(next);assert.notEqual(`${next.x},${next.y}`,`${old.x},${old.y}`);assert.match(s.history.at(-1).text,/opnieuw/);
 });
+test('more beaches appear over the centuries, far apart, on the real coast',()=>{
+ const s=new Civilization(31);while(s.year<1300)s.tick();
+ assert.ok(s.coast.beaches.length>=1,'at least one new beach');assert.ok(s.coast.beaches.length<=3);
+ for(const b of s.coast.beaches){const t=s.tile(b.x,b.y);assert.equal(t.building,'beach');assert.ok(s.history.some(e=>e.type==='beach'&&e.text.startsWith(b.name)));}
+ for(let i=0;i<s.coast.beaches.length;i++)for(let j=i+1;j<s.coast.beaches.length;j++){const a=s.coast.beaches[i],b=s.coast.beaches[j];assert.ok(Math.hypot(a.x-b.x,a.y-b.y)>=6);}
+ assert.ok(!s.land.some(t=>t.building==='beach'&&t.foundingHome));
+});

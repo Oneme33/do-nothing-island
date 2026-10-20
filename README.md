@@ -10,6 +10,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **De vuurtoren** verschijnt vanaf jaar 400 zodra het eiland een steiger of haven heeft, op het meest blootgestelde vrije punt van de kust. Overdag is het een rood-witte toren; 's nachts zwaait een lichtbundel over het water. Verdwijnt hij door overstroming of verbouwing, dan bouwen de bewoners hem verderop opnieuw op.
 
+**Meer stranden.** Na het eerste strand ontstaan er in de loop van de eeuwen tot drie nieuwe stranden op vrije stukken kust, minstens zes tegels van het bestaande zand. Ze krijgen een naam naar hun kant van het eiland (Noorderstrand, Oosterstrand, Zuiderstrand, Westerduin). Parasols hebben verschillende kleuren, er groeit helmgras, en vanaf de renaissance staan er gestreepte strandhuisjes.
+
 **Dag, nacht en seizoenen** geven het eiland een eigen ritme. Een dag duurt op 1× tweeënhalve minuut (op hogere snelheden tot vier keer zo snel) en elk seizoen twee dagen. 's Avonds kleurt het licht warm, 's nachts branden ramen, kampvuren en later straatlantaarns, in de herfst verkleuren de bomen en in de winter ligt er sneeuw op de grond, de heuvels en de dennen. Het weerbericht op het eiland vertelt mee. Dit is alleen sfeer: de simulatie en haar uitkomsten veranderen er niet door. In de instellingen kun je het uitzetten; dan blijft het een zomerse middag.
 
 **Het eilandboek** bundelt alles wat je terugleest op één plek: de knop **Eilandboek ↗** op het eiland opent tabbladen voor Kroniek, Familie, Wensen, Uitdagingen en Verzameling. Het boek onthoudt het laatst gelezen tabblad, pauzeert het eiland zolang het open is en markeert het tabblad Wensen met een stipje als iemand iets vraagt. Pijltjestoetsen wisselen tussen tabbladen.

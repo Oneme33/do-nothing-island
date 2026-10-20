@@ -495,9 +495,18 @@ export class IslandRenderer {
     }
     this.poly([[-12,-2],[-5,1],[-8,5],[-15,2]],'#cfaa8c');
     this.line([[-12,-1],[-6,2]],'#e9d6b3',1);
-    if(this.sim.era>=1){
+    const look=hash(tile.x*7+3,tile.y*11-5);
+    if(look<.18)for(const [x,y] of [[-16,-4],[-11,-6],[14,3]])this.line([[x,y],[x-1,y-5]],'#a7ae7a',1);
+    if(this.sim.year>=1250&&look>.72){
+      // A striped beach hut, each in its own colour.
+      const stripe=['#c97b6b','#7fa3a8','#e2c26a','#93a77b'][Math.floor(hash(tile.y,tile.x*3)*4)];
+      this.poly([[1,-1],[9,3],[9,-9],[1,-13]],'#f1ebd8');this.poly([[9,3],[15,0],[15,-12],[9,-9]],'#d8d0ba');
+      for(let i=0;i<3;i++)this.line([[2+i*3,-12+i*1.5],[2+i*3,0+i*1.5]],stripe,1.4);
+      this.poly([[0,-13],[9,-9],[16,-12],[7,-17]],stripe);
+    }else if(this.sim.era>=1){
+      const shade=['#d3ad8a','#c97b6b','#7fa3a8','#e2c26a'][Math.floor(look*4)];
       this.line([[7,0],[7,-17]],'#a2946b',1);
-      this.ellipse(7,-17,9,4,'#d3ad8a');
+      this.ellipse(7,-17,9,4,shade);
       this.poly([[7,-22],[-2,-17],[7,-17]],'#e7d7af');this.poly([[7,-22],[16,-17],[7,-17]],'#c2957a');
       this.line([[8,4],[14,0],[12,-5]],'#b09c74',1.2);this.line([[8,4],[9,6]],'#9b8f67',1);
     }else this.line([[5,1],[13,4]],'#b9a57a',2);

@@ -1645,6 +1645,7 @@ const coastAround=t=>[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].map
 const seaSides=(s,t)=>coastAround(t).filter(p=>{const n=s.tile(p.x,p.y);return !n||n.kind==='water';}).length;
 function ensureCoast(s){
  s.coast??={lighthouse:null};
+ s.coast.beaches??=[];s.coast.nextBeachAt??=60;
  return s.coast;
 }
 function hasHarbor(s){for(const t of s.tiles.values())if(t.building==='dock'||t.building==='harbor')return true;return false;}
@@ -1663,9 +1664,31 @@ function placeLighthouse(s){
  s.signal('built',best,'Een vuurtoren!');s.rebuildRoads();
  return best;
 }
+// New beaches appear where the coast is free and far from the existing sand.
+const BEACH_NAMES=['Noorderstrand','Oosterstrand','Zuiderstrand','Westerduin'];
+function beachTarget(year){return 1+(year>=60)+(year>=600)+(year>=1250);}
+function beachName(t){const a=Math.atan2(t.y-t.x,t.x+t.y);return BEACH_NAMES[((Math.round(a/(Math.PI/2))%4)+4)%4];}
+function growBeach(s){
+ const coast=ensureCoast(s);coast.nextBeachAt=s.year+41;
+ if(s.storm||s.ending||coast.beaches.length+1>=beachTarget(s.year))return null;
+ const sand=s.land.filter(t=>t.building==='beach');
+ const free=t=>s.isCoast(t)&&!t.landform&&!t.reservedFor&&!t.buildSite&&!t.foundingHome&&(!t.building||t.building==='tree');
+ const far=t=>sand.every(b=>Math.hypot(b.x-t.x,b.y-t.y)>=6);
+ const seeds=s.land.filter(t=>free(t)&&far(t)).sort((a,b)=>coastAround(b).filter(p=>s.tile(p.x,p.y)?.kind==='water').length-coastAround(a).filter(p=>s.tile(p.x,p.y)?.kind==='water').length||a.x-b.x||a.y-b.y);
+ const first=seeds[0];if(!first)return null;
+ const cluster=s.land.filter(t=>free(t)&&Math.hypot(t.x-first.x,t.y-first.y)<=2.3).sort((a,b)=>Math.hypot(a.x-first.x,a.y-first.y)-Math.hypot(b.x-first.x,b.y-first.y)).slice(0,5);
+ if(cluster.length<2)return null;
+ for(const t of cluster){t.building='beach';t.protectedCoast=true;t.district='beach';t.builtYear=s.year;}
+ const base=beachName(first),name=coast.beaches.some(b=>b.name===base)?`Klein ${base}`:base;
+ coast.beaches.push({name,x:first.x,y:first.y,year:s.year});
+ s.log(`${name}: een nieuw strand waar de kust zandig is. Het eerste strand doet alsof het niet jaloers is.`,'beach',{x:first.x,y:first.y});
+ s.signal('celebrate',first,`${name}!`);s.rebuildRoads();
+ return cluster;
+}
 function advanceCoast(s){
  ensureCoast(s);
  if(s.year%7===0)placeLighthouse(s);
+ if(s.year>=s.coast.nextBeachAt)growBeach(s);
 }
 
 const SAVE_VERSION = 1;
@@ -3209,9 +3232,18 @@ class IslandRenderer {
     }
     this.poly([[-12,-2],[-5,1],[-8,5],[-15,2]],'#cfaa8c');
     this.line([[-12,-1],[-6,2]],'#e9d6b3',1);
-    if(this.sim.era>=1){
+    const look=hash(tile.x*7+3,tile.y*11-5);
+    if(look<.18)for(const [x,y] of [[-16,-4],[-11,-6],[14,3]])this.line([[x,y],[x-1,y-5]],'#a7ae7a',1);
+    if(this.sim.year>=1250&&look>.72){
+      // A striped beach hut, each in its own colour.
+      const stripe=['#c97b6b','#7fa3a8','#e2c26a','#93a77b'][Math.floor(hash(tile.y,tile.x*3)*4)];
+      this.poly([[1,-1],[9,3],[9,-9],[1,-13]],'#f1ebd8');this.poly([[9,3],[15,0],[15,-12],[9,-9]],'#d8d0ba');
+      for(let i=0;i<3;i++)this.line([[2+i*3,-12+i*1.5],[2+i*3,0+i*1.5]],stripe,1.4);
+      this.poly([[0,-13],[9,-9],[16,-12],[7,-17]],stripe);
+    }else if(this.sim.era>=1){
+      const shade=['#d3ad8a','#c97b6b','#7fa3a8','#e2c26a'][Math.floor(look*4)];
       this.line([[7,0],[7,-17]],'#a2946b',1);
-      this.ellipse(7,-17,9,4,'#d3ad8a');
+      this.ellipse(7,-17,9,4,shade);
       this.poly([[7,-22],[-2,-17],[7,-17]],'#e7d7af');this.poly([[7,-22],[16,-17],[7,-17]],'#c2957a');
       this.line([[8,4],[14,0],[12,-5]],'#b09c74',1.2);this.line([[8,4],[9,6]],'#9b8f67',1);
     }else this.line([[5,1],[13,4]],'#b9a57a',2);
