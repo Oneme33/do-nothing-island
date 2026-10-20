@@ -39,3 +39,10 @@ test('a visit starts on a morning in any of the four seasons',()=>{
  assert.deepEqual(seasons.map(l=>l.seasonName),['lente','zomer','herfst','winter']);
  for(const l of seasons){assert.equal(l.darkness,0);assert.ok(l.phase>.3&&l.phase<.35);}
 });
+import {lightHidden} from '../src/daylight.js';
+test('a window behind a house in front of it stays dark',()=>{
+ const s=new Civilization(31),back=s.tile(4,-4),front=s.tile(5,-3);
+ back.building='house';front.building=null;front.landform=null;front.buildSite=null;assert.equal(lightHidden(s,back),false);
+ front.building='house';assert.equal(lightHidden(s,back),true);
+ front.building='farm';assert.equal(lightHidden(s,back),false,'a field in front hides nothing');
+});
