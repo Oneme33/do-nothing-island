@@ -92,6 +92,8 @@ Rond 2100 begint het laatste hoofdstuk; een gewoon eiland eindigt uiterlijk in 2
 - **De zee krijgt iets terug:** hogere grond, kleinere ambities en een veilige kust.
 - **De laatste druppel:** een zeldzame poging om de oceaan volledig op te heffen. Hiervoor zijn de maximale wereldruimte, toekomstige techniek en een ongewone ambitie nodig. Pas bij minstens 94,5% werkelijk droog land is het project geslaagd.
 
+**De eilandtoer.** Als het verhaal klaar is, vliegt de camera eerst over het echte eiland: langs vijf grote momenten uit de kroniek (jouw ingrepen, schatten, de vuurtoren, overstromingen, geholpen wensen en het eerste huis dat groeit), dan het eerste huis, en ten slotte de laatste nazaat onder de oude boom, met het verhaal dat de familie nog altijd vertelt. Filmbalken en een tekstkaart begeleiden de toer; met ‘Naar de eindscène’ sla je hem over. Een opnieuw afgespeelde eindscène slaat de toer over.
+
 Elke uitkomst heeft een eigen geanimeerd eindscherm. De scène duurt 24 seconden, kan gepauzeerd en opnieuw afgespeeld worden en biedt na acht seconden een knop naar het naschrift. Je kunt het scherm ook direct sluiten zonder een nieuw venster opgedrongen te krijgen. Het echte eiland krijgt geen extra eindscène-versieringen zoals kronen, paraplu's of zwevende monumenten.
 
 Het naschrift toont kaarten, oorzaken en een **eilandscore van 0–100**, het gemiddelde van vijf onderdelen: leefbaarheid, natuur, zelfstandigheid, veerkracht en cultuur. De scores volgen de werkelijke toestand en geschiedenis. Ze blijven samen met het oorspronkelijke naschrift bewaard wanneer je vrij verder speelt. Er is meer dan één manier om een geslaagd eiland te maken.

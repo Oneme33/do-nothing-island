@@ -13,7 +13,7 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 - [x] **2.5 Geheime gebeurtenissen verzamelen.** Onder andere drie keer regen op de oude boom laten bloeien, een beving bij de vulkaan en vuur op een kampvuur tijdens een feest. Koppel ook de bestaande ontdekkingen aan de verzameling. *(Experimenteerder)*
 - [x] **2.6 ‘Terwijl je weg was…’.** Een korte terugkomsamenvatting met eeuwen, gebeurtenissen en familieleden. ‘Laat zien’ brengt je naar het grootste moment. *(Rustige kijker)*
 - [x] **2.7 Kroniek per tijdperk.** Hoofdstukken met een kleine illustratie en per gebeurtenis ‘Laat zien’. Familie en jouw ingrepen springen eruit. *(Verhalenlezer)*
-- [ ] **2.8 Filmisch einde op het echte eiland.** De camera volgt plekken uit de kroniek en eindigt bij de laatste nazaat onder de oude boom. Het tekstoverzicht komt daarna. *(Allemaal)*
+- [x] **2.8 Filmisch einde op het echte eiland.** De camera volgt plekken uit de kroniek en eindigt bij de laatste nazaat onder de oude boom. Het tekstoverzicht komt daarna. *(Allemaal)*
 - [x] **2.9 Dag, nacht en seizoenen.** Avondlicht, lantaarns, verlichte ramen, herfstbomen en sneeuw op de bergen. *(Rustige kijker)*
 - [x] **2.10 Organisch begin.** Geen zichtbaar raster in jaar 1. Loopsporen worden paden en later straten; de groei naar een stad wordt zichtbaar verdiend.
 
@@ -32,15 +32,7 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 
 ## Nu aan de beurt
 
-**Gepusht en klaar voor Coens test:** rustiger tempo, één eilandboek, familieverhalen en 2.9 dag, nacht en seizoenen.
-
-**Meer leven op het eiland, elk als eigen commit:**
-
-- [x] **Huizen verschillen.** Eigen gevel-, dak- en luikkleur, verhoudingen, bloembakken en wel of geen schoorsteen per huis.
-- [x] **Vuurtoren.** Vanaf jaar 400 bij een haven, rood-wit gestreept, met een lichtbundel in de nacht.
-- [x] **Meer stranden.** Tot drie nieuwe, benoemde stranden met parasols, helmgras en later strandhuisjes.
-- [x] **Schatten.** Tien vondsten via bevingen, stormen, de vulkaan en bouwers; in kroniek, familie en verzameling.
-- [x] **Boten en vissen.** Vissersboten varen overdag uit, meeuwen, springende vissen en af en toe een walvis.
+**Ronde 2 is compleet.** Klaar voor Coens test, elk als eigen commit: willekeurig startseizoen, vreugdevuur op een open plek, vraagtekens met grappige wensen op willekeurige plekken, lichtjes niet meer door huizen heen, het dorpsplein, rustiger huizenbouw tot het molentijdperk met meer bomen, vier nieuwe gebouwen, groeiende wegen (2.10) en de eilandtoer als filmisch einde (2.8).
 
 Aanvullende visuele feedback, na het testen van deze reeks:
 

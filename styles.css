@@ -73,3 +73,13 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .island-window.is-night .weather svg{stroke:#e9ecdf}
 .island-window.is-night #chapter-status{color:#cdd6c2}
 .island-window.is-night .instruction,.island-window.is-night .instruction small{color:#dfe5d6}
+
+/* 2.8 The closing tour over the real island. */
+.tour-caption{position:absolute;left:50%;bottom:86px;transform:translateX(-50%);width:min(540px,calc(100% - 32px));z-index:6;background:#fbf8eef2;border:1px solid #dfe3d2;border-radius:10px;padding:16px 20px 12px;text-align:center;box-shadow:0 10px 40px #213e3022}
+.tour-caption p{font-family:var(--serif);font-size:15px;line-height:1.5;color:var(--ink);margin:6px 0 10px}
+.tour-actions{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#7b866e}
+.tour-actions button{font-size:11px;padding:7px 12px;border-radius:16px;background:#e2ead0;border:1px solid #cdd8b4;color:#3f5536;cursor:pointer}
+.island-window.touring:before,.island-window.touring:after{content:'';position:absolute;left:0;right:0;height:7%;background:#22372c;z-index:5;pointer-events:none}
+.island-window.touring:before{top:0}.island-window.touring:after{top:auto;bottom:0;inset:auto 0 0 0;border-radius:0 0 9px 9px;box-shadow:none}
+.island-window.touring .population-card,.island-window.touring .civic-overview,.island-window.touring .island-heading,.island-window.touring .weather,.island-window.touring .map-controls,.island-window.touring .instruction,.island-window.touring .island-toolbar,.island-window.touring .wish-bubble,.island-window.touring .project-overlay{opacity:0;pointer-events:none;transition:opacity .6s}
+@media (max-width:600px){.tour-caption{bottom:60px;padding:12px 14px 10px}.tour-caption p{font-size:13px}}

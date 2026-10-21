@@ -82,6 +82,16 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .island-window.is-night .weather svg{stroke:#e9ecdf}
 .island-window.is-night #chapter-status{color:#cdd6c2}
 .island-window.is-night .instruction,.island-window.is-night .instruction small{color:#dfe5d6}
+
+/* 2.8 The closing tour over the real island. */
+.tour-caption{position:absolute;left:50%;bottom:86px;transform:translateX(-50%);width:min(540px,calc(100% - 32px));z-index:6;background:#fbf8eef2;border:1px solid #dfe3d2;border-radius:10px;padding:16px 20px 12px;text-align:center;box-shadow:0 10px 40px #213e3022}
+.tour-caption p{font-family:var(--serif);font-size:15px;line-height:1.5;color:var(--ink);margin:6px 0 10px}
+.tour-actions{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#7b866e}
+.tour-actions button{font-size:11px;padding:7px 12px;border-radius:16px;background:#e2ead0;border:1px solid #cdd8b4;color:#3f5536;cursor:pointer}
+.island-window.touring:before,.island-window.touring:after{content:'';position:absolute;left:0;right:0;height:7%;background:#22372c;z-index:5;pointer-events:none}
+.island-window.touring:before{top:0}.island-window.touring:after{top:auto;bottom:0;inset:auto 0 0 0;border-radius:0 0 9px 9px;box-shadow:none}
+.island-window.touring .population-card,.island-window.touring .civic-overview,.island-window.touring .island-heading,.island-window.touring .weather,.island-window.touring .map-controls,.island-window.touring .instruction,.island-window.touring .island-toolbar,.island-window.touring .wish-bubble,.island-window.touring .project-overlay{opacity:0;pointer-events:none;transition:opacity .6s}
+@media (max-width:600px){.tour-caption{bottom:60px;padding:12px 14px 10px}.tour-caption p{font-size:13px}}
 </style>
 </head>
 <body>
@@ -124,7 +134,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
       <button id="moment-close" class="card-close" aria-label="Verberg verhaalkaart">×</button><div class="moment-actions"><button id="moment-focus">Laat zien ↗</button><button id="moment-continue">Sluiten</button></div>
     </aside>
       <aside id="wish-bubble" class="wish-bubble" hidden><button id="wish-dismiss" class="card-close" aria-label="Verberg deze wens">×</button><button id="wish-open" aria-haspopup="dialog"><small id="wish-speaker"></small><span id="wish-text"></span></button></aside>
-      <div class="toast" id="toast" role="status"><span id="toast-text"></span><button id="toast-close" aria-label="Verberg melding">×</button></div>
+      <div class="tour-caption" id="tour-caption" role="status" aria-live="polite" hidden><span class="eyebrow" id="tour-year"></span><p id="tour-text"></p><div class="tour-actions"><span id="tour-step"></span><button id="tour-skip">Naar de eindscène →</button></div></div><div class="toast" id="toast" role="status"><span id="toast-text"></span><button id="toast-close" aria-label="Verberg melding">×</button></div>
       <div class="intervention-result" id="intervention-result" role="status" aria-live="polite" hidden><button id="intervention-close" class="card-close" aria-label="Verberg je ingreep">×</button><span class="eyebrow">JOUW INGREEP</span><strong id="intervention-title"></strong><p id="intervention-detail"></p></div>
       <div class="instruction" id="instruction"><span>✳</span> Probeer niets aan te raken.<small>Klik / tik op het eiland. Ze merken het.</small></div>
 
@@ -1331,7 +1341,7 @@ function jokeAfterTouch(s,spot,type){
  s.liveJoke={x:spot.x,y:spot.y,text:options[s.interferences%options.length],until:s.year+12};
 }
 function startCinema(s,endingId,replay=false){
- s.cinematic={id:endingId,elapsed:0,duration:24,completed:false,cheers:0,replay};s.endingSeen=false;
+ s.cinematic={id:endingId,elapsed:0,duration:24,completed:false,cheers:0,replay,toured:!!replay};s.endingSeen=false;
 }
 function advanceCinema(s,seconds){
  const movie=s.cinematic;if(!movie||movie.completed)return false;
@@ -2760,6 +2770,24 @@ function chroniclePlace(s,entry){
  return null;
 }
 
+// The closing tour: up to five big moments spread over the island's history, the first home, then the old tree.
+// The family is visited at the first home, so its own entries are not separate stops.
+const TOUR_TYPES=new Set(['interference','treasure','lighthouse','discovery','flood','palace','fire','wish']);
+function tourStops(s){
+ const placed=s.history.filter(e=>Number.isFinite(e.x)&&Number.isFinite(e.y)&&s.tile(e.x,e.y)?.kind==='land'&&!(e.x===0&&e.y===0)&&TOUR_TYPES.has(e.type)&&(e.type!=='wish'||s.wishes?.history?.some(w=>w.id===e.wishId&&w.status==='helped')));
+ const moments=[];
+ if(placed.length){
+  const wanted=Math.min(5,placed.length);
+  for(let i=0;i<wanted;i++){const entry=placed[Math.round(i*(placed.length-1)/Math.max(1,wanted-1))];if(!moments.includes(entry))moments.push(entry);}
+ }
+ const stops=moments.map(e=>({x:e.x,y:e.y,seconds:4,eyebrow:`JAAR ${e.year}`,text:nl(e.text)}));
+ const family=s.family,home=family?.home||{x:-1,y:1};
+ if(family){const first=family.generations[0];stops.push({x:home.x,y:home.y,seconds:4,eyebrow:'HET EERSTE HUIS',text:`Hier begon ${first.name} ${family.lastName} met één huisje en een akker. ${family.generations.length} generaties later staat het er nog.`});}
+ const last=family?currentRelative(s):null,lore=family?familyLore(family,1):[];
+ stops.push({x:0,y:0,seconds:6,zoom:2,eyebrow:'ONDER DE OUDE BOOM',text:last?`${last.name} ${family.lastName}, generatie ${last.generation}, zit onder de oude boom.${lore.length?` Aan tafel gaat het nog altijd over ${lore.map(m=>m.memory).join(' en ')}.`:''} De boom was er als eerste, en is er nog.`:'De oude boom was er als eerste, en is er nog.'});
+ return stops;
+}
+
 function drawFlames(r,x,y,size=1){
  const clock=r.reduced?0:r.activityTime;
  r.ellipse(x,y+2,13*size,5*size,'#e5ae4b55');
@@ -3071,15 +3099,16 @@ class IslandRenderer {
       target=mix(target,mobile?1.3:2.1,close);
     }
     if(this.sim.year<120&&!this.focus)target=Math.max(target,mobile?.95:1.12);
-    if(cinemaVisible(this.sim)){this.focus=null;target=mobile?.72:.9;}
+    if(cinemaVisible(this.sim)&&!this.touring){this.focus=null;target=mobile?.72:.9;}
     if(this.focus){this.focus.remaining-=dt;if(this.focus.remaining<=0)this.focus=null;}
-    if(this.focus)target=mobile?1.65:2.05;
+    if(this.focus)target=this.focus.zoom?this.focus.zoom*(mobile?.85:1):mobile?1.65:2.05;
     this.fitZoom=target;
     const desiredZoom=mix(this.zoom,target*this.userZoom,Math.min(1,dt*2));
     this.zoom+=Math.max(-.065,Math.min(.065,desiredZoom-this.zoom));
     const focusPoint=this.focus?this.p(this.focus.x,this.focus.y):null;
     this.center.x=mix(this.center.x,focusPoint?focusPoint.x:(minX+maxX)/2,Math.min(1,dt*.9));
-    this.center.y=mix(this.center.y,focusPoint?focusPoint.y-24:(minY+maxY)/2+15,Math.min(1,dt*.9));
+    // During the closing tour the focus sits higher, above the caption card.
+    this.center.y=mix(this.center.y,focusPoint?focusPoint.y-24+(this.touring?this.height*.32/this.zoom:0):(minY+maxY)/2+15,Math.min(1,dt*.9));
     const quake=this.reduced?0:this.effects.filter(e=>e.type==='rumble'&&e.elapsed<1).reduce((s,e)=>s+Math.sin(e.elapsed*55)*(1-e.elapsed)*3,0);
     this.origin={x:this.width*(mobile?.54:.55)-this.center.x*this.zoom+this.pan.x+quake,y:this.height*(cinemaVisible(this.sim)?.62:mobile?.54:.52)-this.center.y*this.zoom+this.pan.y};
     this.drawWater();
@@ -4461,9 +4490,32 @@ function renderEnding(){
   $('score-breakdown').replaceChildren(...Object.entries(score.values).map(([name,value])=>{const item=document.createElement('div');item.className='score-row';const label=document.createElement('span'),number=document.createElement('strong'),bar=document.createElement('progress');label.textContent=name;number.textContent=value;bar.max=100;bar.value=value;bar.setAttribute('aria-label',`${name}: ${value} van 100`);item.append(label,bar,number);return item;}));
 }
 function cinemaActive(){return !!sim.cinematic&&!sim.cinematic.completed;}
+// 2.8: before the finale, the camera visits the island's big moments and ends under the old tree.
+let tour=null;
+const touring=()=>cinemaActive()&&sim.cinematic.toured===false;
+function showTourStop(){
+  const stop=tour.stops[tour.index];tour.at=performance.now();
+  renderer.focus={x:stop.x,y:stop.y,remaining:stop.seconds+2,zoom:stop.zoom||1.7};renderer.pan={x:0,y:0};renderer.userZoom=1;
+  $('tour-year').textContent=stop.eyebrow;$('tour-text').textContent=stop.text;$('tour-step').textContent=`${tour.index+1} / ${tour.stops.length}`;
+}
+function startTour(){
+  tour={stops:tourStops(sim),index:0,at:performance.now()};renderer.touring=true;
+  for(const dialog of document.querySelectorAll('dialog[open]'))if(dialog.id==='cinema-dialog')dialog.close();
+  $('island-window').classList.add('touring');$('tour-caption').hidden=false;showTourStop();
+}
+function finishTour(){
+  if(sim.cinematic)sim.cinematic.toured=true;tour=null;renderer.touring=false;renderer.focus=null;renderer.recenter();
+  $('tour-caption').hidden=true;$('island-window').classList.remove('touring');accumulator=0;save();updateCinemaUI();
+}
+function advanceTour(now){
+  if(!touring()){if(tour)finishTour();return;}
+  if(!tour){startTour();return;}
+  if(paused||otherDialogOpen())return;
+  if(now-tour.at>=tour.stops[tour.index].seconds*1000){tour.index++;if(tour.index>=tour.stops.length)finishTour();else showTourStop();}
+}
 function updateCinemaUI(){
   const active=cinemaActive();$('cinema-caption').hidden=!active;$('island-window').classList.toggle('cinema-playing',active);
-  if(active&&!$('cinema-dialog').open&&!otherDialogOpen())$('cinema-dialog').showModal();
+  if(active&&sim.cinematic.toured!==false&&!$('cinema-dialog').open&&!otherDialogOpen())$('cinema-dialog').showModal();
   if(!active)return;const beat=cinemaBeat(sim.cinematic);
   $('cinema-title').textContent=nl(beat.title);$('cinema-line').textContent=nl(beat.caption);
   $('cinema-skip').hidden=sim.cinematic.elapsed<8;
@@ -4497,11 +4549,12 @@ function frame(now){
       updateUI();
     }
   }
-  if(cinemaActive()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
+  advanceTour(now);
+  if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
   if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8))renderer.addEffect(signal);sim.signals=[];}
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
-  renderer.paused=paused||modal||sim.ending||now<beatHoldUntil;renderer.draw(now);
+  renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;renderer.draw(now);
   const night=renderer.light.darkness>.3;if(night!==nightShown){nightShown=night;$('island-window').classList.toggle('is-night',night);updateUI();}
   if(cinemaActive()){
     const stage=$('finale-canvas'),box=stage.getBoundingClientRect(),w=Math.max(300,Math.round(box.width)),h=Math.max(200,Math.round(box.height));
@@ -4563,6 +4616,7 @@ $('intro-close').addEventListener('click',finishIntro);
 $('intro-back').addEventListener('click',()=>{introStep=Math.max(0,introStep-1);updateIntro();});
 $('intro-next').addEventListener('click',()=>{if(introStep<2){introStep++;updateIntro();return;}finishIntro();});
 $('cinema-skip').addEventListener('click',completeCinema);
+$('tour-skip').addEventListener('click',finishTour);
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));
 $('find-fun').addEventListener('click',()=>focusPlace(sim.buildings.find(t=>t.building==='fairground')||sim.buildings.find(t=>t.building==='festival-ground')||sim.buildings.find(t=>t.building==='bonfire')));

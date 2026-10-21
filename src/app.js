@@ -6,6 +6,7 @@ import { IslandRenderer } from './renderer.js';
 import {describePlot} from './inspection.js';
 import {drawFinale,islandScores} from './finale.js';
 import {ensureFamily,currentRelative,familyLore,sentenceCase} from './family.js';
+import {tourStops} from './tour.js';
 import {ensureWishes,dismissWish,WISH_OUTCOMES,canHelpWish,helpActiveWish} from './wishes.js';
 import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
 import {chronicleChapters,chroniclePlace,CHAPTER_ILLUSTRATIONS} from './chronicle.js';
@@ -306,9 +307,32 @@ function renderEnding(){
   $('score-breakdown').replaceChildren(...Object.entries(score.values).map(([name,value])=>{const item=document.createElement('div');item.className='score-row';const label=document.createElement('span'),number=document.createElement('strong'),bar=document.createElement('progress');label.textContent=name;number.textContent=value;bar.max=100;bar.value=value;bar.setAttribute('aria-label',`${name}: ${value} van 100`);item.append(label,bar,number);return item;}));
 }
 function cinemaActive(){return !!sim.cinematic&&!sim.cinematic.completed;}
+// 2.8: before the finale, the camera visits the island's big moments and ends under the old tree.
+let tour=null;
+const touring=()=>cinemaActive()&&sim.cinematic.toured===false;
+function showTourStop(){
+  const stop=tour.stops[tour.index];tour.at=performance.now();
+  renderer.focus={x:stop.x,y:stop.y,remaining:stop.seconds+2,zoom:stop.zoom||1.7};renderer.pan={x:0,y:0};renderer.userZoom=1;
+  $('tour-year').textContent=stop.eyebrow;$('tour-text').textContent=stop.text;$('tour-step').textContent=`${tour.index+1} / ${tour.stops.length}`;
+}
+function startTour(){
+  tour={stops:tourStops(sim),index:0,at:performance.now()};renderer.touring=true;
+  for(const dialog of document.querySelectorAll('dialog[open]'))if(dialog.id==='cinema-dialog')dialog.close();
+  $('island-window').classList.add('touring');$('tour-caption').hidden=false;showTourStop();
+}
+function finishTour(){
+  if(sim.cinematic)sim.cinematic.toured=true;tour=null;renderer.touring=false;renderer.focus=null;renderer.recenter();
+  $('tour-caption').hidden=true;$('island-window').classList.remove('touring');accumulator=0;save();updateCinemaUI();
+}
+function advanceTour(now){
+  if(!touring()){if(tour)finishTour();return;}
+  if(!tour){startTour();return;}
+  if(paused||otherDialogOpen())return;
+  if(now-tour.at>=tour.stops[tour.index].seconds*1000){tour.index++;if(tour.index>=tour.stops.length)finishTour();else showTourStop();}
+}
 function updateCinemaUI(){
   const active=cinemaActive();$('cinema-caption').hidden=!active;$('island-window').classList.toggle('cinema-playing',active);
-  if(active&&!$('cinema-dialog').open&&!otherDialogOpen())$('cinema-dialog').showModal();
+  if(active&&sim.cinematic.toured!==false&&!$('cinema-dialog').open&&!otherDialogOpen())$('cinema-dialog').showModal();
   if(!active)return;const beat=cinemaBeat(sim.cinematic);
   $('cinema-title').textContent=nl(beat.title);$('cinema-line').textContent=nl(beat.caption);
   $('cinema-skip').hidden=sim.cinematic.elapsed<8;
@@ -342,11 +366,12 @@ function frame(now){
       updateUI();
     }
   }
-  if(cinemaActive()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
+  advanceTour(now);
+  if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
   if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8))renderer.addEffect(signal);sim.signals=[];}
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
-  renderer.paused=paused||modal||sim.ending||now<beatHoldUntil;renderer.draw(now);
+  renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;renderer.draw(now);
   const night=renderer.light.darkness>.3;if(night!==nightShown){nightShown=night;$('island-window').classList.toggle('is-night',night);updateUI();}
   if(cinemaActive()){
     const stage=$('finale-canvas'),box=stage.getBoundingClientRect(),w=Math.max(300,Math.round(box.width)),h=Math.max(200,Math.round(box.height));
@@ -408,6 +433,7 @@ $('intro-close').addEventListener('click',finishIntro);
 $('intro-back').addEventListener('click',()=>{introStep=Math.max(0,introStep-1);updateIntro();});
 $('intro-next').addEventListener('click',()=>{if(introStep<2){introStep++;updateIntro();return;}finishIntro();});
 $('cinema-skip').addEventListener('click',completeCinema);
+$('tour-skip').addEventListener('click',finishTour);
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));
 $('find-fun').addEventListener('click',()=>focusPlace(sim.buildings.find(t=>t.building==='fairground')||sim.buildings.find(t=>t.building==='festival-ground')||sim.buildings.find(t=>t.building==='bonfire')));

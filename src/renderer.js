@@ -114,15 +114,16 @@ export class IslandRenderer {
       target=mix(target,mobile?1.3:2.1,close);
     }
     if(this.sim.year<120&&!this.focus)target=Math.max(target,mobile?.95:1.12);
-    if(cinemaVisible(this.sim)){this.focus=null;target=mobile?.72:.9;}
+    if(cinemaVisible(this.sim)&&!this.touring){this.focus=null;target=mobile?.72:.9;}
     if(this.focus){this.focus.remaining-=dt;if(this.focus.remaining<=0)this.focus=null;}
-    if(this.focus)target=mobile?1.65:2.05;
+    if(this.focus)target=this.focus.zoom?this.focus.zoom*(mobile?.85:1):mobile?1.65:2.05;
     this.fitZoom=target;
     const desiredZoom=mix(this.zoom,target*this.userZoom,Math.min(1,dt*2));
     this.zoom+=Math.max(-.065,Math.min(.065,desiredZoom-this.zoom));
     const focusPoint=this.focus?this.p(this.focus.x,this.focus.y):null;
     this.center.x=mix(this.center.x,focusPoint?focusPoint.x:(minX+maxX)/2,Math.min(1,dt*.9));
-    this.center.y=mix(this.center.y,focusPoint?focusPoint.y-24:(minY+maxY)/2+15,Math.min(1,dt*.9));
+    // During the closing tour the focus sits higher, above the caption card.
+    this.center.y=mix(this.center.y,focusPoint?focusPoint.y-24+(this.touring?this.height*.32/this.zoom:0):(minY+maxY)/2+15,Math.min(1,dt*.9));
     const quake=this.reduced?0:this.effects.filter(e=>e.type==='rumble'&&e.elapsed<1).reduce((s,e)=>s+Math.sin(e.elapsed*55)*(1-e.elapsed)*3,0);
     this.origin={x:this.width*(mobile?.54:.55)-this.center.x*this.zoom+this.pan.x+quake,y:this.height*(cinemaVisible(this.sim)?.62:mobile?.54:.52)-this.center.y*this.zoom+this.pan.y};
     this.drawWater();

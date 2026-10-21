@@ -75,7 +75,7 @@ export function jokeAfterTouch(s,spot,type){
  s.liveJoke={x:spot.x,y:spot.y,text:options[s.interferences%options.length],until:s.year+12};
 }
 export function startCinema(s,endingId,replay=false){
- s.cinematic={id:endingId,elapsed:0,duration:24,completed:false,cheers:0,replay};s.endingSeen=false;
+ s.cinematic={id:endingId,elapsed:0,duration:24,completed:false,cheers:0,replay,toured:!!replay};s.endingSeen=false;
 }
 export function advanceCinema(s,seconds){
  const movie=s.cinematic;if(!movie||movie.completed)return false;

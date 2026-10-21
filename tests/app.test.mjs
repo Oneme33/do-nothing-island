@@ -44,7 +44,7 @@ test('Help allows looking around without interference; deliberately choosing rai
  assert.ok(e.get('history-snapshot').children.length>0);
 });
 test('the actual application shows a contextual recap, then permits explicit free play',async()=>{
- const sim=new Civilization(201);while(!sim.ending)sim.tick();const a=await appHarness(sim),e=a.elements;
+ const sim=new Civilization(201);while(!sim.ending)sim.tick();sim.cinematic.toured=true;const a=await appHarness(sim),e=a.elements;
  assert.equal(e.get('ending-dialog').open,false);assert.equal(e.get('cinema-caption').hidden,false);
  e.get('cinema-cheer').handlers.click();assert.match(e.get('cinema-cheer').textContent,/1/);
  a.advance(9);assert.equal(e.get('cinema-skip').hidden,false);e.get('cinema-skip').handlers.click();
@@ -72,12 +72,12 @@ test('population remarks update before their normal hold when six residents beco
  const sim=new Civilization(31);sim.population=8;const a=await appHarness(sim);assert.doesNotMatch(a.elements.get('population-note').textContent,/Zes|Six/);assert.match(a.elements.get('population-note').textContent,/8/);
 });
 test('an unfinished reclamation card is hidden after the ending',async()=>{
- const sim=new Civilization(31);while(!sim.ending)sim.tick();sim.project={stage:2,elapsed:5,tiles:[],manual:false};
+ const sim=new Civilization(31);while(!sim.ending)sim.tick();sim.cinematic.toured=true;sim.project={stage:2,elapsed:5,tiles:[],manual:false};
  const a=await appHarness(sim);assert.equal(a.elements.get('project-overlay').hidden,true);
  a.advance(25);assert.equal(a.elements.get('project-overlay').hidden,true);assert.equal(a.elements.get('cinema-dialog').open,false);assert.equal(a.elements.get('ending-dialog').open,true);
 });
 test('a saved ending resumes its scene, while a completed recap stays completed on reload',async()=>{
- const sim=new Civilization(31);while(!sim.ending)sim.tick();sim.cinematic.elapsed=12;sim.cinematic.cheers=2;
+ const sim=new Civilization(31);while(!sim.ending)sim.tick();sim.cinematic.toured=true;sim.cinematic.elapsed=12;sim.cinematic.cheers=2;
  const a=await appHarness(sim);assert.equal(a.elements.get('cinema-caption').hidden,false);a.advance(13);
  assert.equal(a.elements.get('ending-dialog').open,true);assert.equal(a.saved().cinematic.cheers,2);
  const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));
@@ -97,7 +97,7 @@ test('opted-in cards have an immediate close button and never automatically paus
 });
 test('the intro and ending windows can be dismissed immediately without a replacement popup',async()=>{
  const intro=await appHarness(new Civilization(31),{firstVisit:true});intro.elements.get('intro-close').handlers.click();assert.equal(intro.elements.get('intro-dialog').open,false);intro.advance(2);assert.ok(intro.elements.get('year').textContent>1);
- const sim=new Civilization(31);while(!sim.ending)sim.tick();const a=await appHarness(sim),e=a.elements;
+ const sim=new Civilization(31);while(!sim.ending)sim.tick();sim.cinematic.toured=true;const a=await appHarness(sim),e=a.elements;
  assert.equal(e.get('cinema-dialog').open,true);e.get('cinema-close').handlers.click();assert.equal(e.get('cinema-dialog').open,false);assert.equal(e.get('ending-dialog').open,false);
  a.advance(25);assert.equal(e.get('cinema-dialog').open,false);assert.equal(e.get('ending-dialog').open,false);
  e.get('open-ending').handlers.click();assert.equal(e.get('ending-dialog').open,true);e.get('ending-close').handlers.click();a.advance(1);assert.equal(e.get('ending-dialog').open,false);
@@ -182,4 +182,13 @@ test('one island book replaces five windows; tabs switch pages and the book reme
  e.get('book-close').handlers.click();assert.equal(e.get('book-dialog').open,false);
  e.get('canvas-journal').handlers.click();assert.equal(e.get('book-collection').hidden,false,'reopening returns to the last page');
  e.get('book-close').handlers.click();e.get('open-journal').handlers.click();assert.equal(e.get('book-journal').hidden,false,'the history link always opens the chronicle');
+});
+test('the ending first tours the real island, then opens the finale; the tour can be skipped',async()=>{
+ const sim=new Civilization(31);while(!sim.ending)sim.tick();sim.interfere(1,1,'rain');const a=await appHarness(sim),e=a.elements;a.frame(16);
+ assert.equal(e.get('tour-caption').hidden,false);assert.equal(e.get('cinema-dialog').open,false,'no finale window during the tour');
+ assert.match(e.get('tour-step').textContent,/^1 \//);const steps=Number(e.get('tour-step').textContent.split('/ ')[1]);assert.ok(steps>=3);
+ a.advance(5);assert.match(e.get('tour-step').textContent,/^2 \//);
+ for(let i=0;i<60&&!e.get('tour-caption').hidden;i++)a.advance(1);assert.equal(e.get('tour-caption').hidden,true);assert.equal(e.get('cinema-dialog').open,true);assert.equal(a.saved().cinematic.toured,true);
+ const b=await appHarness(Civilization.restore(JSON.stringify({...JSON.parse(sim.serialize()),cinematic:{...sim.cinematic,toured:false}})),{});b.frame(16);
+ b.elements.get('tour-skip').handlers.click();assert.equal(b.elements.get('tour-caption').hidden,true);assert.equal(b.elements.get('cinema-dialog').open,true);
 });
