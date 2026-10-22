@@ -666,8 +666,10 @@ export class Civilization {
     const reserve=Math.max(3,Math.min(8,Math.floor(buildable*.04)));
     const pressure=this.freeLand.length<=reserve && (this.pressure>.86 || this.food<this.population*.5);
     const ambition=this.era===4 && this.obsessed && this.config.rareEndings && this.endgameStarted;
-    if(!pressure && !ambition) return false;
-    const maxBatch=[0,2,5,9,ambition?22:13][this.era];
+    // Polder ambition: once mills (and later pumps) exist, the island keeps winning land while its free ground shrinks.
+    const polder=(this.housingBoom>=1||this.era>=2)&&this.freeLand.length<=Math.max(reserve,Math.floor(buildable*(this.era>=2?.3:.2)))&&this.pressure>.7;
+    if(!pressure && !polder && !ambition) return false;
+    const maxBatch=[0,4,7,10,ambition?22:14][this.era];
     const batch=Math.min(maxBatch,this.config.maxTiles-total);
     const costs={wood:batch*(this.era===1?5:2),stone:batch*(this.era===1?1:3),wealth:batch*(this.era===1?3:5)};
     if(this.wood<costs.wood || this.stone<costs.stone || this.wealth<costs.wealth) return false;
