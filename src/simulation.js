@@ -9,6 +9,7 @@ import {ensureSquare,advanceSquare} from './square.js';
 import {planDelight,DELIGHT_LABELS,DELIGHT_OPENINGS} from './delights.js';
 import {advanceMonuments,buildCastle} from './monuments.js';
 import {advanceWeather} from './weather.js';
+import {advanceCommissions} from './commissions.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 // New islands sit in a 29×29 sea; the natural island stays within the original 25×25, so the extra sea is room for polders.
@@ -378,7 +379,7 @@ export class Civilization {
     advancePleasures(this);advanceCoast(this);advanceSquare(this);
     // Delights do not wait for a housing lull: they claim a fitting free plot when their time comes.
     if(this.year%9===4&&!this.storm)planDelight(this);
-    advanceMonuments(this);advanceWeather(this);
+    advanceMonuments(this);advanceWeather(this);advanceCommissions(this);
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);
@@ -579,7 +580,7 @@ export class Civilization {
       const openings={well:'A village well. Water is now a local amenity.',market:'The market opens. Someone immediately complains about the prices.',windmill:'A windmill begins turning. The wind receives no compensation.','fire-station':'De brandweerkazerne opent. De emmers hebben nu een vaste ploeg.',library:'A library opens. Silence becomes an official policy.',factory:'The first factory starts up. The morning now has a whistle.',powerplant:'A wood-fired steam generator brings electricity. The sunset loses its monopoly.',solar:'Solar panels join the power grid. The weather gets a second job.',turbine:'A wind turbine joins the grid. The wind has been promoted.',statue:'A statue appears in the square. Its subject is open to interpretation.',garden:'A public garden opens. Sitting becomes a civic activity.',theater:'A theater opens. The island develops a dramatic side.',shrine:'A little shrine follows the strange events. The sky is officially under investigation.',church:'A church rises after the miracles. The villagers would like to know who to thank. Or blame.'};
       Object.assign(openings,{park:'A public park opens. Doing nothing is now an approved land use.',forest:'A woodland is planted. The squirrels establish a rival economy.',beach:'A beach opens on the new shore. The sea asks everyone to take their towels home.',shop:'The first shop opens. Wanting things becomes a local industry.',bakery:'A bakery opens. The village begins scheduling its mornings around bread.',cafe:'A café terrace opens. The gossip now comes with a small cup.',playground:'A playground opens. The children test gravity. Repeatedly.',fairground:'A Ferris wheel begins turning. The island invents a recreational queue.'});
       Object.assign(openings,{school:'A school opens. The children immediately question the entire system.','science-center':'A science center opens. The researchers request more funding before lunch.'});
-      Object.assign(openings,DELIGHT_OPENINGS);
+      Object.assign(openings,DELIGHT_OPENINGS,{watchtower:'De uitkijktoren is klaar. De eerste bezoeker roept naar beneden dat hij zijn huis ziet.','rose-garden':'De rozentuin bloeit. Het ruikt tot aan de haven.','grand-fountain':'De grote fontein spuit voor het eerst. De duiven zijn meteen vaste klant.',carillon:'De klokkentoren slaat voor het eerst. Hij is twee minuten te vroeg, uit enthousiasme.'});
       if(DELIGHT_OPENINGS[type]&&(this.seed+this.year)%3!==0)startParty(this,t,`Opening: ${DELIGHT_LABELS[type]}`,['Er wordt een lint doorgeknipt. Het lint is er niet blij mee.','Gratis koffie! De hele wijk komt kijken.','De fanfare oefent nog. Het klinkt bijna als muziek.'],8);
       if(type==='powerplant'&&this.year>=1980)openings.powerplant='Een regelbare reservecentrale versterkt het stroomnet. De stad kiest voor leveringszekerheid.';
       if(['school','library','science-center'].includes(type)){const court=neighbors(t).map(([x,y])=>this.tile(x,y)).find(p=>p?.kind==='land'&&!p.building&&!p.buildSite&&!p.landform&&(!p.reservedFor||p.reservedFor==='knowledge')&&p.district==='knowledge');if(court&&!this.buildings.some(p=>p.building==='campus-square')){court.building='campus-square';court.civicLegacy='The knowledge quarter';court.builtYear=this.year;}}

@@ -481,6 +481,10 @@ export class IslandRenderer {
     else if(b==='royal-palace'){c.scale(2.1,2.1);this.royal=true;this.palace(true,t.variant);this.royal=false;}
     else if(b==='circus')this.circus();
     else if(b==='zoo')this.zoo();
+    else if(b==='watchtower')this.watchtower();
+    else if(b==='rose-garden')this.roseGarden();
+    else if(b==='grand-fountain')this.grandFountain();
+    else if(b==='carillon')this.carillon();
     else if(b==='theme-park')this.themePark();
     else if(b==='station')this.station(t);
     else if(b==='pool')this.pool();
@@ -908,6 +912,28 @@ export class IslandRenderer {
     else if(kind==='chicken'){this.ellipse(0,-20,7,6,stone);this.ellipse(5,-27,3.4,3.4,stone);this.poly([[8,-27.5],[11,-26.5],[8,-25.5]],'#d9a24e');this.poly([[4,-31],[5,-33.5],[6,-31]],'#c0574d');this.poly([[-6,-22],[-11,-27],[-7,-18]],dark);}
     else if(kind==='cat'){this.ellipse(0,-17,4.6,5,bronze);this.ellipse(0,-25,3.4,3,bronze);this.poly([[-2.6,-27],[-2,-30.5],[-.6,-27.6]],bronze);this.poly([[2.6,-27],[2,-30.5],[.6,-27.6]],bronze);this.line([[4,-13],[8,-20]],bronze,1.4);}
     else{this.poly([[-4,-11],[4,-11],[3,-20],[0,-31],[-2,-22],[-4,-26]],'#d1a074');this.poly([[-1.5,-12],[2,-12],[1.5,-18],[0,-24],[-1,-18]],'#efc98a');}
+  }
+  watchtower(){
+    this.ellipse(4,4,14,5,'#58654418');
+    for(const [x,y] of [[-7,0],[7,0],[0,4],[0,-4]])this.line([[x,y],[x*.5,y*.5-34]],'#7f6a4f',1.6);
+    for(let k=1;k<4;k++){const f=k/4;this.line([[-7+3.5*f,-34*f],[7-3.5*f,-34*f]],'#9b8463',1);}
+    this.poly([[-7,-34],[0,-31],[7,-34],[0,-37]],'#a08a64');this.poly([[-8,-41],[0,-48],[8,-41],[0,-38]],'#a5483c');
+    this.person(-2,-35,'#a37b5f',1);this.person(3,-34,'#7f9481',2);this.islandFlag(0,-48,.6);
+  }
+  roseGarden(){
+    this.diamond(0,0,22,11,'#9fb47a');for(const [a,b] of [[[-20,0],[0,-10]],[[0,-10],[20,0]],[[20,0],[0,10]],[[0,10],[-20,0]]])this.line([a,b],'#5f7d4a',3);
+    for(let i=0;i<14;i++){const x=(hash(i,3)-.5)*30,y=(hash(i,5)-.5)*14;this.ellipse(x,y-2,2.2,1.8,'#6f8f4f');this.ellipse(x,y-3,1.3,1.1,['#e48aa0','#d4644f','#f1c6d0','#f3e9c8'][i%4]);}
+    this.line([[-4,4],[-4,-10]],'#8a7552',1);this.line([[4,4],[4,-10]],'#8a7552',1);this.ctx.beginPath();this.ctx.ellipse(0,-10,4,3,0,Math.PI,0);this.ctx.strokeStyle='#6f8f4f';this.ctx.lineWidth=2;this.ctx.stroke();for(let i=0;i<5;i++)this.ellipse(-4+i*2,-12+Math.abs(i-2)*.8,1,1,'#e48aa0');
+  }
+  grandFountain(){
+    this.diamond(0,0,22,11,'#d9d1b3');this.ellipse(0,1,16,7,'#b9b39b');this.ellipse(0,0,14,6,'#8fc0c8');this.ellipse(0,-6,7,3,'#c9c3aa');this.ellipse(0,-7,6,2.4,'#a8d0d6');this.rect(-1.5,-16,3,9,'#d9d1b3');this.ellipse(0,-16,3,1.3,'#c9c3aa');
+    if(!this.reduced)for(let i=0;i<10;i++){const f=(this.time*.8+i/10)%1,a=i/10*Math.PI*2;this.ellipse(Math.cos(a)*f*11,-17+f*16-Math.sin(f*Math.PI)*8,1,1,`rgba(226,241,245,${(1-f)*.95})`);}
+  }
+  carillon(){
+    this.ellipse(4,4,14,5,'#58654418');
+    this.poly([[-6,-2],[0,1],[0,-40],[-6,-43]],'#ddd2b4');this.poly([[0,1],[6,-2],[6,-43],[0,-40]],'#bdb699');
+    this.poly([[-5,-30],[0,-28],[0,-36],[-5,-38]],'#5d564b');const swing=this.reduced?0:Math.sin(this.time*2)*1.2;this.ellipse(-2.5+swing,-32,1.8,2.2,'#c9a24e');
+    this.ellipse(3,-20,2.4,2.4,'#f3eedd');this.line([[3,-20],[3,-22]],'#3f3a36',.6);this.poly([[-8,-43],[0,-54],[8,-43],[0,-40]],'#6f8a8c');this.line([[0,-54],[0,-58]],'#c9a24e',1);
   }
   zoo(){
     const t=this.reduced?0:this.time;

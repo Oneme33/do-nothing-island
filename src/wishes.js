@@ -1,6 +1,7 @@
 import {currentRelative} from './family.js';
 import {findTreasure} from './coast.js';
 import {startParty} from './spectacle.js';
+import {earnCommission} from './commissions.js';
 
 const wishNear=(a,b,r=3)=>Math.hypot(a.x-b.x,a.y-b.y)<=r;
 const wishClamp=n=>Math.max(0,Math.min(100,n));
@@ -25,7 +26,7 @@ function rewardWish(s,wish){
 function closeWish(s,status){
  const state=ensureWishes(s),wish=state.active;if(!wish)return;
  wish.status=status;wish.closedAt=s.year;
- if(status==='helped'){const lasting=rewardWish(s,wish);if(lasting)wish.thanks=`${wish.thanks||'Het is gelukt.'} ${lasting}`;startParty(s,s.tile(wish.x,wish.y),'Een feestje als dank');}
+ if(status==='helped'){earnCommission(s);const lasting=rewardWish(s,wish);if(lasting)wish.thanks=`${wish.thanks||'Het is gelukt.'} ${lasting}`;startParty(s,s.tile(wish.x,wish.y),'Een feestje als dank');}
  if(status==='helped'){s.influence.trust=wishClamp(s.influence.trust+3);s.influence.dependence=wishClamp(s.influence.dependence+1.5);}
  // Wishes come about twice as often as before, so each unanswered one weighs half as much.
  if(status==='independent'){s.influence.trust=wishClamp(s.influence.trust+.5);s.influence.dependence=wishClamp(s.influence.dependence-.5);}

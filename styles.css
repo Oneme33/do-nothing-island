@@ -126,3 +126,8 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .island-window canvas:focus-visible{outline:3px solid #8aa36c;outline-offset:-3px}
 
 .score-row .score-note{grid-column:1/-1;margin-top:-6px;font-size:10px;color:#5f6a5e;text-transform:none;line-height:1.4}
+
+.commission-box{background:#f1efe0;border:1px solid #d9d2b8;border-radius:8px;padding:12px 14px;margin:12px 0;text-align:left}
+.commission-box h3{margin:0 0 4px;font-size:13px}
+.commission-choices{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.commission-choices button{font-size:11px;padding:7px 11px;border-radius:16px;border:1px solid #cdd8b4;background:#e2ead0;color:#3f5536;cursor:pointer}

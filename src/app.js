@@ -14,6 +14,7 @@ import {makePostcard,makeEndCard,downloadCanvas} from './postcard.js';
 import {DAY_SECONDS} from './daylight.js';
 import {feelings} from './feel.js';
 import {WEATHER,weatherActive} from './weather.js';
+import {COMMISSIONS,ensureCommissions,placeCommission,canCommission} from './commissions.js';
 import {ensureWishes,dismissWish,WISH_OUTCOMES,canHelpWish,helpActiveWish} from './wishes.js';
 import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
 import {chronicleChapters,chroniclePlace,CHAPTER_ILLUSTRATIONS} from './chronicle.js';
@@ -197,7 +198,7 @@ let bookPage='journal';
 function renderBookPage(name){
   if(name==='journal')renderJournal();
   else if(name==='family')renderFamily();
-  else if(name==='wishes')renderWishes();
+  else if(name==='wishes'){renderWishes();renderCommissions();}
   else if(name==='challenges'){ensureChallenges(sim).revealed=true;renderChallenges();}
   else if(name==='museum')renderMuseum();
   else renderCollection();
@@ -213,6 +214,15 @@ function openBook(name=bookPage){
   updatePause();
 }
 function openWishes(){openBook('wishes');}
+// Commissions: choose in the book, then point at a free plot on the island.
+let commissionChoice=null;
+function renderCommissions(){
+  const c=ensureCommissions(sim);$('commission-box').hidden=c.available<1;
+  $('commission-note').textContent=`Je mag ${c.available===1?'één bouwwerk':`${c.available} bouwwerken`} kiezen. Daarna klik je op een vrije plek op het eiland.`;
+}
+for(const type of Object.keys(COMMISSIONS))$(`commission-${type}`).addEventListener('click',()=>{
+  commissionChoice=type;$('book-dialog').close();chooseMode('nudge');$('interaction-hint').textContent=`Klik op een vrije plek voor je ${COMMISSIONS[type].name.toLowerCase()}. ${COMMISSIONS[type].effect}`;showToast(`Kies een plek voor je ${COMMISSIONS[type].name.toLowerCase()}.`,3600);
+});
 function updateAwayReport(){
   const report=sim.awayReport;$('away-summary').hidden=!report||report.dismissed;
   if(!report||report.dismissed)return;
@@ -616,6 +626,7 @@ canvas.addEventListener('pointerup',e=>{
     const r=canvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
     const tile=renderer.pick(x,y);
     if(cinemaActive()){cheerCinema();renderer.ripple(x,y);drag=null;return;}
+    if(commissionChoice){const t=sim.tile(tile.x,tile.y);if(canCommission(sim,t)&&placeCommission(sim,commissionChoice,tile.x,tile.y)){showToast(`De bouwers beginnen aan je ${COMMISSIONS[commissionChoice].name.toLowerCase()}.`,3200);commissionChoice=null;chooseMode('nudge');dirtyHistory=true;updateUI();save();}else showToast('Daar kan het niet. Kies een vrije plek, of een plek met alleen een boom.',2800);drag=null;return;}
     if(renderer.pickWishResident(x,y)){openWishes();drag=null;return;}
     if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}drag=null;return;}
     if(sim.ending){showToast("Hun verhaal is klaar. Open het naschrift om vrij verder te spelen.");drag=null;return;}

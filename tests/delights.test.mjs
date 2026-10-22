@@ -36,3 +36,12 @@ test('each island builds one castle, on a site of its own',()=>{
  const sites=new Set();for(const seed of [31,77,5,9]){const s=new Civilization(seed);while(s.year<1300&&!s.court)s.tick();assert.ok(s.court);sites.add(`${s.court.x},${s.court.y}`);assert.equal(buildCastle(s),null,'only once');}
  assert.ok(sites.size>=3,'castles stand in different places');
 });
+import {ensureCommissions,placeCommission} from '../src/commissions.js';
+test('every third helped wish earns a commission you can place on a free plot',()=>{
+ const s=new Civilization(31);while(s.year<300)s.tick();
+ for(let i=0;i<3;i++){s.wishes.active={id:`w${i}`,kind:'pumpkin',mode:'rain',speaker:'Mo',text:'?',x:s.farms[0].x,y:s.farms[0].y,issuedAt:s.year,deadline:s.year+30,status:'active',hidden:false,thing:'regen',noun:'de regen'};s.interfere(s.farms[0].x,s.farms[0].y,'rain');s.year+=40;}
+ assert.equal(ensureCommissions(s).available,1);
+ const plot=s.freeLand.find(t=>!t.reservedFor);assert.equal(placeCommission(s,'grand-fountain',plot.x,plot.y),true);assert.equal(plot.buildSite.type,'grand-fountain');assert.equal(ensureCommissions(s).available,0);
+ assert.equal(placeCommission(s,'carillon',plot.x,plot.y),false,'no second commission without earning it');
+ for(let i=0;i<20;i++)s.tick();assert.equal(plot.building,'grand-fountain');
+});
