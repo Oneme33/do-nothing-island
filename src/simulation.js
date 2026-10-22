@@ -191,7 +191,8 @@ export class Civilization {
   get pressure() { return this.population / Math.max(1,this.capacity); }
   get happiness() { return this.food < 5 ? 'Hungry' : this.protestUntil>this.year?'Restless':this.storm ? 'Concerned' : this.prosperity>78?'Thriving':this.prosperity>40?'Content':'Getting by'; }
   get populationNote() { return /^Six people\./.test(this.currentRemark)&&Math.floor(this.population)!==6?`${Math.floor(this.population)} inwoners. Nog steeds geen vergadering.`:this.currentRemark; }
-  get carCount() { return this.era>=3 && this.power>0 && this.routes.length>2 ? Math.min(9,Math.floor(this.population/45*Math.min(1,this.power/Math.max(1,this.powerDemand)))) : 0; }
+  get vehicleKind() { return this.year<600?'handcart':this.year<1750?'horse':this.year<1900?'coach':this.year<1955?'oldtimer':'car'; }
+  get carCount() { return this.year>=1900 && this.era>=3 && this.power>0 && this.routes.length>2 ? Math.min(9,Math.floor(this.population/45*Math.min(1,this.power/Math.max(1,this.powerDemand)))) : 0; }
   get bikeCount() { return this.year>=1860&&this.era>=2&&this.routes.length>2?Math.min(14,Math.floor(this.population/28)):0; }
   layoutBounds() {
     const land=this.land;return{back:Math.min(...land.map(t=>t.x+t.y)),front:Math.max(...land.map(t=>t.x+t.y)),left:Math.min(...land.map(t=>t.x-t.y)),right:Math.max(...land.map(t=>t.x-t.y))};

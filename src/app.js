@@ -276,7 +276,8 @@ function updateUI(){
   const facilities=['farm','factory','school','science-center'].map(type=>({type,count:sim.buildings.filter(t=>t.building===type).length}));
   const names={farm:'akkers',factory:'fabrieken',school:'scholen','science-center':"wetenschapscentra"};
   $('district-status').textContent=facilities.filter(f=>f.count).map(f=>`${f.count} ${names[f.type]}`).join(' · ');
-  $('mobility-status').textContent=sim.carCount||sim.bikeCount?`${sim.carCount} auto’s · ${sim.bikeCount} fietsen`:"Te voet over het eiland";
+  const ride={handcart:'Handkarren',horse:'Paard en wagen',coach:'Koetsen',oldtimer:`${Math.max(1,sim.carCount)} oldtimers`,car:`${sim.carCount} auto’s`}[sim.vehicleKind];
+  $('mobility-status').textContent=sim.population<12?'Te voet over het eiland':`${ride}${sim.bikeCount?` · ${sim.bikeCount} fietsen`:''}`;
   const moods=["Een behoorlijk rustig begin","Een klein dorp. Een paar grote ideeën.","De kustlijn staat ter discussie","Een kleine wereld met heel grote plannen","Aardrijkskunde is meer een suggestie"];
   $('island-mood').textContent=sim.ending?nl(sim.outcome.consequence):sim.volcanoActiveUntil>sim.year?"De vulkaan heeft een mening":sim.storm?"De oceaan heeft iets te melden":sim.endgameStarted?"Het eiland maakt zijn laatste grote plannen":moods[sim.era];
   $('weather').querySelector('span').textContent=sim.storm?"Hoogwater. Bezorgde commissies.":sim.pumpBroken?"Een pomp neemt onverwacht vrij.":ambienceLine();

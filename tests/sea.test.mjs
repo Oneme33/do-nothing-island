@@ -27,3 +27,9 @@ test('intervention effects and a bucket brigade draw safely and never change the
  for(let i=0;i<40;i++)assert.doesNotThrow(()=>r.draw(i*100));
  r.reduced=true;assert.doesNotThrow(()=>r.draw(5000));assert.equal(s.serialize(),before);
 });
+test('vehicles follow history from handcarts to modern cars',()=>{
+ const s=new Civilization(31);const kinds=[];for(const y of [100,800,1800,1920,2000]){s.year=y;kinds.push(s.vehicleKind);}
+ assert.deepEqual(kinds,['handcart','horse','coach','oldtimer','car']);
+ const t=new Civilization(31);while(t.year<1890)t.tick();assert.equal(t.carCount,0,'no cars before 1900');
+ for(const y of [300,1000,1800,1930,2050]){t.year=y;const {canvas}=harness(),r=new IslandRenderer(canvas,t);assert.doesNotThrow(()=>r.draw(16));}
+});
