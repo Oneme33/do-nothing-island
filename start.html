@@ -1943,7 +1943,7 @@ function flagSVG(id,size=18){
 // Small delights: one of each per island, each in a place that suits it.
 const delightAround=t=>[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:t.x+dx,y:t.y+dy}));
 const DELIGHTS=[
- {type:'museum',since:900,population:150,name:'Eilandmuseum',label:'Een museum!',opening:'Het eilandmuseum opent. De eerste bezoeker vraagt waar de wc is, de tweede waar de geschiedenis is.',where:(s,t)=>Math.hypot(t.x,t.y)<=6},
+ {type:'museum',since:900,population:150,name:'Eilandmuseum',label:'Een museum!',opening:'Het eilandmuseum opent. De eerste bezoeker vraagt waar de wc is, de tweede waar de geschiedenis is.',where:(s,t)=>Math.hypot(t.x,t.y)<=10},
  {type:'circus',since:1650,population:250,name:'Circustent',label:'Hooggeëerd publiek!',opening:'Een circus slaat zijn tent op. De clown blijkt de burgemeester van vroeger te zijn.',where:(s,t)=>Math.hypot(t.x,t.y)>=3&&Math.hypot(t.x,t.y)<=9},
  {type:'station',since:1860,population:400,name:'Treinstation',label:'Instappen!',opening:'Het eiland krijgt een treinstation. Het spoor is kort, maar de conducteur fluit met heel veel overtuiging.',where:(s,t)=>Math.hypot(t.x,t.y)>=4},
  {type:'pool',since:1930,population:500,name:'Openluchtzwembad',label:'Bommetje!',opening:'Een openluchtzwembad opent. De zee doet alsof ze niet beledigd is.',where:(s,t)=>Math.hypot(t.x,t.y)>=3},
@@ -2017,6 +2017,50 @@ function advanceCourt(s){
  s.log('Het hof verhuist naar een nieuw paleis op de mooiste plek van het eiland. Het eerste huis blijft van de familie; de koning neemt alleen het servies mee.','palace',{x:tile.x,y:tile.y});
  startParty(s,tile,'Inhuldiging van het nieuwe paleis',['De trap is zo lang dat de koning onderweg pauzeert.','Er zijn meer kamers dan mensen.','De lakeien oefenen buigen. Twee vallen om.'],6);s.rebuildRoads();
  return tile;
+}
+
+// Weather with consequences. Its own hash keeps the simulation's random numbers untouched.
+const wxHash=(seed,a,b=0)=>{let x=(seed^Math.imul(a+11,0x2c1b3c6d)^Math.imul(b+5,0x297a2d39))>>>0;x=Math.imul(x^(x>>>15),0x85ebca6b);x^=x>>>13;return(x>>>0)/4294967296;};
+const WEATHER={
+ shower:{years:2,line:'Regenbui. De akkers drinken zich vol.',log:'Een flinke regenbui trekt over het eiland. De akkers zijn blij, de was minder.'},
+ thunder:{years:1,line:'Onweer. Iedereen telt de seconden.',log:'Onweer! De donder rolt over de daken en de bliksem zoekt een doel.'},
+ fog:{years:3,line:'Mist. De zee is even weg.',log:'Een dikke mist hangt over de kust. De vissers blijven thuis en vertellen sterke verhalen.'},
+ drought:{years:4,line:'Droogte. De putten worden dieper.',log:'Een lange droogte. Het gras wordt geel en de putten worden een stukje dieper gegraven.'},
+ heatwave:{years:2,line:'Hittegolf. Het strand is vol.',log:'Een hittegolf! Iedereen gaat naar het strand, en de ijssalon draait overuren.'},
+ snowstorm:{years:2,line:'Sneeuwstorm. Iedereen blijft binnen.',log:'Een sneeuwstorm bedekt het eiland. Kachels branden, soep pruttelt, niemand gaat de deur uit.'}
+};
+const KINDS=['shower','shower','thunder','fog','drought','heatwave','snowstorm'];
+function ensureWeather(s){s.weather??=null;s.nextWeather??=30+Math.floor(wxHash(s.seed,1)*20);return s.weather;}
+function weatherActive(s){return s.weather&&s.year<=s.weather.until?s.weather.kind:null;}
+function strike(s){
+ const targets=s.land.filter(t=>['tree','forest','house','hut','townhouse','farm','windmill'].includes(t.building)&&!t.fire);if(!targets.length)return null;
+ const t=targets[Math.floor(wxHash(s.seed,s.year,7)*targets.length)];
+ // Lightning rods arrive with the age of steam and stop most strikes from becoming fires.
+ const rod=s.year>=1750&&wxHash(s.seed,s.year,8)<.75;
+ s.weather.strike={x:t.x,y:t.y};
+ if(rod){s.log('De bliksem slaat in, maar de bliksemafleider vangt hem op. De buurt applaudisseert voor een stuk ijzer.','storm',{x:t.x,y:t.y});return t;}
+ startBlaze(s,t);s.log('De bliksem slaat in! Er ontstaat brand en de emmers komen tevoorschijn.','fire',{x:t.x,y:t.y});s.signal('rumble',t,'Bliksem!');return t;
+}
+function advanceWeather(s){
+ ensureWeather(s);
+ const kind=weatherActive(s);
+ if(kind){
+  // Effects for every year the weather lasts.
+  if(kind==='shower'){s.food+=s.population*.04;for(const f of s.farms)f.wetUntil=Math.max(f.wetUntil||0,s.year+2);for(const t of s.land)if(t.fire)t.fire.until=Math.min(t.fire.until,s.year);}
+  if(kind==='fog'&&!s.land.some(t=>t.building==='lighthouse'))s.prosperity=Math.max(10,s.prosperity-1.2);
+  if(kind==='drought'){const relief=s.land.filter(t=>t.spring||t.building==='well').length;s.freshwater=Math.max(5,s.freshwater-Math.max(1,4-relief));s.food*=.97;}
+  if(kind==='heatwave'){s.freshwater=Math.max(5,s.freshwater-1.5);if(s.buildings.some(t=>t.building==='ice-cream'))s.prosperity=Math.min(94,s.prosperity+1);}
+  if(kind==='snowstorm'){s.food*=.97;s.wood=Math.max(0,s.wood*.94);}
+  return kind;
+ }
+ if(s.weather&&s.weather.kind==='shower'&&!s.weather.rainbow&&s.year===s.weather.until+1){s.weather.rainbow=s.year;}
+ if(s.year<s.nextWeather||s.ending||s.storm)return null;
+ const pick=KINDS[Math.floor(wxHash(s.seed,s.year,3)*KINDS.length)],def=WEATHER[pick];
+ s.weather={kind:pick,since:s.year,until:s.year+def.years-1};
+ s.nextWeather=s.year+18+Math.floor(wxHash(s.seed,s.year,4)*18);
+ s.log(def.log,'storm');
+ if(pick==='thunder')strike(s);
+ return pick;
 }
 
 const SAVE_VERSION = 1;
@@ -2387,7 +2431,7 @@ class Civilization {
     advancePleasures(this);advanceCoast(this);advanceSquare(this);
     // Delights do not wait for a housing lull: they claim a fitting free plot when their time comes.
     if(this.year%9===4&&!this.storm)planDelight(this);
-    advanceMonuments(this);advanceCourt(this);
+    advanceMonuments(this);advanceCourt(this);advanceWeather(this);
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);
@@ -3255,7 +3299,8 @@ function drawSeaLife(r){
  const s=r.sim;if(s.ending)return;
  const c=r.ctx,layout=seaLayout(r),light=r.light||{phase:.5},time=r.reduced?0:r.time;
  // Boats leave after sunrise and come home before dark.
- const out=seaSmooth(.27,.36,light.phase)*(1-seaSmooth(.64,.73,light.phase));
+ const fog=s.weather&&s.year<=s.weather.until&&['fog','snowstorm','thunder'].includes(s.weather.kind);
+ const out=fog?0:seaSmooth(.27,.36,light.phase)*(1-seaSmooth(.64,.73,light.phase));
  const boats=Math.min(6,layout.docks.length*2+(s.era>=1?1:0));
  for(let i=0;i<boats;i++){
   const dock=layout.docks[i%Math.max(1,layout.docks.length)];
@@ -3384,6 +3429,40 @@ function drawFestive(r){
    if(cycle<.3)r.ellipse(cx,cy+60*(1-cycle/.3),1.2,1.2,'#fff3c4');
    else{const open=(cycle-.3)/.7;c.save();c.globalAlpha=(1-open)*dark;for(let i=0;i<12;i++){const a=i/12*Math.PI*2;r.ellipse(cx+Math.cos(a)*open*22,cy+Math.sin(a)*open*14+open*6,1.4,1.4,col);}c.restore();}}
  }
+}
+
+// How the weather looks: rain, lightning, fog banks, a dry tint, heat shimmer, snow and a rainbow afterwards.
+const wfHash=(a,b)=>{const n=Math.sin(a*127.1+b*311.7)*43758.5453;return n-Math.floor(n);};
+function drawWeather(r){
+ const s=r.sim,w=s.weather;if(!w||s.ending)return;
+ const active=s.year<=w.until?w.kind:null,c=r.ctx,W=r.width,H=r.height,t=r.reduced?0:r.time;
+ c.save();
+ if(active==='shower'||active==='thunder'){
+  c.fillStyle=active==='thunder'?'rgba(40,52,70,.22)':'rgba(90,110,110,.08)';c.fillRect(0,0,W,H);
+  c.strokeStyle='rgba(225,235,235,.45)';c.lineWidth=.8;
+  for(let i=0;i<(active==='thunder'?140:100);i++){const x=(wfHash(i,2)*W+t*30)%W,y=(wfHash(i,3)*H+t*180)%H;c.beginPath();c.moveTo(x,y);c.lineTo(x-3,y+10);c.stroke();}
+  if(active==='thunder'&&!r.reduced&&(t%6)<.14){
+   c.fillStyle='rgba(255,255,240,.45)';c.fillRect(0,0,W,H);
+   if(w.strike){const p=r.point(w.strike.x,w.strike.y);c.strokeStyle='#fffbe0';c.lineWidth=2.2;c.beginPath();let x=p.x+30,y=0;c.moveTo(x,y);for(let k=1;k<=6;k++){x=p.x+30-30*k/6+(wfHash(k,Math.floor(t))-.5)*26;y=(p.y-20)*k/6;c.lineTo(x,y);}c.stroke();}
+  }
+ }else if(active==='fog'){
+  c.fillStyle='rgba(238,242,240,.38)';c.fillRect(0,0,W,H);
+  for(let i=0;i<6;i++){const y=H*(.2+i*.13),x=((t*8*(i%2?1:-1))+i*140)%(W+300)-150;c.fillStyle='rgba(248,250,248,.35)';c.beginPath();c.ellipse(x+W/2,y,W*.45,26,0,0,Math.PI*2);c.fill();}
+ }else if(active==='drought'){
+  c.fillStyle='rgba(214,180,110,.14)';c.fillRect(0,0,W,H);
+ }else if(active==='heatwave'){
+  c.fillStyle='rgba(255,196,120,.09)';c.fillRect(0,0,W,H);
+  if(!r.reduced){c.strokeStyle='rgba(255,255,255,.12)';c.lineWidth=1;for(let i=0;i<14;i++){const y=(wfHash(i,9)*H+t*10)%H;c.beginPath();for(let x=0;x<=W;x+=20)c[x?'lineTo':'moveTo'](x,y+Math.sin(x*.05+t*3+i)*2);c.stroke();}}
+ }else if(active==='snowstorm'){
+  c.fillStyle='rgba(240,244,248,.2)';c.fillRect(0,0,W,H);c.fillStyle='rgba(255,255,255,.9)';
+  for(let i=0;i<160;i++){const x=(wfHash(i,4)*W+t*40+Math.sin(t+i)*10)%W,y=(wfHash(i,5)*H+t*55)%H;const rad=1+wfHash(i,6)*1.4;c.beginPath();c.ellipse(x,y,rad,rad,0,0,Math.PI*2);c.fill();}
+ }
+ // A rainbow for a little while after a shower.
+ if(!active&&w.rainbow&&s.year-w.rainbow<3){
+  const cx=W*.5,cy=H*.95,colours=['#e46b5d','#eda04f','#efd36a','#8cc07a','#6fa8d6','#8f7fc4'];c.globalAlpha=.28;c.lineWidth=7;
+  colours.forEach((col,i)=>{c.strokeStyle=col;const rad=H*.85-i*7;c.beginPath();c.ellipse(cx,cy,rad,rad,0,Math.PI*1.08,Math.PI*1.92);c.stroke();});
+ }
+ c.restore();
 }
 
 // A soundscape that grows with the island, synthesised in the browser: no audio files.
@@ -3626,6 +3705,7 @@ class IslandRenderer {
     this.drawBirds();
     this.drawRipples();
     if(this.sim.storm)this.drawRain();
+    drawWeather(this);
     drawDaylight(this,this.light);
     this.drawEffectLabels();
     this.drawDistrictLabels();
@@ -5003,7 +5083,9 @@ function updateAwayReport(){
 }
 const seasonLines={lente:'Lente. Alles loopt uit, ook de vergaderingen.',zomer:'Zomer. Iedereen weet een beter strand.',herfst:'Herfst. De bladeren nemen ontslag.',winter:'Winter. Sneeuw op de bergen, soep in de pannen.'};
 function ambienceLine(){
-  const light=renderer.light;
+  const light=renderer.light,weather=weatherActive(sim);
+  if(weather)return WEATHER[weather].line;
+  if(sim.weather?.rainbow&&sim.year-sim.weather.rainbow<3)return 'Een regenboog! Iedereen wijst tegelijk.';
   if(sim.config.dayNight===false||!light)return sim.era>=3?"Stijgende zee. Optimistische ingenieurs.":"Kalme zee. Kleine ambities.";
   if(light.night)return sim.power>0?'Nacht. De straatlantaarns doen het werk.':'Nacht. Een paar ramen houden de wacht.';
   if(light.dusk>.6)return light.phase<.5?'Ochtendgloren. De eerste bakker is al op.':'Avondrood. Iemand roept dat het eten klaar is.';

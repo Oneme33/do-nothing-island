@@ -13,6 +13,7 @@ import {islandIdentity,flagSVG} from './identity.js';
 import {makePostcard,makeEndCard,downloadCanvas} from './postcard.js';
 import {DAY_SECONDS} from './daylight.js';
 import {feelings} from './feel.js';
+import {WEATHER,weatherActive} from './weather.js';
 import {ensureWishes,dismissWish,WISH_OUTCOMES,canHelpWish,helpActiveWish} from './wishes.js';
 import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
 import {chronicleChapters,chroniclePlace,CHAPTER_ILLUSTRATIONS} from './chronicle.js';
@@ -220,7 +221,9 @@ function updateAwayReport(){
 }
 const seasonLines={lente:'Lente. Alles loopt uit, ook de vergaderingen.',zomer:'Zomer. Iedereen weet een beter strand.',herfst:'Herfst. De bladeren nemen ontslag.',winter:'Winter. Sneeuw op de bergen, soep in de pannen.'};
 function ambienceLine(){
-  const light=renderer.light;
+  const light=renderer.light,weather=weatherActive(sim);
+  if(weather)return WEATHER[weather].line;
+  if(sim.weather?.rainbow&&sim.year-sim.weather.rainbow<3)return 'Een regenboog! Iedereen wijst tegelijk.';
   if(sim.config.dayNight===false||!light)return sim.era>=3?"Stijgende zee. Optimistische ingenieurs.":"Kalme zee. Kleine ambities.";
   if(light.night)return sim.power>0?'Nacht. De straatlantaarns doen het werk.':'Nacht. Een paar ramen houden de wacht.';
   if(light.dusk>.6)return light.phase<.5?'Ochtendgloren. De eerste bakker is al op.':'Avondrood. Iemand roept dat het eten klaar is.';

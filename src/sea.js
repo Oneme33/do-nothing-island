@@ -30,7 +30,8 @@ export function drawSeaLife(r){
  const s=r.sim;if(s.ending)return;
  const c=r.ctx,layout=seaLayout(r),light=r.light||{phase:.5},time=r.reduced?0:r.time;
  // Boats leave after sunrise and come home before dark.
- const out=seaSmooth(.27,.36,light.phase)*(1-seaSmooth(.64,.73,light.phase));
+ const fog=s.weather&&s.year<=s.weather.until&&['fog','snowstorm','thunder'].includes(s.weather.kind);
+ const out=fog?0:seaSmooth(.27,.36,light.phase)*(1-seaSmooth(.64,.73,light.phase));
  const boats=Math.min(6,layout.docks.length*2+(s.era>=1?1:0));
  for(let i=0;i<boats;i++){
   const dock=layout.docks[i%Math.max(1,layout.docks.length)];

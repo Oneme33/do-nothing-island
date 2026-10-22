@@ -1,7 +1,7 @@
 // Small delights: one of each per island, each in a place that suits it.
 const delightAround=t=>[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:t.x+dx,y:t.y+dy}));
 export const DELIGHTS=[
- {type:'museum',since:900,population:150,name:'Eilandmuseum',label:'Een museum!',opening:'Het eilandmuseum opent. De eerste bezoeker vraagt waar de wc is, de tweede waar de geschiedenis is.',where:(s,t)=>Math.hypot(t.x,t.y)<=6},
+ {type:'museum',since:900,population:150,name:'Eilandmuseum',label:'Een museum!',opening:'Het eilandmuseum opent. De eerste bezoeker vraagt waar de wc is, de tweede waar de geschiedenis is.',where:(s,t)=>Math.hypot(t.x,t.y)<=10},
  {type:'circus',since:1650,population:250,name:'Circustent',label:'Hooggeëerd publiek!',opening:'Een circus slaat zijn tent op. De clown blijkt de burgemeester van vroeger te zijn.',where:(s,t)=>Math.hypot(t.x,t.y)>=3&&Math.hypot(t.x,t.y)<=9},
  {type:'station',since:1860,population:400,name:'Treinstation',label:'Instappen!',opening:'Het eiland krijgt een treinstation. Het spoor is kort, maar de conducteur fluit met heel veel overtuiging.',where:(s,t)=>Math.hypot(t.x,t.y)>=4},
  {type:'pool',since:1930,population:500,name:'Openluchtzwembad',label:'Bommetje!',opening:'Een openluchtzwembad opent. De zee doet alsof ze niet beledigd is.',where:(s,t)=>Math.hypot(t.x,t.y)>=3},
