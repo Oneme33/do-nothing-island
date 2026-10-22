@@ -4842,13 +4842,14 @@ $('intro-next').addEventListener('click',()=>{if(introStep<2){introStep++;update
 $('cinema-skip').addEventListener('click',completeCinema);
 $('tour-skip').addEventListener('click',finishTour);
 // 3.6: photo mode hides the interface, offers day or night and saves a postcard.
-let photoPaused=false;
+let photoPaused=false,photoOn=false;
 function setPhotoMode(on){
+  photoOn=on;
   $('island-window').classList.toggle('photo-mode',on);$('photo-bar').hidden=!on;$('photo-mode').setAttribute('aria-pressed',String(on));
   if(on){photoPaused=paused;paused=true;}else paused=photoPaused;updatePause();
 }
 function setPhotoLight(night){const day=Math.floor(renderer.dayClock/DAY_SECONDS);renderer.dayClock=(day+(night?.02:.5))*DAY_SECONDS;renderer.draw(performance.now());}
-$('photo-mode').addEventListener('click',()=>setPhotoMode(!$('island-window').classList.contains('photo-mode')));
+$('photo-mode').addEventListener('click',()=>setPhotoMode(!photoOn));
 $('photo-done').addEventListener('click',()=>setPhotoMode(false));
 $('photo-day').addEventListener('click',()=>setPhotoLight(false));
 $('photo-night').addEventListener('click',()=>setPhotoLight(true));
