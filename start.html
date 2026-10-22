@@ -101,6 +101,8 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .island-window canvas{transition:filter 1.6s ease}
 .island-window.age-shift canvas{filter:sepia(.35) saturate(1.15) brightness(1.04)}
 @media (prefers-reduced-motion:reduce){.age-card{animation:none}.island-window canvas{transition:none}}
+
+.island-flag{vertical-align:-2px;border-radius:2px;box-shadow:0 0 0 .5px #0002}
 </style>
 </head>
 <body>
@@ -1819,6 +1821,34 @@ function advanceSquare(s){
  square.builtYear=s.year;
  s.log('Voor het eerste huis wordt een plein aangelegd. Niemand weet nog waarvoor, maar iedereen gaat er alvast staan.','culture',{x:tiles[0].x,y:tiles[0].y});
  s.signal('celebrate',tiles[0],'Een dorpsplein!');s.rebuildRoads();
+}
+
+// Every island earns a name and a flag from its seed and, once it has one, its character.
+const NAME_PARTS={
+ none:['Nooitgedacht','Boomrust','Wolkenrijk','Schelpenoog','Lantaarnoog','Kribbeland'],
+ harbor:['Ankerhof','Zeewaard','Meeuwenoord','Kribbeland'],
+ garden:['Groenoog','Tuinewaard','Knolrijk','Bloesemhoek'],
+ inventor:['Knutseloog','Ketelhaven','Vonkenrijk','Tandwielerwaard'],
+ builder:['Hoogmoed','Torenwaard','Steenrijk','Dakkerland']
+};
+const NAME_PREFIX=['','Lutje ','Groot ','Oud ','Klein ','Nieuw '];
+const FLAG_STYLE={none:['#5f7f63','#f1ead2','tree'],harbor:['#3f5f7a','#f3efe2','anchor'],garden:['#6f8f4f','#f3e9c8','leaf'],inventor:['#b07a3a','#e9e1c8','gear'],builder:['#a35a45','#efe2c6','tower']};
+const idHash=n=>{let x=(n>>>0)^0x9e3779b9;x=Math.imul(x^(x>>>16),0x45d9f3b);return(x^(x>>>16))>>>0;};
+function islandIdentity(s){
+ const kind=NAME_PARTS[s.character]?s.character:'none',h=idHash(s.seed||1),parts=NAME_PARTS[kind];
+ const [main,second,symbol]=FLAG_STYLE[kind];
+ return{name:NAME_PREFIX[h%NAME_PREFIX.length]+parts[(h>>>4)%parts.length],kind,main,second,symbol,stripe:(h>>>8)%2===0};
+}
+const SYMBOLS={
+ tree:'<circle cx="15" cy="9" r="4"/><rect x="14.3" y="11" width="1.4" height="5"/>',
+ anchor:'<path d="M15 5v11M12 8h6M10 12c1 3 9 3 10 0" fill="none" stroke-width="1.6"/>',
+ leaf:'<path d="M10 15c0-6 5-9 10-9-1 6-4 9-10 9Z"/>',
+ gear:'<circle cx="15" cy="10.5" r="4.2" fill="none" stroke-width="2.4" stroke-dasharray="2 1.3"/>',
+ tower:'<path d="M12 16V8h2v2h2V8h2v8Z"/>'
+};
+function flagSVG(id,size=18){
+ const fill=id.second,stroke=id.second;
+ return `<svg class="island-flag" width="${size*1.5}" height="${size}" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="${id.main}"/>${id.stripe?`<rect y="15" width="30" height="5" fill="${id.second}" opacity=".75"/>`:`<rect width="6" height="20" fill="${id.second}" opacity=".75"/>`}<g fill="${fill}" stroke="${stroke}">${SYMBOLS[id.symbol]}</g></svg>`;
 }
 
 // Small delights: one of each per island, each in a place that suits it.
@@ -3896,6 +3926,9 @@ class IslandRenderer {
       this.person(0,6,'#a37b5f',3);lamp(-18,1);
     }else if(role==='back'){
       planter(-12,-1);planter(12,-1);bench(0,3);this.person(-2,2,'#899e78',4);
+      // The island's own flag on the square.
+      const id=islandIdentity(this.sim),wave=this.reduced?0:Math.sin(this.time*2.4)*1.2;
+      this.line([[6,-2],[6,-34]],'#6d675a',1);this.poly([[6,-34],[19,-33+wave],[19,-25+wave],[6,-26]],id.main);this.poly([[6,-27.6],[19,-26.6+wave],[19,-25+wave],[6,-26]],id.second);this.ellipse(12.5,-30+wave*.5,1.8,1.8,id.second);
     }else{
       // The front stays low, so the square is never hidden: a flower bed and a bench.
       this.diamond(0,1,9,4.5,'#b9a77d');for(let i=0;i<6;i++)this.ellipse(-5+i*2,1+(i%2?-1:1),1.3,1.1,['#d58f7a','#e2c26a','#c98fb0'][i%3]);
@@ -4534,7 +4567,8 @@ function updateUI(){
   $('age-next').textContent=nextAge?`Volgend tijdperk · jaar ${nextAge.year}`:"De toekomst krijgt vorm";
   $('chapter-status').textContent=sim.sandbox?"Vrij spelen · het verhaal is klaar":sim.ending?nl(sim.outcome.title):sim.endgameStarted?`Laatste tijdperk · ${['het overleg','het laatste project','de erfenis'][Math.max(0,sim.endgamePhase)]} · klaar uiterlijk ${sim.finaleDeadline}`:`Laatste tijdperk rond ${sim.endgameYear}`;
   $('chapter-status').classList.toggle('final-age',sim.endgameStarted);
-  $('geography-label').textContent=nl(sim.geography?.name||"Het oorspronkelijke eiland").toUpperCase();
+  const identity=islandIdentity(sim),flagKey=`${identity.name}|${identity.kind}`;
+  if($('geography-label').dataset.identity!==flagKey){$('geography-label').dataset.identity=flagKey;$('geography-label').innerHTML=`${flagSVG(identity,12)} <span>${identity.name.toUpperCase()} · ${nl(sim.geography?.name||'Het oorspronkelijke eiland').toUpperCase()}</span>`;document.title=`${identity.name} · Do Nothing Island`;}
   $('population').textContent=Math.floor(sim.population).toLocaleString();
   if(!shownRemark || /^Six people\./.test(shownRemark)&&Math.floor(sim.population)!==6 || performance.now()-lastRemarkAt>=6500){shownRemark=sim.populationNote;lastRemarkAt=performance.now();$('population-note').textContent=nl(shownRemark);}
   $('happiness').textContent=nl(sim.happiness);

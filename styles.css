@@ -92,3 +92,5 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .island-window canvas{transition:filter 1.6s ease}
 .island-window.age-shift canvas{filter:sepia(.35) saturate(1.15) brightness(1.04)}
 @media (prefers-reduced-motion:reduce){.age-card{animation:none}.island-window canvas{transition:none}}
+
+.island-flag{vertical-align:-2px;border-radius:2px;box-shadow:0 0 0 .5px #0002}

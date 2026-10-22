@@ -8,6 +8,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Huizen verschillen van elkaar.** Elk huis krijgt vanuit zijn plek een eigen gevelkleur, dakkleur, kleur luiken en eigen verhoudingen; sommige hebben bloembakken, andere geen schoorsteen. Een straat ziet er daardoor nooit gekopieerd uit, en hetzelfde huis houdt altijd hetzelfde uiterlijk.
 
+**Naam en vlag.** Elk eiland krijgt een naam en een vlag die bij zijn karakter passen: zeevaarders (anker, blauw), tuiniers (blad, groen), uitvinders (tandwiel, oker) of bouwers (toren, baksteenrood). Zolang het karakter nog niet vaststaat, voert het eiland een boompje. Naam en vlag staan linksonder op het eiland en in de titel van het tabblad, en de vlag wappert op het dorpsplein.
+
 **Nieuwe tijdperken** krijgen een korte titelkaart op het eiland (‘Jaar 600. De middeleeuwen. Torens. Kerken. Meningen.’), een warme kleurgloed over het eiland en, met geluid aan, een eigen muziekmotief.
 
 **Ingrepen die je voelt.** Bij een beving schudt het beeld, rennen bewoners weg en lopen ze daarna weer terug. Regen valt in stralen met spetters op de grond, vuur geeft een rookpluim en zolang iets brandt staat er een emmerbrigade klaar. Een bouwzetje fonkelt even. Met rustige animaties blijft alles stil.

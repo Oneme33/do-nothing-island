@@ -9,6 +9,7 @@ import {ensureFamily,currentRelative,familyLore,sentenceCase} from './family.js'
 import {tourStops} from './tour.js';
 import {museumExhibits} from './museum.js';
 import {Soundscape} from './sound.js';
+import {islandIdentity,flagSVG} from './identity.js';
 import {ensureWishes,dismissWish,WISH_OUTCOMES,canHelpWish,helpActiveWish} from './wishes.js';
 import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
 import {chronicleChapters,chroniclePlace,CHAPTER_ILLUSTRATIONS} from './chronicle.js';
@@ -239,7 +240,8 @@ function updateUI(){
   $('age-next').textContent=nextAge?`Volgend tijdperk · jaar ${nextAge.year}`:"De toekomst krijgt vorm";
   $('chapter-status').textContent=sim.sandbox?"Vrij spelen · het verhaal is klaar":sim.ending?nl(sim.outcome.title):sim.endgameStarted?`Laatste tijdperk · ${['het overleg','het laatste project','de erfenis'][Math.max(0,sim.endgamePhase)]} · klaar uiterlijk ${sim.finaleDeadline}`:`Laatste tijdperk rond ${sim.endgameYear}`;
   $('chapter-status').classList.toggle('final-age',sim.endgameStarted);
-  $('geography-label').textContent=nl(sim.geography?.name||"Het oorspronkelijke eiland").toUpperCase();
+  const identity=islandIdentity(sim),flagKey=`${identity.name}|${identity.kind}`;
+  if($('geography-label').dataset.identity!==flagKey){$('geography-label').dataset.identity=flagKey;$('geography-label').innerHTML=`${flagSVG(identity,12)} <span>${identity.name.toUpperCase()} · ${nl(sim.geography?.name||'Het oorspronkelijke eiland').toUpperCase()}</span>`;document.title=`${identity.name} · Do Nothing Island`;}
   $('population').textContent=Math.floor(sim.population).toLocaleString();
   if(!shownRemark || /^Six people\./.test(shownRemark)&&Math.floor(sim.population)!==6 || performance.now()-lastRemarkAt>=6500){shownRemark=sim.populationNote;lastRemarkAt=performance.now();$('population-note').textContent=nl(shownRemark);}
   $('happiness').textContent=nl(sim.happiness);

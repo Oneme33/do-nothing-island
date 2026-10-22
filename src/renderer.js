@@ -4,6 +4,7 @@ import {daylightAt,drawDaylight,seasonalLeaf,randomDaylightStart} from './daylig
 import {drawSeaLife} from './sea.js';
 import {drawInterventionFx} from './fx.js';
 import {squareRole} from './square.js';
+import {islandIdentity} from './identity.js';
 import { drawFlames, drawBonfire, drawFestivalGround, drawLifeWorld, drawComicBubbles } from './pageants.js';
 const aroundLand=(s,t)=>neighbors(t).every(([x,y])=>s.tile(x,y)?.kind==='land');
 import { neighbors, key } from './simulation.js';
@@ -807,6 +808,9 @@ export class IslandRenderer {
       this.person(0,6,'#a37b5f',3);lamp(-18,1);
     }else if(role==='back'){
       planter(-12,-1);planter(12,-1);bench(0,3);this.person(-2,2,'#899e78',4);
+      // The island's own flag on the square.
+      const id=islandIdentity(this.sim),wave=this.reduced?0:Math.sin(this.time*2.4)*1.2;
+      this.line([[6,-2],[6,-34]],'#6d675a',1);this.poly([[6,-34],[19,-33+wave],[19,-25+wave],[6,-26]],id.main);this.poly([[6,-27.6],[19,-26.6+wave],[19,-25+wave],[6,-26]],id.second);this.ellipse(12.5,-30+wave*.5,1.8,1.8,id.second);
     }else{
       // The front stays low, so the square is never hidden: a flower bed and a bench.
       this.diamond(0,1,9,4.5,'#b9a77d');for(let i=0;i<6;i++)this.ellipse(-5+i*2,1+(i%2?-1:1),1.3,1.1,['#d58f7a','#e2c26a','#c98fb0'][i%3]);
