@@ -3178,6 +3178,14 @@ function drawInterventionFx(r){
    for(let i=0;i<40;i++){const fx=(fxHash(i,1)-.5)*110,fy=(fxHash(i,2)-.5)*55,fall=still?.5:((t*1.8+fxHash(i,3))%1);const x=p.x+fx,y=p.y+fy-40+fall*40;c.beginPath();c.moveTo(x,y);c.lineTo(x-2,y+6);c.stroke();if(fall>.85)r.ellipse(x-2,y+7,2.2,.9,'rgba(220,236,240,.7)');}
   }else if(e.type==='fire'&&t<4.5){
    for(let i=0;i<6;i++){const f=still?.4:((t*.5+i/6)%1);r.ellipse(p.x+Math.sin(f*5+i)*6+f*10,p.y-20-f*55,4+f*10,3+f*7,`rgba(120,115,105,${(1-f)*.35})`);}
+  }else if(/^Een schat/.test(e.label||'')&&t<4){
+   // Treasure: the lid opens, golden rays turn and coins fly up and tumble back down.
+   const glow=Math.min(1,t*2)*(1-Math.max(0,t-3));c.save();c.globalAlpha=.55*glow;
+   for(let i=0;i<8;i++){const a=i/8*Math.PI*2+(still?0:t*.6);c.beginPath();c.moveTo(p.x,p.y-8);c.lineTo(p.x+Math.cos(a-.12)*34,p.y-8+Math.sin(a-.12)*20);c.lineTo(p.x+Math.cos(a+.12)*34,p.y-8+Math.sin(a+.12)*20);c.closePath();c.fillStyle='#f6dc8a';c.fill();}
+   c.restore();
+   r.poly([[p.x-6,p.y],[p.x,p.y+3],[p.x,p.y-3],[p.x-6,p.y-6]],'#8d6542');r.poly([[p.x,p.y+3],[p.x+6,p.y],[p.x+6,p.y-6],[p.x,p.y-3]],'#74543a');
+   const lid=Math.min(1,t*1.5);r.poly([[p.x-6,p.y-6],[p.x,p.y-3],[p.x+2-lid*4,p.y-9-lid*5],[p.x-4-lid*4,p.y-11-lid*4]],'#a37a4f');r.ellipse(p.x,p.y-4,4.5,1.8,'#f1d77a');
+   for(let i=0;i<9;i++){const f=still?.5:Math.min(1,t/1.6+fxHash(i,9)*.2),vx=(fxHash(i,7)-.5)*36,x=p.x+vx*f,y=p.y-6-Math.sin(f*Math.PI)*(26+fxHash(i,8)*14);r.ellipse(x,y,1.8,1.3,'#e5b94a');r.ellipse(x-.4,y-.3,.7,.5,'#fff1b8');}
   }else if((e.type==='nudge'||e.type==='repair')&&t<2.5){
    for(let i=0;i<10;i++){const f=still?.5:((t*.6+fxHash(i,5))%1);r.ellipse(p.x+(fxHash(i,6)-.5)*36,p.y-8-f*36,1.3,1.3,`rgba(240,212,120,${(1-f)})`);}
   }
@@ -3187,6 +3195,41 @@ function drawInterventionFx(r){
   if(!t.fire)continue;const p=r.p(t.x,t.y);
   for(let i=0;i<3;i++){const sway=still?0:Math.sin(r.time*3+i*2)*2,x=p.x+20+i*9,y=p.y+12+i*4.5+sway*.3;r.enqueueActor(y,()=>{r.person(x,y,['#7f9481','#a37b5f','#899e78'][i],still?0:r.time*4+i);r.rect(x-5,y-8+sway,3,3,'#8a8f94');});}
   if(!still){const f=(r.time*.8)%1;r.ellipse(p.x+18-f*14,p.y+4-Math.sin(f*Math.PI)*14,1.6,1.6,'rgba(170,205,220,.8)');}
+ }
+}
+
+// Animals make the island feel lived in. They are drawn only and never change the simulation.
+const animalHash=(a,b)=>{const n=Math.sin(a*41.3+b*289.1)*24634.6;return n-Math.floor(n);};
+function sheep(r,x,y,wool,phase){r.ellipse(x,y-3,4.2,2.8,wool);r.ellipse(x+3.6,y-4.2,1.7,1.5,'#4d4a44');r.line([[x-2,y-1],[x-2,y+1]],'#5d584f',.9);r.line([[x+2,y-1],[x+2+phase*.6,y+1]],'#5d584f',.9);}
+function cow(r,x,y,phase){r.ellipse(x,y-4,5.4,3,'#f2efe6');r.ellipse(x-1.5,y-4.5,1.8,1.3,'#3f3a36');r.ellipse(x+2,y-3.4,1.4,1,'#3f3a36');r.ellipse(x+5,y-5,1.8,1.6,'#e9e3d6');for(const lx of [-3,3])r.line([[x+lx,y-1.5],[x+lx+phase*.5,y+1]],'#5d584f',1);}
+function grazingHorse(r,x,y,phase){r.ellipse(x,y-5,5,2.6,'#8a6a4c');r.poly([[x+4,y-6],[x+7,y-10],[x+8.5,y-8.5],[x+5,y-4.5]],'#8a6a4c');for(const lx of [-3,3])r.line([[x+lx,y-3],[x+lx+phase*.6,y+1]],'#6c5038',1);r.line([[x-5,y-6],[x-7,y-2.5]],'#4f3a2a',1);}
+function deer(r,x,y,phase){r.ellipse(x,y-5,3.8,2,'#a87b52');r.line([[x+3,y-6],[x+5,y-10]],'#a87b52',1.4);r.ellipse(x+5.4,y-10.4,1.4,1.1,'#a87b52');r.line([[x+5,y-11],[x+4,y-14]],'#6e5a44',.7);r.line([[x+6,y-11],[x+7,y-14]],'#6e5a44',.7);for(const lx of [-2,2])r.line([[x+lx,y-3.5],[x+lx+phase*.4,y+1]],'#6e5a44',.8);}
+function rabbit(r,x,y,hop){r.ellipse(x,y-1.6-hop,2,1.4,'#b5a58c');r.ellipse(x+1.6,y-2.8-hop,.9,.8,'#b5a58c');r.line([[x+1.6,y-3.4-hop],[x+1.4,y-5.4-hop]],'#b5a58c',.7);r.ellipse(x-1.8,y-1.7-hop,.6,.6,'#f4f1e8');}
+function seaDuck(r,x,y){r.ellipse(x,y,2.2,1.2,'#f2efe4');r.ellipse(x+1.8,y-1,1,.9,'#3f6b4c');r.ellipse(x+2.8,y-.9,.6,.3,'#d9a24e');}
+function beachGull(r,x,y){r.ellipse(x,y-1.5,2,1.2,'#f6f6f2');r.ellipse(x+1.6,y-2.4,.9,.8,'#f6f6f2');r.line([[x-1.5,y-1.6],[x-3,y-1.2]],'#9aa3a3',.8);r.line([[x+2.4,y-2.4],[x+3.3,y-2.2]],'#d9a24e',.5);}
+function houseCat(r,x,y,color){r.ellipse(x,y-1.8,2,1.5,color);r.ellipse(x+1.8,y-3.2,1.2,1.1,color);r.poly([[x+1,y-4],[x+1.4,y-5.2],[x+1.8,y-4]],color);r.poly([[x+2,y-4],[x+2.5,y-5.2],[x+2.8,y-4]],color);r.line([[x-2,y-1.5],[x-3.4,y-4]],color,.8);}
+function drawAnimals(r){
+ const s=r.sim,still=r.reduced,t=still?0:r.activityTime,winter=(r.light?.winter||0)>.6,night=r.light?.night;
+ let cats=0;
+ for(const tile of r.visibleTiles||[]){
+  if(tile.kind!=='land')continue;const p=r.p(tile.x,tile.y),h=animalHash(tile.x,tile.y);
+  if(tile.building==='farm'&&!tile.fire&&!winter&&!night){
+   const kind=h<.45?'sheep':h<.75?'cow':s.year>=600?'horse':'sheep',n=kind==='sheep'?3:kind==='cow'?2:1;
+   for(let i=0;i<n;i++){const drift=still?0:Math.sin(t*.12+i*2+h*9)*5,x=p.x-10+i*9+drift,y=p.y+(i%2?3:-2),phase=still?0:Math.sin(t*2+i);
+    r.enqueueActor(y+1,()=>kind==='sheep'?sheep(r,x,y,h>.2?'#f4f1e6':'#5c5752',phase):kind==='cow'?cow(r,x,y,phase):grazingHorse(r,x,y,phase));}
+  }else if(tile.building==='forest'&&h<.3&&!night){
+   const x=p.x+Math.sin(t*.08+h*20)*8,y=p.y+4;r.enqueueActor(y+1,()=>deer(r,x,y,still?0:Math.sin(t*1.5)));
+  }else if(!tile.building&&!tile.road&&!tile.buildSite&&!tile.landform&&h<.06&&!winter){
+   const cycle=(t*.5+h*10)%4,hop=cycle<.5?Math.sin(cycle*Math.PI*2)*2.4:0,x=p.x+((t*2+h*40)%24)-12,y=p.y+2;r.enqueueActor(y+1,()=>rabbit(r,x,y,Math.max(0,hop)));
+  }else if(tile.building==='beach'&&h<.4){
+   const x=p.x+(h-.2)*30,y=p.y+3;r.enqueueActor(y+1,()=>beachGull(r,x,y));
+  }else if(['house','townhouse','hut'].includes(tile.building)&&h>.93&&cats<6){
+   cats++;const x=p.x+12,y=p.y+6;r.enqueueActor(y+1,()=>houseCat(r,x,y,['#e0a15c','#3e3a38','#cfc8bc'][Math.floor(h*100)%3]));
+  }
+ }
+ // Ducks paddle along the coast near the beaches.
+ if(!winter)for(const tile of (r.visibleTiles||[]).filter(t=>t.building==='beach').slice(0,3)){
+  const p=r.p(tile.x,tile.y);for(let i=0;i<3;i++){const x=p.x+18+i*6+(still?0:Math.sin(t*.3+i)*6),y=p.y+16+i*2;r.enqueueActor(y,()=>seaDuck(r,x,y));}
  }
 }
 
@@ -3390,6 +3433,7 @@ class IslandRenderer {
     }
     this.drawWorkers();
     drawInterventionFx(this);
+    drawAnimals(this);
     this.drawVisitors();drawLifeWorld(this);
     this.scene.sort((a,b)=>a.depth-b.depth);
     for(const item of this.scene)item.draw();

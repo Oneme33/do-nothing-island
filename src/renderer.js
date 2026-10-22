@@ -3,6 +3,7 @@ import {nl} from './language.js';
 import {daylightAt,drawDaylight,seasonalLeaf,randomDaylightStart} from './daylight.js';
 import {drawSeaLife} from './sea.js';
 import {drawInterventionFx} from './fx.js';
+import {drawAnimals} from './animals.js';
 import {squareRole} from './square.js';
 import {islandIdentity} from './identity.js';
 import { drawFlames, drawBonfire, drawFestivalGround, drawLifeWorld, drawComicBubbles } from './pageants.js';
@@ -155,6 +156,7 @@ export class IslandRenderer {
     }
     this.drawWorkers();
     drawInterventionFx(this);
+    drawAnimals(this);
     this.drawVisitors();drawLifeWorld(this);
     this.scene.sort((a,b)=>a.depth-b.depth);
     for(const item of this.scene)item.draw();

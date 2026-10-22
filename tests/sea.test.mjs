@@ -33,3 +33,8 @@ test('vehicles follow history from handcarts to modern cars',()=>{
  const t=new Civilization(31);while(t.year<1890)t.tick();assert.equal(t.carCount,0,'no cars before 1900');
  for(const y of [300,1000,1800,1930,2050]){t.year=y;const {canvas}=harness(),r=new IslandRenderer(canvas,t);assert.doesNotThrow(()=>r.draw(16));}
 });
+test('animals and a treasure burst draw safely in every season without touching the island',()=>{
+ const s=new Civilization(31);while(s.year<700)s.tick();s.tile(1,1).treasure={id:'coin',year:s.year};const before=s.serialize();
+ for(const season of [.5,2.5,3.5]){const {canvas}=harness(),r=new IslandRenderer(canvas,s);r.dayClock=DAY_SECONDS*2*season+DAY_SECONDS*.5;r.addEffect({type:'celebrate',x:1,y:1,label:'Een schat: de onbekende munt'});for(let i=0;i<30;i++)assert.doesNotThrow(()=>r.draw(i*120));}
+ assert.equal(s.serialize(),before);
+});

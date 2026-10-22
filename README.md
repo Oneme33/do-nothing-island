@@ -24,6 +24,10 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Geluid dat meegroeit.** Het geluid gaat vanzelf aan bij je eerste klik of toets (eerder laten browsers geen geluid toe); met de luidsprekerknop zet je het uit, en die keuze blijft bewaard. Het is een volledig in de browser opgewekte geluidswereld: de zee, vogels overdag, hamers bij bouwplaatsen, kerkklokken vanaf de middeleeuwen, een trambel van 1860 tot 1990, verkeer in de moderne tijd en krekels 's nachts, wanneer alles zachter klinkt. Regen, beving, vuur, bouwen, schatten en een nieuw tijdperk hebben elk een eigen geluid.
 
+**Dieren.** Op de akkers grazen schapen, koeien en vanaf 600 paarden. In het bos lopen herten, op lege grond huppelen konijnen, langs de stranden zwemmen eenden en staan meeuwen, en bij sommige huizen zit een kat. 's Winters en 's nachts zijn de weidedieren binnen.
+
+**Schatten in beeld.** Bij een vondst gaat er een kist open met draaiende gouden stralen, en munten vliegen op en vallen terug.
+
 **Bevingen en vuur doen pijn.** Een beving laat tot drie gewone gebouwen vlak bij het epicentrum instorten tot ruïnes, beschadigt tot zes huizen in de omgeving en kost een tiende van het voedsel en hout; er vertrekken ook wat inwoners. Versterkte huizen scheuren alleen. Vuur slaat vaker over (houten huizen het snelst), verbrandt hout en de oogst van brandende akkers, en een uitgebrand huis kost inwoners. Ruïnes worden na achttien jaar in steen herbouwd. Een brandweer houdt het vuur kleiner.
 
 **Voertuigen gaan mee met de tijd.** Eerst duwen bewoners handkarren, vanaf 600 rijden er paard en wagen, vanaf 1750 koetsen, vanaf 1900 oldtimers en pas vanaf 1955 moderne auto's. Fietsen komen vanaf 1860.

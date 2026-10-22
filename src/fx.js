@@ -14,6 +14,14 @@ export function drawInterventionFx(r){
    for(let i=0;i<40;i++){const fx=(fxHash(i,1)-.5)*110,fy=(fxHash(i,2)-.5)*55,fall=still?.5:((t*1.8+fxHash(i,3))%1);const x=p.x+fx,y=p.y+fy-40+fall*40;c.beginPath();c.moveTo(x,y);c.lineTo(x-2,y+6);c.stroke();if(fall>.85)r.ellipse(x-2,y+7,2.2,.9,'rgba(220,236,240,.7)');}
   }else if(e.type==='fire'&&t<4.5){
    for(let i=0;i<6;i++){const f=still?.4:((t*.5+i/6)%1);r.ellipse(p.x+Math.sin(f*5+i)*6+f*10,p.y-20-f*55,4+f*10,3+f*7,`rgba(120,115,105,${(1-f)*.35})`);}
+  }else if(/^Een schat/.test(e.label||'')&&t<4){
+   // Treasure: the lid opens, golden rays turn and coins fly up and tumble back down.
+   const glow=Math.min(1,t*2)*(1-Math.max(0,t-3));c.save();c.globalAlpha=.55*glow;
+   for(let i=0;i<8;i++){const a=i/8*Math.PI*2+(still?0:t*.6);c.beginPath();c.moveTo(p.x,p.y-8);c.lineTo(p.x+Math.cos(a-.12)*34,p.y-8+Math.sin(a-.12)*20);c.lineTo(p.x+Math.cos(a+.12)*34,p.y-8+Math.sin(a+.12)*20);c.closePath();c.fillStyle='#f6dc8a';c.fill();}
+   c.restore();
+   r.poly([[p.x-6,p.y],[p.x,p.y+3],[p.x,p.y-3],[p.x-6,p.y-6]],'#8d6542');r.poly([[p.x,p.y+3],[p.x+6,p.y],[p.x+6,p.y-6],[p.x,p.y-3]],'#74543a');
+   const lid=Math.min(1,t*1.5);r.poly([[p.x-6,p.y-6],[p.x,p.y-3],[p.x+2-lid*4,p.y-9-lid*5],[p.x-4-lid*4,p.y-11-lid*4]],'#a37a4f');r.ellipse(p.x,p.y-4,4.5,1.8,'#f1d77a');
+   for(let i=0;i<9;i++){const f=still?.5:Math.min(1,t/1.6+fxHash(i,9)*.2),vx=(fxHash(i,7)-.5)*36,x=p.x+vx*f,y=p.y-6-Math.sin(f*Math.PI)*(26+fxHash(i,8)*14);r.ellipse(x,y,1.8,1.3,'#e5b94a');r.ellipse(x-.4,y-.3,.7,.5,'#fff1b8');}
   }else if((e.type==='nudge'||e.type==='repair')&&t<2.5){
    for(let i=0;i<10;i++){const f=still?.5:((t*.6+fxHash(i,5))%1);r.ellipse(p.x+(fxHash(i,6)-.5)*36,p.y-8-f*36,1.3,1.3,`rgba(240,212,120,${(1-f)})`);}
   }
