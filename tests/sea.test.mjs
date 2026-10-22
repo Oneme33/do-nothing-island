@@ -20,3 +20,10 @@ test('fishing boats, gulls, fish and the occasional whale draw safely by day, ni
  }
  assert.equal(s.serialize(),before,'the sea is only drawn');
 });
+test('intervention effects and a bucket brigade draw safely and never change the island',()=>{
+ const s=new Civilization(31);while(s.year<200)s.tick();s.farms[0].fire={started:s.year,until:s.year+9};const before=s.serialize();
+ const {canvas}=harness(),r=new IslandRenderer(canvas,s);
+ for(const type of ['rumble','rain','fire','nudge'])r.addEffect({type,x:2,y:2,title:type});
+ for(let i=0;i<40;i++)assert.doesNotThrow(()=>r.draw(i*100));
+ r.reduced=true;assert.doesNotThrow(()=>r.draw(5000));assert.equal(s.serialize(),before);
+});

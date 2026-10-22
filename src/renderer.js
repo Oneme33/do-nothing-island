@@ -2,6 +2,7 @@ import { cinemaVisible } from './spectacle.js';
 import {nl} from './language.js';
 import {daylightAt,drawDaylight,seasonalLeaf,randomDaylightStart} from './daylight.js';
 import {drawSeaLife} from './sea.js';
+import {drawInterventionFx} from './fx.js';
 import {squareRole} from './square.js';
 import { drawFlames, drawBonfire, drawFestivalGround, drawLifeWorld, drawComicBubbles } from './pageants.js';
 const aroundLand=(s,t)=>neighbors(t).every(([x,y])=>s.tile(x,y)?.kind==='land');
@@ -152,6 +153,7 @@ export class IslandRenderer {
       if(t.landform||t.building||t.buildSite)this.scene.push({depth,draw:()=>{if(t.landform)this.drawLandform(t);if(t.building)this.drawBuilding(t);if(t.buildSite)this.drawBuildingSite(t);}});
     }
     this.drawWorkers();
+    drawInterventionFx(this);
     this.drawVisitors();drawLifeWorld(this);
     this.scene.sort((a,b)=>a.depth-b.depth);
     for(const item of this.scene)item.draw();

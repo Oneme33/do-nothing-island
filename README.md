@@ -8,6 +8,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Huizen verschillen van elkaar.** Elk huis krijgt vanuit zijn plek een eigen gevelkleur, dakkleur, kleur luiken en eigen verhoudingen; sommige hebben bloembakken, andere geen schoorsteen. Een straat ziet er daardoor nooit gekopieerd uit, en hetzelfde huis houdt altijd hetzelfde uiterlijk.
 
+**Ingrepen die je voelt.** Bij een beving schudt het beeld, rennen bewoners weg en lopen ze daarna weer terug. Regen valt in stralen met spetters op de grond, vuur geeft een rookpluim en zolang iets brandt staat er een emmerbrigade klaar. Een bouwzetje fonkelt even. Met rustige animaties blijft alles stil.
+
 **Geluid dat meegroeit.** De geluidsknop zet een volledig in de browser opgewekte geluidswereld aan: de zee, vogels overdag, hamers bij bouwplaatsen, kerkklokken vanaf de middeleeuwen, een trambel van 1860 tot 1990, verkeer in de moderne tijd en krekels 's nachts, wanneer alles zachter klinkt. Regen, beving, vuur, bouwen, schatten en een nieuw tijdperk hebben elk een eigen geluid.
 
 **Polders.** Met molens (vanaf 1250) begint het eiland land te winnen zodra minder dan een vijfde van de grond vrij is, in stukken van vier tegels; met gemalen vanaf de stoomtijd al bij minder dan dertig procent vrij, in grotere stukken. Een eiland groeit zo tegen het einde met zo'n honderd tegels, tot de ingestelde grens.
