@@ -1361,6 +1361,8 @@ function advancePleasures(s){
  ensureSpectacle(s);
  tendFires(s);advanceTraditions(s);
  if(s.festival&&s.year>s.festival.until)s.festival=null;
+ // A party lifts the mood for as long as it lasts.
+ if(s.festival){s.unrest=Math.max(0,(s.unrest||0)-.6);s.prosperity=Math.min(94,s.prosperity+.15);}
  if(s.liveJoke&&s.year>s.liveJoke.until)s.liveJoke=null;
  if(s.year<s.nextFestival||s.storm||s.endgameStarted||s.ending)return;
  const beach=s.beaches.find(t=>t.walkable),bonfire=s.buildings.find(t=>['bonfire','campfire'].includes(t.building));
@@ -1377,7 +1379,7 @@ function advancePleasures(s){
  s.festival={kind:event.kind,x:event.spot.x,y:event.spot.y,title:event.title,quips:event.quips,until:s.year+20};
  s.log(`${event.title}. ${event.quips[Math.floor(s.random()*event.quips.length)]}`,'fun',{x:event.spot.x,y:event.spot.y});
  s.signal('celebrate',event.spot,event.title);s.unrest=Math.max(0,s.unrest-5);s.prosperity=Math.min(94,s.prosperity+2);s.food=Math.max(0,s.food-Math.min(12,s.population*.04));
- s.nextFestival=s.year+55+Math.floor(s.random()*65);
+ s.nextFestival=s.year+30+Math.floor(s.random()*35);
 }
 function jokeAfterTouch(s,spot,type){
  const lines={nudge:['That was absolutely my idea.','The sky has approved the extension.','Unexpected motivation. Highly suspicious.'],rain:['The weather has excellent aim.','The carrots would like to thank you.','Free showers! Cancel the plumbing.'],rumble:['We only just painted that.','Who is moving the furniture?','The ground has lodged a complaint.'],fire:['Outdoor central heating!','Please retain your eyebrows.','The insurance company has left the island.'],repair:['A delivery from absolutely nowhere.']};
@@ -1411,7 +1413,7 @@ function cinemaVisible(s){return !!s.cinematic&&(!s.cinematic.completed||s.endin
 
 // Persistent consequences, civic projects and the finite story of an island.
 const STORY_VERSION=1;
-const eventPriority=type=>({ending:100,endgame:98,palace:96,age:92,discovery:91,treasure:90,lighthouse:80,crisis:90,fire:89,flood:88,abandon:87,reform:86,family:85,interference:84,legacy:82,technology:76,culture:68,land:66,district:65,repair:55,storm:45,life:35,trade:25,farm:20,build:10}[type]||30);
+const eventPriority=type=>({ending:100,endgame:98,palace:96,age:92,discovery:91,treasure:90,delight:83,lighthouse:80,crisis:90,fire:89,flood:88,abandon:87,reform:86,family:85,interference:84,legacy:82,technology:76,culture:68,land:66,district:65,repair:55,storm:45,life:35,trade:25,farm:20,build:10}[type]||30);
 const ENDINGS={
   phoenix:{title:'De Feniksstad.',quote:'Ze zijn vaker herbouwd dan verslagen.',description:'Branden veranderden deze stad. Uit houten wijken verrezen stenen huizen, een vaste brandweer en pleinen waar het lichtfeest elk jaar terugkeert.',consequence:'Een stad die opnieuw begint',detail:'De gevels zijn mooier. De emmers staan klaar. Het verleden is hier geen weggepoetste vlek.'},
   independent:{title:'They figured it out.',quote:'The island would like to take all the credit.',description:'A civilization has learned to live with its limits. Generations come and go; the little world can look after itself.',consequence:'An independent island',detail:'Their greatest achievement is an ordinary tomorrow.'},
@@ -2096,7 +2098,7 @@ class Civilization {
   // 0: a slow village; 1: the windmill age from 1250; 2: land actually won from the sea.
   get housingBoom() { return this.reclaimed.length>0?2:this.year>=1250&&this.buildings.some(t=>t.building==='windmill')?1:0; }
   get pressure() { return this.population / Math.max(1,this.capacity); }
-  get happiness() { return this.food < 5 ? 'Hungry' : this.protestUntil>this.year?'Restless':this.storm ? 'Concerned' : this.prosperity>78?'Thriving':this.prosperity>40?'Content':'Getting by'; }
+  get happiness() { return this.food < 5 ? 'Hungry' : this.protestUntil>this.year?'Restless':this.storm ? 'Concerned' : this.festival&&this.year<=this.festival.until ? 'Feestelijk' : this.prosperity>78?'Thriving':this.prosperity>40?'Content':'Getting by'; }
   get populationNote() { return /^Six people\./.test(this.currentRemark)&&Math.floor(this.population)!==6?`${Math.floor(this.population)} inwoners. Nog steeds geen vergadering.`:this.currentRemark; }
   get vehicleKind() { return this.year<600?'handcart':this.year<1750?'horse':this.year<1900?'coach':this.year<1955?'oldtimer':'car'; }
   get carCount() { return this.year>=1900 && this.era>=3 && this.power>0 && this.routes.length>2 ? Math.min(9,Math.floor(this.population/45*Math.min(1,this.power/Math.max(1,this.powerDemand)))) : 0; }
@@ -2474,7 +2476,7 @@ class Civilization {
       Object.assign(openings,DELIGHT_OPENINGS);
       if(type==='powerplant'&&this.year>=1980)openings.powerplant='Een regelbare reservecentrale versterkt het stroomnet. De stad kiest voor leveringszekerheid.';
       if(['school','library','science-center'].includes(type)){const court=neighbors(t).map(([x,y])=>this.tile(x,y)).find(p=>p?.kind==='land'&&!p.building&&!p.buildSite&&!p.landform&&(!p.reservedFor||p.reservedFor==='knowledge')&&p.district==='knowledge');if(court&&!this.buildings.some(p=>p.building==='campus-square')){court.building='campus-square';court.civicLegacy='The knowledge quarter';court.builtYear=this.year;}}
-      if(openings[type])this.log(this.buildings.filter(t=>t.building===type).length>1?`${openings[type].replace(/The first /,'Another ')} A new neighborhood gets its turn.`:openings[type],['statue','garden','theater','park','forest','beach','playground','fairground'].includes(type)?'culture':['shop','bakery','cafe'].includes(type)?'trade':'technology',{x:t.x,y:t.y});
+      if(openings[type])this.log(this.buildings.filter(t=>t.building===type).length>1?`${openings[type].replace(/The first /,'Another ')} A new neighborhood gets its turn.`:openings[type],DELIGHT_OPENINGS[type]?'delight':['statue','garden','theater','park','forest','beach','playground','fairground'].includes(type)?'culture':['shop','bakery','cafe'].includes(type)?'trade':'technology',{x:t.x,y:t.y});
       else if(this.buildings.length<18)this.log(type==='farm'?'Another field is planted. Dinner looks increasingly likely.':'A new home is finished. The neighbors come over to inspect it.','home',{x:t.x,y:t.y});
     }
     if(changed)this.rebuildRoads();
@@ -2881,7 +2883,7 @@ function museumExhibits(s){
 
 // The closing tour: up to five big moments spread over the island's history, the first home, then the old tree.
 // The family is visited at the first home, so its own entries are not separate stops.
-const TOUR_TYPES=new Set(['interference','treasure','lighthouse','discovery','flood','palace','fire','wish']);
+const TOUR_TYPES=new Set(['interference','treasure','lighthouse','discovery','flood','palace','fire','wish','delight']);
 function tourStops(s){
  const placed=s.history.filter(e=>Number.isFinite(e.x)&&Number.isFinite(e.y)&&s.tile(e.x,e.y)?.kind==='land'&&!(e.x===0&&e.y===0)&&TOUR_TYPES.has(e.type)&&(e.type!=='wish'||s.wishes?.history?.some(w=>w.id===e.wishId&&w.status==='helped')));
  const moments=[];
@@ -3233,6 +3235,34 @@ function drawAnimals(r){
  }
 }
 
+// A real party: bunting, lanterns, a ring of dancers, music notes, a snack stall and fireworks after dark.
+const festHash=(a,b)=>{const n=Math.sin(a*63.7+b*11.3)*31337.7;return n-Math.floor(n);};
+const FEST_COLOURS=['#d4644f','#e2c26a','#7fa3a8','#c98fb0','#93a77b'];
+function drawFestive(r){
+ const f=r.sim.festival;if(!f||r.sim.ending||!Number.isFinite(f.x))return;
+ const c=r.ctx,p=r.p(f.x,f.y),t=r.reduced?0:r.time,dark=r.light?.darkness||0;
+ // Bunting and lanterns on four poles around the party.
+ const poles=[[-30,-6],[0,-21],[30,-6],[0,9]];
+ for(const [x,y] of poles)r.line([[p.x+x,p.y+y],[p.x+x,p.y+y-22]],'#7d7464',1);
+ for(let i=0;i<4;i++){const [ax,ay]=poles[i],[bx,by]=poles[(i+1)%4];
+  for(let k=0;k<6;k++){const u=(k+.5)/6,x=p.x+ax+(bx-ax)*u,y=p.y+ay-22+(by-ay)*u+Math.sin(u*Math.PI)*4;
+   r.poly([[x-2,y],[x+2,y],[x,y+3.5]],FEST_COLOURS[(i+k)%5]);
+   if(k%2===0){r.ellipse(x,y+5,1.6,2,dark>.2?'#ffd98c':'#f0c870');if(dark>.2){c.save();c.globalAlpha=.25*dark;r.ellipse(x,y+5,6,6,'#ffcf7a');c.restore();}}}}
+ // A ring of dancers turning around the centre.
+ for(let i=0;i<8;i++){const a=t*.9+i/8*Math.PI*2,x=p.x+Math.cos(a)*16,y=p.y+Math.sin(a)*8,hop=r.reduced?0:Math.abs(Math.sin(t*5+i))*2;r.enqueueActor(y,()=>r.person(x,y-hop,FEST_COLOURS[i%5],t*6+i));}
+ // A snack stall with a striped roof.
+ r.enqueueActor(p.y+12,()=>{const x=p.x+22,y=p.y+10;r.poly([[x-6,y],[x+6,y-3],[x+6,y-8],[x-6,y-5]],'#b29b74');r.poly([[x-8,y-6],[x+8,y-10],[x+7,y-14],[x-7,y-10]],'#d4644f');r.line([[x-4,y-7],[x+5,y-10]],'#fbf3e4',1.2);});
+ if(r.reduced)return;
+ for(let i=0;i<4;i++){const u=(t*.35+i/4)%1;c.fillStyle=`rgba(90,80,60,${1-u})`;c.font='10px serif';c.fillText(i%2?'♪':'♫',p.x-10+i*7+Math.sin(u*6)*4,p.y-24-u*30);}
+ for(let i=0;i<14;i++){const u=(t*.25+festHash(i,1))%1;r.ellipse(p.x+(festHash(i,2)-.5)*60,p.y-40+u*46,1,1.4,FEST_COLOURS[i%5]);}
+ if(dark>.3){
+  // Fireworks: a few bursts that rise, open and fade.
+  for(let k=0;k<3;k++){const cycle=(t*.4+k*.37)%1,cx=p.x+(festHash(k,Math.floor(t*.4+k*.37))-.5)*120,cy=p.y-70-festHash(k,3)*40,col=FEST_COLOURS[(k+Math.floor(t*.4))%5];
+   if(cycle<.3)r.ellipse(cx,cy+60*(1-cycle/.3),1.2,1.2,'#fff3c4');
+   else{const open=(cycle-.3)/.7;c.save();c.globalAlpha=(1-open)*dark;for(let i=0;i<12;i++){const a=i/12*Math.PI*2;r.ellipse(cx+Math.cos(a)*open*22,cy+Math.sin(a)*open*14+open*6,1.4,1.4,col);}c.restore();}}
+ }
+}
+
 // A soundscape that grows with the island, synthesised in the browser: no audio files.
 class Soundscape{
  constructor(){
@@ -3273,6 +3303,12 @@ class Soundscape{
   if(year>=1860&&year<1990&&!night&&due('tram',35)){this.tone(880,.35,{volume:.035});this.tone(1175,.35,{volume:.03,delay:.18});}
   if(year>=1920&&due('traffic',7))this.hiss(2.4,{volume:.03*quiet,frequency:260,attack:.9});
   if(night&&due('crickets',2.5))for(let i=0;i<4;i++)this.tone(4300,.035,{type:'square',volume:.01,delay:i*.07});
+ }
+ // A cheerful little tune while a party is on, repeated every few seconds.
+ festive(){
+  if(!this.enabled)return;const now=this.ctx.currentTime;if((this.next.festive||0)>now)return;this.next.festive=now+6.5;
+  const tune=[523,659,784,659,698,880,784,659,587,698,659,523];tune.forEach((f,i)=>this.tone(f,.28,{type:'triangle',volume:.025,delay:i*.26}));
+  for(let i=0;i<6;i++)this.tone(131,.18,{volume:.03,delay:i*.52});
  }
  play(type){
   if(!this.enabled)return;
@@ -3434,6 +3470,7 @@ class IslandRenderer {
     this.drawWorkers();
     drawInterventionFx(this);
     drawAnimals(this);
+    drawFestive(this);
     this.drawVisitors();drawLifeWorld(this);
     this.scene.sort((a,b)=>a.depth-b.depth);
     for(const item of this.scene)item.draw();
@@ -4917,7 +4954,7 @@ function frame(now){
     }
   }
   advanceTour(now);
-  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite)});}
+  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;if(sim.festival&&sim.year<=sim.festival.until&&!paused)soundscape.festive();soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite)});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
   if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');}sim.signals=[];}
   presentMoment(now);
@@ -5006,7 +5043,7 @@ $('ending-card').addEventListener('click',()=>{try{const id=islandIdentity(sim),
 $('ending-link').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(islandLink());showToast('Link gekopieerd. Een vriend speelt hetzelfde eiland en mag anders ingrijpen.',3600);}catch{showToast(islandLink(),6000);}});
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));
-$('find-fun').addEventListener('click',()=>focusPlace(sim.buildings.find(t=>t.building==='fairground')||sim.buildings.find(t=>t.building==='festival-ground')||sim.buildings.find(t=>t.building==='bonfire')));
+$('find-fun').addEventListener('click',()=>{if(sim.festival&&sim.year<=sim.festival.until){focusPlace(sim.tile(sim.festival.x,sim.festival.y));showToast(`${nl(sim.festival.title)} · iedereen is welkom.`,3200);return;}showToast(`Nu even geen feest. Het volgende is rond jaar ${sim.nextFestival}.`,3200);focusPlace(sim.buildings.find(t=>t.building==='town-square')||sim.buildings.find(t=>t.building==='fairground')||sim.buildings.find(t=>t.building==='bonfire'));});
 $('ending-continue').addEventListener('click',()=>$('ending-dialog').close());
 $('ending-sandbox').addEventListener('click',()=>{resumeSandbox(sim);beatHoldUntil=0;momentQueue=[];$('ending-dialog').close();updateUI();updatePause();save();});
 $('ending-new').addEventListener('click',()=>newIsland());

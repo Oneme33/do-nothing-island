@@ -396,7 +396,7 @@ function frame(now){
     }
   }
   advanceTour(now);
-  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite)});}
+  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;if(sim.festival&&sim.year<=sim.festival.until&&!paused)soundscape.festive();soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite)});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
   if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');}sim.signals=[];}
   presentMoment(now);
@@ -485,7 +485,7 @@ $('ending-card').addEventListener('click',()=>{try{const id=islandIdentity(sim),
 $('ending-link').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(islandLink());showToast('Link gekopieerd. Een vriend speelt hetzelfde eiland en mag anders ingrijpen.',3600);}catch{showToast(islandLink(),6000);}});
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));
-$('find-fun').addEventListener('click',()=>focusPlace(sim.buildings.find(t=>t.building==='fairground')||sim.buildings.find(t=>t.building==='festival-ground')||sim.buildings.find(t=>t.building==='bonfire')));
+$('find-fun').addEventListener('click',()=>{if(sim.festival&&sim.year<=sim.festival.until){focusPlace(sim.tile(sim.festival.x,sim.festival.y));showToast(`${nl(sim.festival.title)} · iedereen is welkom.`,3200);return;}showToast(`Nu even geen feest. Het volgende is rond jaar ${sim.nextFestival}.`,3200);focusPlace(sim.buildings.find(t=>t.building==='town-square')||sim.buildings.find(t=>t.building==='fairground')||sim.buildings.find(t=>t.building==='bonfire'));});
 $('ending-continue').addEventListener('click',()=>$('ending-dialog').close());
 $('ending-sandbox').addEventListener('click',()=>{resumeSandbox(sim);beatHoldUntil=0;momentQueue=[];$('ending-dialog').close();updateUI();updatePause();save();});
 $('ending-new').addEventListener('click',()=>newIsland());

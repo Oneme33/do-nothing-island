@@ -189,7 +189,7 @@ export class Civilization {
   // 0: a slow village; 1: the windmill age from 1250; 2: land actually won from the sea.
   get housingBoom() { return this.reclaimed.length>0?2:this.year>=1250&&this.buildings.some(t=>t.building==='windmill')?1:0; }
   get pressure() { return this.population / Math.max(1,this.capacity); }
-  get happiness() { return this.food < 5 ? 'Hungry' : this.protestUntil>this.year?'Restless':this.storm ? 'Concerned' : this.prosperity>78?'Thriving':this.prosperity>40?'Content':'Getting by'; }
+  get happiness() { return this.food < 5 ? 'Hungry' : this.protestUntil>this.year?'Restless':this.storm ? 'Concerned' : this.festival&&this.year<=this.festival.until ? 'Feestelijk' : this.prosperity>78?'Thriving':this.prosperity>40?'Content':'Getting by'; }
   get populationNote() { return /^Six people\./.test(this.currentRemark)&&Math.floor(this.population)!==6?`${Math.floor(this.population)} inwoners. Nog steeds geen vergadering.`:this.currentRemark; }
   get vehicleKind() { return this.year<600?'handcart':this.year<1750?'horse':this.year<1900?'coach':this.year<1955?'oldtimer':'car'; }
   get carCount() { return this.year>=1900 && this.era>=3 && this.power>0 && this.routes.length>2 ? Math.min(9,Math.floor(this.population/45*Math.min(1,this.power/Math.max(1,this.powerDemand)))) : 0; }
@@ -567,7 +567,7 @@ export class Civilization {
       Object.assign(openings,DELIGHT_OPENINGS);
       if(type==='powerplant'&&this.year>=1980)openings.powerplant='Een regelbare reservecentrale versterkt het stroomnet. De stad kiest voor leveringszekerheid.';
       if(['school','library','science-center'].includes(type)){const court=neighbors(t).map(([x,y])=>this.tile(x,y)).find(p=>p?.kind==='land'&&!p.building&&!p.buildSite&&!p.landform&&(!p.reservedFor||p.reservedFor==='knowledge')&&p.district==='knowledge');if(court&&!this.buildings.some(p=>p.building==='campus-square')){court.building='campus-square';court.civicLegacy='The knowledge quarter';court.builtYear=this.year;}}
-      if(openings[type])this.log(this.buildings.filter(t=>t.building===type).length>1?`${openings[type].replace(/The first /,'Another ')} A new neighborhood gets its turn.`:openings[type],['statue','garden','theater','park','forest','beach','playground','fairground'].includes(type)?'culture':['shop','bakery','cafe'].includes(type)?'trade':'technology',{x:t.x,y:t.y});
+      if(openings[type])this.log(this.buildings.filter(t=>t.building===type).length>1?`${openings[type].replace(/The first /,'Another ')} A new neighborhood gets its turn.`:openings[type],DELIGHT_OPENINGS[type]?'delight':['statue','garden','theater','park','forest','beach','playground','fairground'].includes(type)?'culture':['shop','bakery','cafe'].includes(type)?'trade':'technology',{x:t.x,y:t.y});
       else if(this.buildings.length<18)this.log(type==='farm'?'Another field is planted. Dinner looks increasingly likely.':'A new home is finished. The neighbors come over to inspect it.','home',{x:t.x,y:t.y});
     }
     if(changed)this.rebuildRoads();

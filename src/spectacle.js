@@ -51,6 +51,8 @@ export function advancePleasures(s){
  ensureSpectacle(s);
  tendFires(s);advanceTraditions(s);
  if(s.festival&&s.year>s.festival.until)s.festival=null;
+ // A party lifts the mood for as long as it lasts.
+ if(s.festival){s.unrest=Math.max(0,(s.unrest||0)-.6);s.prosperity=Math.min(94,s.prosperity+.15);}
  if(s.liveJoke&&s.year>s.liveJoke.until)s.liveJoke=null;
  if(s.year<s.nextFestival||s.storm||s.endgameStarted||s.ending)return;
  const beach=s.beaches.find(t=>t.walkable),bonfire=s.buildings.find(t=>['bonfire','campfire'].includes(t.building));
@@ -67,7 +69,7 @@ export function advancePleasures(s){
  s.festival={kind:event.kind,x:event.spot.x,y:event.spot.y,title:event.title,quips:event.quips,until:s.year+20};
  s.log(`${event.title}. ${event.quips[Math.floor(s.random()*event.quips.length)]}`,'fun',{x:event.spot.x,y:event.spot.y});
  s.signal('celebrate',event.spot,event.title);s.unrest=Math.max(0,s.unrest-5);s.prosperity=Math.min(94,s.prosperity+2);s.food=Math.max(0,s.food-Math.min(12,s.population*.04));
- s.nextFestival=s.year+55+Math.floor(s.random()*65);
+ s.nextFestival=s.year+30+Math.floor(s.random()*35);
 }
 export function jokeAfterTouch(s,spot,type){
  const lines={nudge:['That was absolutely my idea.','The sky has approved the extension.','Unexpected motivation. Highly suspicious.'],rain:['The weather has excellent aim.','The carrots would like to thank you.','Free showers! Cancel the plumbing.'],rumble:['We only just painted that.','Who is moving the furniture?','The ground has lodged a complaint.'],fire:['Outdoor central heating!','Please retain your eyebrows.','The insurance company has left the island.'],repair:['A delivery from absolutely nowhere.']};

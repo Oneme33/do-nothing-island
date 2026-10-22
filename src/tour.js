@@ -2,7 +2,7 @@ import {nl} from './language.js';
 import {currentRelative,familyLore} from './family.js';
 // The closing tour: up to five big moments spread over the island's history, the first home, then the old tree.
 // The family is visited at the first home, so its own entries are not separate stops.
-const TOUR_TYPES=new Set(['interference','treasure','lighthouse','discovery','flood','palace','fire','wish']);
+const TOUR_TYPES=new Set(['interference','treasure','lighthouse','discovery','flood','palace','fire','wish','delight']);
 export function tourStops(s){
  const placed=s.history.filter(e=>Number.isFinite(e.x)&&Number.isFinite(e.y)&&s.tile(e.x,e.y)?.kind==='land'&&!(e.x===0&&e.y===0)&&TOUR_TYPES.has(e.type)&&(e.type!=='wish'||s.wishes?.history?.some(w=>w.id===e.wishId&&w.status==='helped')));
  const moments=[];

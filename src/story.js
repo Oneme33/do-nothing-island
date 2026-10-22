@@ -2,7 +2,7 @@ import { startCinema } from './spectacle.js';
 import {islandScores} from './finale.js';
 // Persistent consequences, civic projects and the finite story of an island.
 export const STORY_VERSION=1;
-export const eventPriority=type=>({ending:100,endgame:98,palace:96,age:92,discovery:91,treasure:90,lighthouse:80,crisis:90,fire:89,flood:88,abandon:87,reform:86,family:85,interference:84,legacy:82,technology:76,culture:68,land:66,district:65,repair:55,storm:45,life:35,trade:25,farm:20,build:10}[type]||30);
+export const eventPriority=type=>({ending:100,endgame:98,palace:96,age:92,discovery:91,treasure:90,delight:83,lighthouse:80,crisis:90,fire:89,flood:88,abandon:87,reform:86,family:85,interference:84,legacy:82,technology:76,culture:68,land:66,district:65,repair:55,storm:45,life:35,trade:25,farm:20,build:10}[type]||30);
 export const ENDINGS={
   phoenix:{title:'De Feniksstad.',quote:'Ze zijn vaker herbouwd dan verslagen.',description:'Branden veranderden deze stad. Uit houten wijken verrezen stenen huizen, een vaste brandweer en pleinen waar het lichtfeest elk jaar terugkeert.',consequence:'Een stad die opnieuw begint',detail:'De gevels zijn mooier. De emmers staan klaar. Het verleden is hier geen weggepoetste vlek.'},
   independent:{title:'They figured it out.',quote:'The island would like to take all the credit.',description:'A civilization has learned to live with its limits. Generations come and go; the little world can look after itself.',consequence:'An independent island',detail:'Their greatest achievement is an ordinary tomorrow.'},
