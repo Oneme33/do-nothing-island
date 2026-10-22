@@ -12,7 +12,7 @@ export class Soundscape{
  }
  sea(){
   const c=this.ctx,src=c.createBufferSource(),filter=c.createBiquadFilter(),gain=c.createGain(),lfo=c.createOscillator(),depth=c.createGain();
-  src.buffer=this.brown;src.loop=true;filter.type='lowpass';filter.frequency.value=450;gain.gain.value=.16;
+  src.buffer=this.brown;src.loop=true;filter.type='lowpass';filter.frequency.value=450;gain.gain.value=.22;
   lfo.frequency.value=.13;depth.gain.value=.055;lfo.connect(depth).connect(gain.gain);src.connect(filter).connect(gain).connect(this.master);src.start();lfo.start();
  }
  async start(){await this.ctx.resume();this.enabled=true;}
@@ -32,12 +32,12 @@ export class Soundscape{
   if(!this.enabled)return;
   const now=this.ctx.currentTime,quiet=night?.4:1,due=(key,gap)=>{if((this.next[key]||0)>now)return false;this.next[key]=now+gap*(.6+Math.random()*.8);return true;};
   this.master.gain.setTargetAtTime(night?.6:.9,now,1.5);
-  if(!night&&due('birds',5)){const base=2200+Math.random()*1400;for(let i=0;i<2+Math.floor(Math.random()*3);i++)this.tone(base*(1+Math.random()*.2),.09,{volume:.012,delay:i*.13,to:base*1.3});}
-  if(building&&!night&&due('hammer',3))for(let i=0;i<2;i++)this.hiss(.06,{volume:.035,delay:i*.32,filter:'bandpass',frequency:1800,attack:.003});
-  if(year>=600&&due('bell',50))for(const [f,v] of [[523,.03],[1046,.012],[784,.01]])this.tone(f,3,{volume:v*quiet});
-  if(year>=1860&&year<1990&&!night&&due('tram',35)){this.tone(880,.35,{volume:.02});this.tone(1175,.35,{volume:.018,delay:.18});}
-  if(year>=1920&&due('traffic',7))this.hiss(2.4,{volume:.018*quiet,frequency:260,attack:.9});
-  if(night&&due('crickets',2.5))for(let i=0;i<4;i++)this.tone(4300,.035,{type:'square',volume:.004,delay:i*.07});
+  if(!night&&due('birds',5)){const base=2200+Math.random()*1400;for(let i=0;i<2+Math.floor(Math.random()*3);i++)this.tone(base*(1+Math.random()*.2),.09,{volume:.03,delay:i*.13,to:base*1.3});}
+  if(building&&!night&&due('hammer',3))for(let i=0;i<2;i++)this.hiss(.06,{volume:.07,delay:i*.32,filter:'bandpass',frequency:1800,attack:.003});
+  if(year>=600&&due('bell',50))for(const [f,v] of [[523,.05],[1046,.02],[784,.015]])this.tone(f,3,{volume:v*quiet});
+  if(year>=1860&&year<1990&&!night&&due('tram',35)){this.tone(880,.35,{volume:.035});this.tone(1175,.35,{volume:.03,delay:.18});}
+  if(year>=1920&&due('traffic',7))this.hiss(2.4,{volume:.03*quiet,frequency:260,attack:.9});
+  if(night&&due('crickets',2.5))for(let i=0;i<4;i++)this.tone(4300,.035,{type:'square',volume:.01,delay:i*.07});
  }
  play(type){
   if(!this.enabled)return;

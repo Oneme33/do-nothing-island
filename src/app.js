@@ -631,10 +631,15 @@ async function toggleAudio(){
   try{
     soundscape??=new Soundscape();
     if(soundscape.enabled)await soundscape.stop();else await soundscape.start();
+    sim.config.sound=soundscape.enabled;save();
     $('sound').classList.toggle('enabled',soundscape.enabled);$('sound').setAttribute('aria-label',soundscape.enabled?"Zet het geluid uit":"Zet het geluid aan");
   }catch{showToast("De oceaan houdt zich stil. Geluid werkt niet in deze browser.");}
 }
-$('sound').addEventListener('click',toggleAudio);
+$('sound').addEventListener('click',e=>{e.stopPropagation();toggleAudio();});
+// Sound is on by default; browsers only allow it after a first click or key press.
+function autoStartSound(){if(sim.config.sound===false||soundscape?.enabled)return;toggleAudio();}
+window.addEventListener('pointerdown',autoStartSound,{once:true,capture:true});
+window.addEventListener('keydown',autoStartSound,{once:true,capture:true});
 document.addEventListener('visibilitychange',()=>{
   accumulator=0;lastTime=performance.now();
   if(document.hidden){save();soundscape?.pause();}
