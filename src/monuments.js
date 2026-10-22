@@ -27,3 +27,16 @@ export function advanceMonuments(s){
   return;
  }
 }
+// Around 1500 the court moves to a far grander palace on a commanding spot; the first home stays with the family.
+export function advanceCourt(s){
+ s.court??=null;if(s.court||s.ending||s.year<1500||s.population<500||s.year%5!==0)return null;
+ const near=t=>[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1]].some(([dx,dy])=>s.tile(t.x+dx,t.y+dy)?.landform);
+ const free=t=>(!t.building||['tree','forest','park','garden'].includes(t.building))&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.road&&!t.foundingHome&&Math.hypot(t.x,t.y)>=4;
+ const spots=s.land.filter(free).sort((a,b)=>(near(b)?1:0)-(near(a)?1:0)||(a.x+a.y)-(b.x+b.y));
+ const tile=spots[0];if(!tile)return null;
+ tile.building='royal-palace';tile.builtYear=s.year;tile.district='heritage';tile.landmark=true;
+ s.court={x:tile.x,y:tile.y,year:s.year};
+ s.log('Het hof verhuist naar een nieuw paleis op de mooiste plek van het eiland. Het eerste huis blijft van de familie; de koning neemt alleen het servies mee.','palace',{x:tile.x,y:tile.y});
+ startParty(s,tile,'Inhuldiging van het nieuwe paleis',['De trap is zo lang dat de koning onderweg pauzeert.','Er zijn meer kamers dan mensen.','De lakeien oefenen buigen. Twee vallen om.'],6);s.rebuildRoads();
+ return tile;
+}

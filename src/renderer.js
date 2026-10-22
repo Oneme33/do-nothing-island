@@ -472,6 +472,7 @@ export class IslandRenderer {
     else if(b==='petting-farm')this.pettingFarm(t);
     else if(b==='museum')this.museum();
     else if(b==='monument')this.monumentStatue(t.monument);
+    else if(b==='royal-palace'){c.scale(2.1,2.1);this.royal=true;this.palace(true,t.variant);this.royal=false;}
     else if(b==='circus')this.circus();
     else if(b==='station')this.station(t);
     else if(b==='pool')this.pool();
@@ -639,7 +640,8 @@ export class IslandRenderer {
   palace(grand,v){
     const year=this.sim.year;
     if(!grand){this.house(v,2);for(const x of [-9,-4])this.line([[x,-1+(x+9)*.5],[x,-12+(x+9)*.5]],'#efe6cc',1.6);this.poly([[-12,-12],[-1,-6],[-1,-8],[-12,-14]],'#c8b48c');this.islandFlag(0,-51,.9);return;}
-    if(year<1250){this.castle();this.islandFlag(-14,-58,.9);return;}
+    if(year<1250&&!this.royal){this.castle();this.islandFlag(-14,-58,.9);return;}
+    if(this.royal){for(const side of [-1,1]){const x=side*44;this.poly([[x-9,2],[x,6],[x,-30],[x-9,-34]],'#e8dfc2');this.poly([[x,6],[x+9,2],[x+9,-34],[x,-30]],'#c9c8aa');this.poly([[x-11,-34],[x,-47],[x+11,-34],[x,-28]],'#6f8a8c');this.islandFlag(x,-47,.6);}}
     if(year>=1750){
       // Side wings reach out to both sides, each with its own roof and windows.
       for(const side of [-1,1]){const x=side*31;
@@ -1202,10 +1204,14 @@ export class IslandRenderer {
     for(const id of ids){const t=this.sim.tiles.get(id);if(!t)continue;const p=this.p(t.x,t.y),adj=[[t.x,t.y-1],[t.x+1,t.y],[t.x,t.y+1],[t.x-1,t.y]];for(let i=0;i<4;i++)if(!ids.has(key(...adj[i]))){const a=corners[i],b=corners[(i+1)%4],points=[[p.x+a[0],p.y+a[1]],[p.x+b[0],p.y+b[1]]];this.line(points,'#f8f0d9cc',4);this.line(points,'#b88b54',1.8);}}
   }
   drawLandmarkLabels(){
+    const court=this.sim.court&&this.sim.tile(this.sim.court.x,this.sim.court.y);
+    if(court?.building==='royal-palace'){const p=this.point(court.x,court.y);this.landmarkLabel('HET NIEUWE PALEIS',p.x,p.y-150*this.zoom);}
     const home=this.sim.buildings.find(t=>t.foundingHome);if(!home||!['manor','palace'].includes(home.building))return;
-    const p=this.point(home.x,home.y),c=this.ctx;
-    const label=home.building==='palace'?'PALEIS · HET EERSTE HUIS':'HET EERSTE LANDHUIS';
-    const y=p.y-(home.building==='palace'?104:82)*this.zoom;
+    const p=this.point(home.x,home.y);
+    this.landmarkLabel(home.building==='palace'?(court?'HET OUDE PALEIS · HET EERSTE HUIS':'PALEIS · HET EERSTE HUIS'):'HET EERSTE LANDHUIS',p.x,p.y-(home.building==='palace'?104:82)*this.zoom);
+  }
+  landmarkLabel(label,x,y){
+    const p={x},c=this.ctx;
     if(p.x<25||p.x>this.width-25||y<25||y>this.height-40)return;
     c.save();c.font='500 8px "DM Sans", sans-serif';const w=c.measureText(label).width+18;
     const box=this.reserveLabel(p.x,y-12,w,21);if(!box){c.restore();return;}

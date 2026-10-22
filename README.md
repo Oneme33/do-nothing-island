@@ -48,6 +48,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Bergen en de vulkaan** zijn ruim anderhalf keer zo groot getekend en worden in de loop van de eeuwen nog iets hoger, zodat ze boven de stad uit blijven steken.
 
+**Het hof verhuist.** Rond 1500 (met minstens vijfhonderd inwoners) verhuist het hof naar een nieuw paleis, ruim twee keer zo groot, met extra torens en de eilandvlag, op de mooiste plek achterin bij de heuvels of bergen. Het eerste huis blijft als het oude paleis bij de familie. De verhuizing wordt met een inhuldiging gevierd.
+
 **Het eerste huis groeit mee.** Het landhuis krijgt een veranda en de eilandvlag. Vanaf 1000 wordt het een burcht, vanaf 1250 een paleis, vanaf 1750 komen er zijvleugels en een koperen koepel, en vanaf 1950 banieren, gouden lijsten en een fontein. Bij elk stadium wordt het gebouw groter, en 's avonds branden de ramen.
 
 **De vuurtoren** verschijnt vanaf jaar 400 zodra het eiland een steiger of haven heeft, op het meest blootgestelde vrije punt van de kust. Overdag is het een rood-witte toren; 's nachts zwaait een lichtbundel over het water. Verdwijnt hij door overstroming of verbouwing, dan bouwen de bewoners hem verderop opnieuw op.

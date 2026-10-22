@@ -7,7 +7,7 @@ import {advanceCollection} from './collection.js';
 import {advanceCoast,coastNotice} from './coast.js';
 import {ensureSquare,advanceSquare} from './square.js';
 import {planDelight,DELIGHT_LABELS,DELIGHT_OPENINGS} from './delights.js';
-import {advanceMonuments} from './monuments.js';
+import {advanceMonuments,advanceCourt} from './monuments.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 // New islands sit in a 29×29 sea; the natural island stays within the original 25×25, so the extra sea is room for polders.
@@ -377,7 +377,7 @@ export class Civilization {
     advancePleasures(this);advanceCoast(this);advanceSquare(this);
     // Delights do not wait for a housing lull: they claim a fitting free plot when their time comes.
     if(this.year%9===4&&!this.storm)planDelight(this);
-    advanceMonuments(this);
+    advanceMonuments(this);advanceCourt(this);
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);
@@ -844,7 +844,7 @@ export class Civilization {
       const landscape=reshapeAfterQuake(this,spot);captureSnapshot(this,'Na de beving');
       for(const tile of this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=2))tile.crackUntil=this.year+60;
       // Close to the epicentre ordinary buildings collapse into ruins; reinforced ones only crack.
-      const fragile=t=>t.building&&!t.foundingHome&&!t.reservedFor&&t.district!=='heritage'&&!t.landform&&!['farm','beach','forest','tree','original-tree','ruins','town-square','lighthouse','bridge','dock','harbor','quarry'].includes(t.building)&&!t.retrofitted&&t.builtYear!==this.year;
+      const fragile=t=>t.building&&!t.foundingHome&&!t.reservedFor&&t.district!=='heritage'&&!t.landform&&!['farm','beach','forest','tree','original-tree','ruins','town-square','lighthouse','bridge','dock','harbor','quarry','royal-palace'].includes(t.building)&&!t.retrofitted&&t.builtYear!==this.year;
       const collapsed=this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=1.5&&fragile(t)).slice(0,3);
       for(const t of collapsed){t.rebuildFrom=t.building;t.rebuildAt=this.year+18;t.building='ruins';t.buildSite=null;t.quakeHistory=(t.quakeHistory||0)+1;this.signal('rumble',t,'Ingestort');}
       if(collapsed.length){this.population=Math.max(4,this.population*(1-.012*collapsed.length));this.rebuildRoads();}

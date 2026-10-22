@@ -1152,7 +1152,7 @@ function drawFinale(c,w,h,s,m,reduced=false){
  c.restore();
 }
 
-const PLACE_NAMES={hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',lighthouse:'Vuurtoren','town-square':'Dorpsplein','petting-farm':'Kinderboerderij',museum:'Eilandmuseum',monument:'Standbeeld',circus:'Circustent',station:'Treinstation',pool:'Openluchtzwembad',spaceport:'Ruimtehaven',observatory:'Sterrenwacht','ice-cream':'IJssalon',greenhouse:'Kas',ruins:'Ruïne'};
+const PLACE_NAMES={hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',lighthouse:'Vuurtoren','town-square':'Dorpsplein','petting-farm':'Kinderboerderij',museum:'Eilandmuseum',monument:'Standbeeld','royal-palace':'Het nieuwe paleis',circus:'Circustent',station:'Treinstation',pool:'Openluchtzwembad',spaceport:'Ruimtehaven',observatory:'Sterrenwacht','ice-cream':'IJssalon',greenhouse:'Kas',ruins:'Ruïne'};
 const names=['Noor','Sam','Bo','Mila','Daan','Lou','Iris','Mo','Tess','Finn','Ada','Jip'];
 const surnames=['de Vries','van de Kust','Bos','van Dijk','de Boer','Steen','van de Berg','Visser'];
 function describePlot(s,t){
@@ -1205,7 +1205,7 @@ function describePlot(s,t){
 const nearby=(a,b,r=2)=>Math.hypot(a.x-b.x,a.y-b.y)<=r;
 const adjacentPlots=(s,t)=>[[1,0],[-1,0],[0,1],[0,-1]].map(([x,y])=>s.tile(t.x+x,t.y+y)).filter(Boolean);
 const dwelling=['hut','house','townhouse','tower','manor','palace'];
-const protectedPlot=t=>t.foundingHome||t.reservedFor||['original-tree','palace','palace-wing','royal-garden','palace-square','town-square','bridge'].includes(t.building);
+const protectedPlot=t=>t.foundingHome||t.reservedFor||['original-tree','palace','palace-wing','royal-garden','palace-square','town-square','royal-palace','bridge'].includes(t.building);
 function ensureConsequences(s){
  s.fireCount??=0;s.rebuiltFires??=0;s.fireTraditions??=0;s.discoveries??=[];s.discoveryRecords??={};s.fireCode??=false;
 }
@@ -1988,6 +1988,19 @@ function advanceMonuments(s){
   return;
  }
 }
+// Around 1500 the court moves to a far grander palace on a commanding spot; the first home stays with the family.
+function advanceCourt(s){
+ s.court??=null;if(s.court||s.ending||s.year<1500||s.population<500||s.year%5!==0)return null;
+ const near=t=>[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1]].some(([dx,dy])=>s.tile(t.x+dx,t.y+dy)?.landform);
+ const free=t=>(!t.building||['tree','forest','park','garden'].includes(t.building))&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.road&&!t.foundingHome&&Math.hypot(t.x,t.y)>=4;
+ const spots=s.land.filter(free).sort((a,b)=>(near(b)?1:0)-(near(a)?1:0)||(a.x+a.y)-(b.x+b.y));
+ const tile=spots[0];if(!tile)return null;
+ tile.building='royal-palace';tile.builtYear=s.year;tile.district='heritage';tile.landmark=true;
+ s.court={x:tile.x,y:tile.y,year:s.year};
+ s.log('Het hof verhuist naar een nieuw paleis op de mooiste plek van het eiland. Het eerste huis blijft van de familie; de koning neemt alleen het servies mee.','palace',{x:tile.x,y:tile.y});
+ startParty(s,tile,'Inhuldiging van het nieuwe paleis',['De trap is zo lang dat de koning onderweg pauzeert.','Er zijn meer kamers dan mensen.','De lakeien oefenen buigen. Twee vallen om.'],6);s.rebuildRoads();
+ return tile;
+}
 
 const SAVE_VERSION = 1;
 // New islands sit in a 29×29 sea; the natural island stays within the original 25×25, so the extra sea is room for polders.
@@ -2357,7 +2370,7 @@ class Civilization {
     advancePleasures(this);advanceCoast(this);advanceSquare(this);
     // Delights do not wait for a housing lull: they claim a fitting free plot when their time comes.
     if(this.year%9===4&&!this.storm)planDelight(this);
-    advanceMonuments(this);
+    advanceMonuments(this);advanceCourt(this);
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);
@@ -2824,7 +2837,7 @@ class Civilization {
       const landscape=reshapeAfterQuake(this,spot);captureSnapshot(this,'Na de beving');
       for(const tile of this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=2))tile.crackUntil=this.year+60;
       // Close to the epicentre ordinary buildings collapse into ruins; reinforced ones only crack.
-      const fragile=t=>t.building&&!t.foundingHome&&!t.reservedFor&&t.district!=='heritage'&&!t.landform&&!['farm','beach','forest','tree','original-tree','ruins','town-square','lighthouse','bridge','dock','harbor','quarry'].includes(t.building)&&!t.retrofitted&&t.builtYear!==this.year;
+      const fragile=t=>t.building&&!t.foundingHome&&!t.reservedFor&&t.district!=='heritage'&&!t.landform&&!['farm','beach','forest','tree','original-tree','ruins','town-square','lighthouse','bridge','dock','harbor','quarry','royal-palace'].includes(t.building)&&!t.retrofitted&&t.builtYear!==this.year;
       const collapsed=this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=1.5&&fragile(t)).slice(0,3);
       for(const t of collapsed){t.rebuildFrom=t.building;t.rebuildAt=this.year+18;t.building='ruins';t.buildSite=null;t.quakeHistory=(t.quakeHistory||0)+1;this.signal('rumble',t,'Ingestort');}
       if(collapsed.length){this.population=Math.max(4,this.population*(1-.012*collapsed.length));this.rebuildRoads();}
@@ -3872,6 +3885,7 @@ class IslandRenderer {
     else if(b==='petting-farm')this.pettingFarm(t);
     else if(b==='museum')this.museum();
     else if(b==='monument')this.monumentStatue(t.monument);
+    else if(b==='royal-palace'){c.scale(2.1,2.1);this.royal=true;this.palace(true,t.variant);this.royal=false;}
     else if(b==='circus')this.circus();
     else if(b==='station')this.station(t);
     else if(b==='pool')this.pool();
@@ -4039,7 +4053,8 @@ class IslandRenderer {
   palace(grand,v){
     const year=this.sim.year;
     if(!grand){this.house(v,2);for(const x of [-9,-4])this.line([[x,-1+(x+9)*.5],[x,-12+(x+9)*.5]],'#efe6cc',1.6);this.poly([[-12,-12],[-1,-6],[-1,-8],[-12,-14]],'#c8b48c');this.islandFlag(0,-51,.9);return;}
-    if(year<1250){this.castle();this.islandFlag(-14,-58,.9);return;}
+    if(year<1250&&!this.royal){this.castle();this.islandFlag(-14,-58,.9);return;}
+    if(this.royal){for(const side of [-1,1]){const x=side*44;this.poly([[x-9,2],[x,6],[x,-30],[x-9,-34]],'#e8dfc2');this.poly([[x,6],[x+9,2],[x+9,-34],[x,-30]],'#c9c8aa');this.poly([[x-11,-34],[x,-47],[x+11,-34],[x,-28]],'#6f8a8c');this.islandFlag(x,-47,.6);}}
     if(year>=1750){
       // Side wings reach out to both sides, each with its own roof and windows.
       for(const side of [-1,1]){const x=side*31;
@@ -4602,10 +4617,14 @@ class IslandRenderer {
     for(const id of ids){const t=this.sim.tiles.get(id);if(!t)continue;const p=this.p(t.x,t.y),adj=[[t.x,t.y-1],[t.x+1,t.y],[t.x,t.y+1],[t.x-1,t.y]];for(let i=0;i<4;i++)if(!ids.has(key(...adj[i]))){const a=corners[i],b=corners[(i+1)%4],points=[[p.x+a[0],p.y+a[1]],[p.x+b[0],p.y+b[1]]];this.line(points,'#f8f0d9cc',4);this.line(points,'#b88b54',1.8);}}
   }
   drawLandmarkLabels(){
+    const court=this.sim.court&&this.sim.tile(this.sim.court.x,this.sim.court.y);
+    if(court?.building==='royal-palace'){const p=this.point(court.x,court.y);this.landmarkLabel('HET NIEUWE PALEIS',p.x,p.y-150*this.zoom);}
     const home=this.sim.buildings.find(t=>t.foundingHome);if(!home||!['manor','palace'].includes(home.building))return;
-    const p=this.point(home.x,home.y),c=this.ctx;
-    const label=home.building==='palace'?'PALEIS · HET EERSTE HUIS':'HET EERSTE LANDHUIS';
-    const y=p.y-(home.building==='palace'?104:82)*this.zoom;
+    const p=this.point(home.x,home.y);
+    this.landmarkLabel(home.building==='palace'?(court?'HET OUDE PALEIS · HET EERSTE HUIS':'PALEIS · HET EERSTE HUIS'):'HET EERSTE LANDHUIS',p.x,p.y-(home.building==='palace'?104:82)*this.zoom);
+  }
+  landmarkLabel(label,x,y){
+    const p={x},c=this.ctx;
     if(p.x<25||p.x>this.width-25||y<25||y>this.height-40)return;
     c.save();c.font='500 8px "DM Sans", sans-serif';const w=c.measureText(label).width+18;
     const box=this.reserveLabel(p.x,y-12,w,21);if(!box){c.restore();return;}
