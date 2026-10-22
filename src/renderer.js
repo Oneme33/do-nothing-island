@@ -70,7 +70,13 @@ export class IslandRenderer {
   }
   setZoom(delta){this.userZoom=Math.max(.65,Math.min(2.4,this.userZoom*delta));}
   focusTile(tile,seconds=9){if(!tile)return;this.focus={x:tile.x,y:tile.y,remaining:seconds};this.pan={x:0,y:0};this.userZoom=1;}
-  recenter(){this.focus=null;this.pan={x:0,y:0};this.userZoom=1;}
+  recenter(){this.focus=null;this.flight=null;this.pan={x:0,y:0};this.userZoom=1;}
+  flyTo(points,duration,{dip=.35,hold=true}={}){this.focus=null;this.pan={x:0,y:0};this.userZoom=1;this.flight={points:[{x:this.center.x,y:this.center.y,zoom:this.zoom},...points],start:null,duration,dip,hold};}
+  // A short sightseeing flight from one side of the island to the other, then back to the usual view.
+  sweep(seconds=6){
+    const land=this.sim.land;if(land.length<4)return;const pts=land.map(t=>this.p(t.x,t.y));const left=pts.reduce((a,b)=>b.x<a.x?b:a),right=pts.reduce((a,b)=>b.x>a.x?b:a),mid=this.p(0,0);
+    this.flyTo([{x:left.x+60,y:left.y-20,zoom:1.45},{x:mid.x,y:mid.y-20,zoom:1.25},{x:right.x-60,y:right.y-20,zoom:1.45}],seconds,{dip:.2,hold:false});
+  }
   ripple(x,y){this.ripples.push({x,y,time:this.time});}
   addEffect(effect){if(!effect||!Number.isFinite(effect.x)||!Number.isFinite(effect.y))return;this.effects.push({...effect,label:effect.label||effect.title||'',elapsed:0});if(this.effects.length>18){const i=this.effects.reduce((n,e,k,a)=>(e.priority||0)<(a[n].priority||0)?k:n,0);this.effects.splice(i,1);}}
   reserveLabel(x,y,w,h){
@@ -128,6 +134,13 @@ export class IslandRenderer {
     this.center.x=mix(this.center.x,focusPoint?focusPoint.x:(minX+maxX)/2,Math.min(1,dt*.9));
     // During the closing tour the focus sits higher, above the caption card.
     this.center.y=mix(this.center.y,focusPoint?focusPoint.y-24+(this.touring?this.height*.32/this.zoom:0):(minY+maxY)/2+15,Math.min(1,dt*.9));
+    // A camera flight overrides the usual framing: an eased path through waypoints with a gentle zoom-out in the middle.
+    if(this.flight){
+      const f=this.flight;f.start??=now;const u=this.reduced?1:Math.min(1,(now-f.start)/1000/f.duration),e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+      const seg=(f.points.length-1)*e,i=Math.min(f.points.length-2,Math.floor(seg)),k=seg-i,a=f.points[i],b=f.points[i+1];
+      this.center.x=a.x+(b.x-a.x)*k;this.center.y=a.y+(b.y-a.y)*k;this.zoom=Math.max(.5,a.zoom+(b.zoom-a.zoom)*k-f.dip*Math.sin(Math.PI*u));
+      if(u>=1&&!f.hold)this.flight=null;
+    }
     const quake=this.reduced?0:this.effects.filter(e=>e.type==='rumble'&&e.elapsed<1).reduce((s,e)=>s+Math.sin(e.elapsed*55)*(1-e.elapsed)*3,0);
     this.origin={x:this.width*(mobile?.54:.55)-this.center.x*this.zoom+this.pan.x+quake,y:this.height*(cinemaVisible(this.sim)?.62:mobile?.54:.52)-this.center.y*this.zoom+this.pan.y};
     this.drawWater();

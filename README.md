@@ -18,7 +18,7 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Naam en vlag.** Elk eiland krijgt een naam en een vlag die bij zijn karakter passen: zeevaarders (anker, blauw), tuiniers (blad, groen), uitvinders (tandwiel, oker) of bouwers (toren, baksteenrood). Zolang het karakter nog niet vaststaat, voert het eiland een boompje. Naam en vlag staan linksonder op het eiland en in de titel van het tabblad, en de vlag wappert op het dorpsplein.
 
-**Nieuwe tijdperken** krijgen een korte titelkaart op het eiland (‘Jaar 600. De middeleeuwen. Torens. Kerken. Meningen.’), een warme kleurgloed over het eiland en, met geluid aan, een eigen muziekmotief.
+**Nieuwe tijdperken** krijgen een korte rondvlucht van de camera, van de ene kant van het eiland naar de andere, en een titelkaart op het eiland (‘Jaar 600. De middeleeuwen. Torens. Kerken. Meningen.’), een warme kleurgloed over het eiland en, met geluid aan, een eigen muziekmotief.
 
 **Ingrepen die je voelt.** Bij een beving schudt het beeld, rennen bewoners weg en lopen ze daarna weer terug. Regen valt in stralen met spetters op de grond, vuur geeft een rookpluim en zolang iets brandt staat er een emmerbrigade klaar. Een bouwzetje fonkelt even. Met rustige animaties blijft alles stil.
 
@@ -128,7 +128,7 @@ Rond 2100 begint het laatste hoofdstuk; een gewoon eiland eindigt uiterlijk in 2
 - **De zee krijgt iets terug:** hogere grond, kleinere ambities en een veilige kust.
 - **De laatste druppel:** een zeldzame poging om de oceaan volledig op te heffen. Hiervoor zijn de maximale wereldruimte, toekomstige techniek en een ongewone ambitie nodig. Pas bij minstens 94,5% werkelijk droog land is het project geslaagd.
 
-**De eilandtoer.** Als het verhaal klaar is, vliegt de camera eerst over het echte eiland: langs vijf grote momenten uit de kroniek (jouw ingrepen, schatten, de vuurtoren, overstromingen, geholpen wensen en het eerste huis dat groeit), dan het eerste huis, en ten slotte de laatste nazaat onder de oude boom, met het verhaal dat de familie nog altijd vertelt. Filmbalken en een tekstkaart begeleiden de toer; met ‘Naar de eindscène’ sla je hem over. Een opnieuw afgespeelde eindscène slaat de toer over.
+**De eilandtoer.** Als het verhaal klaar is, vliegt de camera eerst over het echte eiland, met een vloeiende boog en een beetje uitzoomen tussen de haltes: langs vijf grote momenten uit de kroniek (jouw ingrepen, schatten, de vuurtoren, overstromingen, geholpen wensen en het eerste huis dat groeit), dan het eerste huis, en ten slotte de laatste nazaat onder de oude boom, met het verhaal dat de familie nog altijd vertelt. Filmbalken en een tekstkaart begeleiden de toer; met ‘Naar de eindscène’ sla je hem over. Een opnieuw afgespeelde eindscène slaat de toer over.
 
 Elke uitkomst heeft een eigen geanimeerd eindscherm. De scène duurt 24 seconden, kan gepauzeerd en opnieuw afgespeeld worden en biedt na acht seconden een knop naar het naschrift. Je kunt het scherm ook direct sluiten zonder een nieuw venster opgedrongen te krijgen. Het echte eiland krijgt geen extra eindscène-versieringen zoals kronen, paraplu's of zwevende monumenten.
 

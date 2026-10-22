@@ -234,6 +234,7 @@ function announceAge(){
   if(age.id===shownAge)return;shownAge=age.id;if(!AGE_LINES[age.id])return;
   $('age-card-year').textContent=`JAAR ${age.year}`;$('age-card-title').textContent=nl(age.name);$('age-card-line').textContent=AGE_LINES[age.id];
   $('age-card').hidden=false;$('island-window').classList.add('age-shift');soundscape?.play('age');
+  if(!tour&&!photoOn&&!renderer.reduced)renderer.sweep(6);
   clearTimeout(ageTimer);ageTimer=setTimeout(()=>{$('age-card').hidden=true;$('island-window').classList.remove('age-shift');},4800);
 }
 function updateUI(){
@@ -341,7 +342,7 @@ let tour=null;
 const touring=()=>cinemaActive()&&sim.cinematic.toured===false;
 function showTourStop(){
   const stop=tour.stops[tour.index];tour.at=performance.now();
-  renderer.focus={x:stop.x,y:stop.y,remaining:stop.seconds+2,zoom:stop.zoom||1.7};renderer.pan={x:0,y:0};renderer.userZoom=1;
+  const zoom=stop.zoom||1.7,point=renderer.p(stop.x,stop.y);renderer.flyTo([{x:point.x,y:point.y-24+renderer.height*.32/zoom,zoom}],2.6,{dip:.45});
   $('tour-year').textContent=stop.eyebrow;$('tour-text').textContent=stop.text;$('tour-step').textContent=`${tour.index+1} / ${tour.stops.length}`;
 }
 function startTour(){
@@ -350,7 +351,7 @@ function startTour(){
   $('island-window').classList.add('touring');$('tour-caption').hidden=false;showTourStop();
 }
 function finishTour(){
-  if(sim.cinematic)sim.cinematic.toured=true;tour=null;renderer.touring=false;renderer.focus=null;renderer.recenter();
+  if(sim.cinematic)sim.cinematic.toured=true;tour=null;renderer.touring=false;renderer.flight=null;renderer.focus=null;renderer.recenter();
   $('tour-caption').hidden=true;$('island-window').classList.remove('touring');accumulator=0;save();updateCinemaUI();
 }
 function advanceTour(now){

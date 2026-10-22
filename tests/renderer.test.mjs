@@ -160,3 +160,9 @@ test('every open wish shows one clickable question mark at the requested place a
   s.wishes.active=null;r.draw(300);assert.equal(r.pickWishResident(p.x,p.y),false);
  }
 });
+test('camera flights move smoothly through waypoints and release afterwards',()=>{
+ const s=new Civilization(31),{canvas}=canvasHarness(1200,650),r=new IslandRenderer(canvas,s);r.draw(0);
+ r.sweep(2);const start={...r.center};const xs=[];for(let t=16;t<=2400;t+=100){r.draw(t);xs.push(r.center.x);}
+ assert.ok(xs.some(x=>Math.abs(x-start.x)>40),'the camera travels');assert.equal(r.flight,null,'a sweep releases the camera');
+ r.flyTo([{x:100,y:50,zoom:1.7}],1);for(let t=2500;t<=3700;t+=100)r.draw(t);assert.ok(Math.abs(r.center.x-100)<1&&Math.abs(r.zoom-1.7)<.01);assert.ok(r.flight,'a tour stop holds its view');
+});

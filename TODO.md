@@ -32,7 +32,7 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 
 ## Nu aan de beurt
 
-**Ronde 2 en 3 zijn compleet** en gepusht, elk onderdeel met een eigen commit. Coens test in de browser volgt nog. Ook nieuw: polders, zodat het eiland aan het einde weer flink groeit.
+**Ronde 4, op basis van Coens feedback, gepusht:** geluid standaard aan, tempo eerst vlot en later rustiger, groter eiland met torenflats, voertuigen per tijdperk, zwaardere schade door beving en vuur, groeiend kasteel, groter plein, dieren, schat-animatie, standbeelden (ook voor jou), vier nieuwe gebouwen, vijftien nieuwe vraagtekens met blijvende beloning, feesten bij wensen en openingen, echte raamverlichting en cameravluchten. Coens test in de browser volgt nog.
 
 Aanvullende visuele feedback, na het testen van deze reeks:
 
