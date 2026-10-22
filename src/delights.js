@@ -2,6 +2,10 @@
 const delightAround=t=>[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:t.x+dx,y:t.y+dy}));
 export const DELIGHTS=[
  {type:'museum',since:900,population:150,name:'Eilandmuseum',label:'Een museum!',opening:'Het eilandmuseum opent. De eerste bezoeker vraagt waar de wc is, de tweede waar de geschiedenis is.',where:(s,t)=>Math.hypot(t.x,t.y)<=6},
+ {type:'circus',since:1650,population:250,name:'Circustent',label:'Hooggeëerd publiek!',opening:'Een circus slaat zijn tent op. De clown blijkt de burgemeester van vroeger te zijn.',where:(s,t)=>Math.hypot(t.x,t.y)>=3&&Math.hypot(t.x,t.y)<=9},
+ {type:'station',since:1860,population:400,name:'Treinstation',label:'Instappen!',opening:'Het eiland krijgt een treinstation. Het spoor is kort, maar de conducteur fluit met heel veel overtuiging.',where:(s,t)=>Math.hypot(t.x,t.y)>=4},
+ {type:'pool',since:1930,population:500,name:'Openluchtzwembad',label:'Bommetje!',opening:'Een openluchtzwembad opent. De zee doet alsof ze niet beledigd is.',where:(s,t)=>Math.hypot(t.x,t.y)>=3},
+ {type:'spaceport',since:2060,population:800,name:'Ruimtehaven',label:'Aftellen!',opening:'Een ruimtehaven! De eerste raket gaat naar de maan en komt terug met een steen en een selfie.',where:(s,t,near)=>near(t,p=>p?.kind==='water'||p?.building==='beach')},
  {type:'petting-farm',since:150,population:40,name:'Kinderboerderij',label:'Mèèh!',opening:'Een kinderboerderij opent. De geit wordt direct verkozen tot burgemeester van de kinderen.',where:(s,t)=>Math.hypot(t.x,t.y)>=3&&Math.hypot(t.x,t.y)<=8},
  {type:'observatory',since:1600,population:200,name:'Sterrenwacht',label:'Sterren kijken',opening:'Een sterrenwacht verrijst bij de berg. De eerste ontdekking: de maan is er nog.',where:(s,t,near)=>near(t,p=>!!p?.landform)},
  {type:'ice-cream',since:1800,population:300,name:'IJssalon',label:'Een ijsje!',opening:'Een ijssalon opent bij het strand. Het eiland leert het woord ‘nog eentje’.',where:(s,t,near)=>near(t,p=>p?.building==='beach')},

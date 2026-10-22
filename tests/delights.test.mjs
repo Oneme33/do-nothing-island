@@ -25,3 +25,9 @@ test('islands get a stable name and flag that follow their character',()=>{
  assert.match(flagSVG(id),/^<svg[^>]*class="island-flag"/);
  const names=new Set([1,2,3,4,5,6,7,8].map(seed=>islandIdentity(new Civilization(seed)).name));assert.ok(names.size>=3);
 });
+import {advanceMonuments} from '../src/monuments.js';
+test('the island raises a statue for you: a hand when you help, an empty plinth when you never touch',()=>{
+ const idle=new Civilization(31);while(idle.year<1510)idle.tick();assert.ok(idle.monuments.some(m=>m.kind==='watcher'));assert.ok(!idle.monuments.some(m=>m.kind==='hand'));
+ const helper=new Civilization(31);while(helper.year<200)helper.tick();helper.influence.trust=20;helper.year=206;advanceMonuments(helper);
+ const hand=helper.monuments.find(m=>m.kind==='hand');assert.ok(hand);assert.equal(helper.tile(hand.x,hand.y).monument,'hand');
+});

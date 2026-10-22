@@ -47,7 +47,7 @@ test('public costs, food spoilage and conservation remain effective on a larger 
  const s=run(201);assert.equal(s.outcome.id,'sanctuary');
  assert.ok(s.wealth<1400);assert.ok(s.prosperity<98);
  const stores=Civilization.restore(s.serialize()),empty=Civilization.restore(s.serialize());
- stores.food=1000;empty.food=0;stores.wealth=1000;empty.wealth=0;
+ stores.food=2000;empty.food=1000;stores.wealth=1000;empty.wealth=0;
  advanceEconomy(stores);advanceEconomy(empty);
  assert.ok(Math.abs(stores.food-empty.food-975)<.001,'stored food loses 2.5% per year');
  assert.ok(stores.balance.expenses>empty.balance.expenses,'large reserves carry additional public costs');

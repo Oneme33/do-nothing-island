@@ -457,6 +457,11 @@ export class IslandRenderer {
     else if(b==='town-square')this.townSquare(t);
     else if(b==='petting-farm')this.pettingFarm(t);
     else if(b==='museum')this.museum();
+    else if(b==='monument')this.monumentStatue(t.monument);
+    else if(b==='circus')this.circus();
+    else if(b==='station')this.station(t);
+    else if(b==='pool')this.pool();
+    else if(b==='spaceport')this.spaceport(t);
     else if(b==='observatory')this.observatory();
     else if(b==='ice-cream')this.iceCream(t);
     else if(b==='greenhouse')this.greenhouse();
@@ -834,6 +839,8 @@ export class IslandRenderer {
       for(let i=0;i<7;i++)this.ellipse(8+i*1.8,4-i*1.6,1.3,1.1,['#d58f7a','#e2c26a','#c98fb0'][i%3]);
       c.save();c.translate(12,-6);c.scale(.5,.5);this.tree(false,.7);c.restore();c.save();c.translate(-15,-4);c.scale(.45,.45);this.tree(false,.62);c.restore();
       lamp(16,6);
+    }else if(role==='monument'&&t.monument){
+      this.ellipse(0,1,9,4.5,'#c8bd98');this.monumentStatue(t.monument);bench(-13,5);bench(13,4);
     }else if(role==='monument'){
       // A sundial until the island raises its first statue here.
       this.ellipse(0,1,9,4.5,'#c8bd98');this.poly([[-3,0],[0,1.5],[3,0],[3,-7],[0,-5.5],[-3,-7]],'#d9d1b8');this.ellipse(0,-7,4,1.8,'#c9c1a8');this.line([[0,-7],[2,-11]],'#8a7552',1);
@@ -856,6 +863,45 @@ export class IslandRenderer {
     if(v<.35){this.ellipse(0,0,7,2.5,'#55703a18');this.ellipse(0,-3,6,4,this.leaf('#86a062'));this.ellipse(3,-4,4,3,this.leaf('#9bb173'));}
     else{c.scale(.55,.55);this.tree(false,v);}
     c.restore();
+  }
+  monumentStatue(kind){
+    const stone='#cfc8b3',dark='#aaa38e',bronze='#8a7350';
+    this.ellipse(3,3,13,4,'#58654414');this.poly([[-7,0],[0,3.5],[7,0],[0,-3.5]],'#bdb59d');this.poly([[-5,-1],[0,1.5],[0,-8],[-5,-10.5]],stone);this.poly([[0,1.5],[5,-1],[5,-10.5],[0,-8]],dark);this.poly([[-5,-10.5],[0,-8],[5,-10.5],[0,-13]],'#ddd6c2');
+    if(kind==='hand'){this.ellipse(0,-34,11,6,'#eef0ea');this.ellipse(-6,-35,6,4.5,'#f6f7f2');this.poly([[-3,-12],[3,-12],[4,-24],[-4,-24]],stone);for(let i=0;i<4;i++)this.poly([[-4+i*2.3,-24],[-2.6+i*2.3,-24],[-2.8+i*2.3,-31+Math.abs(i-1.5)],[-4.2+i*2.3,-31+Math.abs(i-1.5)]],stone);this.poly([[4,-22],[6.5,-26],[5.4,-27],[3.4,-24]],stone);}
+    else if(kind==='watcher'){this.line([[-9,4],[-1,8]],'#8f7a58',1.8);this.line([[-9,1],[-1,5]],'#a58e66',1.2);this.ellipse(4,-14,2.6,1.2,'#d58f7a');this.ellipse(-2,-14,2,1,'#e2c26a');}
+    else if(kind==='founder'){this.ellipse(0,-14,3.4,2,bronze);this.poly([[-3,-13],[3,-13],[2.4,-25],[-2.4,-25]],bronze);this.ellipse(0,-27.5,2.4,2.4,bronze);this.poly([[-3.5,-29],[3.5,-29],[0,-32]],'#6f5c40');this.line([[3,-22],[7,-33]],'#6f5c40',1.2);this.line([[5.5,-33],[8.5,-32]],'#6f5c40',1.2);}
+    else if(kind==='chicken'){this.ellipse(0,-20,7,6,stone);this.ellipse(5,-27,3.4,3.4,stone);this.poly([[8,-27.5],[11,-26.5],[8,-25.5]],'#d9a24e');this.poly([[4,-31],[5,-33.5],[6,-31]],'#c0574d');this.poly([[-6,-22],[-11,-27],[-7,-18]],dark);}
+    else if(kind==='cat'){this.ellipse(0,-17,4.6,5,bronze);this.ellipse(0,-25,3.4,3,bronze);this.poly([[-2.6,-27],[-2,-30.5],[-.6,-27.6]],bronze);this.poly([[2.6,-27],[2,-30.5],[.6,-27.6]],bronze);this.line([[4,-13],[8,-20]],bronze,1.4);}
+    else{this.poly([[-4,-11],[4,-11],[3,-20],[0,-31],[-2,-22],[-4,-26]],'#d1a074');this.poly([[-1.5,-12],[2,-12],[1.5,-18],[0,-24],[-1,-18]],'#efc98a');}
+  }
+  circus(){
+    this.ellipse(4,4,22,7,'#58654414');
+    for(let i=0;i<8;i++){const a0=Math.PI+i*Math.PI/8,a1=a0+Math.PI/8;this.poly([[Math.cos(a0)*19,Math.sin(a0)*-9.5-2],[Math.cos(a1)*19,Math.sin(a1)*-9.5-2],[0,-34]],i%2?'#f1ead6':'#c95b4c');}
+    this.poly([[-19,-2],[19,-2],[17,4],[-17,4]],'#e8dfc8');for(let i=-3;i<=3;i++)this.line([[i*5,-2],[i*5,4]],'#c95b4c',1.6);
+    this.poly([[-3,4],[3,4],[2,-3],[-2,-3]],'#5a3b33');this.line([[0,-34],[0,-42]],'#7d7464',1);const wave=this.reduced?0:Math.sin(this.time*3)*1.2;this.poly([[0,-42],[7,-40+wave],[0,-38]],'#e2c26a');
+  }
+  station(t){
+    this.poly([[-16,-2],[0,6],[16,-2],[16,-14],[0,-22],[-16,-14]],'#d9c7a6');this.poly([[0,6],[16,-2],[16,-14],[0,-6]],'#b8a586');this.poly([[-19,-14],[0,-25],[19,-14],[0,-3]],'#7f6a5e');
+    this.ellipse(0,-16,2.4,2.4,'#f3eedd');this.line([[0,-16],[0,-17.6]],'#3f3a36',.6);this.line([[0,-16],[1.2,-16]],'#3f3a36',.6);
+    // A short track with a tiny train shuttling back and forth.
+    this.line([[-30,12],[30,-4]],'#7a6f60',1.6);this.line([[-28,15],[32,-1]],'#7a6f60',1.6);
+    const run=this.reduced?.5:(Math.sin(this.time*.4+t.x)+1)/2,x=-22+run*44,y=13-run*12;
+    this.poly([[x-7,y-1],[x+6,y-4.5],[x+6,y-11],[x-7,y-7.5]],'#3f5f4f');this.poly([[x+6,y-4.5],[x+9,y-6],[x+9,y-12],[x+6,y-11]],'#30483c');this.rect(x+4,y-15,2.4,4,'#2b2b2b');
+    if(!this.reduced)for(let i=0;i<3;i++){const f=(this.time*.8+i*.33)%1;this.ellipse(x+5+f*-6,y-17-f*14,2+f*4,1.6+f*3,`rgba(235,235,225,${(1-f)*.7})`);}
+  }
+  pool(){
+    this.diamond(0,0,22,11,'#e4ddc8');this.diamond(0,0,17,8.5,'#7fb9c8');this.diamond(0,-.4,15,7.4,'#9ccfda');
+    if(!this.reduced)for(let i=0;i<3;i++){const x=-8+i*7+Math.sin(this.time+i)*2,y=1-i*.6;this.ellipse(x,y,1.8,1.2,'#e9c9a8');this.ellipse(x-2.4,y+.3,2,.6,'rgba(255,255,255,.7)');}
+    this.line([[14,-3],[14,-12]],'#8a8f94',1);this.line([[14,-12],[8,-11]],'#c9c3aa',1.6);
+    for(const [x,c] of [[-17,'#d4644f'],[-12,'#e2c26a']]){this.line([[x,3],[x,-7]],'#8a7552',.8);this.poly([[x-5,-7],[x,-10],[x+5,-7]],c);}
+  }
+  spaceport(t){
+    this.diamond(0,0,22,11,'#b9bdb4');this.diamond(0,0,10,5,'#9da39b');this.line([[-12,0],[12,0]],'#e2c26a',1);
+    this.line([[12,2],[12,-34]],'#7d8580',1.4);this.line([[12,-30],[4,-30]],'#7d8580',1);
+    // Every so often the rocket lifts off with a plume, then a new one stands ready.
+    const cycle=this.reduced?0:(this.time*.05+t.x*.13)%1,lift=cycle>.85?Math.pow((cycle-.85)/.15,2)*160:0;
+    if(lift<150){const y=-lift;this.poly([[-3,y-2],[3,y-2],[3,y-24],[0,y-31],[-3,y-24]],'#eeeeea');this.poly([[-3,y-6],[-6,y],[-3,y-1]],'#c95b4c');this.poly([[3,y-6],[6,y],[3,y-1]],'#c95b4c');this.ellipse(0,y-17,1.4,1.4,'#7fa3a8');
+      if(lift>0)for(let i=0;i<6;i++){const f=i/6;this.ellipse((Math.random()-.5)*4,y+2+f*18,3+f*6,2+f*4,`rgba(${f<.3?'255,210,140':'230,228,220'},${(1-f)*.85})`);}}
   }
   museum(){
     this.ellipse(4,4,20,6,'#58654414');

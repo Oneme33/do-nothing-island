@@ -7,6 +7,7 @@ import {advanceCollection} from './collection.js';
 import {advanceCoast,coastNotice} from './coast.js';
 import {ensureSquare,advanceSquare} from './square.js';
 import {planDelight,DELIGHT_LABELS,DELIGHT_OPENINGS} from './delights.js';
+import {advanceMonuments} from './monuments.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 export const WORLD_RADIUS = 12;
@@ -364,6 +365,7 @@ export class Civilization {
     advancePleasures(this);advanceCoast(this);advanceSquare(this);
     // Delights do not wait for a housing lull: they claim a fitting free plot when their time comes.
     if(this.year%9===4&&!this.storm)planDelight(this);
+    advanceMonuments(this);
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);

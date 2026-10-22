@@ -24,6 +24,10 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Geluid dat meegroeit.** Het geluid gaat vanzelf aan bij je eerste klik of toets (eerder laten browsers geen geluid toe); met de luidsprekerknop zet je het uit, en die keuze blijft bewaard. Het is een volledig in de browser opgewekte geluidswereld: de zee, vogels overdag, hamers bij bouwplaatsen, kerkklokken vanaf de middeleeuwen, een trambel van 1860 tot 1990, verkeer in de moderne tijd en krekels 's nachts, wanneer alles zachter klinkt. Regen, beving, vuur, bouwen, schatten en een nieuw tijdperk hebben elk een eigen geluid.
 
+**Standbeelden.** Het eiland zet vanzelf beelden neer. Op de monumentplek van het plein komt er één voor jou: **Het Onzichtbare Handje** als je bewoners vaak hebt geholpen, of **Voor wie niets deed** (een leeg voetstuk met een bankje) als je tot 1500 nergens aan hebt gezeten. Verder komen er beelden voor de stichter van de familie, de Heilige Kip (als die schat gevonden is), de vuurtorenkat en, na meerdere branden, een monument voor de Grote Brand.
+
+**Nog meer bijzondere gebouwen.** Een circustent (vanaf 1650), een treinstation met een heen en weer rijdend treintje (1860), een openluchtzwembad met zwemmers (1930) en een ruimtehaven waar af en toe een raket opstijgt (2060).
+
 **Gezellige feesten.** Ongeveer elke dertig tot zestig jaar is er een feest: marktdag of dansavond op het plein, een eendenrace, een vliegerdag, een pannenkoekenfeest of een vreugdevuur. Er hangen slingers met lampionnen, een kring mensen danst, er staat een snoepkraam, muzieknootjes en confetti dwarrelen, en 's avonds is er vuurwerk. Zolang het feest duurt is iedereen ‘Feestelijk’, daalt de onrust en stijgt de welvaart een beetje, en met geluid aan speelt er een vrolijk deuntje. De knop **Feest** brengt je naar het feest, of vertelt wanneer het volgende is.
 
 **Dieren.** Op de akkers grazen schapen, koeien en vanaf 600 paarden. In het bos lopen herten, op lege grond huppelen konijnen, langs de stranden zwemmen eenden en staan meeuwen, en bij sommige huizen zit een kat. 's Winters en 's nachts zijn de weidedieren binnen.
