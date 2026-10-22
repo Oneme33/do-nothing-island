@@ -8,6 +8,15 @@ export function islandScores(s){
  const values={leefbaarheid:living,natuur:nature,zelfstandigheid:independent,veerkracht:resilience,cultuur:culture};
  return {values,total:score100(Object.values(values).reduce((a,b)=>a+b,0)/5)};
 }
+// What each score means, in plain words, with a short verdict for the value.
+const SCORE_MEANING={
+ leefbaarheid:['Eten, water en welvaart voor iedereen',['Het was vaak krap.','De meeste mensen kwamen goed rond.','Iedereen had het goed.']],
+ natuur:['Hoe groen en schoon het eiland bleef',['Er bleef weinig natuur over.','Een redelijk groen eiland.','Een levend, schoon landschap.']],
+ zelfstandigheid:['Hoeveel ze zelf deden, zonder jouw hulp',['Ze leunden flink op jou.','Soms hielp je een handje.','Ze deden bijna alles zelf.']],
+ veerkracht:['Hoe goed ze terugkwamen na brand, beving en hoog water',['Elke ramp bleef lang zichtbaar.','Ze herstelden op eigen tempo.','Na elke ramp stonden ze sterker op.']],
+ cultuur:['Parken, feesten, tradities en bijzondere plekken',['Weinig tijd voor plezier.','Er was genoeg te doen.','Een eiland vol leven en feest.']]
+};
+export function explainScore(name,value){const [what,verdicts]=SCORE_MEANING[name]||['',['','','']];return{what,verdict:verdicts[value>=70?2:value>=45?1:0]};}
 export function drawFinale(c,w,h,s,m,reduced=false){
  if(!m)return;const t=reduced?Math.floor(m.elapsed/6)*6:m.elapsed,id=m.id;
  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,w,h);c.fillStyle='#dfebe0';c.fillRect(0,0,w,h);

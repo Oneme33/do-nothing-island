@@ -124,3 +124,5 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .eyebrow{color:#5f6b52}
 .dialog-note,.save-status,#chapter-status,.time-caption,.pace-readout,.history-item time,.family-generations time,.collection-grid small{color:#5f6a5e}
 .island-window canvas:focus-visible{outline:3px solid #8aa36c;outline-offset:-3px}
+
+.score-row .score-note{grid-column:1/-1;margin-top:-6px;font-size:10px;color:#5f6a5e;text-transform:none;line-height:1.4}
