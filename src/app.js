@@ -10,6 +10,8 @@ import {tourStops} from './tour.js';
 import {museumExhibits} from './museum.js';
 import {Soundscape} from './sound.js';
 import {islandIdentity,flagSVG} from './identity.js';
+import {makePostcard,makeEndCard,downloadCanvas} from './postcard.js';
+import {DAY_SECONDS} from './daylight.js';
 import {ensureWishes,dismissWish,WISH_OUTCOMES,canHelpWish,helpActiveWish} from './wishes.js';
 import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
 import {chronicleChapters,chroniclePlace,CHAPTER_ILLUSTRATIONS} from './chronicle.js';
@@ -22,6 +24,9 @@ let storageAvailable=true;
 let sim;
 try {sim=Civilization.restore(localStorage.getItem(storageKey));}catch{storageAvailable=false;}
 sim ||= new Civilization();
+// 3.7: a shared link with ?seed= opens that same island; the previous one can be restored for ten seconds.
+let sharedFrom=null;
+try{const shared=Number(new URLSearchParams(location.search).get('seed'));if(Number.isInteger(shared)&&shared>0&&shared<=0xffffffff&&shared!==sim.seed){sharedFrom=sim.serialize();sim=new Civilization(shared,{...sim.config});}}catch{}
 returnFromAway(sim);
 let collection=readCollection(null),collectionStorageAvailable=true;
 try{collection=readCollection(localStorage.getItem(COLLECTION_STORAGE_KEY));}catch{collectionStorageAvailable=false;}
@@ -456,6 +461,22 @@ $('intro-back').addEventListener('click',()=>{introStep=Math.max(0,introStep-1);
 $('intro-next').addEventListener('click',()=>{if(introStep<2){introStep++;updateIntro();return;}finishIntro();});
 $('cinema-skip').addEventListener('click',completeCinema);
 $('tour-skip').addEventListener('click',finishTour);
+// 3.6: photo mode hides the interface, offers day or night and saves a postcard.
+let photoPaused=false;
+function setPhotoMode(on){
+  $('island-window').classList.toggle('photo-mode',on);$('photo-bar').hidden=!on;$('photo-mode').setAttribute('aria-pressed',String(on));
+  if(on){photoPaused=paused;paused=true;}else paused=photoPaused;updatePause();
+}
+function setPhotoLight(night){const day=Math.floor(renderer.dayClock/DAY_SECONDS);renderer.dayClock=(day+(night?.02:.5))*DAY_SECONDS;renderer.draw(performance.now());}
+$('photo-mode').addEventListener('click',()=>setPhotoMode(!$('island-window').classList.contains('photo-mode')));
+$('photo-done').addEventListener('click',()=>setPhotoMode(false));
+$('photo-day').addEventListener('click',()=>setPhotoLight(false));
+$('photo-night').addEventListener('click',()=>setPhotoLight(true));
+$('photo-save').addEventListener('click',()=>{try{const id=islandIdentity(sim);downloadCanvas(makePostcard(canvas,{identity:id,year:sim.year,line:`${Math.floor(sim.population).toLocaleString('nl-NL')} inwoners · ${nl(sim.age.name)}`}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-jaar-${sim.year}.png`);showToast('Ansichtkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
+function islandLink(){try{return `${location.origin}${location.pathname}?seed=${sim.seed}`;}catch{return `?seed=${sim.seed}`;}}
+$('ending-card').addEventListener('click',()=>{try{const id=islandIdentity(sim),o=sim.outcome||ENDINGS.independent,family=ensureFamily(sim),score=(o.scores||islandScores(sim)).total;
+  downloadCanvas(makeEndCard({identity:id,title:nl(o.title),quote:nl(o.quote),familyName:family.lastName,generations:family.generations.length,seed:sim.seed,year:o.year||sim.year,score,before:sim.snapshots[0]?.land,after:o.coast||sim.land.map(t=>`${t.x},${t.y}`),link:islandLink()}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-eindkaart.png`);showToast('Eindkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
+$('ending-link').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(islandLink());showToast('Link gekopieerd. Een vriend speelt hetzelfde eiland en mag anders ingrijpen.',3600);}catch{showToast(islandLink(),6000);}});
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));
 $('find-fun').addEventListener('click',()=>focusPlace(sim.buildings.find(t=>t.building==='fairground')||sim.buildings.find(t=>t.building==='festival-ground')||sim.buildings.find(t=>t.building==='bonfire')));
@@ -599,6 +620,7 @@ document.addEventListener('visibilitychange',()=>{
 window.addEventListener('pagehide',save);
 let firstVisit=true;try{firstVisit=localStorage.getItem(introKey)!=='done';}catch{}
 if(firstVisit)showIntro();
+if(sharedFrom){previousIsland=sharedFrom;$('undo-reset').hidden=false;undoTimer=setTimeout(()=>{previousIsland=null;$('undo-reset').hidden=true;},10000);showToast(`Je speelt een gedeeld eiland (seed ${sim.seed}). Ingrijpen mag, anders dan je vriend.`,5000);try{history.replaceState(null,'',location.pathname);}catch{}}
 updateUI();updatePause();save();
 if(!storageAvailable)$('save-status').textContent="Opslaan lukt hier niet. Je kunt dit bezoek wel gewoon verder spelen.";
 requestAnimationFrame(frame);

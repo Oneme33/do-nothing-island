@@ -103,6 +103,12 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 @media (prefers-reduced-motion:reduce){.age-card{animation:none}.island-window canvas{transition:none}}
 
 .island-flag{vertical-align:-2px;border-radius:2px;box-shadow:0 0 0 .5px #0002}
+
+/* 3.6 Photo mode */
+.photo-bar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:7;display:flex;gap:6px;background:#fbf8eef0;border:1px solid #dfe3d2;border-radius:24px;padding:6px;box-shadow:0 8px 30px #213e3022}
+.photo-bar button{font-size:11px;padding:8px 13px;border-radius:18px;border:1px solid transparent;background:none;color:#4d6142;cursor:pointer}
+.photo-bar .primary-photo{background:#dce7c4;border-color:#cbd8ad}
+.island-window.photo-mode .population-card,.island-window.photo-mode .civic-overview,.island-window.photo-mode .island-heading,.island-window.photo-mode .weather,.island-window.photo-mode .map-controls,.island-window.photo-mode .instruction,.island-window.photo-mode .island-toolbar,.island-window.photo-mode .wish-bubble,.island-window.photo-mode .project-overlay,.island-window.photo-mode .map-coordinate,.island-window.photo-mode .tile-inspector,.island-window.photo-mode .toast,.island-window.photo-mode .away-summary{opacity:0;pointer-events:none;transition:opacity .4s}
 </style>
 </head>
 <body>
@@ -139,13 +145,13 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 
       <div class="map-coordinate" id="geography-label">EEN KLEINE PLEK IN EEN GROOT NIETS</div>
       <div class="map-controls"><button id="find-beach" title="Bekijk het strand">Strand ↗</button><button id="zoom-out" aria-label="Zoom uit">−</button><button id="recenter" aria-label="Zet het eiland in het midden" title="Zet het eiland in het midden"><svg viewBox="0 0 20 20"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4"/></svg></button><button id="zoom-in" aria-label="Zoom in">+</button></div>
-      <div class="island-toolbar"><div class="time-controls"><button id="pause" aria-label="Pauzeer het eiland" title="Pauze (spatie)"><svg id="pause-icon" viewBox="0 0 20 20"><path d="M6 4v12M14 4v12"/></svg></button><div class="speed-buttons" role="group" aria-label="Snelheid van het eiland"><button class="active" data-speed="1" aria-pressed="true">1×</button><button data-speed="2" aria-pressed="false">2×</button><button data-speed="3" aria-pressed="false">3×</button><button data-speed="10" aria-pressed="false">10×</button></div><span class="time-caption" id="time-caption">GEEN BIJZONDERE HAAST</span></div><button id="canvas-journal" title="Open het eilandboek: kroniek, familie, wensen, uitdagingen en verzameling" aria-haspopup="dialog">Eilandboek ↗</button></div>
+      <div class="island-toolbar"><div class="time-controls"><button id="pause" aria-label="Pauzeer het eiland" title="Pauze (spatie)"><svg id="pause-icon" viewBox="0 0 20 20"><path d="M6 4v12M14 4v12"/></svg></button><div class="speed-buttons" role="group" aria-label="Snelheid van het eiland"><button class="active" data-speed="1" aria-pressed="true">1×</button><button data-speed="2" aria-pressed="false">2×</button><button data-speed="3" aria-pressed="false">3×</button><button data-speed="10" aria-pressed="false">10×</button></div><span class="time-caption" id="time-caption">GEEN BIJZONDERE HAAST</span></div><button id="photo-mode" title="Fotomodus: verberg de knoppen en maak een ansichtkaart" aria-pressed="false">Foto</button><button id="canvas-journal" title="Open het eilandboek: kroniek, familie, wensen, uitdagingen en verzameling" aria-haspopup="dialog">Eilandboek ↗</button></div>
     <aside class="story-moment" id="moment-card" aria-live="polite" hidden>
       <div><span class="eyebrow" id="moment-year">EILANDGESCHIEDENIS</span><strong id="moment-title">Een beetje geschiedenis</strong><p id="moment-text"></p></div>
       <button id="moment-close" class="card-close" aria-label="Verberg verhaalkaart">×</button><div class="moment-actions"><button id="moment-focus">Laat zien ↗</button><button id="moment-continue">Sluiten</button></div>
     </aside>
       <aside id="wish-bubble" class="wish-bubble" hidden><button id="wish-dismiss" class="card-close" aria-label="Verberg deze wens">×</button><button id="wish-open" aria-haspopup="dialog"><small id="wish-speaker"></small><span id="wish-text"></span></button></aside>
-      <div class="age-card" id="age-card" role="status" aria-live="polite" hidden><span class="eyebrow" id="age-card-year"></span><strong id="age-card-title"></strong><p id="age-card-line"></p></div><div class="tour-caption" id="tour-caption" role="status" aria-live="polite" hidden><span class="eyebrow" id="tour-year"></span><p id="tour-text"></p><div class="tour-actions"><span id="tour-step"></span><button id="tour-skip">Naar de eindscène →</button></div></div><div class="toast" id="toast" role="status"><span id="toast-text"></span><button id="toast-close" aria-label="Verberg melding">×</button></div>
+      <div class="photo-bar" id="photo-bar" hidden><button id="photo-day">Dag</button><button id="photo-night">Nacht</button><button id="photo-save" class="primary-photo">Bewaar ansichtkaart ↓</button><button id="photo-done">Klaar</button></div><div class="age-card" id="age-card" role="status" aria-live="polite" hidden><span class="eyebrow" id="age-card-year"></span><strong id="age-card-title"></strong><p id="age-card-line"></p></div><div class="tour-caption" id="tour-caption" role="status" aria-live="polite" hidden><span class="eyebrow" id="tour-year"></span><p id="tour-text"></p><div class="tour-actions"><span id="tour-step"></span><button id="tour-skip">Naar de eindscène →</button></div></div><div class="toast" id="toast" role="status"><span id="toast-text"></span><button id="toast-close" aria-label="Verberg melding">×</button></div>
       <div class="intervention-result" id="intervention-result" role="status" aria-live="polite" hidden><button id="intervention-close" class="card-close" aria-label="Verberg je ingreep">×</button><span class="eyebrow">JOUW INGREEP</span><strong id="intervention-title"></strong><p id="intervention-detail"></p></div>
       <div class="instruction" id="instruction"><span>✳</span> Probeer niets aan te raken.<small>Klik / tik op het eiland. Ze merken het.</small></div>
 
@@ -178,7 +184,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
   <dialog id="book-dialog" class="book-dialog" aria-label="Het eilandboek"><div class="book-bar"><div class="book-tabs" role="tablist" aria-label="Hoofdstukken van het eilandboek"><button id="book-tab-journal" role="tab" aria-controls="book-journal" aria-selected="true" tabindex="0"><span aria-hidden="true">✳</span> Kroniek</button><button id="book-tab-family" role="tab" aria-controls="book-family" aria-selected="false" tabindex="-1"><span aria-hidden="true">♧</span> Familie</button><button id="book-tab-wishes" role="tab" aria-controls="book-wishes" aria-selected="false" tabindex="-1"><span aria-hidden="true">♡</span> Wensen</button><button id="book-tab-challenges" role="tab" aria-controls="book-challenges" aria-selected="false" tabindex="-1"><span aria-hidden="true">✧</span> Uitdagingen</button><button id="book-tab-museum" role="tab" aria-controls="book-museum" aria-selected="false" tabindex="-1"><span aria-hidden="true">⌂</span> Museum</button><button id="book-tab-collection" role="tab" aria-controls="book-collection" aria-selected="false" tabindex="-1"><span aria-hidden="true">▧</span> Verzameling</button></div><button id="book-close" class="dialog-close book-close" aria-label="Sluit het eilandboek">×</button></div><section id="book-journal" class="book-page journal-page" role="tabpanel" aria-labelledby="book-tab-journal"><span class="eyebrow">HET EILANDARCHIEF</span><h2>De kroniek van jouw eiland.</h2><p>Hoofdstukken vol familie, eigen ideeën en jouw ingrepen. Laat zien brengt je naar de plek zoals die er nu bij ligt.</p><div class="chronicle-legend"><span>♧ Familie</span><span>✳ Jouw ingreep</span></div><nav id="journal-chapters" class="journal-chapters" aria-label="Hoofdstukken van de kroniek"></nav><p class="dialog-note">De kroniek bewaart maximaal 350 berichten. Grote momenten en familie krijgen voorrang op dagelijkse nieuwtjes.</p><div id="journal-entries"></div></section><section id="book-family" class="book-page family-page" role="tabpanel" aria-labelledby="book-tab-family" hidden><span class="eyebrow">DE FAMILIE VAN HET EERSTE HUIS</span><h2 id="family-title"></h2><p>Het huis blijft. Iedere generatie geeft de sleutel door.</p><section id="family-current" class="family-current"></section><p id="family-note" class="dialog-note"></p><div class="family-navigation"><button id="family-oldest">Naar de eerste generatie ↑</button><button id="family-latest">Naar de huidige generatie ↓</button><button id="family-find-home">Bekijk hun huis ↗</button></div><ol id="family-generations" class="family-generations" aria-label="Generaties van de eerste familie"></ol></section><section id="book-wishes" class="book-page wishes-page" role="tabpanel" aria-labelledby="book-tab-wishes" hidden><span class="eyebrow">EEN VRAAG VAN HET EILAND</span><h2 id="wishes-title">Wensen van inwoners</h2><p>Je mag helpen of gewoon blijven kijken. Hulp vergroot hun vertrouwen én de verwachting dat je terugkomt. Zonder ingreep zoeken ze hun eigen weg.</p><section id="wish-current" class="family-current"></section><div class="wish-actions"><button id="wish-help" class="primary-button" hidden>Help deze inwoner</button><button id="wish-find" class="secondary-button" hidden>Bekijk inwoner ↗</button></div><label class="setting-row"><span>Toon kleine wenswolkjes</span><input id="wish-bubbles" type="checkbox"></label><h3>Eerdere wensen</h3><ol id="wish-history" class="wish-history"></ol></section><section id="book-challenges" class="book-page challenges-page" role="tabpanel" aria-labelledby="book-tab-challenges" hidden><span class="eyebrow">ALLEEN ALS JE ZIN HEBT</span><h2 id="challenges-title">Kleine uitdagingen</h2><p>Dit eiland heeft een paar vrijblijvende ideeën. Er hangt geen beloning of straf aan. Gewoon kijken blijft genoeg.</p><p id="challenge-note" class="dialog-note"></p><ol id="challenge-list" class="challenge-list"></ol></section><section id="book-museum" class="book-page museum-page" role="tabpanel" aria-labelledby="book-tab-museum" hidden><span class="eyebrow">EEN TIJDCAPSULE</span><h2>Het eilandmuseum</h2><p id="museum-note"></p><ol id="museum-list" class="challenge-list"></ol></section><section id="book-collection" class="book-page collection-page" role="tabpanel" aria-labelledby="book-tab-collection" hidden><span class="eyebrow">SPOREN VAN AL JE EILANDEN</span><h2 id="collection-title">De verzameling</h2><p id="collection-progress"></p><p id="collection-storage" class="dialog-note"></p><div id="collection-groups"></div></section></dialog>
   <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480" selected>Een groeiende wereld · 480</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Leven tijdens afwezigheid</strong><small>Bij terugkomst maximaal drie eeuwen verder, behalve wanneer je pauzeert.</small></span><input type="checkbox" id="offline-life" checked></label><label class="setting-row"><span><strong>Steeds wat sneller</strong><small>Ongeveer een minuut per generatie, later iets vlotter.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Dag, nacht en seizoenen</strong><small>Avondlicht, lantaarns, herfstbladeren en sneeuw. Alleen sfeer: het eiland zelf merkt er niets van.</small></span><input type="checkbox" id="day-night" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
 
-  <dialog id="ending-dialog" class="ending-dialog"><button id="ending-close" class="dialog-close" aria-label="Sluit het naschrift">×</button><span class="eyebrow">HET EILAND HEEFT EEN VERHAAL</span><div class="ending-symbol">◉</div><h2 id="ending-title">De erfenis van het eiland.</h2><p class="ending-quote" id="ending-quote"></p><p id="ending-description"></p><div class="ending-shortage"><span>WAT ZE ACHTERLATEN</span><strong id="ending-consequence"></strong><p id="ending-detail"></p></div><section class="island-scores" aria-label="Eilandscores"><span class="eyebrow">HUN EILANDSCORE</span><strong id="ending-score"></strong><div id="score-breakdown"></div><p>Het gemiddelde van vijf kanten van hun beschaving. Er is meer dan één manier om het goed te doen.</p></section><p id="ending-stats"></p><div class="ending-maps"><figure><svg id="ending-before" viewBox="0 0 250 250" role="img" aria-label="Het oorspronkelijke eiland"></svg><figcaption>Het begin</figcaption></figure><figure><svg id="ending-after" viewBox="0 0 250 250" role="img" aria-label="Het uiteindelijke eiland"></svg><figcaption>Het eiland dat zij maakten</figcaption></figure></div><p id="ending-causes"></p><div id="ending-chronicle"></div><button id="ending-continue" class="primary-button">Bekijk het uiteindelijke eiland ↗</button><button id="ending-replay" class="secondary-button">Speel de eindscène opnieuw ↻</button><button id="ending-sandbox" class="secondary-button">Speel vrij verder →</button><button id="ending-new" class="secondary-button">Begin een nieuw eiland ↻</button></dialog>
+  <dialog id="ending-dialog" class="ending-dialog"><button id="ending-close" class="dialog-close" aria-label="Sluit het naschrift">×</button><span class="eyebrow">HET EILAND HEEFT EEN VERHAAL</span><div class="ending-symbol">◉</div><h2 id="ending-title">De erfenis van het eiland.</h2><p class="ending-quote" id="ending-quote"></p><p id="ending-description"></p><div class="ending-shortage"><span>WAT ZE ACHTERLATEN</span><strong id="ending-consequence"></strong><p id="ending-detail"></p></div><section class="island-scores" aria-label="Eilandscores"><span class="eyebrow">HUN EILANDSCORE</span><strong id="ending-score"></strong><div id="score-breakdown"></div><p>Het gemiddelde van vijf kanten van hun beschaving. Er is meer dan één manier om het goed te doen.</p></section><p id="ending-stats"></p><div class="ending-maps"><figure><svg id="ending-before" viewBox="0 0 250 250" role="img" aria-label="Het oorspronkelijke eiland"></svg><figcaption>Het begin</figcaption></figure><figure><svg id="ending-after" viewBox="0 0 250 250" role="img" aria-label="Het uiteindelijke eiland"></svg><figcaption>Het eiland dat zij maakten</figcaption></figure></div><p id="ending-causes"></p><div id="ending-chronicle"></div><button id="ending-continue" class="primary-button">Bekijk het uiteindelijke eiland ↗</button><button id="ending-replay" class="secondary-button">Speel de eindscène opnieuw ↻</button><button id="ending-sandbox" class="secondary-button">Speel vrij verder →</button><button id="ending-new" class="secondary-button">Begin een nieuw eiland ↻</button><button id="ending-card" class="secondary-button">Bewaar eindkaart ↓</button><button id="ending-link" class="secondary-button">Kopieer link naar dit eiland</button></dialog>
   <script>(()=>{
 // Dutch presentation also translates narrative text in older saved islands.
 const dutchText={
@@ -2843,6 +2849,55 @@ function tourStops(s){
  return stops;
 }
 
+// Postcards from the island: a framed photo of the canvas, and a shareable card for the ending.
+function drawFlag(c,id,x,y,w){
+ const h=w*2/3;c.fillStyle=id.main;c.fillRect(x,y,w,h);c.fillStyle=id.second;c.globalAlpha=.75;
+ if(id.stripe)c.fillRect(x,y+h*.75,w,h*.25);else c.fillRect(x,y,w*.2,h);c.globalAlpha=1;
+ c.beginPath();c.arc(x+w/2,y+h*.45,h*.2,0,Math.PI*2);c.fill();
+}
+function paper(width,height){
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const c=canvas.getContext('2d');
+ c.fillStyle='#f7f4e8';c.fillRect(0,0,width,height);c.strokeStyle='#d9d2b8';c.lineWidth=2;c.strokeRect(14,14,width-28,height-28);
+ return{canvas,c};
+}
+function makePostcard(source,{identity,year,line}){
+ const w=1500,h=1000,{canvas,c}=paper(w,h),pad=48,photoH=h-210;
+ c.fillStyle='#dcebe4';c.fillRect(pad,pad,w-pad*2,photoH);
+ const scale=Math.min((w-pad*2)/source.width,photoH/source.height),sw=source.width*scale,sh=source.height*scale;
+ c.drawImage(source,pad+(w-pad*2-sw)/2,pad+(photoH-sh)/2,sw,sh);
+ drawFlag(c,identity,pad,h-140,54);
+ c.fillStyle='#293d32';c.font='48px Georgia, serif';c.fillText(`Groeten uit ${identity.name}`,pad+72,h-102);
+ c.fillStyle='#6f7f61';c.font='22px sans-serif';c.fillText(`Jaar ${year} · ${line}`,pad+72,h-64);
+ c.textAlign='right';c.fillText('Do Nothing Island',w-pad,h-64);
+ return canvas;
+}
+function miniMap(c,land,x,y,size){
+ c.fillStyle='#dbe7da';c.fillRect(x,y,size,size);c.fillStyle='#a8ba85';const cell=size/25;
+ for(const id of land||[]){const [a,b]=id.split(',').map(Number);if(Math.abs(a)<=12&&Math.abs(b)<=12)c.fillRect(x+(a+12)*cell,y+(b+12)*cell,cell+.5,cell+.5);}
+ c.fillStyle='#546f43';c.beginPath();c.arc(x+size/2,y+size/2,4,0,Math.PI*2);c.fill();
+}
+function wrap(c,text,x,y,width,lineHeight){
+ const words=String(text).split(' ');let line='';
+ for(const word of words){if(c.measureText(line+word).width>width&&line){c.fillText(line.trim(),x,y);y+=lineHeight;line='';}line+=word+' ';}
+ c.fillText(line.trim(),x,y);return y;
+}
+function makeEndCard({identity,title,quote,familyName,generations,seed,year,score,before,after,link}){
+ const w=1200,h=675,{canvas,c}=paper(w,h);
+ drawFlag(c,identity,60,56,60);c.fillStyle='#7b866e';c.font='600 16px sans-serif';c.fillText(`${identity.name.toUpperCase()} · JAAR ${year}`,136,82);
+ c.fillStyle='#293d32';c.font='54px Georgia, serif';c.fillText(title,60,170);
+ c.fillStyle='#5c6c4e';c.font='italic 26px Georgia, serif';wrap(c,`“${quote}”`,60,222,560,34);
+ miniMap(c,before,700,70,220);miniMap(c,after,940,70,220);
+ c.fillStyle='#7b866e';c.font='15px sans-serif';c.fillText('Het begin',700,315);c.fillText('Het eiland dat zij maakten',940,315);
+ c.fillStyle='#293d32';c.font='22px sans-serif';
+ c.fillText(`Familie ${familyName} · ${generations} generaties`,60,420);c.fillText(`Eilandscore ${score} / 100`,60,460);
+ c.fillStyle='#6f7f61';c.font='18px sans-serif';c.fillText(`Speel hetzelfde eiland: seed ${seed}`,60,560);if(link)c.fillText(link,60,590);
+ c.textAlign='right';c.fillText('Do Nothing Island',w-60,h-50);
+ return canvas;
+}
+function downloadCanvas(canvas,filename){
+ canvas.toBlob(blob=>{if(!blob)return;const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);},'image/png');
+}
+
 function drawFlames(r,x,y,size=1){
  const clock=r.reduced?0:r.activityTime;
  r.ellipse(x,y+2,13*size,5*size,'#e5ae4b55');
@@ -4349,6 +4404,9 @@ let storageAvailable=true;
 let sim;
 try {sim=Civilization.restore(localStorage.getItem(storageKey));}catch{storageAvailable=false;}
 sim ||= new Civilization();
+// 3.7: a shared link with ?seed= opens that same island; the previous one can be restored for ten seconds.
+let sharedFrom=null;
+try{const shared=Number(new URLSearchParams(location.search).get('seed'));if(Number.isInteger(shared)&&shared>0&&shared<=0xffffffff&&shared!==sim.seed){sharedFrom=sim.serialize();sim=new Civilization(shared,{...sim.config});}}catch{}
 returnFromAway(sim);
 let collection=readCollection(null),collectionStorageAvailable=true;
 try{collection=readCollection(localStorage.getItem(COLLECTION_STORAGE_KEY));}catch{collectionStorageAvailable=false;}
@@ -4783,6 +4841,22 @@ $('intro-back').addEventListener('click',()=>{introStep=Math.max(0,introStep-1);
 $('intro-next').addEventListener('click',()=>{if(introStep<2){introStep++;updateIntro();return;}finishIntro();});
 $('cinema-skip').addEventListener('click',completeCinema);
 $('tour-skip').addEventListener('click',finishTour);
+// 3.6: photo mode hides the interface, offers day or night and saves a postcard.
+let photoPaused=false;
+function setPhotoMode(on){
+  $('island-window').classList.toggle('photo-mode',on);$('photo-bar').hidden=!on;$('photo-mode').setAttribute('aria-pressed',String(on));
+  if(on){photoPaused=paused;paused=true;}else paused=photoPaused;updatePause();
+}
+function setPhotoLight(night){const day=Math.floor(renderer.dayClock/DAY_SECONDS);renderer.dayClock=(day+(night?.02:.5))*DAY_SECONDS;renderer.draw(performance.now());}
+$('photo-mode').addEventListener('click',()=>setPhotoMode(!$('island-window').classList.contains('photo-mode')));
+$('photo-done').addEventListener('click',()=>setPhotoMode(false));
+$('photo-day').addEventListener('click',()=>setPhotoLight(false));
+$('photo-night').addEventListener('click',()=>setPhotoLight(true));
+$('photo-save').addEventListener('click',()=>{try{const id=islandIdentity(sim);downloadCanvas(makePostcard(canvas,{identity:id,year:sim.year,line:`${Math.floor(sim.population).toLocaleString('nl-NL')} inwoners · ${nl(sim.age.name)}`}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-jaar-${sim.year}.png`);showToast('Ansichtkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
+function islandLink(){try{return `${location.origin}${location.pathname}?seed=${sim.seed}`;}catch{return `?seed=${sim.seed}`;}}
+$('ending-card').addEventListener('click',()=>{try{const id=islandIdentity(sim),o=sim.outcome||ENDINGS.independent,family=ensureFamily(sim),score=(o.scores||islandScores(sim)).total;
+  downloadCanvas(makeEndCard({identity:id,title:nl(o.title),quote:nl(o.quote),familyName:family.lastName,generations:family.generations.length,seed:sim.seed,year:o.year||sim.year,score,before:sim.snapshots[0]?.land,after:o.coast||sim.land.map(t=>`${t.x},${t.y}`),link:islandLink()}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-eindkaart.png`);showToast('Eindkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
+$('ending-link').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(islandLink());showToast('Link gekopieerd. Een vriend speelt hetzelfde eiland en mag anders ingrijpen.',3600);}catch{showToast(islandLink(),6000);}});
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));
 $('find-fun').addEventListener('click',()=>focusPlace(sim.buildings.find(t=>t.building==='fairground')||sim.buildings.find(t=>t.building==='festival-ground')||sim.buildings.find(t=>t.building==='bonfire')));
@@ -4926,6 +5000,7 @@ document.addEventListener('visibilitychange',()=>{
 window.addEventListener('pagehide',save);
 let firstVisit=true;try{firstVisit=localStorage.getItem(introKey)!=='done';}catch{}
 if(firstVisit)showIntro();
+if(sharedFrom){previousIsland=sharedFrom;$('undo-reset').hidden=false;undoTimer=setTimeout(()=>{previousIsland=null;$('undo-reset').hidden=true;},10000);showToast(`Je speelt een gedeeld eiland (seed ${sim.seed}). Ingrijpen mag, anders dan je vriend.`,5000);try{history.replaceState(null,'',location.pathname);}catch{}}
 updateUI();updatePause();save();
 if(!storageAvailable)$('save-status').textContent="Opslaan lukt hier niet. Je kunt dit bezoek wel gewoon verder spelen.";
 requestAnimationFrame(frame);

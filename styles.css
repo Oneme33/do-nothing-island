@@ -94,3 +94,9 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 @media (prefers-reduced-motion:reduce){.age-card{animation:none}.island-window canvas{transition:none}}
 
 .island-flag{vertical-align:-2px;border-radius:2px;box-shadow:0 0 0 .5px #0002}
+
+/* 3.6 Photo mode */
+.photo-bar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:7;display:flex;gap:6px;background:#fbf8eef0;border:1px solid #dfe3d2;border-radius:24px;padding:6px;box-shadow:0 8px 30px #213e3022}
+.photo-bar button{font-size:11px;padding:8px 13px;border-radius:18px;border:1px solid transparent;background:none;color:#4d6142;cursor:pointer}
+.photo-bar .primary-photo{background:#dce7c4;border-color:#cbd8ad}
+.island-window.photo-mode .population-card,.island-window.photo-mode .civic-overview,.island-window.photo-mode .island-heading,.island-window.photo-mode .weather,.island-window.photo-mode .map-controls,.island-window.photo-mode .instruction,.island-window.photo-mode .island-toolbar,.island-window.photo-mode .wish-bubble,.island-window.photo-mode .project-overlay,.island-window.photo-mode .map-coordinate,.island-window.photo-mode .tile-inspector,.island-window.photo-mode .toast,.island-window.photo-mode .away-summary{opacity:0;pointer-events:none;transition:opacity .4s}

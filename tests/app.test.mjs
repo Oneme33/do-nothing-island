@@ -197,3 +197,8 @@ test('a new age shows a short title card on the island',async()=>{
  for(let i=0;i<60&&e.get('age-card').hidden;i++)a.advance(1);
  assert.equal(e.get('age-card').hidden,false);assert.match(e.get('age-card-title').textContent,/middeleeuwen|Middeleeuwen/i);assert.match(e.get('age-card-year').textContent,/600/);
 });
+test('photo mode hides the interface, pauses the island and restores the previous state',async()=>{
+ const a=await appHarness(new Civilization(31)),e=a.elements;a.frame(16);
+ e.get('photo-mode').handlers.click();assert.equal(e.get('photo-bar').hidden,false);const year=e.get('year').textContent;a.advance(5);assert.equal(e.get('year').textContent,year,'the island holds still for the photo');
+ e.get('photo-done').handlers.click();assert.equal(e.get('photo-bar').hidden,true);a.advance(5);assert.ok(e.get('year').textContent>year);
+});
