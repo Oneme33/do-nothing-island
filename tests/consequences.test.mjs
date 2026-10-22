@@ -69,3 +69,10 @@ test('all seven dedicated finale scenes draw finite coordinates at small and lar
  assert.ok(calls.includes('fillRect'));assert.ok(calls.includes('ellipse'));
  assert.equal(nl('The Great Duck Regatta'),'De grote eendenrace');assert.equal(nl('The very cautious kingdom.'),'Het bijzonder voorzichtige koninkrijk.');
 });
+test('a tremor collapses fragile buildings near the epicentre and costs stores; reinforced homes only crack',()=>{
+ const s=new Civilization(31);while(s.year<300)s.tick();
+ const home=s.houses.find(t=>!t.foundingHome&&t.district!=='heritage'&&!t.retrofitted);const food=s.food,pop=s.population;
+ s.interfere(home.x,home.y,'rumble');assert.equal(home.building,'ruins');assert.ok(home.rebuildFrom);assert.ok(s.food<food);assert.ok(s.population<pop);
+ const strong=s.houses.find(t=>!t.foundingHome&&t.district!=='heritage'&&Math.hypot(t.x-home.x,t.y-home.y)>6);strong.retrofitted=true;const type=strong.building;
+ s.interfere(strong.x,strong.y,'rumble');assert.equal(strong.building,type);
+});

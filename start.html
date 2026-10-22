@@ -1197,6 +1197,8 @@ function startBlaze(s,t,spread=false){
  ensureConsequences(s);if(t.fire||!t.building||t.building==='ruins')return false;
  t.fire={started:s.year,until:s.year+(s.buildings.some(p=>p.building==='fire-station')?6:16),nextSpread:s.year+(s.era<1?2:4)};
  t.fireHistory=(t.fireHistory||0)+1;t.lastFireYear=s.year;s.fireCount++;
+ // Fire eats into the stores: timber burns, and a burning field loses its harvest.
+ s.wood=Math.max(0,s.wood*.92);if(t.building==='farm')s.food=Math.max(0,s.food*.88);
  if(dwelling.includes(t.building))t.quakeDamage=Math.max(t.quakeDamage||0,.5);
  s.prosperity=Math.max(12,s.prosperity-(spread?1:4));
  if(spread)s.signal('fire',t,'Het vuur slaat over');
@@ -1212,7 +1214,8 @@ function finishBlaze(s,t,rescued=false){
   t.building=null;t.burntForest=true;t.clearingYear=s.year;s.environment=Math.max(10,s.environment-4);
   s.log('Het bos brandt uit. De open plek en vruchtbare as blijven; hier kan later een wijk groeien.','fire',{x:t.x,y:t.y});
  }else if(!rescued&&burned!=='farm'){
-  t.rebuildFrom=burned;t.rebuildAt=s.year+10;t.building='ruins';t.buildSite=null;
+  t.rebuildFrom=burned;t.rebuildAt=s.year+18;t.building='ruins';t.buildSite=null;
+  if(dwelling.includes(burned))s.population=Math.max(4,s.population*.985);
   s.log('De brand laat een ruïne achter. De bewoners beginnen aan een sterker huis.','fire',{x:t.x,y:t.y});
  }else s.log('De brand is geblust. De schade en vruchtbare as blijven zichtbaar.','reform',{x:t.x,y:t.y});
  s.signal('repair',t,rescued?'Geblust · de plek onthoudt het':'As en een nieuw begin');
@@ -1229,12 +1232,12 @@ function tendFires(s){
   const fire=t.fire;if(!fire)continue;
   if((brigade&&s.year-fire.started>=5)||s.year>=fire.until){finishBlaze(s,t);changed=true;continue;}
   if(s.year<(fire.nextSpread??fire.started+3))continue;
-  fire.nextSpread=s.year+(s.era<1?2:5);
-  if(s.land.filter(p=>p.fire).length>=12)continue;
+  fire.nextSpread=s.year+(s.era<1?2:3);
+  if(s.land.filter(p=>p.fire).length>=20)continue;
   for(const other of adjacentPlots(s,t)){
    if(other.kind!=='land'||!other.building||other.fire||protectedPlot(other)||['farm','beach','well','fire-station','ruins','quarry'].includes(other.building)||other.wetUntil>s.year)continue;
    const stone=other.material==='stone'||other.material==='brick'||s.era>=2;
-   const chance=(stone?.08:s.era<1?.65:.3)*(brigade?.2:1);
+   const chance=(stone?.15:s.era<1?.75:.45)*(brigade?.25:1);
    if(s.random()<chance){startBlaze(s,other,true);changed=true;}
   }
  }
@@ -2727,12 +2730,18 @@ class Civilization {
     if(mode==='rumble'){
       const landscape=reshapeAfterQuake(this,spot);captureSnapshot(this,'Na de beving');
       for(const tile of this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=2))tile.crackUntil=this.year+60;
-      const affected=this.houses.filter(h=>Math.abs(h.x-spot.x)+Math.abs(h.y-spot.y)<=2).slice(0,3);
+      // Close to the epicentre ordinary buildings collapse into ruins; reinforced ones only crack.
+      const fragile=t=>t.building&&!t.foundingHome&&!t.reservedFor&&t.district!=='heritage'&&!t.landform&&!['farm','beach','forest','tree','original-tree','ruins','town-square','lighthouse','bridge','dock','harbor','quarry'].includes(t.building)&&!t.retrofitted&&t.builtYear!==this.year;
+      const collapsed=this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=1.5&&fragile(t)).slice(0,3);
+      for(const t of collapsed){t.rebuildFrom=t.building;t.rebuildAt=this.year+18;t.building='ruins';t.buildSite=null;t.quakeHistory=(t.quakeHistory||0)+1;this.signal('rumble',t,'Ingestort');}
+      if(collapsed.length){this.population=Math.max(4,this.population*(1-.012*collapsed.length));this.rebuildRoads();}
+      this.food=Math.max(0,this.food*.9);this.wood=Math.max(0,this.wood*.9);
+      const affected=this.houses.filter(h=>Math.abs(h.x-spot.x)+Math.abs(h.y-spot.y)<=3).slice(0,6);
       const coast=this.reclaimed.filter(h=>h.kind==='land'&&Math.abs(h.x-spot.x)+Math.abs(h.y-spot.y)<=1);
       for(const house of affected){house.quakeDamage=house.retrofitted?.35:1;house.quakeHistory=(house.quakeHistory||0)+1;house.lastQuakeYear=this.year;this.signal('rumble',house,'Repairs needed');}
       this.prosperity=Math.max(12,this.prosperity-6);
       if(coast.length){this.flood(coast);return finish('rumble','Een dijk scheurt!',`Een wijk overstroomt; de bewoners leiden het verkeer om en beginnen aan herstel. ${landscape}`,12);}
-      return finish('rumble',affected.length?`${affected.length} huizen beschadigd`:'Het landschap verschuift',`${landscape} ${affected.length?'Huizen verliezen tijdelijk woonruimte tot de bouwers klaar zijn.':''}`,12);
+      return finish('rumble',collapsed.length?`${collapsed.length} ${collapsed.length===1?'gebouw stort':'gebouwen storten'} in, ${affected.length} beschadigd`:affected.length?`${affected.length} huizen beschadigd`:'Het landschap verschuift',`${landscape} ${affected.length?'Huizen verliezen tijdelijk woonruimte tot de bouwers klaar zijn.':''}`,12);
     }
     if(t?.kind==='flooded'){
       this.wealth=Math.min(1500,this.wealth+30);this.wood=Math.min(600,this.wood+15);

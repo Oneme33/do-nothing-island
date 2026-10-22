@@ -826,12 +826,18 @@ export class Civilization {
     if(mode==='rumble'){
       const landscape=reshapeAfterQuake(this,spot);captureSnapshot(this,'Na de beving');
       for(const tile of this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=2))tile.crackUntil=this.year+60;
-      const affected=this.houses.filter(h=>Math.abs(h.x-spot.x)+Math.abs(h.y-spot.y)<=2).slice(0,3);
+      // Close to the epicentre ordinary buildings collapse into ruins; reinforced ones only crack.
+      const fragile=t=>t.building&&!t.foundingHome&&!t.reservedFor&&t.district!=='heritage'&&!t.landform&&!['farm','beach','forest','tree','original-tree','ruins','town-square','lighthouse','bridge','dock','harbor','quarry'].includes(t.building)&&!t.retrofitted&&t.builtYear!==this.year;
+      const collapsed=this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=1.5&&fragile(t)).slice(0,3);
+      for(const t of collapsed){t.rebuildFrom=t.building;t.rebuildAt=this.year+18;t.building='ruins';t.buildSite=null;t.quakeHistory=(t.quakeHistory||0)+1;this.signal('rumble',t,'Ingestort');}
+      if(collapsed.length){this.population=Math.max(4,this.population*(1-.012*collapsed.length));this.rebuildRoads();}
+      this.food=Math.max(0,this.food*.9);this.wood=Math.max(0,this.wood*.9);
+      const affected=this.houses.filter(h=>Math.abs(h.x-spot.x)+Math.abs(h.y-spot.y)<=3).slice(0,6);
       const coast=this.reclaimed.filter(h=>h.kind==='land'&&Math.abs(h.x-spot.x)+Math.abs(h.y-spot.y)<=1);
       for(const house of affected){house.quakeDamage=house.retrofitted?.35:1;house.quakeHistory=(house.quakeHistory||0)+1;house.lastQuakeYear=this.year;this.signal('rumble',house,'Repairs needed');}
       this.prosperity=Math.max(12,this.prosperity-6);
       if(coast.length){this.flood(coast);return finish('rumble','Een dijk scheurt!',`Een wijk overstroomt; de bewoners leiden het verkeer om en beginnen aan herstel. ${landscape}`,12);}
-      return finish('rumble',affected.length?`${affected.length} huizen beschadigd`:'Het landschap verschuift',`${landscape} ${affected.length?'Huizen verliezen tijdelijk woonruimte tot de bouwers klaar zijn.':''}`,12);
+      return finish('rumble',collapsed.length?`${collapsed.length} ${collapsed.length===1?'gebouw stort':'gebouwen storten'} in, ${affected.length} beschadigd`:affected.length?`${affected.length} huizen beschadigd`:'Het landschap verschuift',`${landscape} ${affected.length?'Huizen verliezen tijdelijk woonruimte tot de bouwers klaar zijn.':''}`,12);
     }
     if(t?.kind==='flooded'){
       this.wealth=Math.min(1500,this.wealth+30);this.wood=Math.min(600,this.wood+15);

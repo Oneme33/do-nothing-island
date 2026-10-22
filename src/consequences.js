@@ -27,6 +27,8 @@ export function startBlaze(s,t,spread=false){
  ensureConsequences(s);if(t.fire||!t.building||t.building==='ruins')return false;
  t.fire={started:s.year,until:s.year+(s.buildings.some(p=>p.building==='fire-station')?6:16),nextSpread:s.year+(s.era<1?2:4)};
  t.fireHistory=(t.fireHistory||0)+1;t.lastFireYear=s.year;s.fireCount++;
+ // Fire eats into the stores: timber burns, and a burning field loses its harvest.
+ s.wood=Math.max(0,s.wood*.92);if(t.building==='farm')s.food=Math.max(0,s.food*.88);
  if(dwelling.includes(t.building))t.quakeDamage=Math.max(t.quakeDamage||0,.5);
  s.prosperity=Math.max(12,s.prosperity-(spread?1:4));
  if(spread)s.signal('fire',t,'Het vuur slaat over');
@@ -42,7 +44,8 @@ export function finishBlaze(s,t,rescued=false){
   t.building=null;t.burntForest=true;t.clearingYear=s.year;s.environment=Math.max(10,s.environment-4);
   s.log('Het bos brandt uit. De open plek en vruchtbare as blijven; hier kan later een wijk groeien.','fire',{x:t.x,y:t.y});
  }else if(!rescued&&burned!=='farm'){
-  t.rebuildFrom=burned;t.rebuildAt=s.year+10;t.building='ruins';t.buildSite=null;
+  t.rebuildFrom=burned;t.rebuildAt=s.year+18;t.building='ruins';t.buildSite=null;
+  if(dwelling.includes(burned))s.population=Math.max(4,s.population*.985);
   s.log('De brand laat een ruïne achter. De bewoners beginnen aan een sterker huis.','fire',{x:t.x,y:t.y});
  }else s.log('De brand is geblust. De schade en vruchtbare as blijven zichtbaar.','reform',{x:t.x,y:t.y});
  s.signal('repair',t,rescued?'Geblust · de plek onthoudt het':'As en een nieuw begin');
@@ -59,12 +62,12 @@ export function tendFires(s){
   const fire=t.fire;if(!fire)continue;
   if((brigade&&s.year-fire.started>=5)||s.year>=fire.until){finishBlaze(s,t);changed=true;continue;}
   if(s.year<(fire.nextSpread??fire.started+3))continue;
-  fire.nextSpread=s.year+(s.era<1?2:5);
-  if(s.land.filter(p=>p.fire).length>=12)continue;
+  fire.nextSpread=s.year+(s.era<1?2:3);
+  if(s.land.filter(p=>p.fire).length>=20)continue;
   for(const other of adjacentPlots(s,t)){
    if(other.kind!=='land'||!other.building||other.fire||protectedPlot(other)||['farm','beach','well','fire-station','ruins','quarry'].includes(other.building)||other.wetUntil>s.year)continue;
    const stone=other.material==='stone'||other.material==='brick'||s.era>=2;
-   const chance=(stone?.08:s.era<1?.65:.3)*(brigade?.2:1);
+   const chance=(stone?.15:s.era<1?.75:.45)*(brigade?.25:1);
    if(s.random()<chance){startBlaze(s,other,true);changed=true;}
   }
  }
