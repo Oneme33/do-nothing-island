@@ -53,7 +53,7 @@ test('the actual application shows a contextual recap, then permits explicit fre
  e.get('ending-replay').handlers.click();assert.equal(e.get('ending-dialog').open,false);assert.equal(a.saved().cinematic.elapsed,0);
  a.advance(25);assert.equal(e.get('ending-dialog').open,true);assert.equal(a.saved().cinematic.completed,true);
  e.get('ending-sandbox').handlers.click();assert.equal(e.get('ending-dialog').open,false);assert.equal(a.saved().sandbox,true);
- a.advance(2);assert.ok(e.get('year').textContent>sim.year);
+ a.advance(5);assert.ok(e.get('year').textContent>sim.year);
  e.get('open-ending').handlers.click();assert.equal(e.get('ending-dialog').open,true);assert.equal(e.get('ending-stats').textContent,stats,'recap keeps the original ending rather than the free-play world');
  assert.equal(e.get('ending-score').textContent,score,'scores stay frozen after free play');
 });

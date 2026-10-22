@@ -52,8 +52,8 @@ const REMARKS = {
 export const key = (x,y) => `${x},${y}`;
 export const neighbors = t => [[t.x+1,t.y],[t.x-1,t.y],[t.x,t.y+1],[t.x,t.y-1]];
 export const isUsable = t => t.kind === 'land';
-// About a minute per generation at 1×: slow enough to get to know the family, gently faster in later ages.
-export const secondsPerYear = (year,era=0) => Math.max(1.1,1.9/(1+Math.max(0,year-1)/2500+era*.05));
+// Early centuries pass briskly; later ages, which span fewer years, get more time per year.
+export const secondsPerYear = (year,era=0) => Math.min(2.3,.75+Math.max(0,year-1)/1500+era*.05);
 export const FIXED_SECONDS_PER_YEAR=1.5;
 const clamp = (v,min,max) => Math.max(min,Math.min(max,v));
 const noise = (x,y) => { const n = Math.sin(x*127.1+y*311.7)*43758.5453; return n-Math.floor(n); };

@@ -147,16 +147,16 @@ test('new islands have different geography while identical seeds reproduce the s
   assert.ok(new Set(islands.map(s=>JSON.stringify(s.land.map(t=>[t.x,t.y,t.building])))).size>=3);
   assert.ok(islands.every(s=>s.history.some(h=>h.type==='palace')));
 });
-test('pacing accelerates smoothly, stays bounded, and still permits the fixed-speed setting',()=>{
+test('pacing starts brisk, slows down gently in later ages, stays bounded, and permits the fixed-speed setting',()=>{
   let previous=secondsPerYear(1);
-  assert.ok(previous>1);
-  assert.ok(previous*32>=55,'a family generation lasts about a minute at 1×');
+  assert.ok(previous<1,'the first centuries pass briskly');
   for(let year=2;year<3000;year++){
-    const duration=secondsPerYear(year,Math.min(4,Math.floor(year/100)));
-    assert.ok(duration<=previous);assert.ok(duration>=1.1);previous=duration;
+    const duration=secondsPerYear(year,Math.min(4,Math.floor(year/500)));
+    assert.ok(duration>=previous-1e-9);assert.ok(duration<=2.3);previous=duration;
   }
-  const sim=new Civilization(8);assert.ok(sim.yearDuration>FIXED_SECONDS_PER_YEAR);
-  sim.year=1000;sim.era=3;assert.ok(sim.yearDuration<FIXED_SECONDS_PER_YEAR);
+  assert.ok(secondsPerYear(2100,4)>2,'the short modern ages get more time');
+  const sim=new Civilization(8);assert.ok(sim.yearDuration<FIXED_SECONDS_PER_YEAR);
+  sim.year=2000;sim.era=4;assert.ok(sim.yearDuration>FIXED_SECONDS_PER_YEAR);
   sim.config.accelerating=false;assert.equal(sim.yearDuration,FIXED_SECONDS_PER_YEAR);
 });
 test('roads connect real destinations and traffic only appears after powered modern roads exist',()=>{
