@@ -11,3 +11,10 @@ test('each island gets one of every small delight, in a fitting place, after its
   assert.ok(s.history.some(e=>e.text===d.opening),`${d.type} opening is logged`);assert.match(describePlot(s,built[0]),new RegExp(d.name));
  }
 });
+import {museumExhibits} from '../src/museum.js';
+test('the museum collects finds, your visits and old maps as exhibits',()=>{
+ const s=new Civilization(31);while(s.year<300)s.tick();s.interfere(3,3,'fire');while(s.year<1000)s.tick();
+ const items=museumExhibits(s);assert.ok(items.some(i=>i.kind==='Jouw ingreep'&&/Grote Brand/.test(i.title)));assert.ok(items.some(i=>i.kind==='Oude kaart'));
+ for(let i=1;i<items.length;i++)assert.ok(items[i].year>=items[i-1].year);
+ assert.ok(s.buildings.some(t=>t.building==='museum'));
+});

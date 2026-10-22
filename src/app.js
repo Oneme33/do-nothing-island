@@ -7,6 +7,7 @@ import {describePlot} from './inspection.js';
 import {drawFinale,islandScores} from './finale.js';
 import {ensureFamily,currentRelative,familyLore,sentenceCase} from './family.js';
 import {tourStops} from './tour.js';
+import {museumExhibits} from './museum.js';
 import {ensureWishes,dismissWish,WISH_OUTCOMES,canHelpWish,helpActiveWish} from './wishes.js';
 import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
 import {chronicleChapters,chroniclePlace,CHAPTER_ILLUSTRATIONS} from './chronicle.js';
@@ -150,6 +151,11 @@ function renderFamily(){
     item.append(heading,time,line);if(person.moments?.length)item.append(familyMoments(person));return item;
   }));
 }
+function renderMuseum(){
+  const open=sim.buildings.some(t=>t.building==='museum'),items=museumExhibits(sim);
+  $('museum-note').textContent=open?`${items.length} stukken in de vitrines. De suppoost kent ze allemaal uit het hoofd.`:'Er is nog geen museum. Rond het jaar 900 bouwt het eiland er vanzelf een; tot die tijd liggen de stukken op zolder.';
+  $('museum-list').replaceChildren(...items.map(item=>{const li=document.createElement('li'),title=document.createElement('strong'),text=document.createElement('p'),meta=document.createElement('small');title.textContent=item.title;text.textContent=item.text;meta.textContent=`${item.kind}${item.year?` · jaar ${item.year}`:''}`;li.append(title,text,meta);return li;}));
+}
 function renderChallenges(){
   const state=ensureChallenges(sim);
   $('challenge-note').textContent=state.trackingSince>1?`Bijhouden begonnen in jaar ${state.trackingSince}. Voorbijgegane doelen zijn niet achteraf beoordeeld.`:'Deze ideeën horen bij de seed van je eiland. Je hoeft ze niet te volgen.';
@@ -176,13 +182,14 @@ function renderWishes(){
   $('wish-help').hidden=!canHelpWish(sim,wish);$('wish-help').textContent=wish?`Help ${wish.speaker.split(' ')[0]}`:'Help deze inwoner';
   $('wish-history').replaceChildren(...state.history.slice().reverse().map(w=>{const item=document.createElement('li'),name=document.createElement('strong'),text=document.createElement('p');name.textContent=`${WISH_OUTCOMES[w.status]} · jaar ${w.closedAt}`;text.textContent=`${w.speaker}: “${w.text}”`;item.append(name,text);return item;}));
 }
-const bookPages=['journal','family','wishes','challenges','collection'];
+const bookPages=['journal','family','wishes','challenges','museum','collection'];
 let bookPage='journal';
 function renderBookPage(name){
   if(name==='journal')renderJournal();
   else if(name==='family')renderFamily();
   else if(name==='wishes')renderWishes();
   else if(name==='challenges'){ensureChallenges(sim).revealed=true;renderChallenges();}
+  else if(name==='museum')renderMuseum();
   else renderCollection();
 }
 // One book instead of five windows: every page pauses the island the same way.

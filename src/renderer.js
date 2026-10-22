@@ -449,6 +449,7 @@ export class IslandRenderer {
     else if(b==='lighthouse')this.lighthouse();
     else if(b==='town-square')this.townSquare(t);
     else if(b==='petting-farm')this.pettingFarm(t);
+    else if(b==='museum')this.museum();
     else if(b==='observatory')this.observatory();
     else if(b==='ice-cream')this.iceCream(t);
     else if(b==='greenhouse')this.greenhouse();
@@ -817,6 +818,13 @@ export class IslandRenderer {
     if(v<.35){this.ellipse(0,0,7,2.5,'#55703a18');this.ellipse(0,-3,6,4,this.leaf('#86a062'));this.ellipse(3,-4,4,3,this.leaf('#9bb173'));}
     else{c.scale(.55,.55);this.tree(false,v);}
     c.restore();
+  }
+  museum(){
+    this.ellipse(4,4,20,6,'#58654414');
+    this.poly([[-16,-3],[0,5],[16,-3],[16,-17],[0,-25],[-16,-17]],'#e4dcc4');this.poly([[0,5],[16,-3],[16,-17],[0,-9]],'#c9c1a8');
+    for(let i=0;i<5;i++)this.line([[-14+i*3.4,-3+i*1.7],[-14+i*3.4,-16+i*1.7]],'#f3eedd',2);
+    this.poly([[-19,-17],[0,-29],[19,-17],[0,-8]],'#9b8a6c');this.poly([[-19,-17],[0,-29],[0,-8]],'#b3a27f');
+    this.poly([[-4,-1],[0,1],[0,-7],[-4,-9]],'#7d6a52');this.line([[10,-20],[10,-33]],'#7d7464',.8);this.poly([[10,-33],[18,-30],[10,-27]],'#b8644f');
   }
   pettingFarm(t){
     this.diamond(0,0,21,10.5,'#c9b77f');this.diamond(0,0,18,9,'#d8c68c');
