@@ -65,9 +65,9 @@ export const TREASURE_CATALOG=[
 ];
 const coastHash=(seed,a,b,c)=>{let x=(seed^Math.imul(a+7,0x27d4eb2d)^Math.imul(b+101,0x165667b1)^Math.imul(c+307,0x9e3779b1))>>>0;x=Math.imul(x^(x>>>15),0x2c1b3c6d);x^=x>>>12;return(x>>>0)/4294967296;};
 const TREASURE_CHANCE={rumble:.4,storm:.05,build:.006,volcano:.5};
-export function findTreasure(s,cause,tile){
+export function findTreasure(s,cause,tile,force=false){
  const coast=ensureCoast(s);coast.treasures??=[];
- if(!tile||s.ending||coastHash(s.seed,s.year,tile.x,tile.y)>=TREASURE_CHANCE[cause])return null;
+ if(!tile||s.ending||!force&&coastHash(s.seed,s.year,tile.x,tile.y)>=TREASURE_CHANCE[cause])return null;
  const found=new Set(coast.treasures.map(t=>t.id)),treasure=TREASURE_CATALOG.find(t=>t.cause===cause&&!found.has(t.id)&&s.year>=(t.since||0));
  if(!treasure)return null;
  const record={id:treasure.id,year:s.year,x:tile.x,y:tile.y};coast.treasures.push(record);tile.treasure={id:treasure.id,year:s.year};

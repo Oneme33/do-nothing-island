@@ -1,4 +1,6 @@
 import {currentRelative} from './family.js';
+import {findTreasure} from './coast.js';
+import {startParty} from './spectacle.js';
 
 const wishNear=(a,b,r=3)=>Math.hypot(a.x-b.x,a.y-b.y)<=r;
 const wishClamp=n=>Math.max(0,Math.min(100,n));
@@ -7,14 +9,29 @@ export function ensureWishes(s){
  if(s.wishes?.version===1)return s.wishes;
  return s.wishes={version:1,serial:0,active:null,history:[],nextAt:s.year+24+(s.seed>>>0)%12};
 }
+// A wish that came true leaves something lasting behind, and the residents throw a small party.
+const REWARD_TEXT={fertile:'Blijvend: vruchtbaardere akkers in de buurt.',food:'Blijvend: een flinke extra voorraad.',calm:'Blijvend: minder onrust in het dorp.',water:'Blijvend: meer vers water.',prosperity:'Blijvend: wat extra welvaart.',tree:'Blijvend: een nieuwe buurtmoestuin.',treasure:'Blijvend: een schat voor het museum.'};
+function rewardWish(s,wish){
+ const reward=FUNNY_WISHES[wish.kind]?.reward,t=s.tile(wish.x,wish.y);if(!reward||!t)return '';
+ if(reward==='fertile')for(const f of s.farms.filter(p=>wishNear(p,t,2)))f.ashFertility=Math.min(.6,(f.ashFertility||0)+.2);
+ if(reward==='food')s.food+=Math.max(20,s.population*.6);
+ if(reward==='calm')s.unrest=Math.max(0,(s.unrest||0)-12);
+ if(reward==='water')s.freshwater=Math.min(100,s.freshwater+10);
+ if(reward==='prosperity')s.prosperity=Math.min(94,s.prosperity+4);
+ if(reward==='tree'){const plot=s.land.filter(p=>!p.building&&!p.buildSite&&!p.reservedFor&&!p.landform&&!p.road).sort((a,b)=>Math.hypot(a.x-t.x,a.y-t.y)-Math.hypot(b.x-t.x,b.y-t.y))[0];if(plot){plot.building='garden';plot.builtYear=s.year;s.rebuildRoads?.();}}
+ if(reward==='treasure')findTreasure(s,'rumble',t,true)||findTreasure(s,'build',t,true);
+ return REWARD_TEXT[reward]||'';
+}
 function closeWish(s,status){
  const state=ensureWishes(s),wish=state.active;if(!wish)return;
  wish.status=status;wish.closedAt=s.year;
+ if(status==='helped'){const lasting=rewardWish(s,wish);if(lasting)wish.thanks=`${wish.thanks||'Het is gelukt.'} ${lasting}`;startParty(s,s.tile(wish.x,wish.y),'Een feestje als dank');}
  if(status==='helped'){s.influence.trust=wishClamp(s.influence.trust+3);s.influence.dependence=wishClamp(s.influence.dependence+1.5);}
- if(status==='independent'){s.influence.trust=wishClamp(s.influence.trust+1);s.influence.dependence=wishClamp(s.influence.dependence-1);}
- if(status==='expired'){s.influence.trust=wishClamp(s.influence.trust-1);s.influence.dependence=wishClamp(s.influence.dependence-.5);}
+ // Wishes come about twice as often as before, so each unanswered one weighs half as much.
+ if(status==='independent'){s.influence.trust=wishClamp(s.influence.trust+.5);s.influence.dependence=wishClamp(s.influence.dependence-.5);}
+ if(status==='expired'){s.influence.trust=wishClamp(s.influence.trust-.5);s.influence.dependence=wishClamp(s.influence.dependence-.25);}
  if(status!=='changed')s.log(`${wish.speaker}: “${wish.text}” ${status==='helped'?(wish.thanks?`${wish.thanks} Het vertrouwen groeit; ze rekenen iets meer op je.`:'Je hielp. Het vertrouwen groeit; ze rekenen iets meer op je.'):status==='independent'?'De inwoners losten het zelf op. Dat geeft vertrouwen in eigen kunnen.':'Er kwam geen ingreep. Ze gaan op eigen kracht verder.'}`,'wish',{x:wish.x,y:wish.y,wishId:wish.id});
- state.history.push({...wish});state.history=state.history.slice(-24);state.active=null;state.nextAt=s.year+64+(s.seed+state.serial*17)%37;
+ state.history.push({...wish});state.history=state.history.slice(-24);state.active=null;state.nextAt=s.year+30+(s.seed+state.serial*17)%25;
 }
 function canOpenWishSpring(s,t){
  return !!t&&(s.influence.rumble+1)%3!==0&&!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.spring&&
@@ -60,7 +77,22 @@ export const FUNNY_WISHES={
  books:{mode:'rain',where:'library',text:'De bibliotheek is zo stoffig dat de boeken niezen. Een frisse bui erover?',thanks:'De boeken zijn fris. Eén woordenboek is nog wat verkouden.',thing:'een frisse bui voor de boeken',noun:'de bui over de bibliotheek'},
  birthday:{mode:'fire',where:'open',text:'Oma Truus wordt honderd. Een feestvuurtje voor de taart?',thanks:'Honderd kaarsjes, één vuurtje. Oma blaast ze in één keer uit.',thing:'een feestvuur voor oma Truus',noun:'het verjaardagsvuur van oma Truus'},
  seagull:{mode:'rain',where:'beach',text:'Een meeuw heeft de patat van de burgemeester gestolen. Een bui om hem te verjagen?',thanks:'De meeuw druipt af. De patat is helaas niet meer te redden.',thing:'een bui tegen de meeuw',noun:'de bui tegen de patatmeeuw'},
- lift:{mode:'nudge',where:'lighthouse',text:'De vuurtorenwachter is de trap zat. Een zetje voor een lift?',thanks:'Er komt een katrol met een mandje. De kat gaat voortaan met de lift.',thing:'een lift in de vuurtoren',noun:'het katrolletje van de vuurtoren'}
+ lift:{mode:'nudge',where:'lighthouse',text:'De vuurtorenwachter is de trap zat. Een zetje voor een lift?',thanks:'Er komt een katrol met een mandje. De kat gaat voortaan met de lift.',thing:'een lift in de vuurtoren',noun:'het katrolletje van de vuurtoren'},
+ mole:{mode:'rumble',where:'farm',reward:'fertile',text:'Een mol graaft gangen onder de akker en weigert te vertrekken. Kan de grond hem vriendelijk wegschudden?',thanks:'De mol verhuist naar het bos. Hij laat losse, luchtige grond achter.',thing:'hulp tegen de mol',noun:'de verhuizing van de mol'},
+ pumpkin:{mode:'rain',where:'farm',reward:'food',text:'De pompoen van boer Henk is bijna een wereldrecord. Nog één bui?',thanks:'Wereldrecord! De pompoen past niet door de deur, dus iedereen eet mee.',thing:'regen voor de recordpompoen',noun:'de recordpompoen'},
+ marshmallow:{mode:'fire',where:'open',reward:'calm',text:'De scouts willen marshmallows roosteren. Een kampvuurtje?',thanks:'Kleverige vingers, gelukkige gezichten. De scouts krijgen een insigne voor geduld.',thing:'een kampvuur voor de scouts',noun:'het marshmallowvuur'},
+ well:{mode:'rain',where:'well',reward:'water',text:'De waterput is zo leeg dat de emmer echoot. Een bui erin?',thanks:'De put is vol. De echo is teleurgesteld.',thing:'een bui voor de put',noun:'de bui in de lege put'},
+ dancefloor:{mode:'nudge',where:'square',reward:'calm',text:'Het plein wil een dansvloer. Een zetje voor de timmerlui?',thanks:'Er ligt een houten dansvloer. Hij kraakt precies in de maat.',thing:'een dansvloer op het plein',noun:'de dansvloer'},
+ statuehat:{mode:'rain',where:'monument',reward:'prosperity',text:'Het standbeeld draagt een hoed van meeuwenpoep. Een frisse bui?',thanks:'Het beeld glimt weer. De meeuwen beramen al een nieuw plan.',thing:'een bui over het standbeeld',noun:'het schoongespoelde standbeeld'},
+ rooster:{mode:'rumble',where:'farm',reward:'calm',text:'De haan kraait om drie uur ’s nachts. Een klein schokje om hem op het goede uur te zetten?',thanks:'De haan kraait voortaan om zeven uur. Bijna altijd.',thing:'een schokje voor de haan',noun:'de haan die leerde klokkijken'},
+ sandcastle:{mode:'nudge',where:'beach',reward:'prosperity',text:'Bij de zandkastelenwedstrijd komt niemand verder dan een bergje. Een zetje?',thanks:'Er staat een zandkasteel met torens en een slotgracht. Het wint van zichzelf.',thing:'hulp bij het zandkasteel',noun:'het winnende zandkasteel'},
+ treasuremap:{mode:'rumble',where:'open',reward:'treasure',text:'Opa heeft een schatkaart getekend. Volgens hem ligt er hier iets. Even schudden?',thanks:'Opa had gelijk! Hij doet alsof hij dat altijd al wist.',thing:'opa’s schat',noun:'opa’s schatkaart'},
+ concert:{mode:'fire',where:'open',reward:'calm',text:'Vanavond is er een openluchtconcert. Een vuurtje voor de sfeer?',thanks:'Het concert is prachtig. De violist speelt een liedje voor het vuur.',thing:'een vuur voor het concert',noun:'het concertvuur'},
+ tomatoes:{mode:'rain',where:'greenhouse',reward:'food',text:'In de kas zijn de tomaten te verlegen om rood te worden. Een bui op het dak?',thanks:'De tomaten blozen. De tuiniers ook.',thing:'een bui voor de tomaten',noun:'de blozende tomaten'},
+ bees:{mode:'nudge',where:'farm',reward:'fertile',text:'De bijen willen een hotel. Een zetje voor een bijenhotel?',thanks:'Het bijenhotel is vol. De akkers zoemen van tevredenheid.',thing:'een bijenhotel',noun:'het bijenhotel'},
+ meltdown:{mode:'rain',where:'ice-cream',reward:'prosperity',text:'Het ijs smelt sneller dan het verkocht wordt. Een verkoelende bui?',thanks:'Het ijs blijft staan. De ijsboer verkoopt vandaag een record aantal bolletjes.',thing:'een bui voor de ijssalon',noun:'de verkoelende bui'},
+ lion:{mode:'rumble',where:'circus',reward:'calm',text:'De circusleeuw is bang voor stilte. Een klein gerommel om hem gerust te stellen?',thanks:'De leeuw spint als een poes. Het publiek klapt voor de grond.',thing:'gerommel voor de leeuw',noun:'de getroeste circusleeuw'},
+ garden:{mode:'rain',where:'house',reward:'tree',text:'De buurt wil een moestuin, maar de grond is keihard. Een bui om hem zacht te maken?',thanks:'De grond is zacht, de spades gaan erin. Er komt een buurtmoestuin.',thing:'regen voor de moestuin',noun:'de buurtmoestuin'}
 };
 function funnyPlace(s,where){
  const pick=list=>wishPick(s,list,where.length);
@@ -70,6 +102,9 @@ function funnyPlace(s,where){
  if(where==='library')return pick(s.buildings.filter(t=>t.building==='library'));
  if(where==='beach')return pick(s.land.filter(t=>t.building==='beach'));
  if(where==='lighthouse')return pick(s.land.filter(t=>t.building==='lighthouse'));
+ if(['well','monument','greenhouse','ice-cream','circus'].includes(where))return pick(s.land.filter(t=>t.building===where));
+ if(where==='square')return pick(s.land.filter(t=>t.building==='town-square'));
+ if(where==='house')return pick(s.houses.filter(t=>!t.foundingHome&&!t.fire));
  return pick(s.land.filter(t=>isOpenPlot(s,t)));
 }
 function wishCandidates(s){

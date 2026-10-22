@@ -4,7 +4,7 @@ import {Civilization} from '../src/simulation.js';
 import {advanceWishes,dismissWish,answerWish} from '../src/wishes.js';
 
 function requesting(kind){
- for(let seed=1;seed<50;seed++){const s=new Civilization(seed);s.wishes.nextAt=1;advanceWishes(s);if(s.wishes.active?.kind===kind)return s;}
+ for(let seed=1;seed<50;seed++)for(let serial=0;serial<40;serial++){const s=new Civilization(seed);s.wishes.serial=serial;s.wishes.nextAt=1;advanceWishes(s);if(s.wishes.active?.kind===kind)return s;}
  throw new Error(`No ${kind} wish found`);
 }
 test('wishes use real places, named islanders and their own schedule without steering random simulation',()=>{
@@ -31,7 +31,7 @@ test('a real fire can be answered with rain or resolved by the residents themsel
 test('dismissing is persistent and declining a wish never creates extra dependence',()=>{
  const s=requesting('feast');s.influence.dependence=10;s.influence.trust=10;dismissWish(s);
  const restored=Civilization.restore(s.serialize());assert.equal(restored.wishes.active.hidden,true);
- restored.year=restored.wishes.active.deadline+1;advanceWishes(restored);assert.equal(restored.wishes.active,null);assert.equal(restored.wishes.history.at(-1).status,'expired');assert.equal(restored.influence.dependence,9.5);assert.equal(restored.influence.trust,9);
+ restored.year=restored.wishes.active.deadline+1;advanceWishes(restored);assert.equal(restored.wishes.active,null);assert.equal(restored.wishes.history.at(-1).status,'expired');assert.equal(restored.influence.dependence,9.75);assert.equal(restored.influence.trust,9.5);
  restored.year=restored.wishes.nextAt;advanceWishes(restored);assert.ok(restored.wishes.active);assert.equal(restored.wishes.active.hidden,false);
 });
 test('old saves get future wishes without inventing a backlog or changing history',()=>{
@@ -67,4 +67,8 @@ test('funny wishes appear in varied places and are solved with the asked-for too
   if(s.wishes.active?.id===w.id){s.interfere(w.x,w.y,w.mode);const done=s.wishes.history.at(-1);assert.equal(done.status,'helped');assert.ok(s.history.at(-1).text.includes(FUNNY_WISHES[w.kind].thanks)||s.history.some(e=>e.type==='wish'&&e.text.includes(FUNNY_WISHES[w.kind].thanks)));}
  }
  assert.ok(kinds.size>=6,`varied wishes: ${[...kinds]}`);assert.ok(places.size>=20,'wishes are not always in the same place');
+});
+test('a helped funny wish leaves a lasting improvement and a small party',()=>{
+ const s=requesting('pumpkin'),w=s.wishes.active,food=s.food;s.interfere(w.x,w.y,w.mode);
+ assert.equal(s.wishes.history.at(-1).status,'helped');assert.ok(s.food>food+15);assert.equal(s.festival?.kind,'party');assert.match(s.history.filter(e=>e.type==='wish').at(-1).text,/Blijvend/);
 });

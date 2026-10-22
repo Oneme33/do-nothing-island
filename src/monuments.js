@@ -1,3 +1,4 @@
+import {startParty} from './spectacle.js';
 // Statues the island raises by itself: for you, for its founder, and for the odd things it loves.
 const helpedWishes=s=>(s.wishes?.history||[]).filter(w=>w.status==='helped').length;
 export const MONUMENTS=[
@@ -21,7 +22,8 @@ export function advanceMonuments(s){
   if(tile.building!=='town-square'){tile.building='monument';tile.builtYear=s.year;}
   tile.monument=m.kind;const title=monumentTitle(s,m);
   s.monuments.push({kind:m.kind,x:tile.x,y:tile.y,year:s.year,square:!!m.square});
-  s.log(`Een standbeeld: ${title}. ${m.text}`,'delight',{x:tile.x,y:tile.y});s.signal('celebrate',tile,title);s.rebuildRoads();
+  s.log(`Een standbeeld: ${title}. ${m.text}`,'delight',{x:tile.x,y:tile.y});s.rebuildRoads();
+  startParty(s,tile,`Onthulling: ${title}`,['Het doek gaat eraf. Iedereen zegt ‘oooh’.','De burgemeester knipt een lint door dat er niet hoeft te zijn.','Er zijn bitterballen. Dat maakt alles plechtig.'],8);
   return;
  }
 }

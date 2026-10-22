@@ -47,6 +47,12 @@ export function extinguish(s,spot){
  let count=0;for(const t of s.land)if(t.fire&&Math.hypot(t.x-spot.x,t.y-spot.y)<=3){finishBlaze(s,t,true);count++;s.signal('celebrate',t,'Geblust · de as blijft');}
  if(count){s.storyStats.reforms++;s.rebuildRoads();}return count;
 }
+// A party with a reason: a wish that came true, or the opening of a statue or special building.
+export function startParty(s,tile,title,quips,years=10){
+ if(!tile||s.ending)return null;
+ s.festival={kind:'party',x:tile.x,y:tile.y,title,quips:quips||['Er is taart. Niemand weet wie hem heeft gebakken.','De fanfare speelt het enige liedje dat ze kent. Twee keer.','Iemand houdt een toespraak. Hij duurt gelukkig kort.'],until:s.year+years};
+ s.signal('celebrate',tile,title);return s.festival;
+}
 export function advancePleasures(s){
  ensureSpectacle(s);
  tendFires(s);advanceTraditions(s);
@@ -69,7 +75,7 @@ export function advancePleasures(s){
  s.festival={kind:event.kind,x:event.spot.x,y:event.spot.y,title:event.title,quips:event.quips,until:s.year+20};
  s.log(`${event.title}. ${event.quips[Math.floor(s.random()*event.quips.length)]}`,'fun',{x:event.spot.x,y:event.spot.y});
  s.signal('celebrate',event.spot,event.title);s.unrest=Math.max(0,s.unrest-5);s.prosperity=Math.min(94,s.prosperity+2);s.food=Math.max(0,s.food-Math.min(12,s.population*.04));
- s.nextFestival=s.year+30+Math.floor(s.random()*35);
+ s.nextFestival=s.year+55+Math.floor(s.random()*65);
 }
 export function jokeAfterTouch(s,spot,type){
  const lines={nudge:['That was absolutely my idea.','The sky has approved the extension.','Unexpected motivation. Highly suspicious.'],rain:['The weather has excellent aim.','The carrots would like to thank you.','Free showers! Cancel the plumbing.'],rumble:['We only just painted that.','Who is moving the furniture?','The ground has lodged a complaint.'],fire:['Outdoor central heating!','Please retain your eyebrows.','The insurance company has left the island.'],repair:['A delivery from absolutely nowhere.']};
