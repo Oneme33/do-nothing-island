@@ -83,3 +83,12 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .island-window.touring:before{top:0}.island-window.touring:after{top:auto;bottom:0;inset:auto 0 0 0;border-radius:0 0 9px 9px;box-shadow:none}
 .island-window.touring .population-card,.island-window.touring .civic-overview,.island-window.touring .island-heading,.island-window.touring .weather,.island-window.touring .map-controls,.island-window.touring .instruction,.island-window.touring .island-toolbar,.island-window.touring .wish-bubble,.island-window.touring .project-overlay{opacity:0;pointer-events:none;transition:opacity .6s}
 @media (max-width:600px){.tour-caption{bottom:60px;padding:12px 14px 10px}.tour-caption p{font-size:13px}}
+
+/* 3.4 Age transitions */
+.age-card{position:absolute;left:50%;top:22%;transform:translateX(-50%);z-index:6;text-align:center;pointer-events:none;background:#fbf8eee8;border:1px solid #dfe3d2;border-radius:10px;padding:16px 28px;box-shadow:0 10px 40px #213e3022;animation:age-in 4.8s ease forwards}
+.age-card strong{display:block;font-family:var(--serif);font-size:24px;font-weight:400;color:var(--ink);margin:4px 0}
+.age-card p{font-size:12px;color:#6f7f61;margin:0}
+@keyframes age-in{0%{opacity:0;transform:translate(-50%,8px)}12%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+.island-window canvas{transition:filter 1.6s ease}
+.island-window.age-shift canvas{filter:sepia(.35) saturate(1.15) brightness(1.04)}
+@media (prefers-reduced-motion:reduce){.age-card{animation:none}.island-window canvas{transition:none}}

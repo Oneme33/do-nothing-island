@@ -218,7 +218,18 @@ function ambienceLine(){
   if(light.dusk>.6)return light.phase<.5?'Ochtendgloren. De eerste bakker is al op.':'Avondrood. Iemand roept dat het eten klaar is.';
   return seasonLines[light.seasonName];
 }
+// 3.4: a short title card, a warm wash over the island and a little motif whenever a new age begins.
+const AGE_LINES={classical:'Zuilen. Scholen. Meningen over zuilen.',medieval:'Torens. Kerken. Meningen.',renaissance:'Molens, gevels en een gewaagd idee: de zee wegpompen.',industrial:'Stoom! Iedereen praat ineens wat harder.',modern:'Auto’s. Niemand weet nog waar ze heen moeten.',contemporary:'Zon, wind en een vergadering over de wind.',future:'De toekomst. Hij wacht nog op een bouwvergunning.'};
+let shownAge=null,ageTimer;
+function announceAge(){
+  const age=sim.age;if(shownAge===null||sim.ending){shownAge=age.id;return;}
+  if(age.id===shownAge)return;shownAge=age.id;if(!AGE_LINES[age.id])return;
+  $('age-card-year').textContent=`JAAR ${age.year}`;$('age-card-title').textContent=nl(age.name);$('age-card-line').textContent=AGE_LINES[age.id];
+  $('age-card').hidden=false;$('island-window').classList.add('age-shift');soundscape?.play('age');
+  clearTimeout(ageTimer);ageTimer=setTimeout(()=>{$('age-card').hidden=true;$('island-window').classList.remove('age-shift');},4800);
+}
 function updateUI(){
+  announceAge();
   updateAwayReport();
   syncCollection();
   updateWishBubble();

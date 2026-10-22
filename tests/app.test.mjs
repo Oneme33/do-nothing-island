@@ -192,3 +192,8 @@ test('the ending first tours the real island, then opens the finale; the tour ca
  const b=await appHarness(Civilization.restore(JSON.stringify({...JSON.parse(sim.serialize()),cinematic:{...sim.cinematic,toured:false}})),{});b.frame(16);
  b.elements.get('tour-skip').handlers.click();assert.equal(b.elements.get('tour-caption').hidden,true);assert.equal(b.elements.get('cinema-dialog').open,true);
 });
+test('a new age shows a short title card on the island',async()=>{
+ const sim=new Civilization(31);sim.year=598;const a=await appHarness(sim),e=a.elements;a.frame(16);assert.equal(e.get('age-card').hidden,true);
+ for(let i=0;i<60&&e.get('age-card').hidden;i++)a.advance(1);
+ assert.equal(e.get('age-card').hidden,false);assert.match(e.get('age-card-title').textContent,/middeleeuwen|Middeleeuwen/i);assert.match(e.get('age-card-year').textContent,/600/);
+});
