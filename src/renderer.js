@@ -93,7 +93,7 @@ export class IslandRenderer {
   rect(x,y,w,h,color){this.ctx.fillStyle=color;this.ctx.fillRect(x,y,w,h);}
   diamond(x,y,w,h,color,stroke=null){this.poly([[x,y-h],[x+w,y],[x,y+h],[x-w,y]],color,stroke,.5);}
   draw(now){
-    this.labelBoxes=[];
+    this.labelBoxes=[];this.litWindows=[];this.litLamps=[];
     // Daylight follows the wall clock, so a slow frame rate never stretches the day.
     const clockDt=Math.max(0,Math.min(.5,(now-this.lastFrame)/1000||.016));
     const dt=Math.max(0,Math.min(.08,(now-this.lastFrame)/1000||.016));this.lastFrame=now;
@@ -377,7 +377,7 @@ export class IslandRenderer {
       if(t.building&&!['tree','original-tree','bridge','dock','harbor'].includes(t.building))ribbon(p,this.entrancePoint(t),1.6,hard?'#c1c5b1':'#cdbb96');
       if(hard && this.sim.power>0 && t.variant>.81 && !t.building){
         this.line([[p.x-7,p.y+3],[p.x-7,p.y-11],[p.x-4,p.y-13]],'#7f8c77',1);
-        this.ellipse(p.x-4,p.y-13,1.7,1.2,'#f5e6ad');
+        this.ellipse(p.x-4,p.y-13,1.7,1.2,'#f5e6ad');this.lampLight(p.x-4,p.y-13,t);
       }
       if(this.sim.power>0 && t.variant>.91){
         const next=this.sim.tile(t.x+1,t.y);
@@ -438,7 +438,7 @@ export class IslandRenderer {
     if(t.builtYear && this.sim.year-t.builtYear<3){const s=.75+(this.sim.year-t.builtYear)/12;c.scale(s,s);}
     if(t.kind==='flooded')c.globalAlpha=.78;
     if(this.focus&&['tower','house','townhouse'].includes(t.building)){const f=this.p(this.focus.x,this.focus.y);if(p.y>f.y&&Math.abs(p.x-f.x)<65)c.globalAlpha=.26;}
-    const b=t.building;
+    const b=t.building;this.currentTile=t;
     this.look=['hut','house','townhouse'].includes(b)?houseLook(t):null;
     if(this.look)c.scale(this.look.sx,this.look.sy);
     if(b==='original-tree')this.tree(true,t.variant,!!t.bloomYear);
@@ -796,6 +796,17 @@ export class IslandRenderer {
     c.restore();
   }
   leaf(color){return seasonalLeaf(color,this.light);}
+  // Record a window or lamp in screen pixels, so the night layer can light exactly that shape.
+  screenPoint(x,y){const m=this.ctx.getTransform?.();if(!m||typeof m.a!=='number')return null;return[m.a*x+m.c*y+m.e,m.b*x+m.d*y+m.f];}
+  window(points,color){
+    this.poly(points,color);
+    if(this.light.darkness<.15||!this.currentTile)return;
+    const mapped=points.map(([x,y])=>this.screenPoint(x,y));if(mapped.every(Boolean))this.litWindows.push({tile:this.currentTile,points:mapped});
+  }
+  lampLight(x,y,tile=null){
+    if(this.light.darkness<.15)return;const p=this.screenPoint(x,y);if(!p)return;const m=this.ctx.getTransform();
+    this.litLamps.push({x:p[0],y:p[1],scale:Math.hypot(m.a,m.b),tile});
+  }
   treasureChest(t){
     const p=this.p(t.x,t.y),c=this.ctx;c.save();c.translate(p.x+11,p.y+3);
     this.ellipse(1,2,7,2.5,'#5a5a3d22');
@@ -813,7 +824,7 @@ export class IslandRenderer {
     if(year>=120)for(let k=1;k<4;k++){const f=k/4;this.line([[-23*f,-11.5+11.5*f],[23-23*f,11.5*f]],'#c4b99466',.5);this.line([[23*f,-11.5+11.5*f],[-23+23*f,11.5*f]],'#c4b99466',.5);}
     const planter=(x,y)=>{this.rect(x-3,y-2,6,3,'#a7957a');this.ellipse(x,y-5,4.5,4,this.leaf('#7e965c'));this.ellipse(x+1.5,y-7,3,2.6,this.leaf('#91a763'));};
     const bench=(x,y)=>{this.line([[x-5,y],[x+5,y-2.5]],'#8f7a58',1.8);this.line([[x-5,y-3],[x+5,y-5.5]],'#a58e66',1.2);};
-    const lamp=(x,y)=>{if(year<1880)return;this.line([[x,y],[x,y-14]],'#5f6b62',1);this.ellipse(x,y-15,1.8,1.8,this.light.darkness>.2?'#ffe6a6':'#e8e2c2');};
+    const lamp=(x,y)=>{if(year<1880)return;this.line([[x,y],[x,y-14]],'#5f6b62',1);this.ellipse(x,y-15,1.8,1.8,this.light.darkness>.2?'#ffe6a6':'#e8e2c2');this.lampLight(x,y-15,null);};
     if(role==='centre'){
       if(year<120){
         this.ellipse(0,0,8,4,'#9c8e72');this.ellipse(0,-.5,5,2.5,'#6f5e4b');for(const [x,y] of [[-12,1],[11,-2],[0,7]])this.line([[x-4,y],[x+4,y-1]],'#8a7552',2.4);
@@ -973,11 +984,11 @@ export class IslandRenderer {
     this.poly([[-2,-h-17],[17,-h-7],[2,-h+5],[-2,-h+4]],roof);
     for(let i=0;i<3;i++)this.line([[-13+i*5,-h-4-i*4],[-1+i*5,-h+2-i*4]],'#e0b78a45',.6);
     this.poly([[-8,-2],[-3,0],[-3,-8],[-8,-10]],'#897957');
-    this.poly([[5,-7],[9,-9],[9,-14],[5,-12]],L.shutter);
+    this.window([[5,-7],[9,-9],[9,-14],[5,-12]],L.shutter);
     if(L.flowers){this.poly([[4,-6],[10,-9],[10,-7],[4,-4]],'#8d7a5a');for(let i=0;i<3;i++)this.ellipse(5.5+i*2,-6.6-i,1.2,1,L.flowers);}
     this.line([[7,-8],[7,-13]],'#b7c0a0',.6);
-    if(level>0){this.poly([[-9,-14],[-5,-12],[-5,-17],[-9,-19]],L.shutterSide);this.poly([[5,-19],[9,-21],[9,-25],[5,-23]],L.shutter);}
-    if(level>1){this.poly([[-9,-24],[-5,-22],[-5,-27],[-9,-29]],L.shutterSide);this.poly([[5,-29],[9,-31],[9,-35],[5,-33]],L.shutter);}
+    if(level>0){this.window([[-9,-14],[-5,-12],[-5,-17],[-9,-19]],L.shutterSide);this.window([[5,-19],[9,-21],[9,-25],[5,-23]],L.shutter);}
+    if(level>1){this.window([[-9,-24],[-5,-22],[-5,-27],[-9,-29]],L.shutterSide);this.window([[5,-29],[9,-31],[9,-35],[5,-33]],L.shutter);}
     if(L.chimney!==false&&(v>.4 || level>0)){
       this.poly([[7,-h-15],[11,-h-17],[11,-h-25],[7,-h-23]],'#a7a18a');
       this.poly([[4,-h-17],[7,-h-15],[7,-h-23],[4,-h-25]],'#c7bca0');
@@ -1011,7 +1022,7 @@ export class IslandRenderer {
       for(let i=0;i<2;i++){const x=-11+i*7;this.poly([[x,-18+i*3],[x+3,-16+i*3],[x+3,-23+i*3],[x,-25+i*3]],'#849580');}
       this.line([[-15,-26],[0,-18],[15,-26]],'#e4cba7',1.8);this.poly([[-4,-45],[0,-40],[4,-35],[-1,-34]],'#dcc09b');
     }
-    for(let i=0;i<2;i++)this.poly([[5,-10-i*12],[9,-12-i*12],[9,-17-i*12],[5,-15-i*12]],this.look?L.shutter:'#7d937c');
+    for(let i=0;i<2;i++)this.window([[5,-10-i*12],[9,-12-i*12],[9,-17-i*12],[5,-15-i*12]],this.look?L.shutter:'#7d937c');
     if(L.flowers)for(let i=0;i<3;i++)this.ellipse(6+i*1.5,-9.5-i*.8,1.1,.9,L.flowers);
     this.ellipse(-15,3,2,1.2,'#b7a37a');
   }
@@ -1066,7 +1077,7 @@ export class IslandRenderer {
     this.poly([[-12,-3],[1,4],[1,4-h],[-12,-3-h]],'#d6d5b9');
     this.poly([[1,4],[13,-2],[13,-2-h],[1,4-h]],'#a4b5a0');
     this.poly([[-12,-3-h],[1,4-h],[13,-2-h],[0,-9-h]],'#c5d0b7');
-    for(let y=-7;y>-h;y-=8)for(let x=-8;x<=7;x+=7)this.poly([[x,y],[x+3,y+1.5],[x+3,y-2],[x,y-3.5]],'#8baba0');
+    for(let y=-7;y>-h;y-=8)for(let x=-8;x<=7;x+=7)this.window([[x,y],[x+3,y+1.5],[x+3,y-2],[x,y-3.5]],'#8baba0');
     this.diamond(0,-h-4,7,3,'#97ad83');
     if(v>.7){this.line([[0,-h-5],[0,-h-16]],'#91a398',1);this.ellipse(0,-h-16,1.5,1.5,'#d5d4a5');}
   }

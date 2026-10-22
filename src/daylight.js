@@ -34,7 +34,6 @@ export function seasonalLeaf(hex,light){
  const result=toHex(rgb)+hex.slice(7);
  if(leafCache.size>600)leafCache.clear();leafCache.set(cacheKey,result);return result;
 }
-const UNLIT=new Set(['farm','forest','beach','park','garden','tree','original-tree','ruins','royal-garden','palace-square','town-square','campus-square','playground','windmill','solar','wind-turbine','statue','sculpture']);
 const FIRES=new Set(['campfire','bonfire']);
 // Lights are painted after the island, so anything standing right in front must hide them.
 const LOW_FRONT=new Set(['farm','beach','park','garden','campfire','bonfire','playground','campus-square','palace-square','town-square','royal-garden','ruins']);
@@ -43,7 +42,6 @@ const coversLight=t=>!!t&&t.kind==='land'&&(!!t.landform||!!t.buildSite||!!t.bui
 export function lightHidden(sim,t){
  return coversLight(sim.tile(t.x+1,t.y+1))||TALL.has(sim.tile(t.x+2,t.y+2)?.building);
 }
-const lightHash=(x,y)=>{const n=Math.sin(x*91.7+y*47.3)*15731.13;return n-Math.floor(n);};
 // Darkness is multiplied over the finished island; windows, fires and streetlights glow on top.
 export function drawDaylight(r,light){
  if(!light||(!light.darkness&&!light.dusk))return;
@@ -54,8 +52,7 @@ export function drawDaylight(r,light){
   c.globalCompositeOperation='multiply';c.fillStyle=`rgb(${night.join(',')})`;c.fillRect(0,0,r.width,r.height);
   c.globalCompositeOperation='lighter';c.translate(r.origin.x,r.origin.y);c.scale(r.zoom,r.zoom);
   const d=light.darkness,glow=(x,y,rx,ry,color)=>{c.beginPath();c.ellipse(x,y,rx,ry,0,0,DAY_TAU);c.fillStyle=color;c.fill();};
-  const powered=r.sim.power>0;
-  for(const t of r.visibleTiles||[]){
+   for(const t of r.visibleTiles||[]){
    if(t.kind!=='land')continue;const p=r.p(t.x,t.y);
    if(t.building==='lighthouse'){
     // A slow sweep of light over the sea; the beam is a soft wedge from the lantern room.
@@ -66,9 +63,12 @@ export function drawDaylight(r,light){
    }
    if(lightHidden(r.sim,t))continue;
    if(FIRES.has(t.building)||t.fire){glow(p.x,p.y-8,34,17,`rgba(255,150,70,${(.13*d).toFixed(3)})`);glow(p.x,p.y-8,12,7,`rgba(255,190,110,${(.22*d).toFixed(3)})`);continue;}
-   if(t.building&&!UNLIT.has(t.building)&&lightHash(t.x,t.y)<.85){glow(p.x+3,p.y-11,15,8,`rgba(255,175,95,${(.06*d).toFixed(3)})`);glow(p.x+3,p.y-11,4.5,3,`rgba(255,205,130,${(.34*d).toFixed(3)})`);}
-   if(powered&&t.road&&lightHash(t.y,t.x)<.45){glow(p.x,p.y+11,9,5,`rgba(255,215,150,${(.08*d).toFixed(3)})`);glow(p.x,p.y+11,2,1.5,`rgba(255,230,170,${(.4*d).toFixed(3)})`);}
   }
+  // Only real windows and real lamp posts light up: their shapes were recorded while the island was drawn.
+  c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='source-over';
+  for(const w of r.litWindows||[]){if(lightHidden(r.sim,w.tile))continue;c.beginPath();w.points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=`rgba(255,214,130,${(.85*d).toFixed(3)})`;c.fill();}
+  c.globalCompositeOperation='lighter';
+  for(const l of r.litLamps||[]){if(l.tile&&lightHidden(r.sim,l.tile))continue;glow(l.x,l.y,9*l.scale,6*l.scale,`rgba(255,215,150,${(.16*d).toFixed(3)})`);glow(l.x,l.y,2.2*l.scale,2*l.scale,`rgba(255,236,180,${(.7*d).toFixed(3)})`);}
  }
  c.restore();
 }

@@ -8,7 +8,7 @@ globalThis.matchMedia=()=>({matches:false});
 globalThis.window={devicePixelRatio:2};
 globalThis.ResizeObserver=class{observe(){} disconnect(){}};
 function canvasHarness(){
- const fills=[],context=new Proxy({createRadialGradient:()=>({addColorStop(){}}),measureText:text=>({width:text.length*5})},{get:(t,k)=>k in t?t[k]:k==='fill'?()=>fills.push(t.fillStyle):()=>{},set:(t,k,v)=>{if(typeof v==='number')assert.ok(Number.isFinite(v));t[k]=v;return true;}});
+ const fills=[],context=new Proxy({createRadialGradient:()=>({addColorStop(){}}),measureText:text=>({width:text.length*5}),getTransform:()=>({a:1,b:0,c:0,d:1,e:0,f:0})},{get:(t,k)=>k in t?t[k]:k==='fill'?()=>fills.push(t.fillStyle):()=>{},set:(t,k,v)=>{if(typeof v==='number')assert.ok(Number.isFinite(v));t[k]=v;return true;}});
  return{canvas:{getContext:()=>context,getBoundingClientRect:()=>({width:1200,height:575})},context,fills};
 }
 test('a day turns from midnight to noon and back; seasons follow each other softly',()=>{
@@ -29,8 +29,8 @@ test('the island draws safely by night and in winter, with lit windows, and neve
  const {canvas,fills}=canvasHarness(),renderer=new IslandRenderer(canvas,sim);
  renderer.dayClock=3.5*DAY_SECONDS*SEASON_DAYS+DAY_SECONDS*.02;renderer.draw(16);
  assert.ok(renderer.light.night);assert.equal(renderer.light.seasonName,'winter');
- assert.ok(fills.some(f=>/^rgba\(255,205,130,/.test(f)),'windows glow at night');assert.ok(fills.some(f=>/^rgba\(244,246,247,/.test(f)),'snow lies on the ground');
- renderer.dayNight=false;fills.length=0;renderer.draw(32);assert.equal(renderer.light.darkness,0);assert.ok(!fills.some(f=>/^rgba\(255,205,130,/.test(f)));
+ assert.ok(fills.some(f=>/^rgba\(255,214,130,/.test(f)),'real windows light up at night');assert.ok(renderer.litWindows.length>0);assert.ok(fills.some(f=>/^rgba\(244,246,247,/.test(f)),'snow lies on the ground');
+ renderer.dayNight=false;fills.length=0;renderer.draw(32);assert.equal(renderer.light.darkness,0);assert.ok(!fills.some(f=>/^rgba\(255,214,130,/.test(f)));assert.equal(renderer.litWindows.length,0);
  assert.equal(sim.serialize(),before);
 });
 import {randomDaylightStart} from '../src/daylight.js';
