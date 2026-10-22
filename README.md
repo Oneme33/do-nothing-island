@@ -8,6 +8,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Huizen verschillen van elkaar.** Elk huis krijgt vanuit zijn plek een eigen gevelkleur, dakkleur, kleur luiken en eigen verhoudingen; sommige hebben bloembakken, andere geen schoorsteen. Een straat ziet er daardoor nooit gekopieerd uit, en hetzelfde huis houdt altijd hetzelfde uiterlijk.
 
+**Geluid dat meegroeit.** De geluidsknop zet een volledig in de browser opgewekte geluidswereld aan: de zee, vogels overdag, hamers bij bouwplaatsen, kerkklokken vanaf de middeleeuwen, een trambel van 1860 tot 1990, verkeer in de moderne tijd en krekels 's nachts, wanneer alles zachter klinkt. Regen, beving, vuur, bouwen, schatten en een nieuw tijdperk hebben elk een eigen geluid.
+
 **Polders.** Met molens (vanaf 1250) begint het eiland land te winnen zodra minder dan een vijfde van de grond vrij is, in stukken van vier tegels; met gemalen vanaf de stoomtijd al bij minder dan dertig procent vrij, in grotere stukken. Een eiland groeit zo tegen het einde met zo'n honderd tegels, tot de ingestelde grens.
 
 **Rustig bouwen, veel groen en kleine pleziertjes.** Tot het molentijdperk (vanaf 1250, met een molen) bouwt het dorp één huis tegelijk en pas als het echt vol raakt; daarna gaat het sneller, en zodra er echt land op de zee gewonnen is nog sneller. Op lege grond staan losse bomen en struiken die plaatsmaken zodra er iets gebouwd wordt, en aan de rand van het eiland groeien af en toe nieuwe bomen en bosjes. Elk eiland krijgt op een passende plek één kinderboerderij (vanaf jaar 150), sterrenwacht bij de berg (1600), ijssalon bij het strand (1800) en glazen kas naast de akkers (1850); daarvoor mag hooguit een losse boom wijken.

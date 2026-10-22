@@ -8,6 +8,7 @@ import {drawFinale,islandScores} from './finale.js';
 import {ensureFamily,currentRelative,familyLore,sentenceCase} from './family.js';
 import {tourStops} from './tour.js';
 import {museumExhibits} from './museum.js';
+import {Soundscape} from './sound.js';
 import {ensureWishes,dismissWish,WISH_OUTCOMES,canHelpWish,helpActiveWish} from './wishes.js';
 import {ensureChallenges,CHALLENGE_CATALOG,challengeProgress} from './challenges.js';
 import {chronicleChapters,chroniclePlace,CHAPTER_ILLUSTRATIONS} from './chronicle.js';
@@ -26,7 +27,7 @@ try{collection=readCollection(localStorage.getItem(COLLECTION_STORAGE_KEY));}cat
 const canvas=$('island');
 const renderer=new IslandRenderer(canvas,sim);renderer.mode='nudge';canvas.dataset.mode='nudge';
 let paused=false,speed=[1,2,3,10].includes(sim.config.speedMultiplier)?sim.config.speedMultiplier:1,accumulator=0,lastTime=performance.now(),saveTimer=0,toastTimer,dirtyHistory=true;
-let audio=null,audioNodes=[],audioEnabled=false;
+let soundscape=null,soundAt=0;
 let interferenceMode='nudge',interventionTimer,lastRemarkAt=0,shownRemark='';
 let previousIsland=null,undoTimer;
 let introStep=0,inspectionPinned=false,nightShown=false;
@@ -374,8 +375,9 @@ function frame(now){
     }
   }
   advanceTour(now);
+  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite)});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
-  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8))renderer.addEffect(signal);sim.signals=[];}
+  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');}sim.signals=[];}
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;renderer.draw(now);
@@ -512,7 +514,7 @@ function inspectTile(tile){
 }
 function showIntervention(x,y){
   const result=sim.lastIntervention;
-  renderer.addEffect({...result,priority:100});beatHoldUntil=0;accumulator=0;
+  renderer.addEffect({...result,priority:100});beatHoldUntil=0;accumulator=0;soundscape?.play(result.type);
   $('intervention-result').hidden=sim.config.storyCards!==true;$('intervention-result').dataset.type=result.type;
   $('intervention-title').textContent=nl(result.title);$('intervention-detail').textContent=nl(result.detail);
   if(sim.config.storyCards!==true)showToast(result.title,2400);
@@ -570,27 +572,16 @@ document.addEventListener('keydown',e=>{
 
 async function toggleAudio(){
   try{
-    if(!audio){
-      const Audio=window.AudioContext||window.webkitAudioContext;
-      if(!Audio)throw new Error('unavailable');
-      audio=new Audio();
-      const buffer=audio.createBuffer(1,audio.sampleRate*4,audio.sampleRate),data=buffer.getChannelData(0);
-      let brown=0;for(let i=0;i<data.length;i++){brown=(brown+(.02*(Math.random()*2-1)))/1.02;data[i]=brown*3.5;}
-      const source=audio.createBufferSource();source.buffer=buffer;source.loop=true;
-      const filter=audio.createBiquadFilter();filter.type='lowpass';filter.frequency.value=450;
-      const gain=audio.createGain();gain.gain.value=.16;
-      source.connect(filter).connect(gain).connect(audio.destination);source.start();audioNodes.push(source,gain,filter);
-      const lfo=audio.createOscillator(),lfoGain=audio.createGain();lfo.frequency.value=.13;lfoGain.gain.value=.055;lfo.connect(lfoGain).connect(gain.gain);lfo.start();audioNodes.push(lfo,lfoGain);
-    }
-    if(audioEnabled){await audio.suspend();audioEnabled=false;}else{await audio.resume();audioEnabled=true;}
-    $('sound').classList.toggle('enabled',audioEnabled);$('sound').setAttribute('aria-label',audioEnabled?"Zet het zeegeluid uit":"Zet het zeegeluid aan");
+    soundscape??=new Soundscape();
+    if(soundscape.enabled)await soundscape.stop();else await soundscape.start();
+    $('sound').classList.toggle('enabled',soundscape.enabled);$('sound').setAttribute('aria-label',soundscape.enabled?"Zet het geluid uit":"Zet het geluid aan");
   }catch{showToast("De oceaan houdt zich stil. Geluid werkt niet in deze browser.");}
 }
 $('sound').addEventListener('click',toggleAudio);
 document.addEventListener('visibilitychange',()=>{
   accumulator=0;lastTime=performance.now();
-  if(document.hidden){save();if(audio?.state==='running')audio.suspend();}
-  else{if(returnFromAway(sim)){dirtyHistory=true;momentQueue=[];renderer.effects=[];updateUI();}save();if(audioEnabled)audio?.resume();}
+  if(document.hidden){save();soundscape?.pause();}
+  else{if(returnFromAway(sim)){dirtyHistory=true;momentQueue=[];renderer.effects=[];updateUI();}save();soundscape?.resume();}
 });
 window.addEventListener('pagehide',save);
 let firstVisit=true;try{firstVisit=localStorage.getItem(introKey)!=='done';}catch{}
