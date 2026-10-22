@@ -94,7 +94,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 @media (max-width:600px){.tour-caption{bottom:60px;padding:12px 14px 10px}.tour-caption p{font-size:13px}}
 
 /* 3.4 Age transitions */
-.age-card{position:absolute;left:50%;top:22%;transform:translateX(-50%);z-index:6;text-align:center;pointer-events:none;background:#fbf8eee8;border:1px solid #dfe3d2;border-radius:10px;padding:16px 28px;box-shadow:0 10px 40px #213e3022;animation:age-in 4.8s ease forwards}
+.age-card{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:6;text-align:center;pointer-events:none;background:#fbf8eee8;border:1px solid #dfe3d2;border-radius:10px;padding:16px 28px;box-shadow:0 10px 40px #213e3022;animation:age-in 4.8s ease forwards}
 .age-card strong{display:block;font-family:var(--serif);font-size:24px;font-weight:400;color:var(--ink);margin:4px 0}
 .age-card p{font-size:12px;color:#6f7f61;margin:0}
 @keyframes age-in{0%{opacity:0;transform:translate(-50%,8px)}12%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
@@ -3740,6 +3740,7 @@ class IslandRenderer {
     this.drawBoats();
     drawSeaLife(this);
     c.restore();
+    this.drawCloudShadows();
     this.drawClouds();
     this.drawBirds();
     this.drawRipples();
@@ -3830,9 +3831,11 @@ class IslandRenderer {
   }
   drawWater(){
     const c=this.ctx;
-    c.fillStyle=this.sim.storm?'#c5d8d3':'#dcebe4';c.fillRect(0,0,this.width,this.height);
-    const g=c.createRadialGradient(this.width*.55,this.height*.48,30,this.width*.55,this.height*.48,this.width*.65);
-    g.addColorStop(0,'#e8f0de55');g.addColorStop(1,'#b8d5cb26');c.fillStyle=g;c.fillRect(0,0,this.width,this.height);
+    // A deeper sea: light lagoon water near the island, richer blue-green towards the edges, with glints of sun.
+    c.fillStyle=this.sim.storm?'#c5d8d3':'#d6e8e3';c.fillRect(0,0,this.width,this.height);
+    const g=c.createRadialGradient(this.width*.55,this.height*.5,40,this.width*.55,this.height*.5,this.width*.7);
+    g.addColorStop(0,'#eaf3e6aa');g.addColorStop(.55,'#cfe4df33');g.addColorStop(1,'#9fc4c1aa');c.fillStyle=g;c.fillRect(0,0,this.width,this.height);
+    if(!this.reduced)for(let i=0;i<26;i++){const tw=Math.sin(this.time*1.7+i*2.3);if(tw<.7)continue;const x=hash(i,41)*this.width,y=hash(i,43)*this.height;c.fillStyle=`rgba(255,255,250,${(tw-.7)*2})`;c.fillRect(x-2,y,4,.8);c.fillRect(x-.4,y-1.6,.8,4);}
     for(let i=0;i<115;i++){
       const x=hash(i,2)*this.width+Math.sin(this.time*.13+i)*3;
       const y=hash(i,8)*this.height;
@@ -4006,6 +4009,8 @@ class IslandRenderer {
     const p=this.p(t.x,t.y), c=this.ctx;
     this.archStyle=t.material==='stone'&&this.sim.year<120?'classical':t.architecture||this.sim.age.id;
     c.save();c.translate(p.x,p.y-2);
+    // A soft shadow to the lower right gives every building weight on the ground.
+    if(!['beach','forest','farm','park','garden','town-square','palace-square','tree','original-tree','ruins'].includes(t.building))this.ellipse(9,5,18,6,'rgba(40,55,40,.09)');
     if(t.builtYear && this.sim.year-t.builtYear<3){const s=.75+(this.sim.year-t.builtYear)/12;c.scale(s,s);}
     if(t.kind==='flooded')c.globalAlpha=.78;
     if(this.focus&&['tower','house','townhouse'].includes(t.building)){const f=this.p(this.focus.x,this.focus.y);if(p.y>f.y&&Math.abs(p.x-f.x)<65)c.globalAlpha=.26;}
@@ -4727,14 +4732,16 @@ class IslandRenderer {
     this.diamond(0,-h-4,7,3,'#97ad83');
     if(v>.7){this.line([[0,-h-5],[0,-h-16]],'#91a398',1);this.ellipse(0,-h-16,1.5,1.5,'#d5d4a5');}
   }
+  // Residents: a little taller, with skin, hair and clothes that differ per person, and arms that swing as they walk.
   person(x,y,color,phase=0){
-    const step=Math.sin(this.activityTime*5+phase);
-    this.ellipse(x+1,y+1,2.7,1.1,'#5b714a25');
-    this.line([[x-.9,y-2],[x-.9-step*.6,y+1]],'#7f7e5c',1);
-    this.line([[x+.9,y-2],[x+.9+step*.6,y+1]],'#7f7e5c',1);
-    this.line([[x,y-2],[x,y-5]],color,2.7);
-    this.ellipse(x,y-7,1.7,1.9,'#dbc39c');
-    this.ellipse(x,y-8.2,2.1,.8,'#c9ae79');
+    const step=this.reduced?0:Math.sin(this.activityTime*5+phase),k=1.2,n=Math.abs(Math.floor(phase*7.3+3))%6;
+    const skin=['#e8c9a4','#d9ad84','#b98560','#8d5f40','#f1d6b8','#c99a72'][n],hair=['#3d2f26','#6b4a2f','#c9a15a','#8a8a86','#a5483c','#2b2b2b'][(n+2)%6],legs=['#5d6670','#6f5a44','#4f5a5e'][n%3];
+    this.ellipse(x+1,y+1.2,3.2,1.2,'#3d4a3a2a');
+    this.line([[x-.9,y-2.4*k],[x-.9-step*.8,y+1]],legs,1.3);
+    this.line([[x+.9,y-2.4*k],[x+.9+step*.8,y+1]],legs,1.3);
+    this.poly([[x-1.9,y-2.4*k],[x+1.9,y-2.4*k],[x+1.6,y-6.4*k],[x-1.6,y-6.4*k]],color);
+    this.line([[x-1.9,y-6*k],[x-2.5+step*.6,y-3.4*k]],color,1);this.line([[x+1.9,y-6*k],[x+2.5-step*.6,y-3.4*k]],color,1);
+    this.ellipse(x,y-8.2*k,1.8,2,skin);this.ellipse(x,y-9.1*k,2,1.05,hair);
   }
   drawWorkers(){
     const tiles=this.sim.land.filter(t=>!t.landform);
@@ -4936,6 +4943,12 @@ class IslandRenderer {
     const rightMost=Math.max(...this.sim.land.map(t=>this.p(t.x,t.y).x));
     c.save();c.translate(rightMost+85+Math.sin(this.time*.08)*17,20+Math.sin(this.time*.6)*2);this.smallBoat();c.restore();
     if(this.sim.era>=1){c.save();c.translate(-rightMost-65,65+Math.sin(this.time*.55)*1.5);c.scale(.75,.75);this.smallBoat();c.restore();}
+  }
+  // Soft cloud shadows drift across the island, which makes the landscape feel alive.
+  drawCloudShadows(){
+    if(this.reduced)return;const c=this.ctx;c.save();c.fillStyle='rgba(40,60,50,.07)';
+    for(let i=0;i<3;i++){const x=((hash(i,55)*this.width+this.time*(i%2?.8:1.3))%(this.width+300))-150,y=hash(i,22)*this.height*.65+120;c.beginPath();c.ellipse(x+40,y,90,34,0,0,TAU);c.fill();}
+    c.restore();
   }
   drawClouds(){
     const c=this.ctx;

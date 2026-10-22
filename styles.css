@@ -85,7 +85,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 @media (max-width:600px){.tour-caption{bottom:60px;padding:12px 14px 10px}.tour-caption p{font-size:13px}}
 
 /* 3.4 Age transitions */
-.age-card{position:absolute;left:50%;top:22%;transform:translateX(-50%);z-index:6;text-align:center;pointer-events:none;background:#fbf8eee8;border:1px solid #dfe3d2;border-radius:10px;padding:16px 28px;box-shadow:0 10px 40px #213e3022;animation:age-in 4.8s ease forwards}
+.age-card{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:6;text-align:center;pointer-events:none;background:#fbf8eee8;border:1px solid #dfe3d2;border-radius:10px;padding:16px 28px;box-shadow:0 10px 40px #213e3022;animation:age-in 4.8s ease forwards}
 .age-card strong{display:block;font-family:var(--serif);font-size:24px;font-weight:400;color:var(--ink);margin:4px 0}
 .age-card p{font-size:12px;color:#6f7f61;margin:0}
 @keyframes age-in{0%{opacity:0;transform:translate(-50%,8px)}12%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
