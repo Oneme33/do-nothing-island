@@ -477,6 +477,8 @@ export class IslandRenderer {
     else if(b==='monument')this.monumentStatue(t.monument);
     else if(b==='royal-palace'){c.scale(2.1,2.1);this.royal=true;this.palace(true,t.variant);this.royal=false;}
     else if(b==='circus')this.circus();
+    else if(b==='zoo')this.zoo();
+    else if(b==='theme-park')this.themePark();
     else if(b==='station')this.station(t);
     else if(b==='pool')this.pool();
     else if(b==='spaceport')this.spaceport(t);
@@ -903,6 +905,26 @@ export class IslandRenderer {
     else if(kind==='chicken'){this.ellipse(0,-20,7,6,stone);this.ellipse(5,-27,3.4,3.4,stone);this.poly([[8,-27.5],[11,-26.5],[8,-25.5]],'#d9a24e');this.poly([[4,-31],[5,-33.5],[6,-31]],'#c0574d');this.poly([[-6,-22],[-11,-27],[-7,-18]],dark);}
     else if(kind==='cat'){this.ellipse(0,-17,4.6,5,bronze);this.ellipse(0,-25,3.4,3,bronze);this.poly([[-2.6,-27],[-2,-30.5],[-.6,-27.6]],bronze);this.poly([[2.6,-27],[2,-30.5],[.6,-27.6]],bronze);this.line([[4,-13],[8,-20]],bronze,1.4);}
     else{this.poly([[-4,-11],[4,-11],[3,-20],[0,-31],[-2,-22],[-4,-26]],'#d1a074');this.poly([[-1.5,-12],[2,-12],[1.5,-18],[0,-24],[-1,-18]],'#efc98a');}
+  }
+  zoo(){
+    const t=this.reduced?0:this.time;
+    this.diamond(0,0,22,11,'#b9c58f');for(const [a,b] of [[[-22,0],[0,-11]],[[0,-11],[22,0]],[[22,0],[0,11]],[[0,11],[-22,0]]])this.line([a,b],'#8a7552',.9);
+    this.line([[-11,-5.5],[11,5.5]],'#8a7552',.8);
+    // Giraffe, elephant and a pool of penguins.
+    const gx=-10+Math.sin(t*.3)*2;this.ellipse(gx,-6,4,2.4,'#d9a858');this.line([[gx+3,-7],[gx+6,-19]],'#d9a858',2.2);this.ellipse(gx+6.6,-19.5,2,1.3,'#d9a858');for(const lx of [-2,2])this.line([[gx+lx,-4],[gx+lx,0]],'#b88a45',1);this.ellipse(gx-1,-6.5,1,.8,'#9c6d36');this.ellipse(gx+1.6,-5.4,.9,.7,'#9c6d36');
+    const ex=8+Math.sin(t*.2)*1.5;this.ellipse(ex,-5,5.5,4,'#9a9c98');this.ellipse(ex+5,-6,2.6,2.6,'#9a9c98');this.line([[ex+7,-5],[ex+8,-1+Math.sin(t*1.4)]],'#9a9c98',1.6);this.ellipse(ex+3,-7,1.8,2.2,'#888a86');for(const lx of [-3,2])this.line([[ex+lx,-2],[ex+lx,1]],'#858782',2);
+    this.ellipse(1,6,7,3,'#8fbcc8');for(let i=0;i<3;i++){const px=-3+i*3,hop=this.reduced?0:Math.abs(Math.sin(t*3+i))*1.5;this.ellipse(px,4-hop,1,1.6,'#2f3236');this.ellipse(px,4.4-hop,.6,1,'#f2f0ea');}
+  }
+  themePark(){
+    const t=this.reduced?0:this.time;
+    this.diamond(0,0,22,11,'#c9c2a8');
+    // A roller coaster with a loop and a little train running along it.
+    const track=[[-20,0],[-14,-18],[-6,-24],[0,-12],[4,-8]];this.line(track,'#c95b4c',1.6);for(const [x,y] of track)this.line([[x,y],[x,2]],'#9b9488',.6);
+    {const cx=9,cy=-14;this.ctx.beginPath();this.ctx.ellipse(cx,cy,6,7,0,0,Math.PI*2);this.ctx.strokeStyle='#c95b4c';this.ctx.lineWidth=1.6;this.ctx.stroke();this.line([[cx,cy+7],[cx,2]],'#9b9488',.6);
+      const a=(t*2)%(Math.PI*2);this.rect(cx+Math.cos(a)*6-1.5,cy+Math.sin(a)*7-1.2,3,2.4,'#e2c26a');}
+    // Carousel and a swing ride.
+    this.ellipse(-8,6,6,2.8,'#e2c26a');this.poly([[-14,4],[-8,-4],[-2,4]],'#7fa3a8');for(let i=0;i<4;i++){const a=t*1.5+i*Math.PI/2;this.ellipse(-8+Math.cos(a)*4.5,5+Math.sin(a)*1.6,.9,1.4,'#f1ead6');}
+    this.line([[14,6],[14,-6]],'#7d7464',1);for(let i=0;i<6;i++){const a=t*2.2+i*Math.PI/3,x=14+Math.cos(a)*7,y=-5+Math.sin(a)*2.4;this.line([[14,-6],[x,y+4]],'#9b9488',.4);this.ellipse(x,y+4.5,.9,.9,['#c98fb0','#93a77b','#d4644f'][i%3]);}
   }
   circus(){
     this.ellipse(4,4,22,7,'#58654414');

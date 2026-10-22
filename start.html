@@ -1152,7 +1152,7 @@ function drawFinale(c,w,h,s,m,reduced=false){
  c.restore();
 }
 
-const PLACE_NAMES={hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',lighthouse:'Vuurtoren','town-square':'Dorpsplein','petting-farm':'Kinderboerderij',museum:'Eilandmuseum',monument:'Standbeeld','royal-palace':'Het nieuwe paleis',circus:'Circustent',station:'Treinstation',pool:'Openluchtzwembad',spaceport:'Ruimtehaven',observatory:'Sterrenwacht','ice-cream':'IJssalon',greenhouse:'Kas',ruins:'Ruïne'};
+const PLACE_NAMES={hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',lighthouse:'Vuurtoren','town-square':'Dorpsplein','petting-farm':'Kinderboerderij',museum:'Eilandmuseum',monument:'Standbeeld','royal-palace':'Het nieuwe paleis',zoo:'Dierentuin','theme-park':'Pretpark',circus:'Circustent',station:'Treinstation',pool:'Openluchtzwembad',spaceport:'Ruimtehaven',observatory:'Sterrenwacht','ice-cream':'IJssalon',greenhouse:'Kas',ruins:'Ruïne'};
 const names=['Noor','Sam','Bo','Mila','Daan','Lou','Iris','Mo','Tess','Finn','Ada','Jip'];
 const surnames=['de Vries','van de Kust','Bos','van Dijk','de Boer','Steen','van de Berg','Visser'];
 function describePlot(s,t){
@@ -1345,7 +1345,7 @@ function reshapeAfterQuake(s,spot){
 // Small pleasures and an ending performed by the island, in real time.
 const adjacent=t=>[[t.x+1,t.y],[t.x-1,t.y],[t.x,t.y+1],[t.x,t.y-1]];
 const id=t=>`${t.x},${t.y}`;
-const RECREATION=['park','garden','beach','playground','fairground','theater','bonfire','festival-ground','petting-farm','ice-cream','greenhouse','circus','pool','monument'];
+const RECREATION=['park','garden','beach','playground','fairground','theater','bonfire','festival-ground','petting-farm','ice-cream','greenhouse','circus','pool','monument','zoo','theme-park'];
 function ensureSpectacle(s){
  ensureConsequences(s);
  s.nextFestival??=18;s.festival??=null;s.liveJoke??=null;s.fireCount??=0;
@@ -1391,8 +1391,9 @@ function extinguish(s,spot){
  if(count){s.storyStats.reforms++;s.rebuildRoads();}return count;
 }
 // A party with a reason: a wish that came true, or the opening of a statue or special building.
-function startParty(s,tile,title,quips,years=10){
- if(!tile||s.ending)return null;
+function startParty(s,tile,title,quips,years=4){
+ // Parties stay special: short, and followed by at least thirty quiet years.
+ if(!tile||s.ending||s.year<(s.partyQuietUntil||0))return null;years=Math.min(years,4);s.partyQuietUntil=s.year+years+30;
  s.festival={kind:'party',x:tile.x,y:tile.y,title,quips:quips||['Er is taart. Niemand weet wie hem heeft gebakken.','De fanfare speelt het enige liedje dat ze kent. Twee keer.','Iemand houdt een toespraak. Hij duurt gelukkig kort.'],until:s.year+years};
  s.signal('celebrate',tile,title);return s.festival;
 }
@@ -1403,7 +1404,7 @@ function advancePleasures(s){
  // A party lifts the mood for as long as it lasts.
  if(s.festival){s.unrest=Math.max(0,(s.unrest||0)-.6);s.prosperity=Math.min(94,s.prosperity+.15);}
  if(s.liveJoke&&s.year>s.liveJoke.until)s.liveJoke=null;
- if(s.year<s.nextFestival||s.storm||s.endgameStarted||s.ending)return;
+ if(s.year<s.nextFestival||s.year<(s.partyQuietUntil||0)||s.storm||s.endgameStarted||s.ending)return;
  const beach=s.beaches.find(t=>t.walkable),bonfire=s.buildings.find(t=>['bonfire','campfire'].includes(t.building));
  const stage=s.buildings.find(t=>['festival-ground','theater','fairground'].includes(t.building));
  const bakery=s.buildings.find(t=>t.building==='bakery'),square=s.buildings.find(t=>t.building==='town-square');
@@ -1415,7 +1416,7 @@ function advancePleasures(s){
  if(bakery)choices.push({kind:'pancakes',spot:bakery,title:'The Pancake Emergency',quips:['Too many pancakes. An unprecedented crisis.','The council forms a tasting committee.','The emergency lasts until lunchtime.']});
  if(!choices.length)return;
  const event=choices[Math.floor(s.random()*choices.length)];
- s.festival={kind:event.kind,x:event.spot.x,y:event.spot.y,title:event.title,quips:event.quips,until:s.year+20};
+ s.festival={kind:event.kind,x:event.spot.x,y:event.spot.y,title:event.title,quips:event.quips,until:s.year+6};s.partyQuietUntil=s.year+36;
  s.log(`${event.title}. ${event.quips[Math.floor(s.random()*event.quips.length)]}`,'fun',{x:event.spot.x,y:event.spot.y});
  s.signal('celebrate',event.spot,event.title);s.unrest=Math.max(0,s.unrest-5);s.prosperity=Math.min(94,s.prosperity+2);s.food=Math.max(0,s.food-Math.min(12,s.population*.04));
  s.nextFestival=s.year+55+Math.floor(s.random()*65);
@@ -1936,6 +1937,8 @@ const DELIGHTS=[
  {type:'station',since:1860,population:400,name:'Treinstation',label:'Instappen!',opening:'Het eiland krijgt een treinstation. Het spoor is kort, maar de conducteur fluit met heel veel overtuiging.',where:(s,t)=>Math.hypot(t.x,t.y)>=4},
  {type:'pool',since:1930,population:500,name:'Openluchtzwembad',label:'Bommetje!',opening:'Een openluchtzwembad opent. De zee doet alsof ze niet beledigd is.',where:(s,t)=>Math.hypot(t.x,t.y)>=3},
  {type:'spaceport',since:2060,population:800,name:'Ruimtehaven',label:'Aftellen!',opening:'Een ruimtehaven! De eerste raket gaat naar de maan en komt terug met een steen en een selfie.',where:(s,t,near)=>near(t,p=>p?.kind==='water'||p?.building==='beach')},
+ {type:'zoo',since:1700,population:350,name:'Dierentuin',label:'Kijk, een giraf!',opening:'De dierentuin opent. De giraf kijkt over het hek en vindt de mensen het interessantst.',where:(s,t)=>Math.hypot(t.x,t.y)>=4},
+ {type:'theme-park',since:1960,population:700,name:'Pretpark',label:'Nog een keer!',opening:'Een pretpark opent, met een achtbaan die precies één looping te veel heeft.',where:(s,t)=>Math.hypot(t.x,t.y)>=5},
  {type:'petting-farm',since:150,population:40,name:'Kinderboerderij',label:'Mèèh!',opening:'Een kinderboerderij opent. De geit wordt direct verkozen tot burgemeester van de kinderen.',where:(s,t)=>Math.hypot(t.x,t.y)>=3&&Math.hypot(t.x,t.y)<=8},
  {type:'observatory',since:1600,population:200,name:'Sterrenwacht',label:'Sterren kijken',opening:'Een sterrenwacht verrijst bij de berg. De eerste ontdekking: de maan is er nog.',where:(s,t,near)=>near(t,p=>!!p?.landform)},
  {type:'ice-cream',since:1800,population:300,name:'IJssalon',label:'Een ijsje!',opening:'Een ijssalon opent bij het strand. Het eiland leert het woord ‘nog eentje’.',where:(s,t,near)=>near(t,p=>p?.building==='beach')},
@@ -1949,7 +1952,7 @@ const DELIGHT_OPENINGS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.opening]));
 function planDelight(s){
  const planned=[...s.tiles.values()].some(t=>t.buildSite&&DELIGHT_TYPES.includes(t.buildSite.type));if(planned)return false;
  for(const d of DELIGHTS){
-  if(s.year<d.since||s.population<d.population||s.buildings.some(t=>t.building===d.type))continue;
+  if(s.year<d.since||s.population<d.population||[...s.tiles.values()].some(t=>t.building===d.type||t.rebuildFrom===d.type||t.buildSite?.type===d.type))continue;
   // A lone tree may make way; homes, farms and reserved plots never do.
   const near=(t,r)=>delightAround(t).some(p=>r(s.tile(p.x,p.y)))||[[1,1],[-1,-1],[1,-1],[-1,1],[2,0],[-2,0],[0,2],[0,-2]].some(([dx,dy])=>r(s.tile(t.x+dx,t.y+dy)));
   const spots=s.land.filter(t=>(!t.building||t.building==='tree'||d.type==='observatory'&&t.building==='forest')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
@@ -2752,6 +2755,11 @@ class Civilization {
       t.kind='land'; t.reclaimed=true; t.elevation=.15+this.dikeLevel*.07; t.builtYear=this.year; t.progress=1;
       t.district=districtFor(this,t);t.polder=this.projectCount;t.oldDike=neighbors(t).some(([x,y])=>!p.tiles.includes(key(x,y))&&this.tile(x,y)?.kind!=='land');
       if(!t.building) t.building=null;
+    }
+    // Like real polders, part of the new land becomes farmland when the island needs more food.
+    if(this.balance.food<2||this.food<this.population*1.5){
+      const fresh=p.tiles.map(id=>this.tiles.get(id)).filter(t=>t.kind==='land'&&!t.building);
+      for(const t of fresh.filter((_,i)=>i%3===0)){t.building='farm';t.builtYear=this.year;}
     }
     if(p.isArtificial) {
       const bridge=this.tiles.get(p.tiles[0]);bridge.kind='water';bridge.building='bridge';bridge.reclaimed=false;
@@ -3893,6 +3901,8 @@ class IslandRenderer {
     else if(b==='monument')this.monumentStatue(t.monument);
     else if(b==='royal-palace'){c.scale(2.1,2.1);this.royal=true;this.palace(true,t.variant);this.royal=false;}
     else if(b==='circus')this.circus();
+    else if(b==='zoo')this.zoo();
+    else if(b==='theme-park')this.themePark();
     else if(b==='station')this.station(t);
     else if(b==='pool')this.pool();
     else if(b==='spaceport')this.spaceport(t);
@@ -4319,6 +4329,26 @@ class IslandRenderer {
     else if(kind==='chicken'){this.ellipse(0,-20,7,6,stone);this.ellipse(5,-27,3.4,3.4,stone);this.poly([[8,-27.5],[11,-26.5],[8,-25.5]],'#d9a24e');this.poly([[4,-31],[5,-33.5],[6,-31]],'#c0574d');this.poly([[-6,-22],[-11,-27],[-7,-18]],dark);}
     else if(kind==='cat'){this.ellipse(0,-17,4.6,5,bronze);this.ellipse(0,-25,3.4,3,bronze);this.poly([[-2.6,-27],[-2,-30.5],[-.6,-27.6]],bronze);this.poly([[2.6,-27],[2,-30.5],[.6,-27.6]],bronze);this.line([[4,-13],[8,-20]],bronze,1.4);}
     else{this.poly([[-4,-11],[4,-11],[3,-20],[0,-31],[-2,-22],[-4,-26]],'#d1a074');this.poly([[-1.5,-12],[2,-12],[1.5,-18],[0,-24],[-1,-18]],'#efc98a');}
+  }
+  zoo(){
+    const t=this.reduced?0:this.time;
+    this.diamond(0,0,22,11,'#b9c58f');for(const [a,b] of [[[-22,0],[0,-11]],[[0,-11],[22,0]],[[22,0],[0,11]],[[0,11],[-22,0]]])this.line([a,b],'#8a7552',.9);
+    this.line([[-11,-5.5],[11,5.5]],'#8a7552',.8);
+    // Giraffe, elephant and a pool of penguins.
+    const gx=-10+Math.sin(t*.3)*2;this.ellipse(gx,-6,4,2.4,'#d9a858');this.line([[gx+3,-7],[gx+6,-19]],'#d9a858',2.2);this.ellipse(gx+6.6,-19.5,2,1.3,'#d9a858');for(const lx of [-2,2])this.line([[gx+lx,-4],[gx+lx,0]],'#b88a45',1);this.ellipse(gx-1,-6.5,1,.8,'#9c6d36');this.ellipse(gx+1.6,-5.4,.9,.7,'#9c6d36');
+    const ex=8+Math.sin(t*.2)*1.5;this.ellipse(ex,-5,5.5,4,'#9a9c98');this.ellipse(ex+5,-6,2.6,2.6,'#9a9c98');this.line([[ex+7,-5],[ex+8,-1+Math.sin(t*1.4)]],'#9a9c98',1.6);this.ellipse(ex+3,-7,1.8,2.2,'#888a86');for(const lx of [-3,2])this.line([[ex+lx,-2],[ex+lx,1]],'#858782',2);
+    this.ellipse(1,6,7,3,'#8fbcc8');for(let i=0;i<3;i++){const px=-3+i*3,hop=this.reduced?0:Math.abs(Math.sin(t*3+i))*1.5;this.ellipse(px,4-hop,1,1.6,'#2f3236');this.ellipse(px,4.4-hop,.6,1,'#f2f0ea');}
+  }
+  themePark(){
+    const t=this.reduced?0:this.time;
+    this.diamond(0,0,22,11,'#c9c2a8');
+    // A roller coaster with a loop and a little train running along it.
+    const track=[[-20,0],[-14,-18],[-6,-24],[0,-12],[4,-8]];this.line(track,'#c95b4c',1.6);for(const [x,y] of track)this.line([[x,y],[x,2]],'#9b9488',.6);
+    {const cx=9,cy=-14;this.ctx.beginPath();this.ctx.ellipse(cx,cy,6,7,0,0,Math.PI*2);this.ctx.strokeStyle='#c95b4c';this.ctx.lineWidth=1.6;this.ctx.stroke();this.line([[cx,cy+7],[cx,2]],'#9b9488',.6);
+      const a=(t*2)%(Math.PI*2);this.rect(cx+Math.cos(a)*6-1.5,cy+Math.sin(a)*7-1.2,3,2.4,'#e2c26a');}
+    // Carousel and a swing ride.
+    this.ellipse(-8,6,6,2.8,'#e2c26a');this.poly([[-14,4],[-8,-4],[-2,4]],'#7fa3a8');for(let i=0;i<4;i++){const a=t*1.5+i*Math.PI/2;this.ellipse(-8+Math.cos(a)*4.5,5+Math.sin(a)*1.6,.9,1.4,'#f1ead6');}
+    this.line([[14,6],[14,-6]],'#7d7464',1);for(let i=0;i<6;i++){const a=t*2.2+i*Math.PI/3,x=14+Math.cos(a)*7,y=-5+Math.sin(a)*2.4;this.line([[14,-6],[x,y+4]],'#9b9488',.4);this.ellipse(x,y+4.5,.9,.9,['#c98fb0','#93a77b','#d4644f'][i%3]);}
   }
   circus(){
     this.ellipse(4,4,22,7,'#58654414');

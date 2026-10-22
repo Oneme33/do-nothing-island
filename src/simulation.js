@@ -757,6 +757,11 @@ export class Civilization {
       t.district=districtFor(this,t);t.polder=this.projectCount;t.oldDike=neighbors(t).some(([x,y])=>!p.tiles.includes(key(x,y))&&this.tile(x,y)?.kind!=='land');
       if(!t.building) t.building=null;
     }
+    // Like real polders, part of the new land becomes farmland when the island needs more food.
+    if(this.balance.food<2||this.food<this.population*1.5){
+      const fresh=p.tiles.map(id=>this.tiles.get(id)).filter(t=>t.kind==='land'&&!t.building);
+      for(const t of fresh.filter((_,i)=>i%3===0)){t.building='farm';t.builtYear=this.year;}
+    }
     if(p.isArtificial) {
       const bridge=this.tiles.get(p.tiles[0]);bridge.kind='water';bridge.building='bridge';bridge.reclaimed=false;
     }
