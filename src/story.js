@@ -226,7 +226,7 @@ export function advanceFinale(s){
     s.log('The last great project enters its final test. What remains will be the island’s legacy.','endgame',{x:0,y:0});
     s.signal('endgame',s.tile(0,0),'A legacy takes shape');
   }
-  if(s.finalPlan==='last-drop'&&s.land.length>=s.tiles.size*.945){finishStory(s,'last-drop');return;}
+  if(s.finalPlan==='last-drop'&&s.land.length>=Math.min(s.tiles.size,s.config.maxTiles)*.945){finishStory(s,'last-drop');return;}
   if(s.year>=s.finaleDeadline){
     const result=chooseFinalPlan(s);
     finishStory(s,result==='last-drop'?'independent':result);

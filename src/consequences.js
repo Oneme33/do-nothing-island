@@ -122,7 +122,7 @@ export function reshapeAfterQuake(s,spot){
  }
  const water=adjacentPlots(s,spot).find(t=>t.kind==='water'&&!t.building&&!t.riftYear);
  const occupied=s.land.length+(s.project?.tiles.length||0)+s.reclaimed.filter(t=>t.kind==='flooded').length;
- if(water&&occupied<s.config.maxTiles){
+ if(water&&occupied<s.growthLimit){
   water.kind='land';water.natural=false;water.reclaimed=false;water.elevation=1.8;water.upliftedYear=s.year;water.district='gardens';s.rebuildRoads();
   discover(s,'uplift',water,'De kust komt omhoog. Waar net nog water lag, ligt nu echt droog land. De kaartmaker zucht.');
   return 'De kust komt omhoog: een nieuwe landtegel, zonder inpoldering.';

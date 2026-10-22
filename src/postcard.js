@@ -21,8 +21,8 @@ export function makePostcard(source,{identity,year,line}){
  return canvas;
 }
 function miniMap(c,land,x,y,size){
- c.fillStyle='#dbe7da';c.fillRect(x,y,size,size);c.fillStyle='#a8ba85';const cell=size/25;
- for(const id of land||[]){const [a,b]=id.split(',').map(Number);if(Math.abs(a)<=12&&Math.abs(b)<=12)c.fillRect(x+(a+12)*cell,y+(b+12)*cell,cell+.5,cell+.5);}
+ c.fillStyle='#dbe7da';c.fillRect(x,y,size,size);c.fillStyle='#a8ba85';const cell=size/29;
+ for(const id of land||[]){const [a,b]=id.split(',').map(Number);if(Math.abs(a)<=14&&Math.abs(b)<=14)c.fillRect(x+(a+14)*cell,y+(b+14)*cell,cell+.5,cell+.5);}
  c.fillStyle='#546f43';c.beginPath();c.arc(x+size/2,y+size/2,4,0,Math.PI*2);c.fill();
 }
 function wrap(c,text,x,y,width,lineHeight){

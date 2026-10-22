@@ -350,3 +350,8 @@ test('historical blueprints do not overwrite a new civic use or the founding pal
   const home=sim.tile(-1,1);home.building='manor';home.futureBuilding='tower';sim.advanceFoundingHome();
   assert.equal(home.building,'palace');assert.equal(home.futureBuilding,undefined);
 });
+test('new islands sit in a larger sea and the growing limit rises to 720 when things go well, never dropping again',()=>{
+ const s=new Civilization(31);assert.equal(s.tiles.size,841);assert.equal(s.config.maxTiles,720);assert.ok(s.land.every(t=>Math.abs(t.x)<=12&&Math.abs(t.y)<=12),'the natural island keeps its old size');
+ assert.equal(s.growthLimit,560);s.year=2010;s.prosperity=70;s.freshwater=80;assert.equal(s.growthLimit,720);s.prosperity=10;assert.equal(s.growthLimit,720,'an earned limit stays');
+ const fixed=new Civilization(31,{maxTiles:480});fixed.year=2100;fixed.prosperity=90;assert.equal(fixed.growthLimit,480);
+});

@@ -206,7 +206,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
   <dialog id="guide-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN KLEINE HANDLEIDING</span><h2>Welkom bij het nietsdoen.</h2><p>Eén huisje, een kleine akker en zes mensen. De beschaving groeit vanzelf. Jij kiest of je toekijkt of ingrijpt.</p><div class="guide-steps"><div><span>01</span><p><strong>Neem de tijd.</strong> Het eiland begint op 1×. Met de balk op het eiland kies je de snelheid of pauzeer je. Een open eilandboek, handleiding of instellingenvenster zet het leven even stil.</p></div><div><span>02</span><p><strong>Alles laat sporen achter.</strong> Bouw helpt de bewoners. Regen voedt de akkers. Vuur en bevingen kunnen blijvende veranderingen veroorzaken. Probeer dingen uit en kijk wat de bewoners ermee doen.</p></div><div><span>03</span><p><strong>Help een inwoner.</strong> Zie je een vraagteken op het eiland? Klik erop, lees de wens en kies of je helpt. Een klik op andere gebouwen toont bewoners, bouwjaar en herinneringen. Versleep de kaart of zoom om de rest te zien. Rond 2100 begint het laatste hoofdstuk, met een eigen eindscène en eilandscore.</p></div></div><p class="dialog-note">Spatie: pauze · Scroll of +/−: zoom · Slepen: verkennen<br>Je eiland wordt automatisch in deze browser bewaard.</p><button class="primary-button" data-close>Ik laat ze even hun gang gaan ↗</button></dialog>
 
   <dialog id="book-dialog" class="book-dialog" aria-label="Het eilandboek"><div class="book-bar"><div class="book-tabs" role="tablist" aria-label="Hoofdstukken van het eilandboek"><button id="book-tab-journal" role="tab" aria-controls="book-journal" aria-selected="true" tabindex="0"><span aria-hidden="true">✳</span> Kroniek</button><button id="book-tab-family" role="tab" aria-controls="book-family" aria-selected="false" tabindex="-1"><span aria-hidden="true">♧</span> Familie</button><button id="book-tab-wishes" role="tab" aria-controls="book-wishes" aria-selected="false" tabindex="-1"><span aria-hidden="true">♡</span> Wensen</button><button id="book-tab-challenges" role="tab" aria-controls="book-challenges" aria-selected="false" tabindex="-1"><span aria-hidden="true">✧</span> Uitdagingen</button><button id="book-tab-museum" role="tab" aria-controls="book-museum" aria-selected="false" tabindex="-1"><span aria-hidden="true">⌂</span> Museum</button><button id="book-tab-collection" role="tab" aria-controls="book-collection" aria-selected="false" tabindex="-1"><span aria-hidden="true">▧</span> Verzameling</button></div><button id="book-close" class="dialog-close book-close" aria-label="Sluit het eilandboek">×</button></div><section id="book-journal" class="book-page journal-page" role="tabpanel" aria-labelledby="book-tab-journal"><span class="eyebrow">HET EILANDARCHIEF</span><h2>De kroniek van jouw eiland.</h2><p>Hoofdstukken vol familie, eigen ideeën en jouw ingrepen. Laat zien brengt je naar de plek zoals die er nu bij ligt.</p><div class="chronicle-legend"><span>♧ Familie</span><span>✳ Jouw ingreep</span></div><nav id="journal-chapters" class="journal-chapters" aria-label="Hoofdstukken van de kroniek"></nav><p class="dialog-note">De kroniek bewaart maximaal 350 berichten. Grote momenten en familie krijgen voorrang op dagelijkse nieuwtjes.</p><div id="journal-entries"></div></section><section id="book-family" class="book-page family-page" role="tabpanel" aria-labelledby="book-tab-family" hidden><span class="eyebrow">DE FAMILIE VAN HET EERSTE HUIS</span><h2 id="family-title"></h2><p>Het huis blijft. Iedere generatie geeft de sleutel door.</p><section id="family-current" class="family-current"></section><p id="family-note" class="dialog-note"></p><div class="family-navigation"><button id="family-oldest">Naar de eerste generatie ↑</button><button id="family-latest">Naar de huidige generatie ↓</button><button id="family-find-home">Bekijk hun huis ↗</button></div><ol id="family-generations" class="family-generations" aria-label="Generaties van de eerste familie"></ol></section><section id="book-wishes" class="book-page wishes-page" role="tabpanel" aria-labelledby="book-tab-wishes" hidden><span class="eyebrow">EEN VRAAG VAN HET EILAND</span><h2 id="wishes-title">Wensen van inwoners</h2><p>Je mag helpen of gewoon blijven kijken. Hulp vergroot hun vertrouwen én de verwachting dat je terugkomt. Zonder ingreep zoeken ze hun eigen weg.</p><section id="wish-current" class="family-current"></section><div class="wish-actions"><button id="wish-help" class="primary-button" hidden>Help deze inwoner</button><button id="wish-find" class="secondary-button" hidden>Bekijk inwoner ↗</button></div><label class="setting-row"><span>Toon kleine wenswolkjes</span><input id="wish-bubbles" type="checkbox"></label><h3>Eerdere wensen</h3><ol id="wish-history" class="wish-history"></ol></section><section id="book-challenges" class="book-page challenges-page" role="tabpanel" aria-labelledby="book-tab-challenges" hidden><span class="eyebrow">ALLEEN ALS JE ZIN HEBT</span><h2 id="challenges-title">Kleine uitdagingen</h2><p>Dit eiland heeft een paar vrijblijvende ideeën. Er hangt geen beloning of straf aan. Gewoon kijken blijft genoeg.</p><p id="challenge-note" class="dialog-note"></p><ol id="challenge-list" class="challenge-list"></ol></section><section id="book-museum" class="book-page museum-page" role="tabpanel" aria-labelledby="book-tab-museum" hidden><span class="eyebrow">EEN TIJDCAPSULE</span><h2>Het eilandmuseum</h2><p id="museum-note"></p><ol id="museum-list" class="challenge-list"></ol></section><section id="book-collection" class="book-page collection-page" role="tabpanel" aria-labelledby="book-tab-collection" hidden><span class="eyebrow">SPOREN VAN AL JE EILANDEN</span><h2 id="collection-title">De verzameling</h2><p id="collection-progress"></p><p id="collection-storage" class="dialog-note"></p><div id="collection-groups"></div></section></dialog>
-  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480">Een groeiende wereld · 480</option><option value="560" selected>Een klein rijk · 560</option><option value="625">De hele oceaan · 625</option></select></label><label class="setting-row"><span><strong>Leven tijdens afwezigheid</strong><small>Bij terugkomst maximaal drie eeuwen verder, behalve wanneer je pauzeert.</small></span><input type="checkbox" id="offline-life" checked></label><label class="setting-row"><span><strong>Wisselend tempo</strong><small>Vlot in de eerste eeuwen, rustiger in de korte moderne tijdperken.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Exacte getallen</strong><small>Toon voorraden en percentages als cijfers in plaats van in woorden.</small></span><input type="checkbox" id="show-numbers"></label><label class="setting-row"><span><strong>Dag, nacht en seizoenen</strong><small>Avondlicht, lantaarns, herfstbladeren en sneeuw. Alleen sfeer: het eiland zelf merkt er niets van.</small></span><input type="checkbox" id="day-night" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
+  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480">Een groeiende wereld · 480</option><option value="560">Een klein rijk · 560</option><option value="625">Een groot rijk · 625</option><option value="720" selected>Groeit mee · tot 720</option></select></label><label class="setting-row"><span><strong>Leven tijdens afwezigheid</strong><small>Bij terugkomst maximaal drie eeuwen verder, behalve wanneer je pauzeert.</small></span><input type="checkbox" id="offline-life" checked></label><label class="setting-row"><span><strong>Wisselend tempo</strong><small>Vlot in de eerste eeuwen, rustiger in de korte moderne tijdperken.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Exacte getallen</strong><small>Toon voorraden en percentages als cijfers in plaats van in woorden.</small></span><input type="checkbox" id="show-numbers"></label><label class="setting-row"><span><strong>Dag, nacht en seizoenen</strong><small>Avondlicht, lantaarns, herfstbladeren en sneeuw. Alleen sfeer: het eiland zelf merkt er niets van.</small></span><input type="checkbox" id="day-night" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
 
   <dialog id="ending-dialog" class="ending-dialog"><button id="ending-close" class="dialog-close" aria-label="Sluit het naschrift">×</button><span class="eyebrow">HET EILAND HEEFT EEN VERHAAL</span><div class="ending-symbol">◉</div><h2 id="ending-title">De erfenis van het eiland.</h2><p class="ending-quote" id="ending-quote"></p><p id="ending-description"></p><div class="ending-shortage"><span>WAT ZE ACHTERLATEN</span><strong id="ending-consequence"></strong><p id="ending-detail"></p></div><section class="island-scores" aria-label="Eilandscores"><span class="eyebrow">HUN EILANDSCORE</span><strong id="ending-score"></strong><div id="score-breakdown"></div><p>Het gemiddelde van vijf kanten van hun beschaving. Er is meer dan één manier om het goed te doen.</p></section><p id="ending-stats"></p><div class="ending-maps"><figure><svg id="ending-before" viewBox="0 0 250 250" role="img" aria-label="Het oorspronkelijke eiland"></svg><figcaption>Het begin</figcaption></figure><figure><svg id="ending-after" viewBox="0 0 250 250" role="img" aria-label="Het uiteindelijke eiland"></svg><figcaption>Het eiland dat zij maakten</figcaption></figure></div><p id="ending-causes"></p><div id="ending-chronicle"></div><button id="ending-continue" class="primary-button">Bekijk het uiteindelijke eiland ↗</button><button id="ending-replay" class="secondary-button">Speel de eindscène opnieuw ↻</button><button id="ending-sandbox" class="secondary-button">Speel vrij verder →</button><button id="ending-new" class="secondary-button">Begin een nieuw eiland ↻</button><button id="ending-card" class="secondary-button">Bewaar eindkaart ↓</button><button id="ending-link" class="secondary-button">Kopieer link naar dit eiland</button></dialog>
   <script>(()=>{
@@ -1325,7 +1325,7 @@ function reshapeAfterQuake(s,spot){
  }
  const water=adjacentPlots(s,spot).find(t=>t.kind==='water'&&!t.building&&!t.riftYear);
  const occupied=s.land.length+(s.project?.tiles.length||0)+s.reclaimed.filter(t=>t.kind==='flooded').length;
- if(water&&occupied<s.config.maxTiles){
+ if(water&&occupied<s.growthLimit){
   water.kind='land';water.natural=false;water.reclaimed=false;water.elevation=1.8;water.upliftedYear=s.year;water.district='gardens';s.rebuildRoads();
   discover(s,'uplift',water,'De kust komt omhoog. Waar net nog water lag, ligt nu echt droog land. De kaartmaker zucht.');
   return 'De kust komt omhoog: een nieuwe landtegel, zonder inpoldering.';
@@ -1676,7 +1676,7 @@ function advanceFinale(s){
     s.log('The last great project enters its final test. What remains will be the island’s legacy.','endgame',{x:0,y:0});
     s.signal('endgame',s.tile(0,0),'A legacy takes shape');
   }
-  if(s.finalPlan==='last-drop'&&s.land.length>=s.tiles.size*.945){finishStory(s,'last-drop');return;}
+  if(s.finalPlan==='last-drop'&&s.land.length>=Math.min(s.tiles.size,s.config.maxTiles)*.945){finishStory(s,'last-drop');return;}
   if(s.year>=s.finaleDeadline){
     const result=chooseFinalPlan(s);
     finishStory(s,result==='last-drop'?'independent':result);
@@ -1952,7 +1952,7 @@ function planDelight(s){
   if(s.year<d.since||s.population<d.population||s.buildings.some(t=>t.building===d.type))continue;
   // A lone tree may make way; homes, farms and reserved plots never do.
   const near=(t,r)=>delightAround(t).some(p=>r(s.tile(p.x,p.y)))||[[1,1],[-1,-1],[1,-1],[-1,1],[2,0],[-2,0],[0,2],[0,-2]].some(([dx,dy])=>r(s.tile(t.x+dx,t.y+dy)));
-  const spots=s.land.filter(t=>(!t.building||t.building==='tree')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
+  const spots=s.land.filter(t=>(!t.building||t.building==='tree'||d.type==='observatory'&&t.building==='forest')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
   const spot=spots[(s.year*13+s.seed)%spots.length],tree=spot.building;if(tree)spot.building=null;
   if(s.planBuilding(spot,d.type))return true;
   if(tree)spot.building=tree;
@@ -1990,7 +1990,9 @@ function advanceMonuments(s){
 }
 
 const SAVE_VERSION = 1;
-const WORLD_RADIUS = 12;
+// New islands sit in a 29×29 sea; the natural island stays within the original 25×25, so the extra sea is room for polders.
+const WORLD_RADIUS = 14;
+const NATURAL_RADIUS = 12;
 const ERAS = [
   {name:'The early days', threshold:0, year:1, housing:4, title:'Early civilization'},
   {name:'The old world', threshold:1, year:120, housing:6, title:'Preindustrial civilization'},
@@ -2049,7 +2051,7 @@ class Civilization {
   constructor(seed=Date.now(), config={}) {
     this.seed = seed >>> 0 || 1;
     this.randomState = this.seed;
-    this.config = {maxTiles:560, rareEndings:true, accelerating:true, ...config};
+    this.config = {maxTiles:720, rareEndings:true, accelerating:true, ...config};
     this.year = 1;
     this.population = 6;
     this.food = 28;
@@ -2106,7 +2108,7 @@ class Civilization {
       const u=x*cos-y*sin,v=x*sin+y*cos,angle=Math.atan2(v,u);
       const edge=1+.13*Math.sin(angle*3+g.phase)+.07*Math.cos(angle*5-g.phase);
       const core=(Math.abs(x)<=1&&Math.abs(y)<=1)||[[-2,0],[-2,-1],[-1,-2],[2,0],[0,2]].some(([a,b])=>a===x&&b===y);
-      const natural = core || Math.abs(x)<WORLD_RADIUS&&Math.abs(y)<WORLD_RADIUS&&(u*u/g.radiusX**2+v*v/g.radiusY**2)<edge;
+      const natural = core || Math.abs(x)<NATURAL_RADIUS&&Math.abs(y)<NATURAL_RADIUS&&(u*u/g.radiusX**2+v*v/g.radiusY**2)<edge;
       this.tiles.set(key(x,y), {x,y,kind:natural?'land':'water',natural,reclaimed:false,building:null,variant:noise(x+g.detailSeed,y),elevation:natural?1:.08,damage:0,floodYears:0});
     }
     // Keep one walkable island: diagonal specks do not become disconnected starting land.
@@ -2114,7 +2116,7 @@ class Civilization {
     for(let i=0;i<queue.length;i++)for(const [x,y]of neighbors(queue[i])){const tile=this.tile(x,y),id=key(x,y);if(tile?.kind==='land'&&!connected.has(id)){connected.add(id);queue.push(tile);}}
     for(const [id,tile]of this.tiles)if(tile.kind==='land'&&!connected.has(id)){tile.kind='water';tile.natural=false;tile.elevation=.08;}
     this.originalArea = this.land.length;
-    this.config.maxTiles=Math.min(625,Math.max(320,this.config.maxTiles,this.originalArea+24));
+    this.config.maxTiles=Math.min(this.tiles.size,Math.max(320,this.config.maxTiles,this.originalArea+24));
     this.tile(0,0).building = 'original-tree';
     this.tile(-1,1).building = 'hut';
     this.tile(-1,1).foundingHome = true;
@@ -2169,6 +2171,16 @@ class Civilization {
   get temperament() { return CHARACTERS.find(p=>p.id===this.character)||{food:1,trade:1,science:1,growth:1}; }
   // 0: a slow village; 1: the windmill age from 1250; 2: land actually won from the sea.
   get housingBoom() { return this.reclaimed.length>0?2:this.year>=1250&&this.buildings.some(t=>t.building==='windmill')?1:0; }
+  // With the 'grows along' setting (720) the limit rises as the island does well; lower settings are fixed.
+  get growthLimit() {
+    const chosen=Math.min(this.config.maxTiles,this.tiles.size);if(chosen<720)return chosen;
+    // A limit the island has earned is never taken away again.
+    let cap=Math.max(560,this.growthCap||0);
+    if(this.year>=1600&&this.prosperity>50)cap=Math.max(cap,620);
+    if(this.year>=1850&&this.prosperity>50&&this.freshwater>35)cap=Math.max(cap,680);
+    if(this.year>=2000&&this.prosperity>48)cap=Math.max(cap,720);
+    this.growthCap=cap;return Math.min(chosen,cap);
+  }
   get pressure() { return this.population / Math.max(1,this.capacity); }
   get happiness() { return this.food < 5 ? 'Hungry' : this.protestUntil>this.year?'Restless':this.storm ? 'Concerned' : this.festival&&this.year<=this.festival.until ? 'Feestelijk' : this.prosperity>78?'Thriving':this.prosperity>40?'Content':'Getting by'; }
   get populationNote() { return /^Six people\./.test(this.currentRemark)&&Math.floor(this.population)!==6?`${Math.floor(this.population)} inwoners. Nog steeds geen vergadering.`:this.currentRemark; }
@@ -2656,16 +2668,17 @@ class Civilization {
     if(this.year<1250 || this.technology<3) return false;
     if(this.era===1 && !this.buildings.some(t=>t.building==='windmill')) return false;
     const total=this.land.length+this.reclaimed.filter(t=>t.kind==='flooded').length;
-    if(total>=this.config.maxTiles) return false;
+    const limit=this.growthLimit;
+    if(total>=limit) return false;
     const buildable=this.land.filter(t=>!t.landform).length;
     const reserve=Math.max(3,Math.min(8,Math.floor(buildable*.04)));
     const pressure=this.freeLand.length<=reserve && (this.pressure>.86 || this.food<this.population*.5);
     const ambition=this.era===4 && this.obsessed && this.config.rareEndings && this.endgameStarted;
     // Polder ambition: once mills (and later pumps) exist, the island keeps winning land while its free ground shrinks.
-    const polder=(this.housingBoom>=1||this.era>=2)&&this.freeLand.length<=Math.max(reserve,Math.floor(buildable*(this.era>=2?.4:.25)))&&this.pressure>.65;
+    const polder=(this.housingBoom>=1||this.era>=2)&&this.freeLand.length<=Math.max(reserve,Math.floor(buildable*(this.era>=2?.4:.25)))&&(this.pressure>.65||this.era>=2&&this.prosperity>50);
     if(!pressure && !polder && !ambition) return false;
-    const maxBatch=[0,5,9,12,ambition?22:16][this.era];
-    const batch=Math.min(maxBatch,this.config.maxTiles-total);
+    const maxBatch=[0,5,9,18,ambition?30:26][this.era];
+    const batch=Math.min(maxBatch,limit-total);
     const costs={wood:batch*(this.era===1?5:2),stone:batch*(this.era===1?1:3),wealth:batch*(this.era===1?3:5)};
     if(this.wood<costs.wood || this.stone<costs.stone || this.wealth<costs.wealth) return false;
     const frontier=[...this.tiles.values()].filter(t=>t.kind==='water' && !t.building && neighbors(t).some(([x,y])=>this.tile(x,y)?.kind==='land') && (ambition||!neighbors(t).some(([x,y])=>this.tile(x,y)?.protectedCoast)));
@@ -2706,7 +2719,8 @@ class Civilization {
     this.wood-=upkeep;
     this.wealth-=upkeep;
     p.elapsed+=p.ambitious?12:this.inspiration?2:1;
-    const duration=PROJECT_STAGES[p.stage].duration * (p.manual && p.stage===2 ? 1.7 : 1);
+    // Modern pumping stations and machines work through a polder in a little over half the time.
+    const duration=Math.max(1,Math.round(PROJECT_STAGES[p.stage].duration * (p.manual && p.stage===2 ? 1.7 : 1) * (this.era>=3?.6:1)));
     for(const id of p.tiles) this.tiles.get(id).progress=(p.stage+p.elapsed/duration)/PROJECT_STAGES.length;
     if(p.elapsed<duration) return;
     p.elapsed=0;
@@ -2859,7 +2873,7 @@ class Civilization {
   advanceEndgame() { advanceFinale(this); }
   tryLastDrop() {
     if(this.sandbox||this.ending||!this.endgameStarted||!this.config.rareEndings||!this.obsessed||this.era<4||this.population<100||this.config.maxTiles<600)return;
-    if(this.land.length>=this.tiles.size*.945)finishStory(this,'last-drop');
+    if(this.land.length>=Math.min(this.tiles.size,this.config.maxTiles)*.945)finishStory(this,'last-drop');
   }
   serialize() {
     const {version,...state}=this;
@@ -2869,7 +2883,7 @@ class Civilization {
   static restore(data) {
     try {
       const parsed=JSON.parse(data);
-      if(parsed.version!==SAVE_VERSION || !Array.isArray(parsed.tiles) || parsed.tiles.length!==625 || !Number.isFinite(parsed.year) || !Array.isArray(parsed.history)) return null;
+      if(parsed.version!==SAVE_VERSION || !Array.isArray(parsed.tiles) || ![625,841].includes(parsed.tiles.length) || !Number.isFinite(parsed.year) || !Array.isArray(parsed.history)) return null;
       if(!parsed.tiles.every(pair=>Array.isArray(pair)&&typeof pair[0]==='string'&&Number.isFinite(pair[1]?.x)&&Number.isFinite(pair[1]?.y))) return null;
       const sim=new Civilization(parsed.seed);
       Object.assign(sim,parsed);
@@ -2996,8 +3010,8 @@ function makePostcard(source,{identity,year,line}){
  return canvas;
 }
 function miniMap(c,land,x,y,size){
- c.fillStyle='#dbe7da';c.fillRect(x,y,size,size);c.fillStyle='#a8ba85';const cell=size/25;
- for(const id of land||[]){const [a,b]=id.split(',').map(Number);if(Math.abs(a)<=12&&Math.abs(b)<=12)c.fillRect(x+(a+12)*cell,y+(b+12)*cell,cell+.5,cell+.5);}
+ c.fillStyle='#dbe7da';c.fillRect(x,y,size,size);c.fillStyle='#a8ba85';const cell=size/29;
+ for(const id of land||[]){const [a,b]=id.split(',').map(Number);if(Math.abs(a)<=14&&Math.abs(b)<=14)c.fillRect(x+(a+14)*cell,y+(b+14)*cell,cell+.5,cell+.5);}
  c.fillStyle='#546f43';c.beginPath();c.arc(x+size/2,y+size/2,4,0,Math.PI*2);c.fill();
 }
 function wrap(c,text,x,y,width,lineHeight){
@@ -4029,15 +4043,15 @@ class IslandRenderer {
       // Side wings reach out to both sides, each with its own roof and windows.
       for(const side of [-1,1]){const x=side*31;
         this.poly([[x-12,-1],[x,5],[x,-17],[x-12,-23]],'#e4d9b4');this.poly([[x,5],[x+12,-1],[x+12,-23],[x,-17]],'#c3c6a5');this.poly([[x-14,-23],[x-1,-31],[x+14,-23],[x+1,-15]],year>=1950?'#6f8a8c':'#7e9271');
-        for(let k=0;k<2;k++)this.poly([[x-9+k*5,-7+k*2.5],[x-6+k*5,-5.5+k*2.5],[x-6+k*5,-12+k*2.5],[x-9+k*5,-13.5+k*2.5]],'#8e9b82');}
+        for(let k=0;k<2;k++)this.window([[x-9+k*5,-7+k*2.5],[x-6+k*5,-5.5+k*2.5],[x-6+k*5,-12+k*2.5],[x-9+k*5,-13.5+k*2.5]],'#8e9b82');}
     }
     this.diamond(0,0,26,13,'#c9c39b');
     this.poly([[-21,-3],[0,8],[0,-25],[-21,-36]],'#e1d5ae');
     this.poly([[0,8],[21,-3],[21,-36],[0,-25]],'#bfc3a0');
     this.poly([[-25,-36],[-4,-51],[25,-36],[4,-22]],'#7e9271');
     this.poly([[-25,-36],[-4,-51],[4,-22]],'#96a17a');
-    for(let i=0;i<3;i++){const x=-16+i*6;this.poly([[x,-13+i*3],[x+3,-11+i*3],[x+3,-19+i*3],[x,-21+i*3]],this.light.darkness>.3?'#e8c27a':'#8e9b82');}
-    for(let i=0;i<3;i++){const x=5+i*6;this.poly([[x,-11-i*3],[x+3,-13-i*3],[x+3,-21-i*3],[x,-19-i*3]],this.light.darkness>.3?'#d9b56f':'#7b967f');}
+    for(let i=0;i<3;i++){const x=-16+i*6;this.window([[x,-13+i*3],[x+3,-11+i*3],[x+3,-19+i*3],[x,-21+i*3]],'#8e9b82');}
+    for(let i=0;i<3;i++){const x=5+i*6;this.window([[x,-11-i*3],[x+3,-13-i*3],[x+3,-21-i*3],[x,-19-i*3]],'#7b967f');}
     this.poly([[-3,6],[4,2],[4,-11],[-3,-7]],'#9b8964');
     for(const x of [-20,19]){this.rect(x-3,-42,6,20,'#dbd0a8');this.poly([[x-6,-41],[x,-53],[x+6,-41]],year>=1950?'#6f8a8c':'#8d9a70');if(year>=1950)this.islandFlag(x,-53,.6);}
     if(year>=1750){
@@ -4056,7 +4070,7 @@ class IslandRenderer {
       this.poly([[x-5,y],[x,y+3],[x+5,y],[x+5,y-38],[x,y-41],[x-5,y-38]],'#cbc7ab');
       this.poly([[x,y+3],[x+5,y],[x+5,y-38],[x,y-35]],'#abb69c');
       for(let i=0;i<3;i++)this.rect(x-5+i*4,y-42,2,5,'#dcd2b5');
-      this.poly([[x-1,y-18],[x+1,y-17],[x+1,y-26],[x-1,y-27]],'#7e9079');
+      this.window([[x-1,y-18],[x+1,y-17],[x+1,y-26],[x-1,y-27]],'#7e9079');
     }
     this.poly([[-7,-1],[-2,2],[-2,-10],[-7,-13]],'#8d7d59');
     this.line([[0,-35],[0,-54]],'#a1936b',1);this.poly([[0,-54],[11,-50],[0,-46]],'#c5ab70');
@@ -4987,7 +5001,7 @@ function updateUI(){
   const p=sim.project;$('project-overlay').hidden=!p||sim.ending||cinemaActive();
   if(sim.ending)$('moment-card').hidden=true;
   if(p&&!sim.ending){
-    const percent=Math.floor((p.stage+p.elapsed/(PROJECT_STAGES[p.stage].duration*(p.manual&&p.stage===2?1.7:1)))/5*100);
+    const percent=Math.min(100,Math.floor((p.stage+p.elapsed/Math.max(1,Math.round(PROJECT_STAGES[p.stage].duration*(p.manual&&p.stage===2?1.7:1)*(sim.era>=3?.6:1))))/5*100));
     $('project-name').textContent=p.isArtificial?"Een eigen eiland":p.manual?"Een beetje meer ruimte":"Onderhandelen met de zee";
     $('project-stage').textContent=sim.storm?"Wachten op rustiger water":sim.pumpBroken&&p.stage===2&&!p.manual?"De pomp herstellen":p.manual&&p.stage===2?"Met de hand droogmaken. Langzaam.":nl(PROJECT_STAGES[p.stage].name);
     $('project-percent').textContent=`${percent}%`;$('project-progress').style.width=`${percent}%`;
@@ -5025,7 +5039,7 @@ function updateSnapshotOptions(){
   select.value=value&&sim.snapshots[Number(value)]?value:'0';renderer.historySnapshot=sim.snapshots[Number(select.value)];
 }
 function miniMap(land){
-  return '<rect width="250" height="250" fill="#dbe7da"/>'+land.map(id=>{const [x,y]=id.split(',').map(Number);if(!Number.isFinite(x)||!Number.isFinite(y)||Math.abs(x)>12||Math.abs(y)>12)return'';return `<rect x="${(x+12)*10}" y="${(y+12)*10}" width="10" height="10" fill="#a8ba85"/>`;}).join('')+'<circle cx="125" cy="125" r="4" fill="#546f43"/>';
+  return '<rect width="250" height="250" fill="#dbe7da"/>'+land.map(id=>{const [x,y]=id.split(',').map(Number);if(!Number.isFinite(x)||!Number.isFinite(y)||Math.abs(x)>14||Math.abs(y)>14)return'';return `<rect x="${(x+14)*250/29}" y="${(y+14)*250/29}" width="${250/29}" height="${250/29}" fill="#a8ba85"/>`;}).join('')+'<circle cx="125" cy="125" r="4" fill="#546f43"/>';
 }
 function renderEnding(){
   const o=Object.fromEntries(Object.entries(sim.outcome||ENDINGS.independent).map(([key,value])=>[key,typeof value==='string'?nl(value):value]));
@@ -5239,7 +5253,7 @@ function newIsland(){
   let seed;
   try{seed=crypto.getRandomValues(new Uint32Array(1))[0];}catch{seed=(Date.now()^Math.floor(Math.random()*0xffffffff))>>>0;}
   if(!seed||seed===sim.seed)seed=(sim.seed+1)>>>0||1;
-  switchIsland(new Civilization(seed,{...sim.config,maxTiles:sim.terrainVersion>=2?(sim.config.maxTiles===480?560:sim.config.maxTiles):sim.config.maxTiles>=600?625:560}), "Een nieuwe kust. Nieuwe bergen. De bewoners weten van niets.");
+  switchIsland(new Civilization(seed,{...sim.config,maxTiles:[480,560].includes(sim.config.maxTiles)?720:sim.config.maxTiles}), "Een nieuwe kust. Nieuwe bergen. De bewoners weten van niets.");
   $('undo-reset').hidden=false;clearTimeout(undoTimer);
   undoTimer=setTimeout(()=>{previousIsland=null;$('undo-reset').hidden=true;},10000);
 }

@@ -285,7 +285,7 @@ function updateUI(){
   const p=sim.project;$('project-overlay').hidden=!p||sim.ending||cinemaActive();
   if(sim.ending)$('moment-card').hidden=true;
   if(p&&!sim.ending){
-    const percent=Math.floor((p.stage+p.elapsed/(PROJECT_STAGES[p.stage].duration*(p.manual&&p.stage===2?1.7:1)))/5*100);
+    const percent=Math.min(100,Math.floor((p.stage+p.elapsed/Math.max(1,Math.round(PROJECT_STAGES[p.stage].duration*(p.manual&&p.stage===2?1.7:1)*(sim.era>=3?.6:1))))/5*100));
     $('project-name').textContent=p.isArtificial?"Een eigen eiland":p.manual?"Een beetje meer ruimte":"Onderhandelen met de zee";
     $('project-stage').textContent=sim.storm?"Wachten op rustiger water":sim.pumpBroken&&p.stage===2&&!p.manual?"De pomp herstellen":p.manual&&p.stage===2?"Met de hand droogmaken. Langzaam.":nl(PROJECT_STAGES[p.stage].name);
     $('project-percent').textContent=`${percent}%`;$('project-progress').style.width=`${percent}%`;
@@ -323,7 +323,7 @@ function updateSnapshotOptions(){
   select.value=value&&sim.snapshots[Number(value)]?value:'0';renderer.historySnapshot=sim.snapshots[Number(select.value)];
 }
 function miniMap(land){
-  return '<rect width="250" height="250" fill="#dbe7da"/>'+land.map(id=>{const [x,y]=id.split(',').map(Number);if(!Number.isFinite(x)||!Number.isFinite(y)||Math.abs(x)>12||Math.abs(y)>12)return'';return `<rect x="${(x+12)*10}" y="${(y+12)*10}" width="10" height="10" fill="#a8ba85"/>`;}).join('')+'<circle cx="125" cy="125" r="4" fill="#546f43"/>';
+  return '<rect width="250" height="250" fill="#dbe7da"/>'+land.map(id=>{const [x,y]=id.split(',').map(Number);if(!Number.isFinite(x)||!Number.isFinite(y)||Math.abs(x)>14||Math.abs(y)>14)return'';return `<rect x="${(x+14)*250/29}" y="${(y+14)*250/29}" width="${250/29}" height="${250/29}" fill="#a8ba85"/>`;}).join('')+'<circle cx="125" cy="125" r="4" fill="#546f43"/>';
 }
 function renderEnding(){
   const o=Object.fromEntries(Object.entries(sim.outcome||ENDINGS.independent).map(([key,value])=>[key,typeof value==='string'?nl(value):value]));
@@ -537,7 +537,7 @@ function newIsland(){
   let seed;
   try{seed=crypto.getRandomValues(new Uint32Array(1))[0];}catch{seed=(Date.now()^Math.floor(Math.random()*0xffffffff))>>>0;}
   if(!seed||seed===sim.seed)seed=(sim.seed+1)>>>0||1;
-  switchIsland(new Civilization(seed,{...sim.config,maxTiles:sim.terrainVersion>=2?(sim.config.maxTiles===480?560:sim.config.maxTiles):sim.config.maxTiles>=600?625:560}), "Een nieuwe kust. Nieuwe bergen. De bewoners weten van niets.");
+  switchIsland(new Civilization(seed,{...sim.config,maxTiles:[480,560].includes(sim.config.maxTiles)?720:sim.config.maxTiles}), "Een nieuwe kust. Nieuwe bergen. De bewoners weten van niets.");
   $('undo-reset').hidden=false;clearTimeout(undoTimer);
   undoTimer=setTimeout(()=>{previousIsland=null;$('undo-reset').hidden=true;},10000);
 }

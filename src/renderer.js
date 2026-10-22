@@ -643,15 +643,15 @@ export class IslandRenderer {
       // Side wings reach out to both sides, each with its own roof and windows.
       for(const side of [-1,1]){const x=side*31;
         this.poly([[x-12,-1],[x,5],[x,-17],[x-12,-23]],'#e4d9b4');this.poly([[x,5],[x+12,-1],[x+12,-23],[x,-17]],'#c3c6a5');this.poly([[x-14,-23],[x-1,-31],[x+14,-23],[x+1,-15]],year>=1950?'#6f8a8c':'#7e9271');
-        for(let k=0;k<2;k++)this.poly([[x-9+k*5,-7+k*2.5],[x-6+k*5,-5.5+k*2.5],[x-6+k*5,-12+k*2.5],[x-9+k*5,-13.5+k*2.5]],'#8e9b82');}
+        for(let k=0;k<2;k++)this.window([[x-9+k*5,-7+k*2.5],[x-6+k*5,-5.5+k*2.5],[x-6+k*5,-12+k*2.5],[x-9+k*5,-13.5+k*2.5]],'#8e9b82');}
     }
     this.diamond(0,0,26,13,'#c9c39b');
     this.poly([[-21,-3],[0,8],[0,-25],[-21,-36]],'#e1d5ae');
     this.poly([[0,8],[21,-3],[21,-36],[0,-25]],'#bfc3a0');
     this.poly([[-25,-36],[-4,-51],[25,-36],[4,-22]],'#7e9271');
     this.poly([[-25,-36],[-4,-51],[4,-22]],'#96a17a');
-    for(let i=0;i<3;i++){const x=-16+i*6;this.poly([[x,-13+i*3],[x+3,-11+i*3],[x+3,-19+i*3],[x,-21+i*3]],this.light.darkness>.3?'#e8c27a':'#8e9b82');}
-    for(let i=0;i<3;i++){const x=5+i*6;this.poly([[x,-11-i*3],[x+3,-13-i*3],[x+3,-21-i*3],[x,-19-i*3]],this.light.darkness>.3?'#d9b56f':'#7b967f');}
+    for(let i=0;i<3;i++){const x=-16+i*6;this.window([[x,-13+i*3],[x+3,-11+i*3],[x+3,-19+i*3],[x,-21+i*3]],'#8e9b82');}
+    for(let i=0;i<3;i++){const x=5+i*6;this.window([[x,-11-i*3],[x+3,-13-i*3],[x+3,-21-i*3],[x,-19-i*3]],'#7b967f');}
     this.poly([[-3,6],[4,2],[4,-11],[-3,-7]],'#9b8964');
     for(const x of [-20,19]){this.rect(x-3,-42,6,20,'#dbd0a8');this.poly([[x-6,-41],[x,-53],[x+6,-41]],year>=1950?'#6f8a8c':'#8d9a70');if(year>=1950)this.islandFlag(x,-53,.6);}
     if(year>=1750){
@@ -670,7 +670,7 @@ export class IslandRenderer {
       this.poly([[x-5,y],[x,y+3],[x+5,y],[x+5,y-38],[x,y-41],[x-5,y-38]],'#cbc7ab');
       this.poly([[x,y+3],[x+5,y],[x+5,y-38],[x,y-35]],'#abb69c');
       for(let i=0;i<3;i++)this.rect(x-5+i*4,y-42,2,5,'#dcd2b5');
-      this.poly([[x-1,y-18],[x+1,y-17],[x+1,y-26],[x-1,y-27]],'#7e9079');
+      this.window([[x-1,y-18],[x+1,y-17],[x+1,y-26],[x-1,y-27]],'#7e9079');
     }
     this.poly([[-7,-1],[-2,2],[-2,-10],[-7,-13]],'#8d7d59');
     this.line([[0,-35],[0,-54]],'#a1936b',1);this.poly([[0,-54],[11,-50],[0,-46]],'#c5ab70');

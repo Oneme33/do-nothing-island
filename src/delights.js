@@ -22,7 +22,7 @@ export function planDelight(s){
   if(s.year<d.since||s.population<d.population||s.buildings.some(t=>t.building===d.type))continue;
   // A lone tree may make way; homes, farms and reserved plots never do.
   const near=(t,r)=>delightAround(t).some(p=>r(s.tile(p.x,p.y)))||[[1,1],[-1,-1],[1,-1],[-1,1],[2,0],[-2,0],[0,2],[0,-2]].some(([dx,dy])=>r(s.tile(t.x+dx,t.y+dy)));
-  const spots=s.land.filter(t=>(!t.building||t.building==='tree')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
+  const spots=s.land.filter(t=>(!t.building||t.building==='tree'||d.type==='observatory'&&t.building==='forest')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
   const spot=spots[(s.year*13+s.seed)%spots.length],tree=spot.building;if(tree)spot.building=null;
   if(s.planBuilding(spot,d.type))return true;
   if(tree)spot.building=tree;

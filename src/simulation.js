@@ -10,7 +10,9 @@ import {planDelight,DELIGHT_LABELS,DELIGHT_OPENINGS} from './delights.js';
 import {advanceMonuments} from './monuments.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
-export const WORLD_RADIUS = 12;
+// New islands sit in a 29×29 sea; the natural island stays within the original 25×25, so the extra sea is room for polders.
+export const WORLD_RADIUS = 14;
+export const NATURAL_RADIUS = 12;
 export const ERAS = [
   {name:'The early days', threshold:0, year:1, housing:4, title:'Early civilization'},
   {name:'The old world', threshold:1, year:120, housing:6, title:'Preindustrial civilization'},
@@ -69,7 +71,7 @@ export class Civilization {
   constructor(seed=Date.now(), config={}) {
     this.seed = seed >>> 0 || 1;
     this.randomState = this.seed;
-    this.config = {maxTiles:560, rareEndings:true, accelerating:true, ...config};
+    this.config = {maxTiles:720, rareEndings:true, accelerating:true, ...config};
     this.year = 1;
     this.population = 6;
     this.food = 28;
@@ -126,7 +128,7 @@ export class Civilization {
       const u=x*cos-y*sin,v=x*sin+y*cos,angle=Math.atan2(v,u);
       const edge=1+.13*Math.sin(angle*3+g.phase)+.07*Math.cos(angle*5-g.phase);
       const core=(Math.abs(x)<=1&&Math.abs(y)<=1)||[[-2,0],[-2,-1],[-1,-2],[2,0],[0,2]].some(([a,b])=>a===x&&b===y);
-      const natural = core || Math.abs(x)<WORLD_RADIUS&&Math.abs(y)<WORLD_RADIUS&&(u*u/g.radiusX**2+v*v/g.radiusY**2)<edge;
+      const natural = core || Math.abs(x)<NATURAL_RADIUS&&Math.abs(y)<NATURAL_RADIUS&&(u*u/g.radiusX**2+v*v/g.radiusY**2)<edge;
       this.tiles.set(key(x,y), {x,y,kind:natural?'land':'water',natural,reclaimed:false,building:null,variant:noise(x+g.detailSeed,y),elevation:natural?1:.08,damage:0,floodYears:0});
     }
     // Keep one walkable island: diagonal specks do not become disconnected starting land.
@@ -134,7 +136,7 @@ export class Civilization {
     for(let i=0;i<queue.length;i++)for(const [x,y]of neighbors(queue[i])){const tile=this.tile(x,y),id=key(x,y);if(tile?.kind==='land'&&!connected.has(id)){connected.add(id);queue.push(tile);}}
     for(const [id,tile]of this.tiles)if(tile.kind==='land'&&!connected.has(id)){tile.kind='water';tile.natural=false;tile.elevation=.08;}
     this.originalArea = this.land.length;
-    this.config.maxTiles=Math.min(625,Math.max(320,this.config.maxTiles,this.originalArea+24));
+    this.config.maxTiles=Math.min(this.tiles.size,Math.max(320,this.config.maxTiles,this.originalArea+24));
     this.tile(0,0).building = 'original-tree';
     this.tile(-1,1).building = 'hut';
     this.tile(-1,1).foundingHome = true;
@@ -189,6 +191,16 @@ export class Civilization {
   get temperament() { return CHARACTERS.find(p=>p.id===this.character)||{food:1,trade:1,science:1,growth:1}; }
   // 0: a slow village; 1: the windmill age from 1250; 2: land actually won from the sea.
   get housingBoom() { return this.reclaimed.length>0?2:this.year>=1250&&this.buildings.some(t=>t.building==='windmill')?1:0; }
+  // With the 'grows along' setting (720) the limit rises as the island does well; lower settings are fixed.
+  get growthLimit() {
+    const chosen=Math.min(this.config.maxTiles,this.tiles.size);if(chosen<720)return chosen;
+    // A limit the island has earned is never taken away again.
+    let cap=Math.max(560,this.growthCap||0);
+    if(this.year>=1600&&this.prosperity>50)cap=Math.max(cap,620);
+    if(this.year>=1850&&this.prosperity>50&&this.freshwater>35)cap=Math.max(cap,680);
+    if(this.year>=2000&&this.prosperity>48)cap=Math.max(cap,720);
+    this.growthCap=cap;return Math.min(chosen,cap);
+  }
   get pressure() { return this.population / Math.max(1,this.capacity); }
   get happiness() { return this.food < 5 ? 'Hungry' : this.protestUntil>this.year?'Restless':this.storm ? 'Concerned' : this.festival&&this.year<=this.festival.until ? 'Feestelijk' : this.prosperity>78?'Thriving':this.prosperity>40?'Content':'Getting by'; }
   get populationNote() { return /^Six people\./.test(this.currentRemark)&&Math.floor(this.population)!==6?`${Math.floor(this.population)} inwoners. Nog steeds geen vergadering.`:this.currentRemark; }
@@ -676,16 +688,17 @@ export class Civilization {
     if(this.year<1250 || this.technology<3) return false;
     if(this.era===1 && !this.buildings.some(t=>t.building==='windmill')) return false;
     const total=this.land.length+this.reclaimed.filter(t=>t.kind==='flooded').length;
-    if(total>=this.config.maxTiles) return false;
+    const limit=this.growthLimit;
+    if(total>=limit) return false;
     const buildable=this.land.filter(t=>!t.landform).length;
     const reserve=Math.max(3,Math.min(8,Math.floor(buildable*.04)));
     const pressure=this.freeLand.length<=reserve && (this.pressure>.86 || this.food<this.population*.5);
     const ambition=this.era===4 && this.obsessed && this.config.rareEndings && this.endgameStarted;
     // Polder ambition: once mills (and later pumps) exist, the island keeps winning land while its free ground shrinks.
-    const polder=(this.housingBoom>=1||this.era>=2)&&this.freeLand.length<=Math.max(reserve,Math.floor(buildable*(this.era>=2?.4:.25)))&&this.pressure>.65;
+    const polder=(this.housingBoom>=1||this.era>=2)&&this.freeLand.length<=Math.max(reserve,Math.floor(buildable*(this.era>=2?.4:.25)))&&(this.pressure>.65||this.era>=2&&this.prosperity>50);
     if(!pressure && !polder && !ambition) return false;
-    const maxBatch=[0,5,9,12,ambition?22:16][this.era];
-    const batch=Math.min(maxBatch,this.config.maxTiles-total);
+    const maxBatch=[0,5,9,18,ambition?30:26][this.era];
+    const batch=Math.min(maxBatch,limit-total);
     const costs={wood:batch*(this.era===1?5:2),stone:batch*(this.era===1?1:3),wealth:batch*(this.era===1?3:5)};
     if(this.wood<costs.wood || this.stone<costs.stone || this.wealth<costs.wealth) return false;
     const frontier=[...this.tiles.values()].filter(t=>t.kind==='water' && !t.building && neighbors(t).some(([x,y])=>this.tile(x,y)?.kind==='land') && (ambition||!neighbors(t).some(([x,y])=>this.tile(x,y)?.protectedCoast)));
@@ -726,7 +739,8 @@ export class Civilization {
     this.wood-=upkeep;
     this.wealth-=upkeep;
     p.elapsed+=p.ambitious?12:this.inspiration?2:1;
-    const duration=PROJECT_STAGES[p.stage].duration * (p.manual && p.stage===2 ? 1.7 : 1);
+    // Modern pumping stations and machines work through a polder in a little over half the time.
+    const duration=Math.max(1,Math.round(PROJECT_STAGES[p.stage].duration * (p.manual && p.stage===2 ? 1.7 : 1) * (this.era>=3?.6:1)));
     for(const id of p.tiles) this.tiles.get(id).progress=(p.stage+p.elapsed/duration)/PROJECT_STAGES.length;
     if(p.elapsed<duration) return;
     p.elapsed=0;
@@ -879,7 +893,7 @@ export class Civilization {
   advanceEndgame() { advanceFinale(this); }
   tryLastDrop() {
     if(this.sandbox||this.ending||!this.endgameStarted||!this.config.rareEndings||!this.obsessed||this.era<4||this.population<100||this.config.maxTiles<600)return;
-    if(this.land.length>=this.tiles.size*.945)finishStory(this,'last-drop');
+    if(this.land.length>=Math.min(this.tiles.size,this.config.maxTiles)*.945)finishStory(this,'last-drop');
   }
   serialize() {
     const {version,...state}=this;
@@ -889,7 +903,7 @@ export class Civilization {
   static restore(data) {
     try {
       const parsed=JSON.parse(data);
-      if(parsed.version!==SAVE_VERSION || !Array.isArray(parsed.tiles) || parsed.tiles.length!==625 || !Number.isFinite(parsed.year) || !Array.isArray(parsed.history)) return null;
+      if(parsed.version!==SAVE_VERSION || !Array.isArray(parsed.tiles) || ![625,841].includes(parsed.tiles.length) || !Number.isFinite(parsed.year) || !Array.isArray(parsed.history)) return null;
       if(!parsed.tiles.every(pair=>Array.isArray(pair)&&typeof pair[0]==='string'&&Number.isFinite(pair[1]?.x)&&Number.isFinite(pair[1]?.y))) return null;
       const sim=new Civilization(parsed.seed);
       Object.assign(sim,parsed);
