@@ -17,7 +17,8 @@ const mix=(a,b,t)=>a+(b-a)*t;
 const palette=['#9daf78','#a8b981','#a1b47b','#a9bb81','#a6b77e','#afbf87'];
 // Every home gets its own colours and proportions from its plot, so streets never look copied.
 const HOUSE_WALLS=['#d7cdb0','#e2d6bd','#d9c3a5','#cfd3bd','#e0c9b8','#d2c8a8','#e6dcc6','#cbd1c2','#dcc7a0','#e3d2c4'];
-const HOUSE_ROOFS=['#ad785c','#a46f56','#8e8f6c','#9b6a5c','#7f8b7a','#b08a5e','#8c6f62','#a77c66','#6f8278','#b4795f'];
+const HOUSE_ROOFS=['#a5483c','#6d7a86','#4f5a5e','#7d8b5c','#5f8a87','#b8643f','#8a6a4c','#c9a14f','#7a5f7e','#9b6a5c','#3f5f7a','#a77c66'];
+const THATCH=['#c9b27a','#b89a5c','#d1bd84','#a98d5a','#9a957a','#8a6a4c'];
 const HOUSE_SHUTTERS=['#6c806c','#7b8c79','#8a6f5c','#6f7f95','#9a7a56','#7d6b84','#5f7d7a'];
 const shadeColor=(hex,f)=>'#'+[1,3,5].map(i=>Math.round(Math.max(0,Math.min(255,parseInt(hex.slice(i,i+2),16)*f))).toString(16).padStart(2,'0')).join('');
 const DEFAULT_LOOK={wall:'#d7cdb0',side:'#b9b99b',roof:null,gable:null,shutter:'#6c806c',shutterSide:'#7b8c79',sx:1,sy:1,extra:0,flowers:null,chimney:null};
@@ -1011,8 +1012,33 @@ export class IslandRenderer {
     this.line([[-7,-56],[-7,-59]],'#6d675a',.6);this.line([[7,-56],[7,-59]],'#6d675a',.6);this.line([[-7,-59],[0,-56.5],[7,-59]],'#6d675a',.6);
     c.save();c.globalAlpha=.5+this.light.darkness*.5;this.ellipse(0,-60,3,3,'#fff6cf');c.restore();
   }
+  // The first huts come in three shapes with their own thatch, so a young village never looks copied.
+  hut(v){
+    const L=this.look||DEFAULT_LOOK,h=hash(this.currentTile?.x??1,this.currentTile?.y??2),thatch=THATCH[Math.floor(h*THATCH.length)],shade=shadeColor(thatch,.82),shape=Math.floor(hash((this.currentTile?.y??3)*3,(this.currentTile?.x??4)*7)*3);
+    this.ellipse(5,4,17,5.5,'#58654413');
+    if(shape===0){
+      // A round hut with a conical straw roof.
+      this.ellipse(0,-3,12,6,shadeColor(L.wall,.92));this.poly([[-12,-3],[-12,-12],[12,-12],[12,-3]],L.wall);this.ellipse(0,-12,12,6,L.side);this.ellipse(0,-3,12,6,'#00000000');
+      this.poly([[-15,-12],[0,-32],[15,-12],[0,-6]],thatch);this.poly([[0,-32],[15,-12],[0,-6]],shade);for(let i=0;i<4;i++)this.line([[-12+i*6,-11+Math.abs(i-1.5)],[-1+i*.4,-30]],'#00000014',.6);
+      this.poly([[3,-3],[7,-4.5],[7,-10],[3,-8.5]],'#6f5a40');
+    }else if(shape===1){
+      // A long farmhouse, low and wide, with the roof nearly to the ground.
+      this.poly([[-17,-4],[0,4],[0,-6],[-17,-14]],L.wall);this.poly([[0,4],[10,-1],[10,-11],[0,-6]],L.side);
+      this.poly([[-20,-12],[-6,-26],[13,-12],[0,-3]],thatch);this.poly([[-6,-26],[13,-12],[0,-3]],shade);this.poly([[-20,-12],[-6,-26],[-5,-23],[-17,-11]],shadeColor(thatch,1.08));
+      this.window([[-12,-6],[-8,-4],[-8,-8],[-12,-10]],L.shutter);this.poly([[3,-2],[6,-3.5],[6,-9],[3,-7.5]],'#6f5a40');
+    }else{
+      // A timber cabin with a steep gable.
+      this.poly([[-12,-4],[0,2],[0,-10],[-12,-16]],shadeColor(L.wall,.95));this.poly([[0,2],[12,-4],[12,-16],[0,-10]],L.side);
+      this.poly([[-15,-15],[-2,-30],[15,-16],[1,-8]],thatch);this.poly([[-2,-30],[15,-16],[1,-8]],shade);
+      for(let i=0;i<3;i++)this.line([[-12,-6-i*3.5],[0,0-i*3.5]],'#00000012',.6);
+      this.window([[4,-5],[8,-7],[8,-11],[4,-9]],L.shutter);
+    }
+    if(h>.5){this.rect(-16,-2,3,4,'#b9a27a');this.ellipse(-15,-3,2.3,1.3,'#a39a74');}
+    if(L.flowers)for(let i=0;i<3;i++)this.ellipse(-5+i*2.2,1.5,1.1,.9,L.flowers);
+  }
   house(v,level){
     const c=this.ctx;
+    if(level===0&&this.look){this.hut(v);return;}
     if(level>0&&['classical','medieval','renaissance'].includes(this.archStyle)){this.historicalHouse(v,this.archStyle);return;}
     const L=this.look||DEFAULT_LOOK,h=(level===0?13:level===1?20:31)+(level>0?L.extra:0);
     const roof=L.roof||(level===0?'#ad785c':v>.5?'#a46f56':'#8e8f6c');

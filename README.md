@@ -6,7 +6,7 @@ Een eiland groeit vanzelf: van één huisje en een kleine akker naar een stad me
 
 De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per commit en testmoment uitgevoerd.
 
-**Huizen verschillen van elkaar.** Elk huis krijgt vanuit zijn plek een eigen gevelkleur, dakkleur, kleur luiken en eigen verhoudingen; sommige hebben bloembakken, andere geen schoorsteen. Een straat ziet er daardoor nooit gekopieerd uit, en hetzelfde huis houdt altijd hetzelfde uiterlijk.
+**Huizen verschillen van elkaar.** De eerste hutjes komen in drie vormen: ronde hutten met een kegeldak, lage langhuizen en houten huisjes met een steil puntdak, elk met een eigen tint stro, riet of hout. Latere huizen krijgen hun eigen gevelkleur, verhoudingen en een dak in leisteen, rood, groen, petrol, terracotta of donkergrijs. Sommige hebben bloembakken, andere geen schoorsteen. Hetzelfde huis houdt altijd hetzelfde uiterlijk.
 
 **Op de telefoon** vult het eiland bijna het hele scherm. De bewonerskaart is een klein labeltje dat openklapt als je erop tikt, de ingrepen staan als grote knoppen onderaan, en met twee vingers knijp je om te zoomen.
 
