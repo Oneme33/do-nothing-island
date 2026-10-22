@@ -456,7 +456,7 @@ export class IslandRenderer {
     else if(b==='observatory')this.observatory();
     else if(b==='ice-cream')this.iceCream(t);
     else if(b==='greenhouse')this.greenhouse();
-    else if(b==='manor'||b==='palace'){if(b==='palace')c.scale(1.45,1.45);this.palace(b==='palace',t.variant);}
+    else if(b==='manor'||b==='palace'){const y=this.sim.year,grow=b==='palace'?(y<1250?1.38:y<1750?1.48:y<1950?1.58:1.66):1.14;c.scale(grow,grow);this.palace(b==='palace',t.variant);}
     else if(b==='palace-wing'){this.house(t.variant,2);this.line([[0,-40],[0,-53]],'#a39668',1);this.poly([[0,-53],[9,-50],[0,-47]],'#c8af64');}
     else if(b==='royal-garden')this.formalGarden();
     else if(b==='campus-square'){this.diamond(0,0,22,11,'#d6d6bc');this.line([[-17,0],[0,8],[17,0]],'#aab7a0',2);this.ellipse(0,-3,6,2.5,'#b6c5af');this.poly([[-4,-4],[0,-9],[4,-4],[0,-2]],'#eee9c8');}
@@ -607,20 +607,37 @@ export class IslandRenderer {
     for(let i=0;i<4;i++){this.ellipse(-8+i*5,-3+Math.abs(2-i),2,1.4,i%2?'#a5ad65':'#d1ae69');}
     this.person(-18,2,'#9da36b');
   }
+  // The first home keeps growing: a manor, a castle, a palace, then wings, a dome and finally gold and banners.
+  islandFlag(x,y,size=1){
+    const id=islandIdentity(this.sim),wave=this.reduced?0:Math.sin(this.time*2.2+x)*1.4*size;
+    this.line([[x,y],[x,y-16*size]],'#7d7464',1);this.poly([[x,y-16*size],[x+12*size,y-15*size+wave],[x+12*size,y-8*size+wave],[x,y-9*size]],id.main);
+    this.poly([[x,y-10.5*size],[x+12*size,y-9.5*size+wave],[x+12*size,y-8*size+wave],[x,y-9*size]],id.second);this.ellipse(x+6*size,y-12.5*size+wave*.5,1.6*size,1.6*size,id.second);
+  }
   palace(grand,v){
-    if(grand&&this.archStyle==='medieval'){this.castle();return;}
-    if(!grand){this.house(v,2);this.line([[0,-51],[0,-62]],'#9e956a',1);this.poly([[0,-62],[8,-59],[0,-56]],'#c5b36d');return;}
+    const year=this.sim.year;
+    if(!grand){this.house(v,2);for(const x of [-9,-4])this.line([[x,-1+(x+9)*.5],[x,-12+(x+9)*.5]],'#efe6cc',1.6);this.poly([[-12,-12],[-1,-6],[-1,-8],[-12,-14]],'#c8b48c');this.islandFlag(0,-51,.9);return;}
+    if(year<1250){this.castle();this.islandFlag(-14,-58,.9);return;}
+    if(year>=1750){
+      // Side wings reach out to both sides, each with its own roof and windows.
+      for(const side of [-1,1]){const x=side*31;
+        this.poly([[x-12,-1],[x,5],[x,-17],[x-12,-23]],'#e4d9b4');this.poly([[x,5],[x+12,-1],[x+12,-23],[x,-17]],'#c3c6a5');this.poly([[x-14,-23],[x-1,-31],[x+14,-23],[x+1,-15]],year>=1950?'#6f8a8c':'#7e9271');
+        for(let k=0;k<2;k++)this.poly([[x-9+k*5,-7+k*2.5],[x-6+k*5,-5.5+k*2.5],[x-6+k*5,-12+k*2.5],[x-9+k*5,-13.5+k*2.5]],'#8e9b82');}
+    }
     this.diamond(0,0,26,13,'#c9c39b');
     this.poly([[-21,-3],[0,8],[0,-25],[-21,-36]],'#e1d5ae');
     this.poly([[0,8],[21,-3],[21,-36],[0,-25]],'#bfc3a0');
     this.poly([[-25,-36],[-4,-51],[25,-36],[4,-22]],'#7e9271');
     this.poly([[-25,-36],[-4,-51],[4,-22]],'#96a17a');
-    for(let i=0;i<3;i++){const x=-16+i*6;this.poly([[x,-13+i*3],[x+3,-11+i*3],[x+3,-19+i*3],[x,-21+i*3]],'#8e9b82');}
-    for(let i=0;i<3;i++){const x=5+i*6;this.poly([[x,-11-i*3],[x+3,-13-i*3],[x+3,-21-i*3],[x,-19-i*3]],'#7b967f');}
+    for(let i=0;i<3;i++){const x=-16+i*6;this.poly([[x,-13+i*3],[x+3,-11+i*3],[x+3,-19+i*3],[x,-21+i*3]],this.light.darkness>.3?'#e8c27a':'#8e9b82');}
+    for(let i=0;i<3;i++){const x=5+i*6;this.poly([[x,-11-i*3],[x+3,-13-i*3],[x+3,-21-i*3],[x,-19-i*3]],this.light.darkness>.3?'#d9b56f':'#7b967f');}
     this.poly([[-3,6],[4,2],[4,-11],[-3,-7]],'#9b8964');
-    for(const x of [-20,19]){this.rect(x-3,-42,6,20,'#dbd0a8');this.poly([[x-6,-41],[x,-53],[x+6,-41]],'#8d9a70');}
-    this.line([[-3,-48],[-3,-64]],'#9d956b',1);const flutter=this.reduced?0:Math.sin(this.time*2)*1.5;
-    this.poly([[-3,-64],[9,-61+flutter],[-3,-57]],'#c6af61');
+    for(const x of [-20,19]){this.rect(x-3,-42,6,20,'#dbd0a8');this.poly([[x-6,-41],[x,-53],[x+6,-41]],year>=1950?'#6f8a8c':'#8d9a70');if(year>=1950)this.islandFlag(x,-53,.6);}
+    if(year>=1750){
+      // A green copper dome with a golden finial.
+      this.ellipse(0,-52,11,9,'#8fae9f');this.ellipse(-3,-55,6,5,'#a8c4b6');this.line([[0,-61],[0,-68]],'#c9a24e',1.4);this.ellipse(0,-69,1.6,1.6,'#e0bb55');
+    }
+    this.islandFlag(-3,year>=1750?-68:-48,1);
+    if(year>=1950){this.line([[-21,-36],[0,-25],[21,-36]],'#d8b45c',1);this.ellipse(0,15,9,3.5,'#b9b39b');this.ellipse(0,14.5,7,2.6,'#a8c4bd');if(!this.reduced)this.ellipse(0,9-Math.abs(Math.sin(this.time*2))*4,1.2,2,'rgba(226,241,238,.9)');}
     this.line([[-9,8],[0,13],[9,8]],'#ddd0a7',2);
     this.ellipse(-18,4,3,1.5,'#8da16a');this.ellipse(18,4,3,1.5,'#8da16a');
   }
@@ -781,7 +798,7 @@ export class IslandRenderer {
   }
   // The village square grows with the island: a fire circle, a fountain, later a bandstand and lanterns.
   townSquare(t){
-    const year=this.sim.year,role=squareRole(t);
+    const year=this.sim.year,role=squareRole(t),c=this.ctx;
     this.diamond(0,0,23,11.5,year>=120?'#d9d1b3':'#cdbf96');
     // Cobbles: two sets of lines parallel to the diamond's edges.
     if(year>=120)for(let k=1;k<4;k++){const f=k/4;this.line([[-23*f,-11.5+11.5*f],[23-23*f,11.5*f]],'#c4b99466',.5);this.line([[23*f,-11.5+11.5*f],[-23+23*f,11.5*f]],'#c4b99466',.5);}
@@ -806,6 +823,17 @@ export class IslandRenderer {
       const awning=['#c97b6b','#7fa3a8','#e2c26a'];
       for(const [i,[x,y]] of [[-8,-2],[7,2]].entries()){this.line([[x-5,y+2],[x-5,y-9]],'#8a7552',1);this.line([[x+5,y-1],[x+5,y-12]],'#8a7552',1);this.poly([[x-7,y-8],[x+7,y-12],[x+8,y-9],[x-6,y-5]],awning[i]);this.poly([[x-5,y],[x+5,y-3],[x+5,y-1],[x-5,y+2]],'#b29b74');this.ellipse(x-1,y-2,1.5,1,'#d7a25a');this.ellipse(x+2,y-3,1.5,1,'#9cae6a');}
       this.person(0,6,'#a37b5f',3);lamp(-18,1);
+    }else if(role==='garden'){
+      // A small park on the square: a pond with ducks, flower beds and two trees.
+      this.ellipse(-4,2,10,4.5,'#9fbfb2');this.ellipse(-4,1.5,8,3.4,'#b3d2c6');
+      const swim=this.reduced?0:Math.sin(this.time*.6)*3;this.ellipse(-6+swim,0,1.8,1.1,'#f2efe4');this.ellipse(-4.6+swim,-.8,.9,.8,'#3f6b4c');this.ellipse(-1-swim,2.4,1.6,1,'#a07c55');
+      for(let i=0;i<7;i++)this.ellipse(8+i*1.8,4-i*1.6,1.3,1.1,['#d58f7a','#e2c26a','#c98fb0'][i%3]);
+      c.save();c.translate(12,-6);c.scale(.5,.5);this.tree(false,.7);c.restore();c.save();c.translate(-15,-4);c.scale(.45,.45);this.tree(false,.62);c.restore();
+      lamp(16,6);
+    }else if(role==='monument'){
+      // A sundial until the island raises its first statue here.
+      this.ellipse(0,1,9,4.5,'#c8bd98');this.poly([[-3,0],[0,1.5],[3,0],[3,-7],[0,-5.5],[-3,-7]],'#d9d1b8');this.ellipse(0,-7,4,1.8,'#c9c1a8');this.line([[0,-7],[2,-11]],'#8a7552',1);
+      bench(-13,5);bench(13,4);this.person(13,3,'#c09870',5);
     }else if(role==='back'){
       planter(-12,-1);planter(12,-1);bench(0,3);this.person(-2,2,'#899e78',4);
       // The island's own flag on the square.
