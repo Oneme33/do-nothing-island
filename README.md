@@ -46,6 +46,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Het dorpsplein** ligt midden in het dorp, vóór het eerste huis en naast de oude boom: zes tegels die vanaf jaar 1 vrij blijven. Rond jaar 40 wordt het aangelegd. Eerst staan er bankjes rond een vuurkuil, vanaf de klassieke tijd ligt er bestrating met een fontein en vanaf de stoomtijd staat er een muziektent. Er zijn marktkraampjes, een tuin met een eendenvijver, bloemperken en bomen, een zonnewijzer op de monumentplek, de eilandvlag en later lantaarns. Op het plein worden marktdagen en dansavonden gehouden. Oudere eilanden krijgen de extra tegels erbij als die vrij zijn of als er een park of speeltuin stond; huizen en akkers blijven staan.
 
+**Bergen en de vulkaan** zijn ruim anderhalf keer zo groot getekend en worden in de loop van de eeuwen nog iets hoger, zodat ze boven de stad uit blijven steken.
+
 **Het eerste huis groeit mee.** Het landhuis krijgt een veranda en de eilandvlag. Vanaf 1000 wordt het een burcht, vanaf 1250 een paleis, vanaf 1750 komen er zijvleugels en een koperen koepel, en vanaf 1950 banieren, gouden lijsten en een fontein. Bij elk stadium wordt het gebouw groter, en 's avonds branden de ramen.
 
 **De vuurtoren** verschijnt vanaf jaar 400 zodra het eiland een steiger of haven heeft, op het meest blootgestelde vrije punt van de kust. Overdag is het een rood-witte toren; 's nachts zwaait een lichtbundel over het water. Verdwijnt hij door overstroming of verbouwing, dan bouwen de bewoners hem verderop opnieuw op.

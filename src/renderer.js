@@ -114,7 +114,7 @@ export class IslandRenderer {
     c.clearRect(0,0,this.width,this.height);
     const land=[...this.sim.tiles.values()].filter(t=>t.kind!=='water'||t.building);
     let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
-    for(const t of land){const p=this.p(t.x,t.y);minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y-Math.max(52,t.relief||0));maxY=Math.max(maxY,p.y+25);}
+    for(const t of land){const p=this.p(t.x,t.y);minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y-Math.max(52,t.landform?(t.relief||55)*1.9:0));maxY=Math.max(maxY,p.y+25);}
     const mobile=this.width<600;
     const availW=this.width*(mobile?.85:.66), availH=this.height*.65;
     let target=Math.max(mobile?.74:.86,Math.min(mobile?1.08:1.55,availW/(maxX-minX+80),availH/(maxY-minY+75)));
@@ -242,7 +242,8 @@ export class IslandRenderer {
     return{...this.walkingPosition(a,b,distance-segment,(hash(index,9)-.5)*1.8),stage:road?'road':'walking',alpha:1,a,b,t:distance-segment,target};
   }
   drawLandform(tile){
-    const p=this.p(tile.x,tile.y),c=this.ctx,h=tile.relief||55;c.save();c.translate(p.x,p.y-2);
+    // Mountains stand tall above the city: bigger than a tile, and a little taller as the skyline rises.
+    const p=this.p(tile.x,tile.y),c=this.ctx,grow=tile.landform==='hill'?1.15:1.45+Math.min(.35,this.sim.year/6000),h=(tile.relief||55)*(tile.landform==='hill'?1:1.1);c.save();c.translate(p.x,p.y-2);c.scale(grow,grow);
     this.ellipse(9,3,31,10,'#697c5020');
     if(tile.landform==='hill'){
       this.poly([[-27,2],[-18,-h*.55],[-4,-h],[7,-h*.75],[25,-3],[7,9]],'#8da575');
