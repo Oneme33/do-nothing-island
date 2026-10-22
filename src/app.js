@@ -229,12 +229,20 @@ function ambienceLine(){
 // 3.4: a short title card, a warm wash over the island and a little motif whenever a new age begins.
 const AGE_LINES={classical:'Zuilen. Scholen. Meningen over zuilen.',medieval:'Torens. Kerken. Meningen.',renaissance:'Molens, gevels en een gewaagd idee: de zee wegpompen.',industrial:'Stoom! Iedereen praat ineens wat harder.',modern:'Auto’s. Niemand weet nog waar ze heen moeten.',contemporary:'Zon, wind en een vergadering over de wind.',future:'De toekomst. Hij wacht nog op een bouwvergunning.'};
 let shownAge=null,ageTimer;
+// Now and then the camera glides in close to something happening, but never while you are busy yourself.
+let lastUserActivity=-Infinity,lastDive=-Infinity;
+for(const type of ['pointerdown','wheel','keydown'])window.addEventListener(type,()=>{lastUserActivity=performance.now();},{capture:true,passive:true});
+function maybeDive(x,y,important=false){
+  const now=performance.now();
+  if(sim.config.autoZoom===false||tour||photoOn||paused||renderer.reduced||otherDialogOpen()||now-lastUserActivity<20000||!important&&now-lastDive<90000)return;
+  lastDive=now;renderer.dive(x,y,6);
+}
 function announceAge(){
   const age=sim.age;if(shownAge===null||sim.ending){shownAge=age.id;return;}
   if(age.id===shownAge)return;shownAge=age.id;if(!AGE_LINES[age.id])return;
   $('age-card-year').textContent=`JAAR ${age.year}`;$('age-card-title').textContent=nl(age.name);$('age-card-line').textContent=AGE_LINES[age.id];
   $('age-card').hidden=false;$('island-window').classList.add('age-shift');soundscape?.play('age');
-  if(!tour&&!photoOn&&!renderer.reduced)renderer.sweep(6);
+  maybeDive(1,1,true);
   clearTimeout(ageTimer);ageTimer=setTimeout(()=>{$('age-card').hidden=true;$('island-window').classList.remove('age-shift');},4800);
 }
 function updateUI(){
@@ -399,7 +407,7 @@ function frame(now){
   advanceTour(now);
   if(soundscape?.enabled&&now-soundAt>400){soundAt=now;if(sim.festival&&sim.year<=sim.festival.until&&!paused)soundscape.festive(`${sim.festival.x},${sim.festival.y},${sim.festival.until}`);soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite)});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
-  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');}sim.signals=[];}
+  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);}sim.signals=[];}
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;
@@ -518,6 +526,8 @@ $('show-numbers').addEventListener('change',e=>toggleNumbers(e.target.checked));
 $('resources').addEventListener('click',()=>toggleNumbers(sim.config.showNumbers!==true));
 $('resources').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleNumbers(sim.config.showNumbers!==true);}});
 $('show-numbers').checked=sim.config.showNumbers===true;
+$('auto-zoom').checked=sim.config.autoZoom!==false;
+$('auto-zoom').addEventListener('change',e=>{sim.config.autoZoom=e.target.checked;save();});
 $('day-night').addEventListener('change',e=>{sim.config.dayNight=e.target.checked;renderer.dayNight=e.target.checked;updateUI();save();});
 $('restart').addEventListener('click',()=>{$('restart-confirm').hidden=false;$('restart').hidden=true;});
 $('cancel-restart').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;});

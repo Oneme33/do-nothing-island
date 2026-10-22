@@ -166,3 +166,8 @@ test('camera flights move smoothly through waypoints and release afterwards',()=
  assert.ok(xs.some(x=>Math.abs(x-start.x)>40),'the camera travels');assert.equal(r.flight,null,'a sweep releases the camera');
  r.flyTo([{x:100,y:50,zoom:1.7}],1);for(let t=2500;t<=3700;t+=100)r.draw(t);assert.ok(Math.abs(r.center.x-100)<1&&Math.abs(r.zoom-1.7)<.01);assert.ok(r.flight,'a tour stop holds its view');
 });
+test('a dive glides in close, holds, and then hands the camera back',()=>{
+ const s=new Civilization(31),{canvas}=canvasHarness(1200,650),r=new IslandRenderer(canvas,s);r.draw(0);const before=r.zoom;
+ r.dive(1,1,2);for(let t=16;t<=3200;t+=100)r.draw(t);assert.ok(r.zoom>before+.6,'close in');assert.ok(r.flight);
+ for(let t=3300;t<=6000;t+=100)r.draw(t);assert.equal(r.flight,null,'released after the hold');
+});

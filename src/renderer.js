@@ -72,6 +72,8 @@ export class IslandRenderer {
   focusTile(tile,seconds=9){if(!tile)return;this.focus={x:tile.x,y:tile.y,remaining:seconds};this.pan={x:0,y:0};this.userZoom=1;}
   recenter(){this.focus=null;this.flight=null;this.pan={x:0,y:0};this.userZoom=1;}
   flyTo(points,duration,{dip=.35,hold=true}={}){this.focus=null;this.pan={x:0,y:0};this.userZoom=1;this.flight={points:[{x:this.center.x,y:this.center.y,zoom:this.zoom},...points],start:null,duration,dip,hold};}
+  // Glide in close to one place for a few seconds; afterwards the camera eases back to the whole island.
+  dive(x,y,seconds=6){const p=this.p(x,y);this.flyTo([{x:p.x,y:p.y-24,zoom:this.width<600?1.9:2.35}],2.8,{dip:0,hold:true});this.flight.release=seconds;}
   // A short sightseeing flight from one side of the island to the other, then back to the usual view.
   sweep(seconds=6){
     const land=this.sim.land;if(land.length<4)return;const pts=land.map(t=>this.p(t.x,t.y));const left=pts.reduce((a,b)=>b.x<a.x?b:a),right=pts.reduce((a,b)=>b.x>a.x?b:a),mid=this.p(0,0);
@@ -140,6 +142,7 @@ export class IslandRenderer {
       const seg=(f.points.length-1)*e,i=Math.min(f.points.length-2,Math.floor(seg)),k=seg-i,a=f.points[i],b=f.points[i+1];
       this.center.x=a.x+(b.x-a.x)*k;this.center.y=a.y+(b.y-a.y)*k;this.zoom=Math.max(.5,a.zoom+(b.zoom-a.zoom)*k-f.dip*Math.sin(Math.PI*u));
       if(u>=1&&!f.hold)this.flight=null;
+      if(f.release&&now-f.start>(f.duration+f.release)*1000)this.flight=null;
     }
     const quake=this.reduced?0:this.effects.filter(e=>e.type==='rumble'&&e.elapsed<1).reduce((s,e)=>s+Math.sin(e.elapsed*55)*(1-e.elapsed)*3,0);
     this.origin={x:this.width*(mobile?.54:.55)-this.center.x*this.zoom+this.pan.x+quake,y:this.height*(cinemaVisible(this.sim)?.62:mobile?.54:.52)-this.center.y*this.zoom+this.pan.y};

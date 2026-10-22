@@ -18,7 +18,9 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Naam en vlag.** Elk eiland krijgt een naam en een vlag die bij zijn karakter passen: zeevaarders (anker, blauw), tuiniers (blad, groen), uitvinders (tandwiel, oker) of bouwers (toren, baksteenrood). Zolang het karakter nog niet vaststaat, voert het eiland een boompje. Naam en vlag staan linksonder op het eiland en in de titel van het tabblad, en de vlag wappert op het dorpsplein.
 
-**Nieuwe tijdperken** krijgen een korte rondvlucht van de camera, van de ene kant van het eiland naar de andere, en een titelkaart op het eiland (‘Jaar 600. De middeleeuwen. Torens. Kerken. Meningen.’), een warme kleurgloed over het eiland en, met geluid aan, een eigen muziekmotief.
+**Af en toe naar binnen.** Bij een nieuw tijdperk, een schat, een opening, een onthulling of de inhuldiging van het paleis glijdt de camera een paar seconden dichtbij en zoomt daarna rustig weer uit. Dat gebeurt alleen als je twintig seconden niets hebt aangeraakt, hooguit eens per anderhalve minuut (bij een nieuw tijdperk altijd), en is uit te zetten met ‘Af en toe inzoomen’.
+
+**Nieuwe tijdperken** krijgen een titelkaart op het eiland (‘Jaar 600. De middeleeuwen. Torens. Kerken. Meningen.’), een warme kleurgloed over het eiland en, met geluid aan, een eigen muziekmotief.
 
 **Ingrepen die je voelt.** Bij een beving schudt het beeld, rennen bewoners weg en lopen ze daarna weer terug. Regen valt in stralen met spetters op de grond, vuur geeft een rookpluim en zolang iets brandt staat er een emmerbrigade klaar. Een bouwzetje fonkelt even. Met rustige animaties blijft alles stil.
 
@@ -48,7 +50,7 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Bergen en de vulkaan** zijn ruim anderhalf keer zo groot getekend en worden in de loop van de eeuwen nog iets hoger, zodat ze boven de stad uit blijven steken.
 
-**Het hof verhuist.** Rond 1500 (met minstens vijfhonderd inwoners) verhuist het hof naar een nieuw paleis, ruim twee keer zo groot, met extra torens en de eilandvlag, op de mooiste plek achterin bij de heuvels of bergen. Het eerste huis blijft als het oude paleis bij de familie. De verhuizing wordt met een inhuldiging gevierd.
+**Het hof verhuist.** Rond 1500 (met minstens vijfhonderd inwoners) verhuist het hof naar een nieuw paleis, ruim twee keer zo groot, met extra torens en de eilandvlag, op een plek die elk eiland zelf kiest: bij de bergen, aan de kust met zeezicht of ver van de drukte. Het eerste huis blijft als het oude paleis bij de familie. De verhuizing wordt met een inhuldiging gevierd.
 
 **Het eerste huis groeit mee.** Het landhuis krijgt een veranda en de eilandvlag. Vanaf 1000 wordt het een burcht, vanaf 1250 een paleis, vanaf 1750 komen er zijvleugels en een koperen koepel, en vanaf 1950 banieren, gouden lijsten en een fontein. Bij elk stadium wordt het gebouw groter, en 's avonds branden de ramen.
 
