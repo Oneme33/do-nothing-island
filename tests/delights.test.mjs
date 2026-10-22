@@ -31,9 +31,8 @@ test('the island raises a statue for you: a hand when you help, an empty plinth 
  const helper=new Civilization(31);while(helper.year<200)helper.tick();helper.influence.trust=20;helper.year=206;advanceMonuments(helper);
  const hand=helper.monuments.find(m=>m.kind==='hand');assert.ok(hand);assert.equal(helper.tile(hand.x,hand.y).monument,'hand');
 });
-import {advanceCourt} from '../src/monuments.js';
-test('around 1500 the court moves to a grand new palace while the first home stays with the family',()=>{
- const s=new Civilization(31);while(s.year<1600&&!s.court)s.tick();
- assert.ok(s.court,'the court moved');const t=s.tile(s.court.x,s.court.y);assert.equal(t.building,'royal-palace');assert.ok(s.tile(-1,1).foundingHome);assert.ok(['manor','palace'].includes(s.tile(-1,1).building));
- assert.equal(advanceCourt(s),null,'it moves only once');assert.match(describePlot(s,t),/nieuwe paleis/);
+import {buildCastle} from '../src/monuments.js';
+test('each island builds one castle, on a site of its own',()=>{
+ const sites=new Set();for(const seed of [31,77,5,9]){const s=new Civilization(seed);while(s.year<1300&&!s.court)s.tick();assert.ok(s.court);sites.add(`${s.court.x},${s.court.y}`);assert.equal(buildCastle(s),null,'only once');}
+ assert.ok(sites.size>=3,'castles stand in different places');
 });

@@ -488,7 +488,7 @@ export class IslandRenderer {
     else if(b==='observatory')this.observatory();
     else if(b==='ice-cream')this.iceCream(t);
     else if(b==='greenhouse')this.greenhouse();
-    else if(b==='manor'||b==='palace'){const y=this.sim.year,grow=b==='palace'?(y<1250?1.38:y<1750?1.48:y<1950?1.58:1.66):1.14;c.scale(grow,grow);this.palace(b==='palace',t.variant);}
+    else if(b==='manor'||b==='palace'){const y=this.sim.year,grow=b==='palace'?(y<1250?1.5:y<1750?1.7:y<1950?1.9:2.1):1.14;c.scale(grow,grow);this.royal=b==='palace'&&!!t.castle&&y>=1500;this.palace(b==='palace',t.variant);this.royal=false;}
     else if(b==='palace-wing'){this.house(t.variant,2);this.line([[0,-40],[0,-53]],'#a39668',1);this.poly([[0,-53],[9,-50],[0,-47]],'#c8af64');}
     else if(b==='royal-garden')this.formalGarden();
     else if(b==='campus-square'){this.diamond(0,0,22,11,'#d6d6bc');this.line([[-17,0],[0,8],[17,0]],'#aab7a0',2);this.ellipse(0,-3,6,2.5,'#b6c5af');this.poly([[-4,-4],[0,-9],[4,-4],[0,-2]],'#eee9c8');}
@@ -1258,10 +1258,10 @@ export class IslandRenderer {
   }
   drawLandmarkLabels(){
     const court=this.sim.court&&this.sim.tile(this.sim.court.x,this.sim.court.y);
-    if(court?.building==='royal-palace'){const p=this.point(court.x,court.y);this.landmarkLabel('HET NIEUWE PALEIS',p.x,p.y-150*this.zoom);}
+    if(['royal-palace','palace'].includes(court?.building)){const p=this.point(court.x,court.y);this.landmarkLabel(court.building==='palace'?(this.sim.year<1250?'DE BURCHT':'HET KASTEEL'):'HET NIEUWE PALEIS',p.x,p.y-(this.sim.year<1250?110:150)*this.zoom);}
     const home=this.sim.buildings.find(t=>t.foundingHome);if(!home||!['manor','palace'].includes(home.building))return;
     const p=this.point(home.x,home.y);
-    this.landmarkLabel(home.building==='palace'?(court?'HET OUDE PALEIS · HET EERSTE HUIS':'PALEIS · HET EERSTE HUIS'):'HET EERSTE LANDHUIS',p.x,p.y-(home.building==='palace'?104:82)*this.zoom);
+    this.landmarkLabel(home.building==='palace'?(court?'HET OUDE PALEIS · HET EERSTE HUIS':'PALEIS · HET EERSTE HUIS'):'HET EERSTE HUIS',p.x,p.y-(home.building==='palace'?104:82)*this.zoom);
   }
   landmarkLabel(label,x,y){
     const p={x},c=this.ctx;

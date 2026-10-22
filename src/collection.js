@@ -55,7 +55,7 @@ export function advanceCollection(s){
  for(const t of s.coast?.treasures||[])if(TREASURE_CATALOG.some(c=>c.id===t.id))remember(`treasure:${t.id}`,t.year);
  const home=s.tile(-1,1),building=home?.building==='ruins'?home.rebuildFrom:home?.building;
  if(['manor','palace'].includes(building))remember('moment:manor',s.snapshots.find(p=>p.label==='The first manor')?.year||(building==='manor'?home.builtYear:s.year));
- if(building==='palace')remember('moment:palace',s.snapshots.find(p=>p.label==='The palace and its gardens')?.year||home.builtYear);
+ if(building==='palace'||s.court)remember('moment:palace',s.snapshots.find(p=>p.label==='The palace and its gardens')?.year||home.builtYear);
  const tenth=s.family?.generations.find(p=>p.generation>=10&&!p.reconstructed);if(tenth)remember('moment:generations',tenth.since);
  if(s.volcanoActiveUntil>0)remember('moment:volcano');
  if(s.rebuiltFires>0)remember('moment:rebirth',s.land.find(t=>t.rebuiltYear&&t.material==='stone')?.rebuiltYear);

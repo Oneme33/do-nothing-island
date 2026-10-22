@@ -7,7 +7,7 @@ import {advanceCollection} from './collection.js';
 import {advanceCoast,coastNotice} from './coast.js';
 import {ensureSquare,advanceSquare} from './square.js';
 import {planDelight,DELIGHT_LABELS,DELIGHT_OPENINGS} from './delights.js';
-import {advanceMonuments,advanceCourt} from './monuments.js';
+import {advanceMonuments,buildCastle} from './monuments.js';
 import {advanceWeather} from './weather.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
@@ -378,7 +378,7 @@ export class Civilization {
     advancePleasures(this);advanceCoast(this);advanceSquare(this);
     // Delights do not wait for a housing lull: they claim a fitting free plot when their time comes.
     if(this.year%9===4&&!this.storm)planDelight(this);
-    advanceMonuments(this);advanceCourt(this);advanceWeather(this);
+    advanceMonuments(this);advanceWeather(this);
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);
@@ -597,11 +597,9 @@ export class Civilization {
       this.log('The very first hut becomes a manor. Its owners begin referring to everyone else as “the village”.','palace',{x:home.x,y:home.y});
       growEstate(this,home);captureSnapshot(this,'The first manor');
       this.signal('palace',home,'The first hut → a manor');
-    }else if(this.year>=1000 && this.population>=(this.character==='builder'?50:70) && home.building==='manor'){
-      home.building='palace';delete home.futureBuilding;home.architecture=this.age.id;home.builtYear=this.year;
-      this.log('The first home is now a palace, with a courtyard and formal gardens. The original doorstep survives.','palace',{x:home.x,y:home.y});
-      growEstate(this,home);captureSnapshot(this,'The palace and its gardens');
-      this.signal('palace',home,'The first home → a palace!');
+    }else if(this.year>=1000 && this.population>=(this.character==='builder'?50:70) && home.building==='manor' && !this.court){
+      delete home.futureBuilding;
+      if(buildCastle(this)){captureSnapshot(this,'The palace and its gardens');this.signal('palace',this.tile(this.court.x,this.court.y),'Een kasteel!');}
     }
   }
   rebuildRoads() {

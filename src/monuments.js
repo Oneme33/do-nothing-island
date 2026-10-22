@@ -27,19 +27,18 @@ export function advanceMonuments(s){
   return;
  }
 }
-// Around 1500 the court moves to a far grander palace on a commanding spot; the first home stays with the family.
-export function advanceCourt(s){
- s.court??=null;if(s.court||s.ending||s.year<1500||s.population<500||s.year%5!==0)return null;
+// One castle per island, on a site each island chooses for itself: by the mountains, on the coast or away from the bustle.
+export function buildCastle(s){
+ if(s.court||s.ending)return null;
  const near=t=>[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1]].some(([dx,dy])=>s.tile(t.x+dx,t.y+dy)?.landform);
- const free=t=>(!t.building||['tree','forest','park','garden'].includes(t.building))&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.road&&!t.foundingHome&&Math.hypot(t.x,t.y)>=4;
- // Each island picks its own setting: by the mountains, on the coast with a sea view, or simply far from the bustle.
  const sea=t=>[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>s.tile(t.x+dx,t.y+dy)?.kind==='water');
+ const free=t=>(!t.building||['tree','forest','park','garden','farm'].includes(t.building))&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.road&&!t.foundingHome&&Math.hypot(t.x,t.y)>=4;
  const styles=[t=>near(t)?0:1,t=>sea(t)?0:1,t=>-Math.hypot(t.x,t.y)];
  const style=styles[(s.seed>>>0)%styles.length],spots=s.land.filter(free).sort((a,b)=>style(a)-style(b)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
  const tile=spots[((s.seed>>>3)+s.year)%Math.max(1,spots.length)];if(!tile)return null;
- tile.building='royal-palace';tile.builtYear=s.year;tile.district='heritage';tile.landmark=true;
+ tile.building='palace';tile.builtYear=s.year;tile.architecture=s.age.id;tile.district='heritage';tile.landmark=true;tile.castle=true;
  s.court={x:tile.x,y:tile.y,year:s.year};
- s.log('Het hof verhuist naar een nieuw paleis op de mooiste plek van het eiland. Het eerste huis blijft van de familie; de koning neemt alleen het servies mee.','palace',{x:tile.x,y:tile.y});
- startParty(s,tile,'Inhuldiging van het nieuwe paleis',['De trap is zo lang dat de koning onderweg pauzeert.','Er zijn meer kamers dan mensen.','De lakeien oefenen buigen. Twee vallen om.'],6);s.rebuildRoads();
+ s.log('Het eiland bouwt een kasteel, op een plek die het zelf heeft uitgekozen. Het eerste huis blijft het huis van de familie.','palace',{x:tile.x,y:tile.y});
+ startParty(s,tile,'Inhuldiging van het kasteel',['De trap is zo lang dat de koning onderweg pauzeert.','Er zijn meer kamers dan mensen.','De lakeien oefenen buigen. Twee vallen om.'],4);s.rebuildRoads();
  return tile;
 }

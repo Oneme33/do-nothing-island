@@ -190,7 +190,7 @@ test('new infrastructure and the original home have a visible and functional pro
   assert.equal(sim.buildings.some(t=>['campfire','bonfire'].includes(t.building)),false);
   let manor=false;
   for(let i=0;i<2200;i++){sim.tick();if(sim.tile(-1,1).building==='manor')manor=true;}
-  assert.equal(manor,true);assert.equal(sim.tile(-1,1).building,'palace');
+  assert.equal(manor,true);assert.equal(sim.tile(-1,1).building,'manor');assert.ok(sim.court);assert.equal(sim.tile(sim.court.x,sim.court.y).building,'palace');
   for(const type of ['school','library','science-center','factory','powerplant','statue','garden','solar','turbine','theater'])assert.ok(sim.buildings.some(t=>t.building===type),type);
   assert.ok(sim.power>sim.powerDemand);
   const before=sim.wood;sim.updatePower();assert.ok(sim.wood<before,'steam power burns timber');
@@ -348,7 +348,7 @@ test('historical blueprints do not overwrite a new civic use or the founding pal
   const plot=sim.freeLand[0];plot.futureBuilding='tower';
   assert.equal(sim.planBuilding(plot,'school',true),true);assert.equal(plot.futureBuilding,undefined);
   const home=sim.tile(-1,1);home.building='manor';home.futureBuilding='tower';sim.advanceFoundingHome();
-  assert.equal(home.building,'palace');assert.equal(home.futureBuilding,undefined);
+  assert.equal(home.building,'manor');assert.equal(home.futureBuilding,undefined);assert.ok(sim.court,'the island builds its castle elsewhere');
 });
 test('new islands sit in a larger sea and the growing limit rises to 720 when things go well, never dropping again',()=>{
  const s=new Civilization(31);assert.equal(s.tiles.size,841);assert.equal(s.config.maxTiles,720);assert.ok(s.land.every(t=>Math.abs(t.x)<=12&&Math.abs(t.y)<=12),'the natural island keeps its old size');

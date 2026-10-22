@@ -34,10 +34,11 @@ test('rain leaves irrigation; tremor repairs produce foundations that reduce fut
  assert.equal(home.retrofitted,true);s.interfere(-1,1,'rumble');assert.equal(home.quakeDamage,.35);
  const restored=Civilization.restore(s.serialize());assert.deepEqual(restored.influence,s.influence);assert.deepEqual(restored.interventionLedger,s.interventionLedger);assert.equal(restored.tile(-1,1).retrofitted,true);
 });
-test('the founding palace occupies an estate with a protected garden and public courtyard',()=>{
+test('the founding manor keeps its estate while the one castle stands on its own site',()=>{
  const s=new Civilization(31);while(s.year<1300)s.tick();
- assert.equal(s.tile(-1,1).building,'palace');
- assert.equal(s.tile(-2,1).building,'palace-wing');assert.equal(s.tile(-2,2).building,'royal-garden');assert.equal(s.tile(-1,2).building,'palace-square');
+ assert.equal(s.tile(-1,1).building,'manor');assert.ok(s.court);const castle=s.tile(s.court.x,s.court.y);assert.equal(castle.building,'palace');assert.ok(Math.hypot(castle.x,castle.y)>=4);
+ assert.equal(s.land.filter(t=>['palace','royal-palace'].includes(t.building)).length,1,'only one castle');
+ assert.equal(s.tile(-2,1).building,'garden');assert.equal(s.tile(-1,2).building,'palace-square');
  for(const t of [s.tile(-2,1),s.tile(-2,2),s.tile(-1,2)])assert.ok(!s.freeLand.includes(t));
  assert.ok(s.buildings.some(t=>t.building==='campus-square'));
  assert.ok(s.journeys.some(j=>j.purpose==='learning'));
