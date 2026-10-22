@@ -8,6 +8,10 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Huizen verschillen van elkaar.** Elk huis krijgt vanuit zijn plek een eigen gevelkleur, dakkleur, kleur luiken en eigen verhoudingen; sommige hebben bloembakken, andere geen schoorsteen. Een straat ziet er daardoor nooit gekopieerd uit, en hetzelfde huis houdt altijd hetzelfde uiterlijk.
 
+**Op de telefoon** vult het eiland bijna het hele scherm. De bewonerskaart is een klein labeltje dat openklapt als je erop tikt, de ingrepen staan als grote knoppen onderaan, en met twee vingers knijp je om te zoomen.
+
+**Zonder muis** zet je de focus op het eiland. De pijltjes verplaatsen dan een tegelcursor, Enter voert de gekozen ingreep uit, en Shift met de pijltjes schuift het beeld. De voorkeur voor rustige animaties blijft bewaard en volgt anders de systeeminstelling. Grijze teksten hebben meer contrast gekregen, en een gepauzeerd eiland tekent maar de helft van de beelden.
+
 **Getallen met gevoel.** Voorraden, water, landschap en gemeentekas staan er in woorden: ‘De schuren puilen uit’, ‘Een stapel hout’, ‘De gemeente telt haar munten’. Het echte getal staat in de tooltip; tik op de voorraad, of zet ‘Exacte getallen’ aan in de instellingen, om alles weer in cijfers te zien.
 
 **Fotomodus en eindkaart.** De knop **Foto** op het eiland verbergt alle knoppen en zet de tijd even stil. Kies dag of nacht, zoom en sleep vrij, en bewaar een ansichtkaart met naam, vlag, jaar en inwoners. In het naschrift bewaar je een eindkaart met titel, quote, de kaartjes van toen en nu, de familienaam, de score en de seed. ‘Kopieer link naar dit eiland’ geeft een link met `?seed=`: wie hem opent, speelt hetzelfde eiland en kan anders ingrijpen. Het eigen eiland is daarna tien seconden terug te halen.

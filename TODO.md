@@ -19,20 +19,20 @@ Een vinkje betekent: geïmplementeerd en gepusht. Het betekent niet dat Coens te
 
 ## Ronde 3 — afwerking die het onvergetelijk maakt
 
-- [ ] **3.1 Eilandmuseum.** Een vanzelf meegroeiende tijdcapsule met verdwenen gebouwen, grote ingrepen zoals ‘De Grote Brand van 412’ en ontdekte geheimen.
-- [ ] **3.2 Geluid dat meegroeit.** Vogels, hamers, klokken, trams en verkeer per tijdperk; eigen geluid voor iedere ingreep en meer rust in de nacht.
-- [ ] **3.3 Voelbare animaties bij ingrepen.** Camerabeweging en vluchtende bewoners bij bevingen, rook en emmerploegen bij vuur, regenspetters op velden. Bouw voort op wat al aanwezig is.
-- [ ] **3.4 Overgangen tussen tijdperken.** Een korte titelkaart, zachte kleurverschuiving en eigen muziekmotief voor hoofdstukken en ritme.
-- [ ] **3.5 Naam en vlag.** Genereer die vanuit het eilandkarakter en laat ze terugkomen op gebouwen, in het museum en op de eindkaart.
-- [ ] **3.6 Fotomodus.** Verberg de interface, zoom vrij, kies dag of nacht en bewaar een ansichtkaart met naam, vlag en jaar.
-- [ ] **3.7 Deelbare eindkaart.** Een afbeelding met eindtitel, quote, toen-en-nukaarten, familienaam en seed. Een vriend kan hetzelfde eiland spelen en anders ingrijpen.
-- [ ] **3.8 Getallen met gevoel.** Zinnen zoals ‘De schuren puilen uit’ en ‘De gemeente telt haar munten’; tikken onthult het echte getal.
-- [ ] **3.9 Mobiel schermvullend.** Schermvullend eiland, uitschuifbare statistieken, pinch-to-zoom en duimvriendelijke ingrepen onderaan.
-- [ ] **3.10 Techniek en toegankelijkheid.** Soepel op 10× met een grote stad, terrein cachen en niet blijven tekenen tijdens pauze. Toetsenbordbediening, contrast en een opgeslagen voorkeur voor rustige animaties.
+- [x] **3.1 Eilandmuseum.** Een vanzelf meegroeiende tijdcapsule met verdwenen gebouwen, grote ingrepen zoals ‘De Grote Brand van 412’ en ontdekte geheimen.
+- [x] **3.2 Geluid dat meegroeit.** Vogels, hamers, klokken, trams en verkeer per tijdperk; eigen geluid voor iedere ingreep en meer rust in de nacht.
+- [x] **3.3 Voelbare animaties bij ingrepen.** Camerabeweging en vluchtende bewoners bij bevingen, rook en emmerploegen bij vuur, regenspetters op velden. Bouw voort op wat al aanwezig is.
+- [x] **3.4 Overgangen tussen tijdperken.** Een korte titelkaart, zachte kleurverschuiving en eigen muziekmotief voor hoofdstukken en ritme.
+- [x] **3.5 Naam en vlag.** Genereer die vanuit het eilandkarakter en laat ze terugkomen op gebouwen, in het museum en op de eindkaart.
+- [x] **3.6 Fotomodus.** Verberg de interface, zoom vrij, kies dag of nacht en bewaar een ansichtkaart met naam, vlag en jaar.
+- [x] **3.7 Deelbare eindkaart.** Een afbeelding met eindtitel, quote, toen-en-nukaarten, familienaam en seed. Een vriend kan hetzelfde eiland spelen en anders ingrijpen.
+- [x] **3.8 Getallen met gevoel.** Zinnen zoals ‘De schuren puilen uit’ en ‘De gemeente telt haar munten’; tikken onthult het echte getal.
+- [x] **3.9 Mobiel schermvullend.** Schermvullend eiland, uitschuifbare statistieken, pinch-to-zoom en duimvriendelijke ingrepen onderaan.
+- [x] **3.10 Techniek en toegankelijkheid.** Soepel op 10× met een grote stad, terrein cachen en niet blijven tekenen tijdens pauze. Toetsenbordbediening, contrast en een opgeslagen voorkeur voor rustige animaties.
 
 ## Nu aan de beurt
 
-**Ronde 2 is compleet.** Klaar voor Coens test, elk als eigen commit: willekeurig startseizoen, vreugdevuur op een open plek, vraagtekens met grappige wensen op willekeurige plekken, lichtjes niet meer door huizen heen, het dorpsplein, rustiger huizenbouw tot het molentijdperk met meer bomen, vier nieuwe gebouwen, groeiende wegen (2.10) en de eilandtoer als filmisch einde (2.8).
+**Ronde 2 en 3 zijn compleet** en gepusht, elk onderdeel met een eigen commit. Coens test in de browser volgt nog. Ook nieuw: polders, zodat het eiland aan het einde weer flink groeit.
 
 Aanvullende visuele feedback, na het testen van deze reeks:
 

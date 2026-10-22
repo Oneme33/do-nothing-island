@@ -208,3 +208,7 @@ test('stores read as feelings and show exact numbers on request',async()=>{
  e.get('resources').handlers.click();assert.equal(e.get('food').textContent,'4.000');assert.equal(a.saved().config.showNumbers,true);
  e.get('show-numbers').handlers.change({target:{checked:false}});assert.equal(e.get('food').textContent,'De schuren puilen uit');
 });
+test('the reduced-motion preference is remembered with the island',async()=>{
+ const a=await appHarness(new Civilization(31)),e=a.elements;a.frame(16);
+ assert.equal(e.get('reduce-motion').checked,false);e.get('reduce-motion').handlers.change({target:{checked:true}});assert.equal(a.saved().config.reducedMotion,true);
+});

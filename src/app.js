@@ -37,16 +37,17 @@ let paused=false,speed=[1,2,3,10].includes(sim.config.speedMultiplier)?sim.confi
 let soundscape=null,soundAt=0;
 let interferenceMode='nudge',interventionTimer,lastRemarkAt=0,shownRemark='';
 let previousIsland=null,undoTimer;
-let introStep=0,inspectionPinned=false,nightShown=false;
+let introStep=0,inspectionPinned=false,nightShown=false,drawTick=0;
 const introKey='do-nothing-island-intro-v1';
 const introScreens=[['Dit is jouw eiland.','Eén huisje, een akker en een handvol mensen. Geef ze even de tijd. Er hoeft niets af.'],['Ze redden zich prima.','Ze bouwen, ontdekken en maken er op hun eigen manier iets van. Jij mag gewoon kijken.'],['Probeer niets aan te raken…','Of toch wel. Elke ingreep laat sporen achter. Wat je achter elkaar doet, kan iets onverwachts losmaken.']];
 function otherDialogOpen(){return [...document.querySelectorAll('dialog[open]')].some(d=>d!==$('cinema-dialog'));}
 function updateIntro(){const [title,line]=introScreens[introStep];$('intro-title').textContent=title;$('intro-line').textContent=line;$('intro-step').textContent=`${introStep+1} / 3`;$('intro-next').textContent=introStep===2?'Bekijk mijn eiland →':'Verder →';$('intro-back').hidden=introStep===0;}
 function showIntro(){introStep=0;updateIntro();$('intro-dialog').showModal();accumulator=0;}
 let momentQueue=[],seenMoments=new Set(),momentAt=-Infinity,activeMoment=null,beatHoldUntil=0,snapshotSignature='';
-const reducedPref=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const motionQuery=matchMedia('(prefers-reduced-motion: reduce)'),reducedPref=typeof sim.config.reducedMotion==='boolean'?sim.config.reducedMotion:motionQuery.matches;
 renderer.reduced=reducedPref;
 $('reduce-motion').checked=reducedPref;
+motionQuery.addEventListener?.('change',e=>{if(typeof sim.config.reducedMotion==='boolean')return;renderer.reduced=e.matches;$('reduce-motion').checked=e.matches;});
 $('expansion-limit').value=String(sim.config.maxTiles);
 $('rare-endings').checked=sim.config.rareEndings;
 $('accelerating').checked=sim.config.accelerating;
@@ -399,7 +400,9 @@ function frame(now){
   if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');}sim.signals=[];}
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
-  renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;renderer.draw(now);
+  renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;
+  // A paused island only needs half the frames.
+  drawTick=(drawTick+1)%2;if(!renderer.paused||tour||drawTick===0)renderer.draw(now);
   const night=renderer.light.darkness>.3;if(night!==nightShown){nightShown=night;$('island-window').classList.toggle('is-night',night);updateUI();}
   if(cinemaActive()){
     const stage=$('finale-canvas'),box=stage.getBoundingClientRect(),w=Math.max(300,Math.round(box.width)),h=Math.max(200,Math.round(box.height));
@@ -507,7 +510,7 @@ $('expansion-limit').addEventListener('change',e=>{
 $('rare-endings').addEventListener('change',e=>{sim.config.rareEndings=e.target.checked;save();});
 $('accelerating').addEventListener('change',e=>{sim.config.accelerating=e.target.checked;accumulator=0;updateClock();save();});
 $('story-cards').addEventListener('change',e=>{sim.config.storyCards=e.target.checked;if(!e.target.checked){dismissStory();$('intervention-result').hidden=true;}save();});
-$('reduce-motion').addEventListener('change',e=>{renderer.reduced=e.target.checked;});
+$('reduce-motion').addEventListener('change',e=>{renderer.reduced=e.target.checked;sim.config.reducedMotion=e.target.checked;save();});
 const toggleNumbers=on=>{sim.config.showNumbers=on;$('show-numbers').checked=on;updateUI();save();};
 $('show-numbers').addEventListener('change',e=>toggleNumbers(e.target.checked));
 $('resources').addEventListener('click',()=>toggleNumbers(sim.config.showNumbers!==true));
@@ -567,7 +570,19 @@ $('wish-help').addEventListener('click',()=>{
   if(!helpActiveWish(sim,wish?.id)){renderWishes();showToast('Deze wens is veranderd. Er is geen ingreep gedaan.');return;}
   $('book-dialog').close();const point=renderer.point(wish.x,wish.y);showIntervention(point.x,point.y);
 });
-let drag=null;
+let drag=null,keyCursor=null;
+function actOnTile(tile){
+  if(cinemaActive()||sim.ending)return;
+  if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}return;}
+  sim.interfere(tile.x,tile.y,interferenceMode);const point=renderer.point(tile.x,tile.y);showIntervention(point.x,point.y);inspectTile(sim.tile(tile.x,tile.y));
+}
+// Two fingers pinch to zoom; one finger keeps dragging and tapping as before.
+const touches=new Map();let pinch=0;
+canvas.addEventListener('pointerdown',e=>{touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touches.size===2){const [a,b]=[...touches.values()];pinch=Math.hypot(a.x-b.x,a.y-b.y);}});
+canvas.addEventListener('pointermove',e=>{if(!touches.has(e.pointerId))return;touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touches.size===2&&pinch){const [a,b]=[...touches.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(d>0){renderer.setZoom(d/pinch);pinch=d;}if(drag)drag.moved=true;}});
+const releaseTouch=e=>{touches.delete(e.pointerId);if(touches.size<2)pinch=0;};
+canvas.addEventListener('pointerup',releaseTouch);canvas.addEventListener('pointercancel',releaseTouch);
+document.querySelector('.population-card')?.addEventListener('click',e=>e.currentTarget.classList.toggle('expanded'));
 canvas.addEventListener('pointerdown',e=>{
   if(e.button!==0)return;
   drag={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId);
@@ -604,10 +619,11 @@ document.addEventListener('keydown',e=>{
   if(e.key==='+'||e.key==='=')renderer.setZoom(1.15);
   if(e.key==='-')renderer.setZoom(1/1.15);
   if(document.activeElement===canvas){
-    if(e.key==='ArrowLeft'){e.preventDefault();renderer.pan.x+=20;}
-    if(e.key==='ArrowRight'){e.preventDefault();renderer.pan.x-=20;}
-    if(e.key==='ArrowUp'){e.preventDefault();renderer.pan.y+=20;}
-    if(e.key==='ArrowDown'){e.preventDefault();renderer.pan.y-=20;}
+    const step={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
+    if(step&&e.shiftKey){e.preventDefault();renderer.pan.x-=step[0]*20;renderer.pan.y-=step[1]*20;}
+    // Without a mouse: arrows move a tile cursor, Enter acts on it exactly like a click.
+    else if(step){e.preventDefault();keyCursor={x:(keyCursor?.x??0)+step[0],y:(keyCursor?.y??1)+step[1]};renderer.hover=keyCursor;inspectionPinned=true;inspectTile(sim.tile(keyCursor.x,keyCursor.y));}
+    else if(e.key==='Enter'&&keyCursor){e.preventDefault();actOnTile(keyCursor);}
   }
 });
 
