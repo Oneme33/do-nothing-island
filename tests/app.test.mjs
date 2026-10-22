@@ -202,3 +202,9 @@ test('photo mode hides the interface, pauses the island and restores the previou
  e.get('photo-mode').handlers.click();assert.equal(e.get('photo-bar').hidden,false);const year=e.get('year').textContent;a.advance(5);assert.equal(e.get('year').textContent,year,'the island holds still for the photo');
  e.get('photo-done').handlers.click();assert.equal(e.get('photo-bar').hidden,true);a.advance(5);assert.ok(Number(e.get('year').textContent)>Number(year));
 });
+test('stores read as feelings and show exact numbers on request',async()=>{
+ const sim=new Civilization(31);sim.food=4000;const a=await appHarness(sim),e=a.elements;a.frame(16);
+ assert.equal(e.get('food').textContent,'De schuren puilen uit');assert.match(e.get('food').title,/4\.000/);
+ e.get('resources').handlers.click();assert.equal(e.get('food').textContent,'4.000');assert.equal(a.saved().config.showNumbers,true);
+ e.get('show-numbers').handlers.change({target:{checked:false}});assert.equal(e.get('food').textContent,'De schuren puilen uit');
+});

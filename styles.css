@@ -100,3 +100,8 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .photo-bar button{font-size:11px;padding:8px 13px;border-radius:18px;border:1px solid transparent;background:none;color:#4d6142;cursor:pointer}
 .photo-bar .primary-photo{background:#dce7c4;border-color:#cbd8ad}
 .island-window.photo-mode .population-card,.island-window.photo-mode .civic-overview,.island-window.photo-mode .island-heading,.island-window.photo-mode .weather,.island-window.photo-mode .map-controls,.island-window.photo-mode .instruction,.island-window.photo-mode .island-toolbar,.island-window.photo-mode .wish-bubble,.island-window.photo-mode .project-overlay,.island-window.photo-mode .map-coordinate,.island-window.photo-mode .tile-inspector,.island-window.photo-mode .toast,.island-window.photo-mode .away-summary{opacity:0;pointer-events:none;transition:opacity .4s}
+
+/* 3.8 Numbers with feeling */
+.resources{cursor:pointer}
+.resources.feeling span{font-size:11px;line-height:1.3}
+.resources.feeling small{display:none}

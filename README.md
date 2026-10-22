@@ -8,6 +8,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Huizen verschillen van elkaar.** Elk huis krijgt vanuit zijn plek een eigen gevelkleur, dakkleur, kleur luiken en eigen verhoudingen; sommige hebben bloembakken, andere geen schoorsteen. Een straat ziet er daardoor nooit gekopieerd uit, en hetzelfde huis houdt altijd hetzelfde uiterlijk.
 
+**Getallen met gevoel.** Voorraden, water, landschap en gemeentekas staan er in woorden: ‘De schuren puilen uit’, ‘Een stapel hout’, ‘De gemeente telt haar munten’. Het echte getal staat in de tooltip; tik op de voorraad, of zet ‘Exacte getallen’ aan in de instellingen, om alles weer in cijfers te zien.
+
 **Fotomodus en eindkaart.** De knop **Foto** op het eiland verbergt alle knoppen en zet de tijd even stil. Kies dag of nacht, zoom en sleep vrij, en bewaar een ansichtkaart met naam, vlag, jaar en inwoners. In het naschrift bewaar je een eindkaart met titel, quote, de kaartjes van toen en nu, de familienaam, de score en de seed. ‘Kopieer link naar dit eiland’ geeft een link met `?seed=`: wie hem opent, speelt hetzelfde eiland en kan anders ingrijpen. Het eigen eiland is daarna tien seconden terug te halen.
 
 **Naam en vlag.** Elk eiland krijgt een naam en een vlag die bij zijn karakter passen: zeevaarders (anker, blauw), tuiniers (blad, groen), uitvinders (tandwiel, oker) of bouwers (toren, baksteenrood). Zolang het karakter nog niet vaststaat, voert het eiland een boompje. Naam en vlag staan linksonder op het eiland en in de titel van het tabblad, en de vlag wappert op het dorpsplein.
