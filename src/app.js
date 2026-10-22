@@ -535,7 +535,7 @@ function newIsland(){
   let seed;
   try{seed=crypto.getRandomValues(new Uint32Array(1))[0];}catch{seed=(Date.now()^Math.floor(Math.random()*0xffffffff))>>>0;}
   if(!seed||seed===sim.seed)seed=(sim.seed+1)>>>0||1;
-  switchIsland(new Civilization(seed,{...sim.config,maxTiles:sim.terrainVersion>=2?sim.config.maxTiles:sim.config.maxTiles>=600?625:480}), "Een nieuwe kust. Nieuwe bergen. De bewoners weten van niets.");
+  switchIsland(new Civilization(seed,{...sim.config,maxTiles:sim.terrainVersion>=2?(sim.config.maxTiles===480?560:sim.config.maxTiles):sim.config.maxTiles>=600?625:560}), "Een nieuwe kust. Nieuwe bergen. De bewoners weten van niets.");
   $('undo-reset').hidden=false;clearTimeout(undoTimer);
   undoTimer=setTimeout(()=>{previousIsland=null;$('undo-reset').hidden=true;},10000);
 }

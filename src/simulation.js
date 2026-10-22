@@ -68,7 +68,7 @@ export class Civilization {
   constructor(seed=Date.now(), config={}) {
     this.seed = seed >>> 0 || 1;
     this.randomState = this.seed;
-    this.config = {maxTiles:480, rareEndings:true, accelerating:true, ...config};
+    this.config = {maxTiles:560, rareEndings:true, accelerating:true, ...config};
     this.year = 1;
     this.population = 6;
     this.food = 28;
@@ -310,6 +310,7 @@ export class Civilization {
     const age=AGES.find(age=>age.year===this.year&&age.year>1);
     if(age){captureSnapshot(this,age.name);this.log(`${age.name} begins. The builders have a new idea of what a proper home should look like.`,'age');this.signal('celebrate',this.tile(0,1),age.name);}
     this.advanceBuildings();
+    if(this.year>=1750&&this.year%5===0)this.renewHomes();
     this.advanceFoundingHome();
     if(this.year%Math.max(2,5-this.era)===0) this.develop();
     if(this.year%9===0)this.ensureInfrastructure();
@@ -633,6 +634,16 @@ export class Civilization {
     this.roadCoverage=roadTargets.length?connected/roadTargets.length:0;
     this.routeVersion=2;
   }
+  // Old streets renew over time: houses become townhouses in the age of steam, back districts get towers from 1960.
+  renewHomes() {
+    const homes=this.houses.filter(t=>!t.foundingHome&&!t.buildSite&&t.district!=='heritage');
+    const towers=homes.filter(t=>t.building==='tower').length;
+    const candidates=homes.filter(t=>t.building==='house'||t.building==='hut'||this.year>=1960&&t.building==='townhouse'&&towers<homes.length*.35&&this.plotPosition(t).depth<.5);
+    for(const t of candidates.sort((a,b)=>(a.builtYear||0)-(b.builtYear||0)).slice(0,this.year>=1960?3:2)){
+      const next=this.homeTypeFor(t);if(next===t.building)continue;
+      t.building=next;t.architecture=this.age.id;t.builtYear=this.year;this.signal('built',t,next==='tower'?'Een torenflat!':'Een nieuw herenhuis');
+    }
+  }
   upgradeDistricts() {
     const houses=this.houses.filter(t=>!t.foundingHome);
     const upgrade=houses[Math.floor(this.random()*houses.length)];
@@ -667,9 +678,9 @@ export class Civilization {
     const pressure=this.freeLand.length<=reserve && (this.pressure>.86 || this.food<this.population*.5);
     const ambition=this.era===4 && this.obsessed && this.config.rareEndings && this.endgameStarted;
     // Polder ambition: once mills (and later pumps) exist, the island keeps winning land while its free ground shrinks.
-    const polder=(this.housingBoom>=1||this.era>=2)&&this.freeLand.length<=Math.max(reserve,Math.floor(buildable*(this.era>=2?.3:.2)))&&this.pressure>.7;
+    const polder=(this.housingBoom>=1||this.era>=2)&&this.freeLand.length<=Math.max(reserve,Math.floor(buildable*(this.era>=2?.4:.25)))&&this.pressure>.65;
     if(!pressure && !polder && !ambition) return false;
-    const maxBatch=[0,4,7,10,ambition?22:14][this.era];
+    const maxBatch=[0,5,9,12,ambition?22:16][this.era];
     const batch=Math.min(maxBatch,this.config.maxTiles-total);
     const costs={wood:batch*(this.era===1?5:2),stone:batch*(this.era===1?1:3),wealth:batch*(this.era===1?3:5)};
     if(this.wood<costs.wood || this.stone<costs.stone || this.wealth<costs.wealth) return false;

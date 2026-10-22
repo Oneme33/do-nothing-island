@@ -21,7 +21,7 @@ test('development uses hand drainage and never builds an industrial pump',()=>{
   const sim=prepared(1);const original=sim.land.length;
   assert.equal(sim.tryExpansion(),true);assert.equal(sim.project.manual,true);
   for(let i=0;i<50;i++)sim.advanceProject();
-  assert.equal(sim.project,null);assert.equal(sim.land.length,original+4);
+  assert.equal(sim.project,null);assert.equal(sim.land.length,original+5);
   assert.equal(sim.reclaimed.some(t=>t.building==='pump'),false);
 });
 test('reclamation waits for drainage technology and real inland space pressure',()=>{
@@ -55,7 +55,7 @@ test('reclamation forms a connected coastal project and land is usable only afte
     stages.add(sim.project.stage);sim.advanceProject();assert.equal(sim.land.length,original);
   }
   sim.advanceProject();assert.equal(stages.size,5);assert.equal(sim.project,null);
-  assert.equal(sim.land.length,original+7);assert.ok(sim.reclaimed.some(t=>t.building==='pump'));
+  assert.equal(sim.land.length,original+9);assert.ok(sim.reclaimed.some(t=>t.building==='pump'));
 });
 test('storms and broken pumps stop drainage, and completed districts add capacity through real homes',()=>{
   const sim=prepared();sim.tryExpansion();
