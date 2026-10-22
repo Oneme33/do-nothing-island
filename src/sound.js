@@ -39,9 +39,9 @@ export class Soundscape{
   if(year>=1920&&due('traffic',7))this.hiss(2.4,{volume:.03*quiet,frequency:260,attack:.9});
   if(night&&due('crickets',2.5))for(let i=0;i<4;i++)this.tone(4300,.035,{type:'square',volume:.01,delay:i*.07});
  }
- // A cheerful little tune while a party is on, repeated every few seconds.
- festive(){
-  if(!this.enabled)return;const now=this.ctx.currentTime;if((this.next.festive||0)>now)return;this.next.festive=now+6.5;
+ // A cheerful little tune, once at the start of each party.
+ festive(key){
+  if(!this.enabled||this.lastParty===key)return;this.lastParty=key;
   const tune=[523,659,784,659,698,880,784,659,587,698,659,523];tune.forEach((f,i)=>this.tone(f,.28,{type:'triangle',volume:.025,delay:i*.26}));
   for(let i=0;i<6;i++)this.tone(131,.18,{volume:.03,delay:i*.52});
  }

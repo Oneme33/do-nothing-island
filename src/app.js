@@ -396,7 +396,7 @@ function frame(now){
     }
   }
   advanceTour(now);
-  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;if(sim.festival&&sim.year<=sim.festival.until&&!paused)soundscape.festive();soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite)});}
+  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;if(sim.festival&&sim.year<=sim.festival.until&&!paused)soundscape.festive(`${sim.festival.x},${sim.festival.y},${sim.festival.until}`);soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite)});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
   if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');}sim.signals=[];}
   presentMoment(now);
