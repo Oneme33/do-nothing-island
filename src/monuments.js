@@ -1,6 +1,7 @@
 import {startParty} from './spectacle.js';
+import {wishTally} from './wishes.js';
 // Statues the island raises by itself: for you, for its founder, and for the odd things it loves.
-const helpedWishes=s=>(s.wishes?.history||[]).filter(w=>w.status==='helped').length;
+const helpedWishes=s=>wishTally(s,'helped');
 export const MONUMENTS=[
  {kind:'hand',square:true,when:s=>helpedWishes(s)>=3||s.influence?.trust>=12,title:'Het Onzichtbare Handje',text:'Een stenen hand die uit een wolk steekt. Niemand weet precies wie het is, maar iedereen bedankt hem op zondag.'},
  {kind:'watcher',square:true,when:s=>s.year>=1500&&s.interferences===0,title:'Voor wie niets deed',text:'Een leeg voetstuk met een bankje ervoor, ter ere van de toeschouwer die hen hun gang liet gaan.'},

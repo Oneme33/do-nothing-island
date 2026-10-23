@@ -34,7 +34,7 @@ export function advanceWeather(s){
   return kind;
  }
  // Only now and then does a shower end in a rainbow.
- if(s.weather&&s.weather.kind==='shower'&&!s.weather.rainbow&&s.year===s.weather.until+1&&wxHash(s.seed,s.year,13)<.25){s.weather.rainbow=s.year;}
+ if(s.weather&&s.weather.kind==='shower'&&!s.weather.rainbow&&s.year===s.weather.until+1&&s.year-(s.lastRainbow??-999)>=150&&wxHash(s.seed,s.year,13)<.2){s.weather.rainbow=s.year;s.lastRainbow=s.year;}
  if(s.year<s.nextWeather||s.ending||s.storm)return null;
  const pick=KINDS[Math.floor(wxHash(s.seed,s.year,3)*KINDS.length)],def=WEATHER[pick];
  s.weather={kind:pick,since:s.year,until:s.year+def.years-1};

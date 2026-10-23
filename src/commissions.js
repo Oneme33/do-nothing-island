@@ -1,3 +1,4 @@
+import {wishTally} from './wishes.js';
 // After every third wish you help with, the residents build something of your choosing, wherever you point.
 export const COMMISSIONS={
  watchtower:{name:'Uitkijktoren',effect:'Toeristen komen kijken: wat extra welvaart.',log:'Op jouw verzoek verrijst een uitkijktoren. Bovenaan zie je het hele eiland, en op heldere dagen zelfs een beetje van morgen.'},
@@ -8,7 +9,7 @@ export const COMMISSIONS={
 export function ensureCommissions(s){s.commissions??={available:0,earned:0,built:[]};return s.commissions;}
 // Called when a wish is helped.
 export function earnCommission(s){
- const c=ensureCommissions(s),helped=(s.wishes?.history||[]).filter(w=>w.status==='helped').length+1;
+ const c=ensureCommissions(s),helped=wishTally(s,'helped');
  if(helped%3!==0)return false;
  c.available++;c.earned++;
  s.log('De bewoners willen iets voor je bouwen, als dank voor alle hulp. Kies in het Eilandboek bij Wensen wat het wordt.','wish');

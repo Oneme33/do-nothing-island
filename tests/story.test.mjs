@@ -80,13 +80,18 @@ test('modern life and the finale receive readable time even when automatic accel
  const s=new Civilization(31);let modernSeconds=0;for(let y=1920;y<2080;y++){s.year=y;modernSeconds+=s.yearDuration;}
  assert.ok(modernSeconds>=90);s.endgameStarted=true;s.year=2150;assert.ok(s.yearDuration>=.65);
 });
-import {islandScores,scoreInputs} from '../src/finale.js';
-test('a perfect island scores 100, and asked-for help never costs independence',()=>{
- const s=new Civilization(31);while(s.year<1500)s.tick();
- s.food=s.population*3;s.freshwater=90;s.prosperity=80;s.environment=95;s.pollution=5;s.interferences=4;s.wishes.history=[1,2,3,4].map(i=>({id:`w${i}`,status:'helped'}));s.influence.dependence=6;
- s.rebuiltFires=3;for(const t of s.land)if(t.building==='ruins')t.building='house';s.partiesHeld=6;
- const kinds=['museum','circus','station','pool','spaceport','zoo','theme-park','petting-farm','observatory','ice-cream'];s.land.filter(t=>t.building==='house'&&!t.foundingHome).slice(0,10).forEach((t,i)=>t.building=kinds[i]);
- for(const t of s.land.filter(t=>!t.building&&!t.reservedFor).slice(0,14))t.building='park';
- assert.equal(scoreInputs(s).unrequested,0);const score=islandScores(s);assert.equal(score.total,100,JSON.stringify(score.values));
- s.interferences=9;assert.ok(islandScores(s).values.zelfstandigheid<100,'unasked interventions do count');
+import {islandScores,scoreInputs,scoreLevel,ISLAND_CHECKLIST} from '../src/finale.js';
+import {ensureWishes,canHelpWish,helpActiveWish} from '../src/wishes.js';
+import {placeCommission,canCommission} from '../src/commissions.js';
+test('the island inspection: watching gives a fine island, helping every wish a perfect one',()=>{
+ const watched=new Civilization(77,{maxTiles:720});while(!watched.ending)watched.tick();
+ const quiet=islandScores(watched);assert.ok(quiet.total>=60&&quiet.total<90,`watching alone: ${quiet.total}`);assert.ok(quiet.values['goede buur']<10);
+ assert.equal(quiet.checklist.length,ISLAND_CHECKLIST.length);assert.equal(quiet.done,quiet.checklist.filter(i=>i.done).length);
+ const s=new Civilization(7,{maxTiles:720}),done=new Set();
+ while(!s.ending){s.tick();const w=ensureWishes(s).active;if(w&&!done.has(w.id)&&canHelpWish(s,w)){done.add(w.id);helpActiveWish(s,w.id);}
+  if(s.commissions?.available){const spot=s.land.find(t=>canCommission(s,t));if(spot)placeCommission(s,'rose-garden',spot.x,spot.y);}}
+ assert.equal(scoreInputs(s).unrequested,0,'asked-for help never counts as meddling');assert.ok(scoreInputs(s).helped>24,'help is counted beyond the short wish history');
+ const score=islandScores(s);assert.equal(score.total,100,JSON.stringify(score.values));assert.equal(score.level.id,'perfect');
+ s.interferences+=8;assert.ok(islandScores(s).values['goede buur']<20,'unasked interventions do count');
+ for(const total of [0,49,50,70,85,99,100])assert.equal(scoreLevel(total).min<=total,true);
 });

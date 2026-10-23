@@ -1,29 +1,77 @@
+import {wishTally} from './wishes.js';
 const score100=n=>Math.round(Math.max(0,Math.min(100,n)));
-// Five scores of 0–100 that can all reach 100 together. Wishes that residents asked for never count as interfering.
-export const SCORE_RECIPE='Zo haal je 100: grijp alleen in als iemand erom vraagt (een vraagteken), help veel wensen zodat er feesten zijn, laat het eiland groen en schoon, zorg dat ze minstens drie rampen te boven komen (bliksem, hoog water of een brand die op verzoek geblust wordt) zonder ruïnes aan het einde, en laat ze lang genoeg bouwen voor al hun speciale gebouwen.';
+const scoreCap=v=>Math.min(1,Math.max(0,v));
+// The island inspection ('de eilandkeur'): five parts of twenty points. Watching alone gives a fine island;
+// listening to the residents, helping when they ask and keeping disasters small makes it a perfect one.
+export const SCORE_RECIPE='Zo haal je 100: help (bijna) elke wens met een vraagteken en grijp verder niet in, laat ze alles bouwen wat bij een compleet eiland hoort (ook een opdracht van jou), houd het groen en schoon, en blus branden op hun verzoek zodat er weinig verloren gaat.';
+const has=(s,type)=>s.land.some(t=>t.building===type);
+export const ISLAND_CHECKLIST=[
+ {id:'square',label:'Een dorpsplein',done:s=>!!s.square?.builtYear,at:'town-square'},
+ {id:'harbor',label:'Een haven',done:s=>[...s.tiles.values()].some(t=>t.building==='harbor'||t.building==='dock')},
+ {id:'lighthouse',label:'Een vuurtoren',done:s=>has(s,'lighthouse'),at:'lighthouse'},
+ {id:'castle',label:'Een kasteel met slotgracht',done:s=>!!s.court,at:'palace'},
+ {id:'watermill',label:'Een watermolen',done:s=>has(s,'watermill'),at:'watermill'},
+ {id:'petting-farm',label:'Een kinderboerderij',done:s=>has(s,'petting-farm'),at:'petting-farm'},
+ {id:'museum',label:'Een museum',done:s=>has(s,'museum'),at:'museum'},
+ {id:'observatory',label:'Een sterrenwacht',done:s=>has(s,'observatory'),at:'observatory'},
+ {id:'circus',label:'Een circus',done:s=>has(s,'circus'),at:'circus'},
+ {id:'zoo',label:'Een dierentuin',done:s=>has(s,'zoo'),at:'zoo'},
+ {id:'ice-cream',label:'Een ijssalon',done:s=>has(s,'ice-cream'),at:'ice-cream'},
+ {id:'greenhouse',label:'Een kas',done:s=>has(s,'greenhouse'),at:'greenhouse'},
+ {id:'station',label:'Een treinstation',done:s=>has(s,'station'),at:'station'},
+ {id:'pool',label:'Een zwembad',done:s=>has(s,'pool'),at:'pool'},
+ {id:'theme-park',label:'Een pretpark',done:s=>has(s,'theme-park'),at:'theme-park'},
+ {id:'spaceport',label:'Een ruimtehaven',done:s=>has(s,'spaceport'),at:'spaceport'},
+ {id:'beaches',label:'Drie stranden',done:s=>(s.coast?.beaches?.length||0)>=3},
+ {id:'statues',label:'Drie standbeelden',done:s=>(s.monuments?.length||0)>=3},
+ {id:'famous',label:'Vijf beroemde eilanders',done:s=>(s.famous?.length||0)>=5},
+ {id:'islets',label:'Bewoonde buureilandjes',done:s=>!!s.islets?.list?.length&&s.islets.list.every(i=>i.houses>=i.cap)},
+ {id:'finds',label:'Vier opgravingen',done:s=>(s.digs?.finds?.length||0)>=4},
+ {id:'treasure',label:'Een gevonden schat',done:s=>(s.coast?.treasures?.length||0)>=1},
+ {id:'green',label:'Een groene gordel',done:s=>greenShare(s)>=.1},
+ {id:'commission',label:'Een cadeau voor jou',done:s=>(s.commissions?.built?.length||0)>=1}
+];
+const GREEN=new Set(['park','forest','tree','original-tree','garden','castle-garden','royal-garden','rose-garden']);
+export function greenShare(s){return s.land.length?s.land.filter(t=>GREEN.has(t.building)).length/s.land.length:0;}
 export function scoreInputs(s){
- const helped=(s.wishes?.history||[]).filter(w=>w.status==='helped').length;
- return{helped,unrequested:Math.max(0,(s.interferences||0)-helped),ownDependence:Math.max(0,(s.influence?.dependence||0)-helped*1.5),recovered:(s.rebuiltFires||0)+s.land.filter(t=>t.floodMemorial).length,ruins:s.land.filter(t=>t.building==='ruins').length,parties:s.partiesHeld||0,delights:s.land.filter(t=>['museum','circus','station','pool','spaceport','zoo','theme-park','petting-farm','observatory','ice-cream','greenhouse'].includes(t.building)).length};
+ const helped=wishTally(s,'helped');
+ return{helped,missed:wishTally(s,'expired'),unrequested:Math.max(0,(s.interferences||0)-helped),ownDependence:Math.max(0,(s.influence?.dependence||0)-helped*1.5),
+  lost:s.lostBuildings||0,rescued:s.rescuedFires||0,rebuilt:s.rebuiltFires||0,abandoned:s.storyStats?.abandoned||0,ruins:s.land.filter(t=>t.building==='ruins').length,green:greenShare(s)};
 }
+export const SCORE_LEVELS=[
+ {min:100,id:'perfect',title:'Het Perfecte Eiland',line:'Alles erop en eraan, en iedereen tevreden. Dit eiland wordt in verre landen op ansichtkaarten gezet.',color:'#c98fb0'},
+ {min:85,id:'gold',title:'Een geweldig eiland',line:'Bijna alles wat een eiland kan hebben, en een gelukkig volk.',color:'#e2b84a'},
+ {min:70,id:'silver',title:'Een prachtig eiland',line:'Veel om trots op te zijn, met hier en daar een gemiste kans.',color:'#b9c2c4'},
+ {min:50,id:'bronze',title:'Een fijn eiland',line:'Een goed leven, al vroegen ze vaker om hulp dan ze kregen.',color:'#c58b5c'},
+ {min:0,id:'plain',title:'Een eiland',line:'Het staat er nog, en dat is ook wat.',color:'#9aa88f'}
+];
+export const scoreLevel=total=>SCORE_LEVELS.find(l=>total>=l.min);
 export function islandScores(s){
- const k=scoreInputs(s),cap=v=>Math.min(1,Math.max(0,v));
- const living=score100(100*(.4*cap(s.food/Math.max(1,s.population)/2)+.3*cap(s.freshwater/70)+.3*cap(s.prosperity/60)));
- const nature=score100(100*(.7*cap(s.environment/85)+.3*cap((100-s.pollution)/70)));
- const independent=score100(100-Math.min(60,k.unrequested*8)-Math.min(40,Math.max(0,k.ownDependence-3)*3));
- const resilience=score100(40+Math.min(40,k.recovered*14)+(k.ruins?0:20));
- const culture=score100(Math.min(50,s.recreation.length*4)+Math.min(30,k.parties*6)+Math.min(20,k.delights*2));
- const values={leefbaarheid:living,natuur:nature,zelfstandigheid:independent,veerkracht:resilience,cultuur:culture};
- return {values,total:score100(Object.values(values).reduce((a,b)=>a+b,0)/5)};
+ const k=scoreInputs(s),checklist=ISLAND_CHECKLIST.map(item=>({id:item.id,label:item.label,done:!!item.done(s)}));
+ const done=checklist.filter(i=>i.done).length;
+ const complete=20*done/checklist.length;
+ const wellbeing=8*scoreCap(s.prosperity/65)+6*scoreCap(s.freshwater/75)+6*scoreCap(1-(s.unrest||0)/50);
+ const nature=10*scoreCap(s.environment/90)+5*scoreCap((100-s.pollution)/75)+5*scoreCap(k.green/.1);
+ // Disasters happen anyway; what counts is how much was lost for good, and whether they helped each other back up.
+ const resilience=Math.max(0,20-Math.max(0,k.lost-k.rebuilt*.75-4)*.45-Math.min(6,k.abandoned*.25)-(k.ruins?3:0));
+ // Being a good neighbour: help when asked, and keep your hands to yourself otherwise.
+ const asked=k.helped+k.missed,neighbour=Math.max(0,14*scoreCap(asked?k.helped/asked/.85:0)+6-Math.min(6,k.unrequested*.75));
+ const values={compleet:Math.round(complete),welzijn:Math.round(wellbeing),natuur:Math.round(nature),veerkracht:Math.round(resilience),'goede buur':Math.round(neighbour)};
+ const total=score100(complete+wellbeing+nature+resilience+neighbour);
+ const level=scoreLevel(total);
+ return {values,max:20,total,level:{id:level.id,title:level.title,line:level.line,color:level.color},checklist,done,items:checklist.length};
 }
-// What each score means, in plain words, with a short verdict for the value.
+// What each part means, in plain words, with a short verdict for the value out of twenty.
 const SCORE_MEANING={
- leefbaarheid:['Eten, water en welvaart voor iedereen',['Het was vaak krap.','De meeste mensen kwamen goed rond.','Iedereen had het goed.']],
- natuur:['Hoe groen en schoon het eiland bleef',['Er bleef weinig natuur over.','Een redelijk groen eiland.','Een levend, schoon landschap.']],
- zelfstandigheid:['Hoeveel ze zelf deden; gevraagde hulp telt niet mee',['Ze leunden flink op jou.','Soms hielp je een handje.','Ze deden bijna alles zelf.']],
- veerkracht:['Rampen die ze te boven kwamen, zonder ruïnes aan het einde',['Elke ramp bleef lang zichtbaar.','Ze herstelden op eigen tempo.','Na elke ramp stonden ze sterker op.']],
- cultuur:['Parken, feesten en speciale gebouwen',['Weinig tijd voor plezier.','Er was genoeg te doen.','Een eiland vol leven en feest.']]
+ compleet:['Alles erop en eraan: speciale gebouwen, vondsten, beroemdheden en meer',['Er ontbrak nog veel.','Het meeste staat er.','Werkelijk alles erop en eraan.']],
+ welzijn:['Welvaart, schoon water en rust onder de bewoners',['Het was vaak krap of onrustig.','De meeste mensen kwamen goed rond.','Iedereen had het goed.']],
+ natuur:['Schone lucht, een levend landschap en genoeg groen tussen de huizen',['Er bleef weinig natuur over.','Een redelijk groen eiland.','Een levend, schoon en groen eiland.']],
+ veerkracht:['Hoeveel er blijvend verloren ging bij branden, bevingen en hoog water',['Rampen lieten diepe sporen na.','Ze herstelden op eigen tempo.','Na elke ramp stonden ze sterker op.']],
+ 'goede buur':['Wensen waar je bij hielp, en ingrepen waar niemand om vroeg',['Ze vroegen vaak om hulp en kregen die zelden.','Je hielp soms een handje.','Je was er precies wanneer ze je nodig hadden.']]
 };
-export function explainScore(name,value){const [what,verdicts]=SCORE_MEANING[name]||['',['','','']];return{what,verdict:verdicts[value>=70?2:value>=45?1:0]};}
+export function explainScore(name,value,max=20){const [what,verdicts]=SCORE_MEANING[name]||['',['','','']];const share=value/max;return{what,verdict:verdicts[share>=.75?2:share>=.45?1:0]};}
+// Old saves stored five scores of 0–100; recompute those so every ending shows the inspection.
+export const currentScores=(s,stored)=>stored?.checklist?stored:islandScores(s);
 export function drawFinale(c,w,h,s,m,reduced=false){
  if(!m)return;const t=reduced?Math.floor(m.elapsed/6)*6:m.elapsed,id=m.id;
  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,w,h);c.fillStyle='#dfebe0';c.fillRect(0,0,w,h);

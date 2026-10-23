@@ -51,7 +51,7 @@ export function ensureStory(s,restoring=false){
     s.layoutVersion=2;
   }
   if(s.ending&&!s.outcome)s.outcome={id:'last-drop',...ENDINGS['last-drop'],year:s.year};
-  if(s.outcome&&!s.outcome.scores)s.outcome.scores=islandScores(s);
+  if(s.outcome&&!s.outcome.scores?.checklist)s.outcome.scores=islandScores(s);
 }
 export function districtFor(s,t){
   if(Math.abs(t.x+1)+Math.abs(t.y-1)<=2)return'heritage';

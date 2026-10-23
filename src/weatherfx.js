@@ -1,7 +1,8 @@
 // How the weather looks: rain, lightning, fog banks, a dry tint, heat shimmer, snow and a rainbow afterwards.
 const wfHash=(a,b)=>{const n=Math.sin(a*127.1+b*311.7)*43758.5453;return n-Math.floor(n);};
+export const RAINBOW_SECONDS=16,RAINBOW_REST=360;
 export function drawWeather(r){
- const s=r.sim,w=s.weather;if(!w||s.ending)return;
+ const s=r.sim,w=s.weather;if(!w||s.ending){r.rainbowShowing=false;return;}
  const active=s.year<=w.until?w.kind:null,c=r.ctx,W=r.width,H=r.height,t=r.reduced?0:r.time;
  c.save();
  if(active==='shower'||active==='thunder'){
@@ -24,10 +25,17 @@ export function drawWeather(r){
   c.fillStyle='rgba(240,244,248,.2)';c.fillRect(0,0,W,H);c.fillStyle='rgba(255,255,255,.9)';
   for(let i=0;i<160;i++){const x=(wfHash(i,4)*W+t*40+Math.sin(t+i)*10)%W,y=(wfHash(i,5)*H+t*55)%H;const rad=1+wfHash(i,6)*1.4;c.beginPath();c.ellipse(x,y,rad,rad,0,0,Math.PI*2);c.fill();}
  }
- // A rainbow after a shower, only by day: it fades in, stays about fourteen seconds and fades out, whatever the speed.
- if(w.rainbow&&r._rainbowKey!==w.rainbow){r._rainbowKey=w.rainbow;r._rainbowStart=Date.now();}
- const since=(Date.now()-(r._rainbowStart||0))/1000,day=1-Math.min(1,(r.light?.darkness||0)*3);
- const rainbow=r._rainbowStart&&!active&&since<18?Math.min(1,since/2.5,(18-since)/3)*day:0;
+ // A rainbow after a shower, only by day. It plays once on the wall clock (fade in, stay, fade out) and is never
+ // interrupted; a new one waits at least six real minutes, so fast speeds cannot make it flicker or pile up.
+ const now=Date.now();
+ if(w.rainbow&&r._rainbowKey!==w.rainbow){
+  r._rainbowKey=w.rainbow;
+  const day=(r.light?.darkness||0)<.15,rested=!r._rainbowStart||now-r._rainbowStart>RAINBOW_REST*1000;
+  if(day&&rested&&!r.reduced)r._rainbowStart=now;
+ }
+ const since=(now-(r._rainbowStart||0))/1000;
+ const rainbow=r._rainbowStart&&since<RAINBOW_SECONDS?Math.min(1,since/3,(RAINBOW_SECONDS-since)/4):0;
+ r.rainbowShowing=rainbow>0;
  if(rainbow>0){
   // Anchored to the island: it moves and scales with the camera instead of hanging on the screen.
   const anchor=r.point(0,0),z=r.zoom||1,cx=anchor.x,cy=anchor.y+60*z,colours=['#e46b5d','#eda04f','#efd36a','#8cc07a','#6fa8d6','#8f7fc4'];c.globalAlpha=.3*rainbow;c.lineWidth=7*z;

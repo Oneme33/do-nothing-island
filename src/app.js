@@ -4,7 +4,7 @@ import { eventPriority, resumeSandbox, ENDINGS } from './story.js';
 import { Civilization, ERAS, PROJECT_STAGES, AGES } from './simulation.js';
 import { IslandRenderer } from './renderer.js';
 import {describePlot} from './inspection.js';
-import {islandScores,explainScore,SCORE_RECIPE} from './finale.js';
+import {islandScores,explainScore,SCORE_RECIPE,currentScores} from './finale.js';
 import {drawCredits,creditsFor} from './credits.js';
 import {ensureFamily,currentRelative,familyLore,sentenceCase} from './family.js';
 import {tourStops} from './tour.js';
@@ -187,7 +187,9 @@ function renderAlbum(){
     img.src=photo.src;img.alt=photo.caption;img.loading='lazy';year.textContent=`Jaar ${photo.year}`;caption.append(year,photo.caption);figure.style.setProperty?.('--tilt',`${((i*37)%5-2)*.6}deg`);figure.append(img,caption);return figure;}));
 }
 function renderChallenges(){
-  const state=ensureChallenges(sim);
+  const state=ensureChallenges(sim),keur=islandScores(sim);
+  $('keur-now').textContent=`Als het eiland nu gekeurd werd: ${keur.total} van 100, ${keur.level.title.toLowerCase()}. Alles erop en eraan: ${keur.done} van ${keur.items}. ${Object.entries(keur.values).map(([name,value])=>`${name} ${value}/20`).join(' · ')}.`;
+  $('keur-now-list').replaceChildren(...keur.checklist.map(item=>{const li=document.createElement('li');li.textContent=item.label;li.dataset.done=String(item.done);return li;}));
   $('challenge-note').textContent=state.trackingSince>1?`Bijhouden begonnen in jaar ${state.trackingSince}. Voorbijgegane doelen zijn niet achteraf beoordeeld.`:'Deze ideeën horen bij de seed van je eiland. Je hoeft ze niet te volgen.';
   $('challenge-list').replaceChildren(...state.goals.map(goal=>{
     const definition=CHALLENGE_CATALOG.find(d=>d.id===goal.id),item=document.createElement('li'),title=document.createElement('strong'),description=document.createElement('p'),status=document.createElement('span'),progress=document.createElement('small');
@@ -253,7 +255,7 @@ const seasonLines={lente:'Lente. Alles loopt uit, ook de vergaderingen.',zomer:'
 function ambienceLine(){
   const light=renderer.light,weather=weatherActive(sim);
   if(weather)return WEATHER[weather].line;
-  if(sim.weather?.rainbow&&sim.year-sim.weather.rainbow<3&&!light.night)return 'Een regenboog! Iedereen wijst tegelijk.';
+  if(renderer.rainbowShowing)return 'Een regenboog! Iedereen wijst tegelijk.';
   if(sim.config.dayNight===false||!light)return sim.era>=3?"Stijgende zee. Optimistische ingenieurs.":"Kalme zee. Kleine ambities.";
   if(light.night)return sim.power>0?'Nacht. De straatlantaarns doen het werk.':'Nacht. Een paar ramen houden de wacht.';
   if(light.dusk>.6)return light.phase<.5?'Ochtendgloren. De eerste bakker is al op.':'Avondrood. Iemand roept dat het eten klaar is.';
@@ -376,8 +378,11 @@ function renderEnding(){
   const influence=o.influence||sim.influence;
   $('ending-causes').textContent=(o.interferences??sim.interferences)?`Jouw invloed: ${influence.rain} regenbuien, ${influence.nudge+influence.rescues} keer hulp, ${influence.rumble} bevingen. ${Math.round(influence.dependence)}% afhankelijkheid; ${influence.fear} angst. ${nl(o.lastConsequence||sim.interventionLedger.at(-1)?.consequence||'')}.`:"Jij keek toe. Zij namen hun eigen beslissingen. De wegen, ruzies en prestaties zijn van hen.";
   $('ending-chronicle').replaceChildren(...(o.chronicle||sim.history.filter(e=>['palace','reform','flood','endgame','legacy'].includes(e.type)).slice(-5)).map(historyItem));
-  const score=o.scores||islandScores(sim);$('ending-score').textContent=`${score.total} / 100`;$('score-recipe').textContent=SCORE_RECIPE;
-  $('score-breakdown').replaceChildren(...Object.entries(score.values).map(([name,value])=>{const item=document.createElement('div');item.className='score-row';const label=document.createElement('span'),number=document.createElement('strong'),bar=document.createElement('progress'),note=document.createElement('small'),info=explainScore(name,value);label.textContent=name;number.textContent=value;bar.max=100;bar.value=value;bar.setAttribute('aria-label',`${name}: ${value} van 100. ${info.what}. ${info.verdict}`);note.className='score-note';note.textContent=`${info.what}. ${info.verdict}`;item.append(label,bar,number,note);return item;}));
+  const score=currentScores(sim,sim.outcome?.scores);$('ending-score').textContent=String(score.total);$('score-recipe').textContent=SCORE_RECIPE;
+  $('keur-title').textContent=score.level.title;$('keur-line').textContent=score.level.line;$('keur-medal').style.setProperty?.('--medal',score.level.color);
+  $('keur-count').textContent=`Alles erop en eraan: ${score.done} van ${score.items}`;
+  $('keur-list').replaceChildren(...score.checklist.map(item=>{const li=document.createElement('li');li.textContent=item.label;li.dataset.done=String(item.done);return li;}));
+  $('score-breakdown').replaceChildren(...Object.entries(score.values).map(([name,value])=>{const item=document.createElement('div');item.className='score-row';const label=document.createElement('span'),number=document.createElement('strong'),bar=document.createElement('progress'),note=document.createElement('small'),info=explainScore(name,value,score.max||100);label.textContent=name;number.textContent=value;bar.max=score.max||100;bar.value=value;bar.setAttribute('aria-label',`${name}: ${value} van ${score.max||100}. ${info.what}. ${info.verdict}`);note.className='score-note';note.textContent=`${info.what}. ${info.verdict}`;item.append(label,bar,number,note);return item;}));
 }
 function cinemaActive(){return !!sim.cinematic&&!sim.cinematic.completed;}
 // 2.8: before the finale, the camera visits the island's big moments and ends under the old tree.
@@ -524,8 +529,8 @@ $('photo-day').addEventListener('click',()=>setPhotoLight(false));
 $('photo-night').addEventListener('click',()=>setPhotoLight(true));
 $('photo-save').addEventListener('click',()=>{try{const id=islandIdentity(sim);downloadCanvas(makePostcard(canvas,{identity:id,year:sim.year,line:`${Math.floor(sim.population).toLocaleString('nl-NL')} inwoners · ${nl(sim.age.name)}`}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-jaar-${sim.year}.png`);showToast('Ansichtkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
 function islandLink(){try{return `${location.origin}${location.pathname}?seed=${sim.seed}`;}catch{return `?seed=${sim.seed}`;}}
-$('ending-card').addEventListener('click',()=>{try{const id=islandIdentity(sim),o=sim.outcome||ENDINGS.independent,family=ensureFamily(sim),score=(o.scores||islandScores(sim)).total;
-  const lines=creditsFor(sim);downloadCanvas(makeEndCard({identity:id,title:nl(o.title),quote:nl(o.quote),familyName:family.lastName,generations:family.generations.length,seed:sim.seed,year:o.year||sim.year,score,before:sim.snapshots[0]?.land,after:o.coast||sim.land.map(t=>`${t.x},${t.y}`),link:islandLink(),photo:canvas,awards:lines.filter(l=>l.kind==='award'),stats:lines.filter(l=>l.kind==='stat')}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-eindkaart.png`);showToast('Eindkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
+$('ending-card').addEventListener('click',()=>{try{const id=islandIdentity(sim),o=sim.outcome||ENDINGS.independent,family=ensureFamily(sim),keur=currentScores(sim,o.scores),score=keur.total;
+  const lines=creditsFor(sim);downloadCanvas(makeEndCard({identity:id,title:nl(o.title),quote:nl(o.quote),familyName:family.lastName,generations:family.generations.length,seed:sim.seed,year:o.year||sim.year,score,before:sim.snapshots[0]?.land,after:o.coast||sim.land.map(t=>`${t.x},${t.y}`),link:islandLink(),photo:canvas,keur,awards:lines.filter(l=>l.kind==='award'),stats:lines.filter(l=>l.kind==='stat')}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-eindkaart.png`);showToast('Eindkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
 $('ending-link').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(islandLink());showToast('Link gekopieerd. Een vriend speelt hetzelfde eiland en mag anders ingrijpen.',3600);}catch{showToast(islandLink(),6000);}});
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));

@@ -44,10 +44,10 @@ export function finishBlaze(s,t,rescued=false){
   t.building=null;t.burntForest=true;t.clearingYear=s.year;s.environment=Math.max(10,s.environment-4);
   s.log('Het bos brandt uit. De open plek en vruchtbare as blijven; hier kan later een wijk groeien.','fire',{x:t.x,y:t.y});
  }else if(!rescued&&burned!=='farm'){
-  t.rebuildFrom=burned;t.rebuildAt=s.year+18;t.building='ruins';t.buildSite=null;
+  t.rebuildFrom=burned;t.rebuildAt=s.year+18;t.building='ruins';t.buildSite=null;s.lostBuildings=(s.lostBuildings||0)+1;
   if(dwelling.includes(burned))s.population=Math.max(4,s.population*.985);
   s.log('De brand laat een ruïne achter. De bewoners beginnen aan een sterker huis.','fire',{x:t.x,y:t.y});
- }else s.log('De brand is geblust. De schade en vruchtbare as blijven zichtbaar.','reform',{x:t.x,y:t.y});
+ }else{if(rescued)s.rescuedFires=(s.rescuedFires||0)+1;s.log('De brand is geblust. De schade en vruchtbare as blijven zichtbaar.','reform',{x:t.x,y:t.y});}
  s.signal('repair',t,rescued?'Geblust · de plek onthoudt het':'As en een nieuw begin');
 }
 export function tendFires(s){

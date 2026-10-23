@@ -23,9 +23,15 @@ function rewardWish(s,wish){
  if(reward==='treasure')findTreasure(s,'rumble',t,true)||findTreasure(s,'build',t,true);
  return REWARD_TEXT[reward]||'';
 }
+// The history keeps only the latest wishes, so lasting totals are counted separately.
+export function wishTally(s,status){
+ const state=s.wishes;if(!state)return 0;
+ state.tally??=state.history.reduce((t,w)=>(t[w.status]=(t[w.status]||0)+1,t),{});
+ return state.tally[status]||0;
+}
 function closeWish(s,status){
  const state=ensureWishes(s),wish=state.active;if(!wish)return;
- wish.status=status;wish.closedAt=s.year;
+ wish.status=status;wish.closedAt=s.year;wishTally(s,status);state.tally[status]=(state.tally[status]||0)+1;
  if(status==='helped'){earnCommission(s);const lasting=rewardWish(s,wish);if(lasting)wish.thanks=`${wish.thanks||'Het is gelukt.'} ${lasting}`;startParty(s,s.tile(wish.x,wish.y),'Een feestje als dank');}
  if(status==='helped'){s.influence.trust=wishClamp(s.influence.trust+3);s.influence.dependence=wishClamp(s.influence.dependence+1.5);}
  // Wishes come about twice as often as before, so each unanswered one weighs half as much.

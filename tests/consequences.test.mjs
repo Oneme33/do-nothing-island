@@ -59,8 +59,8 @@ test('inspection gives a stable household, dates and actual plot memories',()=>{
 });
 test('scores reflect choices, stay bounded and freeze in the saved recap',()=>{
  const s=new Civilization(31),before=islandScores(s);s.influence.dependence=60;s.interferences=30;s.pollution=80;s.environment=20;
- const after=islandScores(s);assert.ok(after.values.zelfstandigheid<before.values.zelfstandigheid);assert.ok(after.values.natuur<before.values.natuur);
- for(const n of Object.values(after.values))assert.ok(n>=0&&n<=100);
+ const after=islandScores(s);assert.ok(after.values['goede buur']<before.values['goede buur']);assert.ok(after.values.natuur<before.values.natuur);
+ for(const n of Object.values(after.values))assert.ok(n>=0&&n<=20);
  finishStory(s,'independent');const score=structuredClone(s.outcome.scores);resumeSandbox(s);for(let i=0;i<20;i++)s.tick();assert.deepEqual(s.outcome.scores,score);assert.deepEqual(Civilization.restore(s.serialize()).outcome.scores,score);
 });
 test('all seven dedicated finale scenes draw finite coordinates at small and large sizes',()=>{

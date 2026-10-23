@@ -864,7 +864,7 @@ export class Civilization {
       const fragile=t=>t.building&&!t.foundingHome&&!t.reservedFor&&t.district!=='heritage'&&!t.landform&&!['farm','beach','forest','tree','original-tree','ruins','town-square','lighthouse','bridge','dock','harbor','quarry','royal-palace','castle-garden'].includes(t.building)&&!t.retrofitted&&t.builtYear!==this.year;
       const collapsed=this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=1.5&&fragile(t)).slice(0,3);
       for(const t of collapsed){t.rebuildFrom=t.building;t.rebuildAt=this.year+18;t.building='ruins';t.buildSite=null;t.quakeHistory=(t.quakeHistory||0)+1;this.signal('rumble',t,'Ingestort');}
-      if(collapsed.length){this.population=Math.max(4,this.population*(1-.012*collapsed.length));this.rebuildRoads();}
+      if(collapsed.length){this.lostBuildings=(this.lostBuildings||0)+collapsed.length;this.population=Math.max(4,this.population*(1-.012*collapsed.length));this.rebuildRoads();}
       this.food=Math.max(0,this.food*.9);this.wood=Math.max(0,this.wood*.9);
       const affected=this.houses.filter(h=>Math.abs(h.x-spot.x)+Math.abs(h.y-spot.y)<=3).slice(0,6);
       const coast=this.reclaimed.filter(h=>h.kind==='land'&&Math.abs(h.x-spot.x)+Math.abs(h.y-spot.y)<=1);

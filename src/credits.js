@@ -1,6 +1,8 @@
 import {islandIdentity} from './identity.js';
 import {TREASURE_CATALOG} from './coast.js';
 import {nl} from './language.js';
+import {wishTally} from './wishes.js';
+import {currentScores} from './finale.js';
 // The ending as a film: the real island in the background, an effect per ending, and credits written from this island's own history.
 const credHash=(a,b=0)=>{const n=Math.sin(a*91.17+b*57.3)*43758.5453;return n-Math.floor(n);};
 const credPick=(s,list,salt)=>list[Math.floor(credHash((s.seed>>>0)%9973,salt)*list.length)];
@@ -12,8 +14,9 @@ function islandAnimal(s){
  return credPick(s,['een eend met ambitie','de haan die leerde klokkijken','een meeuw met een patatverleden'],3);
 }
 export function creditsFor(s){
- const id=islandIdentity(s),family=s.family,o=s.outcome||{},helped=(s.wishes?.history||[]).filter(w=>w.status==='helped').length,unasked=Math.max(0,(s.interferences||0)-helped);
+ const id=islandIdentity(s),family=s.family,o=s.outcome||{},helped=wishTally(s,'helped'),unasked=Math.max(0,(s.interferences||0)-helped);
  const houses=s.houses.length,towers=s.houses.filter(t=>t.building==='tower').length,years=s.year,pop=Math.floor(s.population);
+ const keur=currentScores(s,o.scores);
  const treasure=TREASURE_CATALOG.find(t=>t.id===s.coast?.treasures?.[0]?.id);
  const lines=[
   {kind:'title',text:id.name,sub:nl(o.title||'Een eilandverhaal')},
@@ -25,6 +28,8 @@ export function creditsFor(s){
   {kind:'line',text:islandAnimal(s)},
   ...(treasure?[{kind:'line',text:treasure.title,sub:'gevonden, gepoetst en in het museum gezet'}]:[]),
   ...(s.court?[{kind:'line',text:'Het kasteel',sub:credPick(s,['met meer kamers dan mensen','en een trap die nooit ophoudt','dat elke eeuw een stukje groter werd'],5)}]:[]),
+  {kind:'head',text:'De eilandkeur'},
+  {kind:'award',text:keur.level.title,sub:`${keur.total} van 100 · ${keur.done} van ${keur.items} dingen erop en eraan`},
   {kind:'head',text:'Prijzen'},
   {kind:'award',text:'Langste vergadering',sub:`de gemeenteraad, ${nlNumber(years/3)} uur over de kleur van de bankjes`},
   {kind:'award',text:'Mooiste dak',sub:`familie ${credPick(s,['Bos','Visser','de Boer','Steen','van Dijk'],7)}, voor ‘onverwacht petrol’`},
@@ -57,6 +62,26 @@ function particles(c,id,w,h,t,reduced){
   const x=((t*.08)%1.3-.15)*w,y=h*.25+Math.sin(t)*20*n;c.fillStyle='#e8913c';c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x-40,y-30-Math.sin(t*6)*12*n,x-70,y-10);c.quadraticCurveTo(x-40,y-5,x-25,y+8);c.closePath();c.fill();}
  if(['independent','sanctuary','phoenix','miracles'].includes(id)&&!reduced){for(let k=0;k<3;k++){const cycle=(t*.3+k*.33)%1,cx=w*(.2+credHash(k,Math.floor(t*.3+k*.33))*.6),cy=h*(.12+credHash(k,9)*.25),col=['#d4644f','#e2c26a','#7fa3a8','#c98fb0'][(k+Math.floor(t))%4];if(cycle>.25){const open=(cycle-.25)/.75;c.save();c.globalAlpha=1-open;c.fillStyle=col;for(let i=0;i<14;i++){const a=i/14*Math.PI*2;c.beginPath();c.ellipse(cx+Math.cos(a)*open*40,cy+Math.sin(a)*open*30+open*10,2,2,0,0,Math.PI*2);c.fill();}c.restore();}}}
 }
+// Halfway through the film the inspection stamp drops onto the island, and the checklist ticks itself off.
+function drawKeur(c,w,h,s,u,reduced){
+ if(u<.42)return;
+ const keur=currentScores(s,s.outcome?.scores),k=reduced?1:Math.min(1,(u-.42)/.06),drop=1+(1-k)*1.6,panel=Math.min(360,w*.52),cx=Math.max(110,(w-panel-18)/2),cy=h*.42;
+ if(keur.level.id==='perfect'&&!reduced){c.save();c.globalAlpha=.45*Math.min(1,(u-.42)/.1);c.lineWidth=12;['#e46b5d','#eda04f','#efd36a','#8cc07a','#6fa8d6','#8f7fc4'].forEach((col,i)=>{c.strokeStyle=col;c.beginPath();c.ellipse(cx,h*.95,Math.min(w,h)*.62-i*12,Math.min(w,h)*.62-i*12,0,Math.PI*1.05,Math.PI*1.95);c.stroke();});c.restore();}
+ c.save();c.translate(cx,cy);c.scale(drop,drop);c.rotate(-.08*(1-k)-.05);c.globalAlpha=k;
+ c.fillStyle='rgba(20,34,28,.35)';c.beginPath();c.ellipse(4,6,74,74,0,0,Math.PI*2);c.fill();
+ c.fillStyle=keur.level.color;c.beginPath();c.ellipse(0,0,74,74,0,0,Math.PI*2);c.fill();
+ c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=3;c.beginPath();c.ellipse(0,0,64,64,0,0,Math.PI*2);c.stroke();
+ for(let i=0;i<24;i++){const a=i/24*Math.PI*2;c.fillStyle='rgba(255,255,255,.45)';c.beginPath();c.ellipse(Math.cos(a)*69,Math.sin(a)*69,2,2,0,0,Math.PI*2);c.fill();}
+ c.fillStyle='#293d32';c.textAlign='center';c.font='600 9px sans-serif';c.fillText('DE EILANDKEUR',0,-30);
+ c.font='44px Georgia, serif';c.fillText(String(keur.total),0,12);c.font='10px sans-serif';c.fillText('VAN 100',0,28);
+ c.restore();
+ c.save();c.globalAlpha=k;c.textAlign='center';c.fillStyle='#fbf8ee';c.font='22px Georgia, serif';c.fillText(keur.level.title,cx,cy+104);
+ // One tick per item, appearing one after another.
+ const shown=reduced?keur.items:Math.floor(Math.min(1,(u-.48)/.2)*keur.items),cols=12,size=14;
+ keur.checklist.forEach((item,i)=>{if(i>=Math.max(0,shown))return;const x=cx+((i%cols)-(cols-1)/2)*size*1.3,y=cy+124+Math.floor(i/cols)*size*1.3;c.fillStyle=item.done?'#8cc07a':'rgba(251,248,238,.25)';c.beginPath();c.ellipse(x,y,size/2,size/2,0,0,Math.PI*2);c.fill();if(item.done){c.strokeStyle='#22372c';c.lineWidth=2;c.beginPath();c.moveTo(x-3.5,y);c.lineTo(x-1,y+3);c.lineTo(x+4,y-3);c.stroke();}});
+ if(shown>=keur.items){c.fillStyle='#dfe9d4';c.font='12px sans-serif';c.fillText(`${keur.done} van ${keur.items} dingen erop en eraan`,cx,cy+124+2*size*1.3+8);}
+ c.restore();
+}
 export function drawCredits(c,w,h,s,movie,reduced,island){
  if(!movie)return;const t=reduced?Math.floor(movie.elapsed/6)*6:movie.elapsed,id=movie.id;
  c.setTransform(1,0,0,1,0,0);c.fillStyle='#22372c';c.fillRect(0,0,w,h);
@@ -64,6 +89,7 @@ export function drawCredits(c,w,h,s,movie,reduced,island){
  if(island&&island.width&&island.height){const zoom=1.05+t/movie.duration*.25,iw=island.width,ih=island.height,scale=Math.max(w/iw,h/ih)*zoom;c.globalAlpha=.9;c.drawImage(island,(w-iw*scale)/2,(h-ih*scale)/2,iw*scale,ih*scale);c.globalAlpha=1;}
  c.fillStyle='rgba(20,34,28,.25)';c.fillRect(0,0,w,h);
  particles(c,id,w,h,t,reduced);
+ drawKeur(c,w,h,s,t/movie.duration,reduced);
  // Credits roll up through a soft paper panel.
  const lines=creditsFor(s),panelW=Math.min(360,w*.52),x0=w-panelW-18;
  c.fillStyle='rgba(251,248,238,.9)';c.fillRect(x0,0,panelW,h);

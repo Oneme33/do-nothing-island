@@ -41,3 +41,7 @@ Aanvullende visuele feedback, na het testen van deze reeks:
 Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 
 **Ronde 5, gepusht:** bezoekers van overzee (handelsschip, ontdekkingsreiziger, luchtballon op het plein, zeppelin, cruiseschip), twee buureilandjes met een veerboot vanaf 1700 en langzaam groeiende huisjes, beroemde inwoners met een blauw bordje en museumstuk, opgravingen vanaf 1890 met vondsten voor het museum, en een fotoalbum in het Eilandboek.
+
+**Eilandkeur, gepusht:** nieuwe score van vijf onderdelen van 20 (compleet, welzijn, natuur, veerkracht, goede buur) met een checklist van 24 dingen ‘erop en eraan’, medailles van ‘een eiland’ tot ‘Het Perfecte Eiland’, een keurronde in de rondvlucht, een keurstempel in de aftiteling, de keur op de eindkaart en ‘tot nu toe’ in het Eilandboek. Niks doen geeft ongeveer 75–83, alle wensen helpen 94–100.
+
+**Volgende rondes:** zie de to-do lijst in `INVENTARIS.md`.

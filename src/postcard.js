@@ -31,7 +31,7 @@ function wrap(c,text,x,y,width,lineHeight){
  c.fillText(line.trim(),x,y);return y;
 }
 // The end card: a real photo of the island, the verdict, three awards and a stamp of approval from the old tree.
-export function makeEndCard({identity,title,quote,familyName,generations,seed,year,score,before,after,link,photo,awards=[],stats=[]}){
+export function makeEndCard({identity,title,quote,familyName,generations,seed,year,score,keur,before,after,link,photo,awards=[],stats=[]}){
  const w=1500,h=1000,{canvas,c}=paper(w,h);
  c.fillStyle='#dcebe4';c.fillRect(48,48,860,560);
  if(photo&&photo.width){const scale=Math.max(860/photo.width,560/photo.height),pw=photo.width*scale,ph=photo.height*scale;c.save();c.beginPath();c.rect(48,48,860,560);c.clip();c.drawImage(photo,48+(860-pw)/2,48+(560-ph)/2,pw,ph);c.restore();}
@@ -40,8 +40,8 @@ export function makeEndCard({identity,title,quote,familyName,generations,seed,ye
  c.fillStyle='#293d32';c.font='48px Georgia, serif';wrap(c,title,950,170,500,52);
  c.fillStyle='#5c6c4e';c.font='italic 24px Georgia, serif';wrap(c,`“${quote}”`,950,260,500,32);
  miniMap(c,before,950,360,150);miniMap(c,after,1120,360,150);c.fillStyle='#7b866e';c.font='14px sans-serif';c.fillText('toen',950,530);c.fillText('nu',1120,530);
- // A score badge.
- c.fillStyle='#e2c26a';c.beginPath();c.ellipse(1360,445,62,62,0,0,Math.PI*2);c.fill();c.fillStyle='#293d32';c.textAlign='center';c.font='bold 40px Georgia, serif';c.fillText(String(score),1360,452);c.font='13px sans-serif';c.fillText('VAN 100',1360,475);c.textAlign='left';
+ // The inspection medal, in the colour of its level.
+ c.fillStyle=keur?.level?.color||'#e2c26a';c.beginPath();c.ellipse(1360,445,62,62,0,0,Math.PI*2);c.fill();c.fillStyle='#293d32';c.textAlign='center';c.font='bold 40px Georgia, serif';c.fillText(String(score),1360,452);c.font='13px sans-serif';c.fillText('VAN 100',1360,475);if(keur){c.font='italic 18px Georgia, serif';c.fillText(keur.level.title,1360,535);c.font='13px sans-serif';c.fillText(`${keur.done} van ${keur.items} dingen erop en eraan`,1360,558);}c.textAlign='left';
  c.fillStyle='#293d32';c.font='600 16px sans-serif';c.fillText('PRIJZEN',60,660);
  awards.slice(0,3).forEach((a,i)=>{c.fillStyle='#8a7552';c.font='600 20px sans-serif';c.fillText(`🏆 ${a.text}`,60,700+i*58);c.fillStyle='#5f6a5e';c.font='17px sans-serif';wrap(c,a.sub,92,724+i*58,780,20);});
  c.fillStyle='#293d32';c.font='600 16px sans-serif';c.fillText('IN CIJFERS',950,600);
