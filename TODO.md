@@ -104,3 +104,8 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 - **Dichterbij beginnen:** de eerste blik toont veel lege grond, terwijl het interessante in een klein stukje gebeurt. Begin dicht op het eerste huis en de bewoners en zoom geleidelijk uit naarmate het eiland groeit.
 - **Verstopte verhalen naar voren halen:** het familieverhaal en andere mooie details zitten nu in het Eilandboek. Laat af en toe zo'n moment op het eiland zelf opvallen, met een subtiel, aanklikbaar berichtje, zodat je eerder een band krijgt met de bewoners.
 - **Kortere introductie:** in plaats van drie schermen één korte begroeting, en de uitleg daarna tijdens het ontdekken, op het moment dat je iets voor het eerst ziet of doet.
+
+### Nog te doen: soepeler zoomen op mobiel
+- Tijdens knijpen of slepen tijdelijk minder detail tekenen: geen dieren, wandelaars, wolken, vogels, bootjes en seizoensversiering, en minder golfjes. Anderhalve seconde na loslaten komt alles terug.
+- Op telefoons met pixelverhouding 1,25 tekenen in plaats van 1,5.
+- Als dat niet genoeg is: de vaste delen van het eiland (grond, gebouwen) in een tussenbeeld bewaren en alleen opnieuw tekenen als er iets verandert.
