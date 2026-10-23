@@ -399,7 +399,9 @@ export class Civilization {
     const planned=[...this.tiles.values()].filter(t=>t.buildSite);
     // Homes come slowly until windmills and reclaimed land give the island room for a real building boom.
     const boom=this.housingBoom,homeSites=planned.filter(t=>['hut','house','townhouse','tower'].includes(t.buildSite.type)).length;
-    const needHome=this.population/(this.capacity+homeSites*ERAS[this.era].housing)>[.9,.75,.68][boom]&&homeSites<[1,2+this.era,3+this.era][boom];
+    // Homes come slowly, and never take the last few free plots: that stays for parks, delights and your gifts.
+    const greenReserve=this.freeLand.length>6;
+    const needHome=greenReserve&&this.population/(this.capacity+homeSites*ERAS[this.era].housing)>[.9,.82,.75][boom]&&homeSites<[1,1+this.era,2+this.era][boom];
     if(needHome || needFood) {
       if(needFood && planned.some(t=>t.buildSite.type==='farm'))return;
       if(planned.length>=2+this.era)return;
@@ -661,7 +663,7 @@ export class Civilization {
     }
   }
   upgradeDistricts() {
-    const houses=this.houses.filter(t=>!t.foundingHome);
+    const houses=this.houses.filter(t=>!t.foundingHome&&!t.castle&&!['manor','palace','royal-palace'].includes(t.building));
     const upgrade=houses[Math.floor(this.random()*houses.length)];
     if(upgrade) upgrade.building=this.homeTypeFor(upgrade);
     if(upgrade){upgrade.architecture=this.age.id;upgrade.builtYear=this.year;this.signal('built',upgrade,'A home for a new age');}
@@ -695,9 +697,10 @@ export class Civilization {
     const pressure=this.freeLand.length<=reserve && (this.pressure>.86 || this.food<this.population*.5);
     const ambition=this.era===4 && this.obsessed && this.config.rareEndings && this.endgameStarted;
     // Polder ambition: once mills (and later pumps) exist, the island keeps winning land while its free ground shrinks.
-    const polder=(this.housingBoom>=1||this.era>=2)&&this.freeLand.length<=Math.max(reserve,Math.floor(buildable*(this.era>=2?.4:.25)))&&(this.pressure>.65||this.era>=2&&this.prosperity>50);
+    // Polder ambition: with mills, and later pumps, the island keeps winning land while free ground runs low.
+    const polder=(this.housingBoom>=1||this.era>=2)&&this.freeLand.length<=Math.max(reserve,Math.floor(buildable*(this.era>=2?.45:.3)))&&this.prosperity>35;
     if(!pressure && !polder && !ambition) return false;
-    const maxBatch=[0,5,9,18,ambition?30:26][this.era];
+    const maxBatch=[0,8,14,20,ambition?30:26][this.era];
     const batch=Math.min(maxBatch,limit-total);
     const costs={wood:batch*(this.era===1?5:2),stone:batch*(this.era===1?1:3),wealth:batch*(this.era===1?3:5)};
     if(this.wood<costs.wood || this.stone<costs.stone || this.wealth<costs.wealth) return false;

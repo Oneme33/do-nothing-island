@@ -14,11 +14,11 @@ export function earnCommission(s){
  s.log('De bewoners willen iets voor je bouwen, als dank voor alle hulp. Kies in het Eilandboek bij Wensen wat het wordt.','wish');
  return true;
 }
-export function canCommission(s,tile){return !!tile&&tile.kind==='land'&&(!tile.building||tile.building==='tree')&&!tile.buildSite&&!tile.landform&&!tile.reservedFor&&!tile.foundingHome;}
+export function canCommission(s,tile){return !!tile&&tile.kind==='land'&&(!tile.building||['tree','forest','park','garden','farm'].includes(tile.building))&&!tile.buildSite&&!tile.landform&&!tile.reservedFor&&!tile.foundingHome;}
 export function placeCommission(s,type,x,y){
  const c=ensureCommissions(s),tile=s.tile(x,y),def=COMMISSIONS[type];
  if(!def||c.available<1||s.ending||!canCommission(s,tile))return false;
- if(tile.building==='tree')tile.building=null;
+ if(['tree','forest','park','garden','farm'].includes(tile.building))tile.building=null;
  if(!s.planBuilding(tile,type,true))return false;
  tile.commissioned=true;c.available--;c.built.push({type,x,y,year:s.year});
  s.log(def.log,'delight',{x,y});s.signal('celebrate',tile,`${def.name}, voor jou`);

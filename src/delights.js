@@ -9,7 +9,7 @@ export const DELIGHTS=[
  {type:'zoo',since:1700,population:350,name:'Dierentuin',label:'Kijk, een giraf!',opening:'De dierentuin opent. De giraf kijkt over het hek en vindt de mensen het interessantst.',where:(s,t)=>Math.hypot(t.x,t.y)>=4},
  {type:'theme-park',since:1960,population:700,name:'Pretpark',label:'Nog een keer!',opening:'Een pretpark opent, met een achtbaan die precies één looping te veel heeft.',where:(s,t)=>Math.hypot(t.x,t.y)>=5},
  {type:'petting-farm',since:150,population:40,name:'Kinderboerderij',label:'Mèèh!',opening:'Een kinderboerderij opent. De geit wordt direct verkozen tot burgemeester van de kinderen.',where:(s,t)=>Math.hypot(t.x,t.y)>=3&&Math.hypot(t.x,t.y)<=8},
- {type:'observatory',since:1600,population:200,name:'Sterrenwacht',label:'Sterren kijken',opening:'Een sterrenwacht verrijst bij de berg. De eerste ontdekking: de maan is er nog.',where:(s,t,near)=>near(t,p=>!!p?.landform)},
+ {type:'observatory',since:1600,population:200,name:'Sterrenwacht',label:'Sterren kijken',opening:'Een sterrenwacht verrijst bij de berg. De eerste ontdekking: de maan is er nog.',where:(s,t,near)=>near(t,p=>!!p?.landform)||s.year>=1900&&Math.hypot(t.x,t.y)>=5},
  {type:'ice-cream',since:1800,population:300,name:'IJssalon',label:'Een ijsje!',opening:'Een ijssalon opent bij het strand. Het eiland leert het woord ‘nog eentje’.',where:(s,t,near)=>near(t,p=>p?.building==='beach')},
  {type:'greenhouse',since:1850,population:300,name:'Kas',label:'Tomaten onder glas',opening:'Een glazen kas vol tomaten en twijfelachtige cactussen opent. De tuiniers praten er alleen fluisterend.',where:(s,t)=>delightAround(t).some(p=>['farm','garden','park'].includes(s.tile(p.x,p.y)?.building))}
 ];
@@ -24,7 +24,7 @@ export function planDelight(s){
   if(s.year<d.since||s.population<d.population||[...s.tiles.values()].some(t=>t.building===d.type||t.rebuildFrom===d.type||t.buildSite?.type===d.type))continue;
   // A lone tree may make way; homes, farms and reserved plots never do.
   const near=(t,r)=>delightAround(t).some(p=>r(s.tile(p.x,p.y)))||[[1,1],[-1,-1],[1,-1],[-1,1],[2,0],[-2,0],[0,2],[0,-2]].some(([dx,dy])=>r(s.tile(t.x+dx,t.y+dy)));
-  const spots=s.land.filter(t=>(!t.building||t.building==='tree'||d.type==='observatory'&&t.building==='forest')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
+  const spots=s.land.filter(t=>(!t.building||['tree','garden','park'].includes(t.building)||d.type==='observatory'&&t.building==='forest')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
   const spot=spots[(s.year*13+s.seed)%spots.length],tree=spot.building;if(tree)spot.building=null;
   if(s.planBuilding(spot,d.type))return true;
   if(tree)spot.building=tree;

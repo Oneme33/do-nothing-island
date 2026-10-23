@@ -626,7 +626,7 @@ canvas.addEventListener('pointerup',e=>{
     const r=canvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
     const tile=renderer.pick(x,y);
     if(cinemaActive()){cheerCinema();renderer.ripple(x,y);drag=null;return;}
-    if(commissionChoice){const t=sim.tile(tile.x,tile.y);if(canCommission(sim,t)&&placeCommission(sim,commissionChoice,tile.x,tile.y)){showToast(`De bouwers beginnen aan je ${COMMISSIONS[commissionChoice].name.toLowerCase()}.`,3200);commissionChoice=null;chooseMode('nudge');dirtyHistory=true;updateUI();save();}else showToast('Daar kan het niet. Kies een vrije plek, of een plek met alleen een boom.',2800);drag=null;return;}
+    if(commissionChoice){const t=sim.tile(tile.x,tile.y);if(canCommission(sim,t)&&placeCommission(sim,commissionChoice,tile.x,tile.y)){showToast(`De bouwers beginnen aan je ${COMMISSIONS[commissionChoice].name.toLowerCase()}.`,3200);commissionChoice=null;chooseMode('nudge');dirtyHistory=true;updateUI();save();}else showToast('Daar kan het niet. Kies een vrije plek, of een boom, bos, park, tuin of akker.',2800);drag=null;return;}
     if(renderer.pickWishResident(x,y)){openWishes();drag=null;return;}
     if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}drag=null;return;}
     if(sim.ending){showToast("Hun verhaal is klaar. Open het naschrift om vrij verder te spelen.");drag=null;return;}

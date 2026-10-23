@@ -1968,11 +1968,11 @@ function earnCommission(s){
  s.log('De bewoners willen iets voor je bouwen, als dank voor alle hulp. Kies in het Eilandboek bij Wensen wat het wordt.','wish');
  return true;
 }
-function canCommission(s,tile){return !!tile&&tile.kind==='land'&&(!tile.building||tile.building==='tree')&&!tile.buildSite&&!tile.landform&&!tile.reservedFor&&!tile.foundingHome;}
+function canCommission(s,tile){return !!tile&&tile.kind==='land'&&(!tile.building||['tree','forest','park','garden','farm'].includes(tile.building))&&!tile.buildSite&&!tile.landform&&!tile.reservedFor&&!tile.foundingHome;}
 function placeCommission(s,type,x,y){
  const c=ensureCommissions(s),tile=s.tile(x,y),def=COMMISSIONS[type];
  if(!def||c.available<1||s.ending||!canCommission(s,tile))return false;
- if(tile.building==='tree')tile.building=null;
+ if(['tree','forest','park','garden','farm'].includes(tile.building))tile.building=null;
  if(!s.planBuilding(tile,type,true))return false;
  tile.commissioned=true;c.available--;c.built.push({type,x,y,year:s.year});
  s.log(def.log,'delight',{x,y});s.signal('celebrate',tile,`${def.name}, voor jou`);
@@ -1999,7 +1999,7 @@ const DELIGHTS=[
  {type:'zoo',since:1700,population:350,name:'Dierentuin',label:'Kijk, een giraf!',opening:'De dierentuin opent. De giraf kijkt over het hek en vindt de mensen het interessantst.',where:(s,t)=>Math.hypot(t.x,t.y)>=4},
  {type:'theme-park',since:1960,population:700,name:'Pretpark',label:'Nog een keer!',opening:'Een pretpark opent, met een achtbaan die precies één looping te veel heeft.',where:(s,t)=>Math.hypot(t.x,t.y)>=5},
  {type:'petting-farm',since:150,population:40,name:'Kinderboerderij',label:'Mèèh!',opening:'Een kinderboerderij opent. De geit wordt direct verkozen tot burgemeester van de kinderen.',where:(s,t)=>Math.hypot(t.x,t.y)>=3&&Math.hypot(t.x,t.y)<=8},
- {type:'observatory',since:1600,population:200,name:'Sterrenwacht',label:'Sterren kijken',opening:'Een sterrenwacht verrijst bij de berg. De eerste ontdekking: de maan is er nog.',where:(s,t,near)=>near(t,p=>!!p?.landform)},
+ {type:'observatory',since:1600,population:200,name:'Sterrenwacht',label:'Sterren kijken',opening:'Een sterrenwacht verrijst bij de berg. De eerste ontdekking: de maan is er nog.',where:(s,t,near)=>near(t,p=>!!p?.landform)||s.year>=1900&&Math.hypot(t.x,t.y)>=5},
  {type:'ice-cream',since:1800,population:300,name:'IJssalon',label:'Een ijsje!',opening:'Een ijssalon opent bij het strand. Het eiland leert het woord ‘nog eentje’.',where:(s,t,near)=>near(t,p=>p?.building==='beach')},
  {type:'greenhouse',since:1850,population:300,name:'Kas',label:'Tomaten onder glas',opening:'Een glazen kas vol tomaten en twijfelachtige cactussen opent. De tuiniers praten er alleen fluisterend.',where:(s,t)=>delightAround(t).some(p=>['farm','garden','park'].includes(s.tile(p.x,p.y)?.building))}
 ];
@@ -2014,7 +2014,7 @@ function planDelight(s){
   if(s.year<d.since||s.population<d.population||[...s.tiles.values()].some(t=>t.building===d.type||t.rebuildFrom===d.type||t.buildSite?.type===d.type))continue;
   // A lone tree may make way; homes, farms and reserved plots never do.
   const near=(t,r)=>delightAround(t).some(p=>r(s.tile(p.x,p.y)))||[[1,1],[-1,-1],[1,-1],[-1,1],[2,0],[-2,0],[0,2],[0,-2]].some(([dx,dy])=>r(s.tile(t.x+dx,t.y+dy)));
-  const spots=s.land.filter(t=>(!t.building||t.building==='tree'||d.type==='observatory'&&t.building==='forest')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
+  const spots=s.land.filter(t=>(!t.building||['tree','garden','park'].includes(t.building)||d.type==='observatory'&&t.building==='forest')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
   const spot=spots[(s.year*13+s.seed)%spots.length],tree=spot.building;if(tree)spot.building=null;
   if(s.planBuilding(spot,d.type))return true;
   if(tree)spot.building=tree;
@@ -2100,7 +2100,8 @@ function advanceWeather(s){
   if(kind==='snowstorm'){s.food*=.97;s.wood=Math.max(0,s.wood*.94);}
   return kind;
  }
- if(s.weather&&s.weather.kind==='shower'&&!s.weather.rainbow&&s.year===s.weather.until+1){s.weather.rainbow=s.year;}
+ // Only now and then does a shower end in a rainbow.
+ if(s.weather&&s.weather.kind==='shower'&&!s.weather.rainbow&&s.year===s.weather.until+1&&wxHash(s.seed,s.year,13)<.25){s.weather.rainbow=s.year;}
  if(s.year<s.nextWeather||s.ending||s.storm)return null;
  const pick=KINDS[Math.floor(wxHash(s.seed,s.year,3)*KINDS.length)],def=WEATHER[pick];
  s.weather={kind:pick,since:s.year,until:s.year+def.years-1};
@@ -2498,7 +2499,9 @@ class Civilization {
     const planned=[...this.tiles.values()].filter(t=>t.buildSite);
     // Homes come slowly until windmills and reclaimed land give the island room for a real building boom.
     const boom=this.housingBoom,homeSites=planned.filter(t=>['hut','house','townhouse','tower'].includes(t.buildSite.type)).length;
-    const needHome=this.population/(this.capacity+homeSites*ERAS[this.era].housing)>[.9,.75,.68][boom]&&homeSites<[1,2+this.era,3+this.era][boom];
+    // Homes come slowly, and never take the last few free plots: that stays for parks, delights and your gifts.
+    const greenReserve=this.freeLand.length>6;
+    const needHome=greenReserve&&this.population/(this.capacity+homeSites*ERAS[this.era].housing)>[.9,.82,.75][boom]&&homeSites<[1,1+this.era,2+this.era][boom];
     if(needHome || needFood) {
       if(needFood && planned.some(t=>t.buildSite.type==='farm'))return;
       if(planned.length>=2+this.era)return;
@@ -2760,7 +2763,7 @@ class Civilization {
     }
   }
   upgradeDistricts() {
-    const houses=this.houses.filter(t=>!t.foundingHome);
+    const houses=this.houses.filter(t=>!t.foundingHome&&!t.castle&&!['manor','palace','royal-palace'].includes(t.building));
     const upgrade=houses[Math.floor(this.random()*houses.length)];
     if(upgrade) upgrade.building=this.homeTypeFor(upgrade);
     if(upgrade){upgrade.architecture=this.age.id;upgrade.builtYear=this.year;this.signal('built',upgrade,'A home for a new age');}
@@ -2794,9 +2797,10 @@ class Civilization {
     const pressure=this.freeLand.length<=reserve && (this.pressure>.86 || this.food<this.population*.5);
     const ambition=this.era===4 && this.obsessed && this.config.rareEndings && this.endgameStarted;
     // Polder ambition: once mills (and later pumps) exist, the island keeps winning land while its free ground shrinks.
-    const polder=(this.housingBoom>=1||this.era>=2)&&this.freeLand.length<=Math.max(reserve,Math.floor(buildable*(this.era>=2?.4:.25)))&&(this.pressure>.65||this.era>=2&&this.prosperity>50);
+    // Polder ambition: with mills, and later pumps, the island keeps winning land while free ground runs low.
+    const polder=(this.housingBoom>=1||this.era>=2)&&this.freeLand.length<=Math.max(reserve,Math.floor(buildable*(this.era>=2?.45:.3)))&&this.prosperity>35;
     if(!pressure && !polder && !ambition) return false;
-    const maxBatch=[0,5,9,18,ambition?30:26][this.era];
+    const maxBatch=[0,8,14,20,ambition?30:26][this.era];
     const batch=Math.min(maxBatch,limit-total);
     const costs={wood:batch*(this.era===1?5:2),stone:batch*(this.era===1?1:3),wealth:batch*(this.era===1?3:5)};
     if(this.wood<costs.wood || this.stone<costs.stone || this.wealth<costs.wealth) return false;
@@ -5613,7 +5617,7 @@ canvas.addEventListener('pointerup',e=>{
     const r=canvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
     const tile=renderer.pick(x,y);
     if(cinemaActive()){cheerCinema();renderer.ripple(x,y);drag=null;return;}
-    if(commissionChoice){const t=sim.tile(tile.x,tile.y);if(canCommission(sim,t)&&placeCommission(sim,commissionChoice,tile.x,tile.y)){showToast(`De bouwers beginnen aan je ${COMMISSIONS[commissionChoice].name.toLowerCase()}.`,3200);commissionChoice=null;chooseMode('nudge');dirtyHistory=true;updateUI();save();}else showToast('Daar kan het niet. Kies een vrije plek, of een plek met alleen een boom.',2800);drag=null;return;}
+    if(commissionChoice){const t=sim.tile(tile.x,tile.y);if(canCommission(sim,t)&&placeCommission(sim,commissionChoice,tile.x,tile.y)){showToast(`De bouwers beginnen aan je ${COMMISSIONS[commissionChoice].name.toLowerCase()}.`,3200);commissionChoice=null;chooseMode('nudge');dirtyHistory=true;updateUI();save();}else showToast('Daar kan het niet. Kies een vrije plek, of een boom, bos, park, tuin of akker.',2800);drag=null;return;}
     if(renderer.pickWishResident(x,y)){openWishes();drag=null;return;}
     if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}drag=null;return;}
     if(sim.ending){showToast("Hun verhaal is klaar. Open het naschrift om vrij verder te spelen.");drag=null;return;}

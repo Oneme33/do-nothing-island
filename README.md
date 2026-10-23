@@ -42,6 +42,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Voertuigen gaan mee met de tijd.** Eerst duwen bewoners handkarren, vanaf 600 rijden er paard en wagen, vanaf 1750 koetsen, vanaf 1900 oldtimers en pas vanaf 1955 moderne auto's. Fietsen komen vanaf 1860.
 
+**Altijd ruimte.** Vanaf het molentijdperk wint het eiland land zodra minder dan 30% van de grond vrij is (later 45%), in grotere stukken dan eerst en zonder op woningdruk te wachten. Huizen komen trager en laten altijd een paar plekken vrij, zodat speciale gebouwen, de dierentuin, het pretpark en jouw opdrachten een plek vinden; die mogen ook op een park, tuin of bos (opdrachten ook op een akker). Een regenboog verschijnt alleen af en toe na een bui.
+
 **Polderakkers.** Als de voedselbalans krap is, wordt een derde van nieuw gewonnen land meteen akker, zodat een groeiende bevolking te eten heeft.
 
 **Polders en torenflats.** Nieuwe eilanden liggen in een grotere zee (29×29 tegels; het eiland zelf begint even groot als vroeger). De standaardinstelling ‘Groeit mee · tot 720’ laat de grens oplopen als het goed gaat: 560 tegels, vanaf 1600 met welvaart 620, vanaf 1850 met welvaart en water 680, en vanaf 2000 tot 720. Een bereikte grens blijft staan. Met molens (vanaf 1250) begint het eiland land te winnen zodra minder dan een kwart van de grond vrij is; met gemalen vanaf de stoomtijd bij minder dan veertig procent vrij, of als het welvarend is. Moderne gemalen werken sneller en in grotere stukken, zodat een goed lopend eiland tegen het einde rond de 650 tot 700 tegels haalt. Vanaf de stoomtijd worden de oudste huizen geleidelijk herenhuizen, en vanaf 1960 krijgen de achterste wijken torenflats, tot ongeveer een derde van alle woningen.
