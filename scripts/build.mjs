@@ -1,4 +1,4 @@
-import { mkdir, copyFile, cp, rm, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, copyFile, cp, rm, readFile, writeFile, readdir } from 'node:fs/promises';
 await rm('dist', { recursive:true, force:true });
 await mkdir('dist', { recursive:true });
 for (const file of ['index.html','styles.css','favicon.svg']) await copyFile(file,`dist/${file}`);
@@ -12,6 +12,8 @@ const html = (await readFile('index.html','utf8'))
   .replace('<script type="module" src="./src/app.js"></script>',()=>`<script>(()=>{\n${script}\n})();</script>`);
 await writeFile('start.html',html);
 await writeFile('dist/start.html',html);
-// Online, the single-file version is the front page: a page reload always fetches it fresh, so updates show at once.
-await writeFile('dist/index.html',html);
+// Every build stamps its module URLs with a version, so a new upload is fetched fresh while unchanged builds stay cached.
+const stamp=Date.now().toString(36);
+for(const name of (await readdir('dist/src')).filter(n=>n.endsWith('.js'))){const file=`dist/src/${name}`;await writeFile(file,(await readFile(file,'utf8')).replace(/from '\.\/([\w-]+)\.js'/g,(m,n)=>`from './${n}.js?v=${stamp}'`));}
+await writeFile('dist/index.html',(await readFile('dist/index.html','utf8')).replace('./src/app.js','./src/app.js?v='+stamp).replace('./styles.css','./styles.css?v='+stamp));
 console.log('Built Do Nothing Island → dist/ (no runtime dependencies)');
