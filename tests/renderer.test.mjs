@@ -148,7 +148,7 @@ test('the larger palace, history overlays and reserved campus render with smooth
   renderer.reduced=width<500;renderer.showHistory=true;renderer.historySnapshot=sim.snapshots[0];renderer.focusTile(sim.tile(-1,1),.5);
   let previous=renderer.zoom;
   for(let i=0;i<70;i++){renderer.draw(100+i*16);assert.ok(Math.abs(renderer.zoom-previous)<.09,'camera never jumps');previous=renderer.zoom;}
-  assert.equal(renderer.focus,null,'focus also expires with reduced motion');assert.ok(calls.includes('fillText'));assert.ok(calls.includes('stroke'));
+  assert.equal(renderer.focus,null,'focus also expires with reduced motion');if(width>=700)assert.ok(calls.includes('fillText'),'landmark names on larger screens');assert.ok(calls.includes('stroke'));
  }
 });
 test('every open wish shows one clickable question mark at the requested place at either screen size',()=>{

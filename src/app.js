@@ -277,9 +277,11 @@ let shownAge=null,ageTimer;
 // Now and then the camera glides in close to something happening, but never while you are busy yourself.
 let lastUserActivity=-Infinity,lastDive=-Infinity;
 for(const type of ['pointerdown','wheel','keydown'])window.addEventListener(type,()=>{lastUserActivity=performance.now();},{capture:true,passive:true});
+// Automatic camera dives are off by default on phones; the setting can switch them on.
+const autoZoomOn=()=>sim.config.autoZoom??!(typeof window!=='undefined'&&window.innerWidth<700);
 function maybeDive(x,y,important=false){
   const now=performance.now();
-  if(sim.config.autoZoom===false||tour||photoOn||paused||renderer.reduced||otherDialogOpen()||now-lastUserActivity<20000||!important&&now-lastDive<90000)return;
+  if(!autoZoomOn()||tour||photoOn||paused||renderer.reduced||otherDialogOpen()||now-lastUserActivity<20000||!important&&now-lastDive<90000)return;
   lastDive=now;renderer.dive(x,y,6);
 }
 function announceAge(){
@@ -564,7 +566,7 @@ $('photo-save').addEventListener('click',()=>{try{const id=islandIdentity(sim);d
 function islandLink(){try{return `${location.origin}${location.pathname}?seed=${sim.seed}`;}catch{return `?seed=${sim.seed}`;}}
 $('ending-card').addEventListener('click',()=>{try{const id=islandIdentity(sim),o=sim.outcome||ENDINGS.independent,family=ensureFamily(sim),keur=currentScores(sim,o.scores),score=keur.total;
   const lines=creditsFor(sim);downloadCanvas(makeEndCard({identity:id,title:nl(o.title),quote:nl(o.quote),familyName:family.lastName,generations:family.generations.length,seed:sim.seed,year:o.year||sim.year,score,before:sim.snapshots[0]?.land,after:o.coast||sim.land.map(t=>`${t.x},${t.y}`),link:islandLink(),photo:canvas,keur,awards:lines.filter(l=>l.kind==='award'),stats:lines.filter(l=>l.kind==='stat')}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-eindkaart.png`);showToast('Eindkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
-$('toggle-details').addEventListener('click',()=>{const on=$('island-window').classList.toggle('show-details');$('toggle-details').setAttribute('aria-pressed',String(!!on));});
+$('toggle-details').addEventListener('click',()=>{const on=$('island-window').classList.toggle('show-details');renderer.showDetails=!!on;$('toggle-details').setAttribute('aria-pressed',String(!!on));});
 $('ending-link').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(islandLink());showToast('Link gekopieerd. Een vriend speelt hetzelfde eiland en mag anders ingrijpen.',3600);}catch{showToast(islandLink(),6000);}});
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));
@@ -602,7 +604,7 @@ $('resources').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e
 $('show-numbers').checked=sim.config.showNumbers===true;
 const volumes=()=>({music:(sim.config.musicVolume??50)/100,effects:(sim.config.effectsVolume??100)/100});
 for(const [id,keyName] of [['music-volume','musicVolume'],['effects-volume','effectsVolume']]){$(id).value=String(sim.config[keyName]??(id==='music-volume'?50:100));$(id).addEventListener('input',e=>{sim.config[keyName]=Number(e.target.value);soundscape?.setVolumes(volumes());save();});}
-$('auto-zoom').checked=sim.config.autoZoom!==false;
+$('auto-zoom').checked=autoZoomOn();
 $('auto-zoom').addEventListener('change',e=>{sim.config.autoZoom=e.target.checked;save();});
 $('day-night').addEventListener('change',e=>{sim.config.dayNight=e.target.checked;renderer.dayNight=e.target.checked;updateUI();save();});
 $('restart').addEventListener('click',()=>{$('restart-confirm').hidden=false;$('restart').hidden=true;});

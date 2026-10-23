@@ -293,8 +293,17 @@ export class IslandRenderer {
       this.ellipse(0,-h+3,9.5,3.4,'#3f3530');this.ellipse(0,-h+3.6,6.4,2.1,`rgba(255,${active?120:90},50,${glow.toFixed(3)})`);
       // Lava traces down the flanks: faint and dark when quiet, bright flows when it erupts.
       this.lavaLight(0,-h+3.6,active?1.6:.9);
-      for(const path of [[[2,-h+5],[6,-h*.72],[3,-h*.5],[12,-h*.22],[15,-2]],[[-3,-h+5],[-8,-h*.66],[-6,-h*.42],[-14,-h*.15]]]){if(active)for(const [x,y] of path.slice(1))this.lavaLight(x,y,.7);
-        this.line(path,active?'#c8502a':'#6e3a2c',active?2.6:1.4);if(active)this.line(path,'#ffcf6a',.9);
+      // Lava flows: a ribbon that widens as it runs down, with a dark crust, glowing lava and a bright core.
+      // Quiet, only a short trickle glows below the crater; in an eruption the flows reach the foot.
+      const flows=[[[2,-h+5],[6,-h*.72],[3,-h*.5],[12,-h*.22],[15,-2]],[[-3,-h+5],[-8,-h*.66],[-6,-h*.42],[-14,-h*.15]]];
+      for(const [n,full] of flows.entries()){
+        const path=active?full:full.slice(0,n?2:3);if(path.length<2)continue;
+        const ribbon=(w0,w1)=>{const left=[],right=[];path.forEach(([x,y],i)=>{const a=path[Math.max(0,i-1)],b=path[Math.min(path.length-1,i+1)],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy)||1,w=w0+(w1-w0)*i/(path.length-1);left.push([x-dy/len*w,y+dx/len*w*.6]);right.push([x+dy/len*w,y-dx/len*w*.6]);});return[...left,...right.reverse()];};
+        this.poly(ribbon(active?1.3:.9,active?2.8:1.5),'#4a2a22');
+        this.poly(ribbon(active?.85:.55,active?2:1),active?'#d6502a':'#b24a2a');
+        this.poly(ribbon(active?.3:.2,active?.9:.45),active?'#ffc24a':'#f08a3a');
+        // Glowing clots slide down the stream.
+        for(let k=0;k<(active?4:2);k++){const f=((t*(active?.25:.12))+k/(active?4:2)+n*.3)%1,seg=f*(path.length-1),i=Math.min(path.length-2,Math.floor(seg)),u=seg-i,x=path[i][0]+(path[i+1][0]-path[i][0])*u,y=path[i][1]+(path[i+1][1]-path[i][1])*u;this.ellipse(x,y,active?1.1:.7,active?.8:.5,'#fff0b0');if(active||k===0)this.lavaLight(x,y,active?.6:.35);}
       }
       if(active){const c=this.ctx;c.save();c.globalCompositeOperation='lighter';this.ellipse(0,-h+2,18,9,'rgba(255,120,60,.18)');c.restore();for(let i=0;i<4;i++){const f=(t*.9+i*.25)%1;this.ellipse(-3+i*2+Math.sin(i+t)*4,-h-f*16,1.2,1.2,`rgba(255,${150+i*20},80,${(1-f).toFixed(3)})`);}}
       if(!active&&this.light.winter>0)this.poly([[-11,-h+5],[-6,-h+1],[-1,-h+3],[4,-h],[10,-h+4],[8,-h*.8],[2,-h*.85],[-4,-h*.78],[-9,-h*.82]],`rgba(246,248,249,${(this.light.winter*.85).toFixed(3)})`);
@@ -1676,6 +1685,7 @@ export class IslandRenderer {
     for(const id of ids){const t=this.sim.tiles.get(id);if(!t)continue;const p=this.p(t.x,t.y),adj=[[t.x,t.y-1],[t.x+1,t.y],[t.x,t.y+1],[t.x-1,t.y]];for(let i=0;i<4;i++)if(!ids.has(key(...adj[i]))){const a=corners[i],b=corners[(i+1)%4],points=[[p.x+a[0],p.y+a[1]],[p.x+b[0],p.y+b[1]]];this.line(points,'#f8f0d9cc',4);this.line(points,'#b88b54',1.8);}}
   }
   drawLandmarkLabels(){
+    if(this.width<700&&!this.showDetails)return;
     const court=this.sim.court&&this.sim.tile(this.sim.court.x,this.sim.court.y);
     if(['royal-palace','palace'].includes(court?.building)){const p=this.point(court.x,court.y);this.landmarkLabel(court.building==='palace'?(this.sim.year<1250?'DE BURCHT':'HET KASTEEL'):'HET NIEUWE PALEIS',p.x,p.y-(this.sim.year<1250?80:100)*this.zoom);}
     const home=this.sim.buildings.find(t=>t.foundingHome);if(!home||!['manor','palace'].includes(home.building))return;
