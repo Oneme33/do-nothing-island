@@ -109,3 +109,8 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 - Tijdens knijpen of slepen tijdelijk minder detail tekenen: geen dieren, wandelaars, wolken, vogels, bootjes en seizoensversiering, en minder golfjes. Anderhalve seconde na loslaten komt alles terug.
 - Op telefoons met pixelverhouding 1,25 tekenen in plaats van 1,5.
 - Als dat niet genoeg is: de vaste delen van het eiland (grond, gebouwen) in een tussenbeeld bewaren en alleen opnieuw tekenen als er iets verandert.
+- **Flikkerende hoofdjes (ook op desktop):** de hoofdjes van bewoners flikkeren soms. Vermoedelijk wisselen bewoners en gebouwen met dezelfde diepte steeds van volgorde, of knipperen ze bij het in- en uitlopen van een deur. Uitzoeken en een vaste tekenvolgorde geven.
+
+### Nog te doen: kleine wensen
+- **Cadeau zonder inzoomen:** bij het bouwen van een cadeau door de bewoners niet automatisch inzoomen, maar een duidelijke marker op de plek laten zien (bijvoorbeeld een vlaggetje of een strik boven de bouwplaats, tot het klaar is).
+- **Kerk met kerkhof:** de kerk krijgt een kerkhof ernaast. In het begin een kleine kerk met een paar grafjes; later groeit het kerkhof mee en staat er aan het einde een grote kerk ergens achterin het eiland, met een flink kerkhof.
