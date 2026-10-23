@@ -258,8 +258,10 @@ function announceAge(){
   maybeDive(1,1,true);
   clearTimeout(ageTimer);ageTimer=setTimeout(()=>{$('age-card').hidden=true;$('island-window').classList.remove('age-shift');},4800);
 }
+let shownCentury=null;
 function updateUI(){
   announceAge();
+  const century=Math.floor(sim.year/100);if(shownCentury!==null&&century>shownCentury)soundscape?.play('century');shownCentury=century;
   updateAwayReport();
   syncCollection();
   updateWishBubble();
@@ -418,9 +420,9 @@ function frame(now){
     }
   }
   advanceTour(now);
-  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite)});}
+  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite),close:Math.max(0,Math.min(1,(renderer.zoom/Math.max(.3,renderer.fitZoom||1)-1)/1.1))});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
-  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);}sim.signals=[];}
+  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');}sim.signals=[];}
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;
