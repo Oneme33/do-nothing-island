@@ -1,6 +1,6 @@
 // How the weather looks: rain, lightning, fog banks, a dry tint, heat shimmer, snow and a rainbow afterwards.
 const wfHash=(a,b)=>{const n=Math.sin(a*127.1+b*311.7)*43758.5453;return n-Math.floor(n);};
-export const RAINBOW_SECONDS=16,RAINBOW_REST=360;
+export const RAINBOW_SECONDS=9,RAINBOW_REST=360;
 export function drawWeather(r){
  const s=r.sim,w=s.weather;if(!w||s.ending){r.rainbowShowing=false;return;}
  const active=s.year<=w.until?w.kind:null,c=r.ctx,W=r.width,H=r.height,t=r.reduced?0:r.time;
@@ -34,7 +34,7 @@ export function drawWeather(r){
   if(day&&rested&&!r.reduced)r._rainbowStart=now;
  }
  const since=(now-(r._rainbowStart||0))/1000;
- const rainbow=r._rainbowStart&&since<RAINBOW_SECONDS?Math.min(1,since/3,(RAINBOW_SECONDS-since)/4):0;
+ const rainbow=r._rainbowStart&&since<RAINBOW_SECONDS?Math.min(1,since/2,(RAINBOW_SECONDS-since)/2.5):0;
  r.rainbowShowing=rainbow>0;
  if(rainbow>0){
   // Anchored to the island: it moves and scales with the camera instead of hanging on the screen.

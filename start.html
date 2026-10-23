@@ -283,6 +283,20 @@ body>main{padding:0;margin:0;max-width:none}
  #open-ending::before{content:'Einde';font-size:10px}
  #new-island span{font-size:13px!important}
 }
+
+/* The closing film fills the screen: the island and its words, with two small buttons in the corner. */
+.cinema-dialog{width:100vw!important;max-width:none!important;height:100vh!important;max-height:none!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#1d2a24!important;overflow:hidden}
+.cinema-dialog::backdrop{background:#1d2a24}
+.cinema-dialog #finale-canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
+.cinema-dialog>.eyebrow,.cinema-dialog .dialog-note,.cinema-dialog progress,.cinema-dialog #cinema-title,.cinema-dialog #cinema-line,.cinema-dialog .cinema-caption>.eyebrow,#cinema-cheer{display:none!important}
+.cinema-dialog .cinema-caption{position:absolute!important;right:16px;bottom:14px;width:auto!important;background:none}
+.cinema-dialog .cinema-caption div{display:flex;gap:6px}
+.cinema-dialog button#cinema-skip,.cinema-dialog #cinema-pause{position:relative;font-size:11px;padding:6px 12px;border-radius:16px;background:rgba(250,249,240,.16);color:#f3efe2;border:1px solid rgba(250,249,240,.3)}
+.cinema-dialog #cinema-pause{position:absolute;right:16px;bottom:52px}
+.cinema-dialog #cinema-close{z-index:3;color:#f3efe2;background:rgba(250,249,240,.12);border-color:rgba(250,249,240,.3)}
+
+.keur-fold{margin:12px 0}.keur-fold summary{cursor:pointer;list-style:none}.keur-fold summary::-webkit-details-marker{display:none}.keur-fold summary::after{content:' ▾';color:#8a9a7c}.keur-fold[open] summary::after{content:' ▴'}
+details.score-row{display:block}details.score-row>summary{display:grid;grid-template-columns:115px 1fr 30px;align-items:center;gap:10px;cursor:pointer;list-style:none}details.score-row>summary::-webkit-details-marker{display:none}details.score-row .score-note{margin:4px 0 6px!important}
 </style>
 </head>
 <body>
@@ -358,7 +372,7 @@ body>main{padding:0;margin:0;max-width:none}
   <dialog id="book-dialog" class="book-dialog" aria-label="Het eilandboek"><div class="book-bar"><div class="book-tabs" role="tablist" aria-label="Hoofdstukken van het eilandboek"><button id="book-tab-journal" role="tab" aria-controls="book-journal" aria-selected="true" tabindex="0"><span aria-hidden="true">✳</span> Kroniek</button><button id="book-tab-family" role="tab" aria-controls="book-family" aria-selected="false" tabindex="-1"><span aria-hidden="true">♧</span> Familie</button><button id="book-tab-wishes" role="tab" aria-controls="book-wishes" aria-selected="false" tabindex="-1"><span aria-hidden="true">♡</span> Wensen</button><button id="book-tab-challenges" role="tab" aria-controls="book-challenges" aria-selected="false" tabindex="-1"><span aria-hidden="true">✧</span> Uitdagingen</button><button id="book-tab-museum" role="tab" aria-controls="book-museum" aria-selected="false" tabindex="-1"><span aria-hidden="true">⌂</span> Museum</button><button id="book-tab-album" role="tab" aria-controls="book-album" aria-selected="false" tabindex="-1"><span aria-hidden="true">▣</span> Album</button><button id="book-tab-collection" role="tab" aria-controls="book-collection" aria-selected="false" tabindex="-1"><span aria-hidden="true">▧</span> Verzameling</button></div><button id="book-close" class="dialog-close book-close" aria-label="Sluit het eilandboek">×</button></div><section id="book-journal" class="book-page journal-page" role="tabpanel" aria-labelledby="book-tab-journal"><span class="eyebrow">HET EILANDARCHIEF</span><h2>De kroniek van jouw eiland.</h2><p>Hoofdstukken vol familie, eigen ideeën en jouw ingrepen. Laat zien brengt je naar de plek zoals die er nu bij ligt.</p><div class="chronicle-legend"><span>♧ Familie</span><span>✳ Jouw ingreep</span></div><nav id="journal-chapters" class="journal-chapters" aria-label="Hoofdstukken van de kroniek"></nav><p class="dialog-note">De kroniek bewaart maximaal 350 berichten. Grote momenten en familie krijgen voorrang op dagelijkse nieuwtjes.</p><div id="journal-entries"></div></section><section id="book-family" class="book-page family-page" role="tabpanel" aria-labelledby="book-tab-family" hidden><span class="eyebrow">DE FAMILIE VAN HET EERSTE HUIS</span><h2 id="family-title"></h2><p>Het huis blijft. Iedere generatie geeft de sleutel door.</p><section id="family-current" class="family-current"></section><p id="family-note" class="dialog-note"></p><div class="family-navigation"><button id="family-oldest">Naar de eerste generatie ↑</button><button id="family-latest">Naar de huidige generatie ↓</button><button id="family-find-home">Bekijk hun huis ↗</button></div><ol id="family-generations" class="family-generations" aria-label="Generaties van de eerste familie"></ol></section><section id="book-wishes" class="book-page wishes-page" role="tabpanel" aria-labelledby="book-tab-wishes" hidden><span class="eyebrow">EEN VRAAG VAN HET EILAND</span><h2 id="wishes-title">Wensen van inwoners</h2><p>Je mag helpen of gewoon blijven kijken. Hulp vergroot hun vertrouwen én de verwachting dat je terugkomt. Zonder ingreep zoeken ze hun eigen weg.</p><section id="commission-box" class="commission-box" hidden><h3>Jouw opdracht</h3><p id="commission-note"></p><div class="commission-choices"><button id="commission-watchtower">Uitkijktoren</button><button id="commission-rose-garden">Rozentuin</button><button id="commission-grand-fountain">Grote fontein</button><button id="commission-carillon">Klokkentoren</button></div></section><section id="wish-current" class="family-current"></section><div class="wish-actions"><button id="wish-help" class="primary-button" hidden>Help deze inwoner</button><button id="wish-find" class="secondary-button" hidden>Bekijk inwoner ↗</button></div><label class="setting-row"><span>Toon kleine wenswolkjes</span><input id="wish-bubbles" type="checkbox"></label><h3>Eerdere wensen</h3><ol id="wish-history" class="wish-history"></ol></section><section id="book-challenges" class="book-page challenges-page" role="tabpanel" aria-labelledby="book-tab-challenges" hidden><span class="eyebrow">ALLEEN ALS JE ZIN HEBT</span><h2 id="challenges-title">Kleine uitdagingen</h2><p>Dit eiland heeft een paar vrijblijvende ideeën. Er hangt geen beloning of straf aan. Gewoon kijken blijft genoeg.</p><p id="challenge-note" class="dialog-note"></p><ol id="challenge-list" class="challenge-list"></ol><h3>De eilandkeur tot nu toe</h3><p id="keur-now" class="dialog-note"></p><ul id="keur-now-list" class="keur-list"></ul></section><section id="book-museum" class="book-page museum-page" role="tabpanel" aria-labelledby="book-tab-museum" hidden><span class="eyebrow">EEN TIJDCAPSULE</span><h2>Het eilandmuseum</h2><p id="museum-note"></p><ol id="museum-list" class="challenge-list"></ol></section><section id="book-album" class="book-page album-page" role="tabpanel" aria-labelledby="book-tab-album" hidden><span class="eyebrow">VANZELF GEKIEKT</span><h2>Het fotoalbum</h2><p id="album-note"></p><div id="album-grid" class="album-grid"></div></section><section id="book-collection" class="book-page collection-page" role="tabpanel" aria-labelledby="book-tab-collection" hidden><span class="eyebrow">SPOREN VAN AL JE EILANDEN</span><h2 id="collection-title">De verzameling</h2><p id="collection-progress"></p><p id="collection-storage" class="dialog-note"></p><div id="collection-groups"></div></section></dialog>
   <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480">Een groeiende wereld · 480</option><option value="560">Een klein rijk · 560</option><option value="625">Een groot rijk · 625</option><option value="720" selected>Groeit mee · tot 720</option></select></label><label class="setting-row"><span><strong>Leven tijdens afwezigheid</strong><small>Bij terugkomst maximaal drie eeuwen verder, behalve wanneer je pauzeert.</small></span><input type="checkbox" id="offline-life" checked></label><label class="setting-row"><span><strong>Wisselend tempo</strong><small>Vlot in de eerste eeuwen, rustiger in de korte moderne tijdperken.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Af en toe inzoomen</strong><small>De camera glijdt soms dichtbij een nieuw tijdperk, een schat of een opening, als je even niets doet.</small></span><input type="checkbox" id="auto-zoom" checked></label><label class="setting-row"><span><strong>Muziek</strong><small>Een rustige muziekbedding die per tijdperk van klank verandert.</small></span><input type="range" id="music-volume" min="0" max="100" step="5" value="50" aria-label="Volume van de muziek"></label><label class="setting-row"><span><strong>Geluiden</strong><small>Zee, vogels, het dorp en grote momenten.</small></span><input type="range" id="effects-volume" min="0" max="100" step="5" value="100" aria-label="Volume van de geluiden"></label><label class="setting-row"><span><strong>Exacte getallen</strong><small>Toon voorraden en percentages als cijfers in plaats van in woorden.</small></span><input type="checkbox" id="show-numbers"></label><label class="setting-row"><span><strong>Dag, nacht en seizoenen</strong><small>Avondlicht, lantaarns, herfstbladeren en sneeuw. Alleen sfeer: het eiland zelf merkt er niets van.</small></span><input type="checkbox" id="day-night" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
 
-  <dialog id="ending-dialog" class="ending-dialog"><button id="ending-close" class="dialog-close" aria-label="Sluit het naschrift">×</button><span class="eyebrow">HET EILAND HEEFT EEN VERHAAL</span><div class="ending-symbol">◉</div><h2 id="ending-title">De erfenis van het eiland.</h2><p class="ending-quote" id="ending-quote"></p><p id="ending-description"></p><div class="ending-shortage"><span>WAT ZE ACHTERLATEN</span><strong id="ending-consequence"></strong><p id="ending-detail"></p></div><section class="island-scores" aria-label="De eilandkeur"><span class="eyebrow">DE EILANDKEUR</span><div class="keur-head"><div id="keur-medal" class="keur-medal"><strong id="ending-score"></strong><small>van 100</small></div><div><h3 id="keur-title"></h3><p id="keur-line"></p></div></div><div id="score-breakdown"></div><h4 id="keur-count" class="keur-count"></h4><ul id="keur-list" class="keur-list"></ul><p>De keur telt zes onderdelen, samen 100 punten. Ze trekken tegen elkaar in: helpen maakt ze dankbaar maar afhankelijk, en een paar beproevingen maken ze sterk, maar te veel breekt ze. Alleen toekijken levert een mooi eiland op; een perfect eiland vraagt om het midden: ongeveer de helft van de wensen helpen en ze een paar keer op de proef stellen.</p><p id="score-recipe" class="dialog-note"></p></section><p id="ending-stats"></p><div class="ending-maps"><figure><svg id="ending-before" viewBox="0 0 250 250" role="img" aria-label="Het oorspronkelijke eiland"></svg><figcaption>Het begin</figcaption></figure><figure><svg id="ending-after" viewBox="0 0 250 250" role="img" aria-label="Het uiteindelijke eiland"></svg><figcaption>Het eiland dat zij maakten</figcaption></figure></div><p id="ending-causes"></p><div id="ending-chronicle"></div><button id="ending-continue" class="primary-button">Bekijk het uiteindelijke eiland ↗</button><button id="ending-replay" class="secondary-button">Speel de eindscène opnieuw ↻</button><button id="ending-sandbox" class="secondary-button">Speel vrij verder →</button><button id="ending-new" class="secondary-button">Begin een nieuw eiland ↻</button><button id="ending-card" class="secondary-button">Bewaar eindkaart ↓</button><button id="ending-link" class="secondary-button">Kopieer link naar dit eiland</button></dialog>
+  <dialog id="ending-dialog" class="ending-dialog"><button id="ending-close" class="dialog-close" aria-label="Sluit het naschrift">×</button><span class="eyebrow">HET EILAND HEEFT EEN VERHAAL</span><div class="ending-symbol">◉</div><h2 id="ending-title">De erfenis van het eiland.</h2><p class="ending-quote" id="ending-quote"></p><p id="ending-description"></p><div class="ending-shortage"><span>WAT ZE ACHTERLATEN</span><strong id="ending-consequence"></strong><p id="ending-detail"></p></div><section class="island-scores" aria-label="De eilandkeur"><span class="eyebrow">DE EILANDKEUR</span><div class="keur-head"><div id="keur-medal" class="keur-medal"><strong id="ending-score"></strong><small>van 100</small></div><div><h3 id="keur-title"></h3><p id="keur-line"></p></div></div><div id="score-breakdown"></div><details class="keur-fold"><summary id="keur-count" class="keur-count"></summary><ul id="keur-list" class="keur-list"></ul></details><details class="keur-fold"><summary class="keur-count">Hoe werkt de keur?</summary><p>De keur telt zes onderdelen, samen 100 punten. Ze trekken tegen elkaar in: helpen maakt ze dankbaar maar afhankelijk, en een paar beproevingen maken ze sterk, maar te veel breekt ze. Alleen toekijken levert een mooi eiland op; een perfect eiland vraagt om het midden: ongeveer de helft van de wensen helpen en ze een paar keer op de proef stellen.</p><p id="score-recipe" class="dialog-note"></p></details></section><p id="ending-stats"></p><div class="ending-maps"><figure><svg id="ending-before" viewBox="0 0 250 250" role="img" aria-label="Het oorspronkelijke eiland"></svg><figcaption>Het begin</figcaption></figure><figure><svg id="ending-after" viewBox="0 0 250 250" role="img" aria-label="Het uiteindelijke eiland"></svg><figcaption>Het eiland dat zij maakten</figcaption></figure></div><p id="ending-causes"></p><div id="ending-chronicle"></div><button id="ending-continue" class="primary-button">Bekijk het uiteindelijke eiland ↗</button><button id="ending-replay" class="secondary-button">Speel de eindscène opnieuw ↻</button><button id="ending-sandbox" class="secondary-button">Speel vrij verder →</button><button id="ending-new" class="secondary-button">Begin een nieuw eiland ↻</button><button id="ending-card" class="secondary-button">Bewaar eindkaart ↓</button><button id="ending-link" class="secondary-button">Kopieer link naar dit eiland</button></dialog>
   <script>(()=>{
 // Dutch presentation also translates narrative text in older saved islands.
 const dutchText={
@@ -1691,16 +1705,16 @@ function cinemaVisible(s){return !!s.cinematic&&(!s.cinematic.completed||s.endin
 const STORY_VERSION=1;
 const eventPriority=type=>({ending:100,endgame:98,palace:96,age:92,discovery:91,treasure:90,delight:83,famous:81,visitor:78,islet:70,lighthouse:80,crisis:90,fire:89,flood:88,abandon:87,reform:86,family:85,interference:84,legacy:82,technology:76,culture:68,land:66,district:65,repair:55,storm:45,life:35,trade:25,farm:20,build:10}[type]||30);
 const ENDINGS={
-  artists:{title:'Het Kunstenaarseiland.',quote:'Ze hebben het eiland zo vaak geschilderd dat het zelf is gaan poseren.',description:'Schilders, dichters, componisten en uitvinders maakten van dit eiland een plek waar iedereen iets maakt. Het museum is te klein, de musea daarna ook.',consequence:'Een eiland vol makers',detail:'Op elke muur hangt iets. Op sommige muren hangt een schilderij van een muur.'},
-  funfair:{title:'Het Pretparkeiland.',quote:'Nog één keer! En dan nog één keer.',description:'Een dierentuin, een circus, een pretpark en veel te veel feesten: dit eiland koos voor plezier en heeft daar nooit spijt van gehad.',consequence:'Een eiland dat altijd feest viert',detail:'De achtbaan heeft een eigen kroniek. De giraf ook.'},
-  seafarers:{title:'Het Zeevaardersvolk.',quote:'Thuis is waar de veerboot aanlegt.',description:'Schepen, ballonnen en veerboten brachten de wereld naar dit eiland, en het eiland naar de wereld. Op de buureilandjes wonen neven, op de kaart staan ze allemaal.',consequence:'Een eiland met vrienden overzee',detail:'Elke haven kent hun vlag. De meeuwen spreken drie talen.'},
-  phoenix:{title:'De Feniksstad.',quote:'Ze zijn vaker herbouwd dan verslagen.',description:'Branden veranderden deze stad. Uit houten wijken verrezen stenen huizen, een vaste brandweer en pleinen waar het lichtfeest elk jaar terugkeert.',consequence:'Een stad die opnieuw begint',detail:'De gevels zijn mooier. De emmers staan klaar. Het verleden is hier geen weggepoetste vlek.'},
-  independent:{title:'They figured it out.',quote:'The island would like to take all the credit.',description:'A civilization has learned to live with its limits. Generations come and go; the little world can look after itself.',consequence:'An independent island',detail:'Their greatest achievement is an ordinary tomorrow.'},
-  sanctuary:{title:'A little room for nothing.',quote:'Progress has been postponed until after the picnic.',description:'The island chooses gardens, clean water and a coastline worth keeping. Its grandest invention turns out to be enough.',consequence:'A living island',detail:'The old tree has rather more company now.'},
-  miracles:{title:'Please keep touching.',quote:'The council has added you to the infrastructure budget.',description:'Your help became a habit, then a tradition. Fields, temples and civic plans were built around the expectation that you would return.',consequence:'A civilization of miracles',detail:'The island is prosperous. Independence remains under discussion.'},
-  fortress:{title:'The very cautious kingdom.',quote:'The foundations are excellent. The sky is considered unreliable.',description:'Repeated tremors changed the way people built and lived. Strong foundations, shelter gardens and watchful shrines define the island.',consequence:'A resilient, watchful society',detail:'They survived your attention. They remember it.'},
-  retreat:{title:'The sea gets a little back.',quote:'The map has been revised. So has the definition of success.',description:'Faced with the cost of keeping everything, the island chooses higher ground, smaller ambitions and a safer shore.',consequence:'A smaller, surviving civilization',detail:'The city did not disappear. It learned where to stop.'},
-  'last-drop':{title:'The Last Drop.',quote:'The ocean has been successfully discontinued.',description:'A civilization has conquered the sea. Every pump is silent. Every engineer is celebrated.',consequence:'Severe water shortage.',detail:'The council has formed a committee to look into it.'}
+  artists:{title:'Een eiland vol makers.',quote:'Ze hebben het eiland zo vaak geschilderd dat het zelf is gaan poseren.',description:'Schilders, dichters, componisten en uitvinders maakten van dit eiland een plek waar iedereen iets maakt. Het museum is te klein, de musea daarna ook.',consequence:'Een eiland vol makers',detail:'Op elke muur hangt iets. Op sommige muren hangt een schilderij van een muur.'},
+  funfair:{title:'Een eiland dat graag feest.',quote:'Nog één keer! En dan nog één keer.',description:'Een dierentuin, een circus, een pretpark en veel te veel feesten: dit eiland koos voor plezier en heeft daar nooit spijt van gehad.',consequence:'Een eiland dat altijd feest viert',detail:'De achtbaan heeft een eigen kroniek. De giraf ook.'},
+  seafarers:{title:'Een eiland met vrienden overzee.',quote:'Thuis is waar de veerboot aanlegt.',description:'Schepen, ballonnen en veerboten brachten de wereld naar dit eiland, en het eiland naar de wereld. Op de buureilandjes wonen neven, op de kaart staan ze allemaal.',consequence:'Een eiland met vrienden overzee',detail:'Elke haven kent hun vlag. De meeuwen spreken drie talen.'},
+  phoenix:{title:'Steeds weer opgebouwd.',quote:'Ze zijn vaker herbouwd dan verslagen.',description:'Branden veranderden deze stad. Uit houten wijken verrezen stenen huizen, een vaste brandweer en pleinen waar het lichtfeest elk jaar terugkeert.',consequence:'Een stad die opnieuw begint',detail:'De gevels zijn mooier. De emmers staan klaar. Het verleden is hier geen weggepoetste vlek.'},
+  independent:{title:'Ze redden het zelf.',quote:'The island would like to take all the credit.',description:'A civilization has learned to live with its limits. Generations come and go; the little world can look after itself.',consequence:'An independent island',detail:'Their greatest achievement is an ordinary tomorrow.'},
+  sanctuary:{title:'Een beetje ruimte voor niets.',quote:'Progress has been postponed until after the picnic.',description:'The island chooses gardens, clean water and a coastline worth keeping. Its grandest invention turns out to be enough.',consequence:'A living island',detail:'The old tree has rather more company now.'},
+  miracles:{title:'Ze bleven op jou rekenen.',quote:'The council has added you to the infrastructure budget.',description:'Your help became a habit, then a tradition. Fields, temples and civic plans were built around the expectation that you would return.',consequence:'A civilization of miracles',detail:'The island is prosperous. Independence remains under discussion.'},
+  fortress:{title:'Een voorzichtig koninkrijk.',quote:'The foundations are excellent. The sky is considered unreliable.',description:'Repeated tremors changed the way people built and lived. Strong foundations, shelter gardens and watchful shrines define the island.',consequence:'A resilient, watchful society',detail:'They survived your attention. They remember it.'},
+  retreat:{title:'De zee kreeg wat terug.',quote:'The map has been revised. So has the definition of success.',description:'Faced with the cost of keeping everything, the island chooses higher ground, smaller ambitions and a safer shore.',consequence:'A smaller, surviving civilization',detail:'The city did not disappear. It learned where to stop.'},
+  'last-drop':{title:'De laatste druppel.',quote:'The ocean has been successfully discontinued.',description:'A civilization has conquered the sea. Every pump is silent. Every engineer is celebrated.',consequence:'Severe water shortage.',detail:'The council has formed a committee to look into it.'}
 };
 const bound=(n,a,b)=>Math.max(a,Math.min(b,n));
 const around=t=>[[t.x+1,t.y],[t.x-1,t.y],[t.x,t.y+1],[t.x,t.y-1]];
@@ -3928,71 +3942,34 @@ function creditsFor(s){
  ];
  return lines;
 }
-function particles(c,id,w,h,t,reduced){
- const n=reduced?0:1;
- if(id==='independent'){
-  for(let i=0;i<4;i++){const x=w*(.15+i*.22)+Math.sin(t*.6+i)*20*n,y=h*(.18+credHash(i,2)*.2)+Math.cos(t*.8+i)*10*n;c.fillStyle=['#d4644f','#e2c26a','#7fa3a8','#c98fb0'][i];c.beginPath();c.moveTo(x,y-10);c.lineTo(x+7,y);c.lineTo(x,y+10);c.lineTo(x-7,y);c.closePath();c.fill();c.strokeStyle='rgba(60,60,60,.4)';c.beginPath();c.moveTo(x,y+10);c.quadraticCurveTo(x+10,y+40,x-5,h*.8);c.stroke();}
- }
- if(id==='sanctuary'){for(let i=0;i<30;i++){const u=(t*.05+credHash(i,4))%1;c.fillStyle=['#c99a4a','#a8b46a','#d4704f'][i%3];c.beginPath();c.ellipse(w*credHash(i,5)+Math.sin(t+i)*14*n,u*h,3,1.6,t+i,0,Math.PI*2);c.fill();}}
- if(id==='miracles'){c.save();c.globalAlpha=.35;for(let i=0;i<7;i++){const a=-Math.PI/2+(i-3)*.18+Math.sin(t*.4)*.04*n;c.fillStyle='#f6dc8a';c.beginPath();c.moveTo(w*.5,-20);c.lineTo(w*.5+Math.cos(a-.05)*h*1.4,-20+Math.sin(a-.05)*-h*1.4*-1);c.lineTo(w*.5+Math.cos(a+.05)*h*1.4,-20+Math.sin(a+.05)*-h*1.4*-1);c.closePath();c.fill();}c.restore();
-  const wave=Math.sin(t*3)*.25*n;c.save();c.translate(w*.5,h*.12);c.rotate(wave);c.fillStyle='#f4efe4';c.beginPath();c.ellipse(0,0,26,30,0,0,Math.PI*2);c.fill();for(let i=0;i<4;i++){c.beginPath();c.ellipse(-15+i*10,-30,4.5,14,0,0,Math.PI*2);c.fill();}c.restore();}
- if(id==='fortress'){for(let i=0;i<5;i++){const x=w*(.1+i*.2),sway=Math.sin(t*2+i)*3*n;c.strokeStyle='#6d675a';c.beginPath();c.moveTo(x,h*.55);c.lineTo(x,h*.25);c.stroke();c.fillStyle=['#a35a45','#3f5f7a'][i%2];c.beginPath();c.moveTo(x,h*.25);c.lineTo(x+26,h*.27+sway);c.lineTo(x+26,h*.36+sway);c.lineTo(x,h*.34);c.closePath();c.fill();}}
- if(id==='retreat'){for(let i=0;i<4;i++){const u=(t*.03+i*.22)%1,x=w*(.2+i*.18)+u*w*.3,y=h*(.7-u*.35);c.fillStyle='#8f6f5a';c.beginPath();c.moveTo(x-12,y);c.lineTo(x+12,y);c.lineTo(x+8,y+5);c.lineTo(x-8,y+5);c.closePath();c.fill();c.fillStyle='#f3efcf';c.beginPath();c.moveTo(x,y-1);c.lineTo(x,y-20);c.lineTo(x+11,y-4);c.closePath();c.fill();}}
- if(id==='last-drop'){const level=Math.min(1,t/18);c.fillStyle=`rgba(90,150,170,${.45*(1-level)})`;c.fillRect(0,h*(.35+level*.6),w,h);for(let i=0;i<5;i++){const hop=Math.abs(Math.sin(t*3+i))*14*n;c.fillStyle='#c9d3cf';c.beginPath();c.ellipse(w*(.2+i*.15),h*.92-hop,6,2.6,Math.sin(t+i),0,Math.PI*2);c.fill();}}
- if(id==='artists'){for(let i=0;i<26;i++){const u=(t*.04+credHash(i,11))%1;c.save();c.globalAlpha=.6*Math.sin(u*Math.PI);c.fillStyle=['#d4644f','#e2c26a','#5c8fc0','#8cc07a','#c98fb0'][i%5];c.beginPath();c.ellipse(w*credHash(i,12),h*credHash(i,13)+Math.sin(t+i)*6*n,8+credHash(i,14)*14,5+credHash(i,15)*8,credHash(i,16)*3,0,Math.PI*2);c.fill();c.restore();}}
- if(id==='funfair'){for(let i=0;i<9;i++){const u=(t*.05+i/9)%1,x=w*(.08+credHash(i,17)*.55)+Math.sin(t+i)*12*n,y=h*(1.05-u*1.2);c.fillStyle=['#d4644f','#e2c26a','#5c8fc0','#c98fb0'][i%4];c.beginPath();c.ellipse(x,y,9,11,0,0,Math.PI*2);c.fill();c.strokeStyle='rgba(60,60,60,.5)';c.beginPath();c.moveTo(x,y+11);c.lineTo(x+Math.sin(t*2+i)*4,y+34);c.stroke();}
-  const cx=w*.22,cy=h*.55,R=Math.min(w,h)*.18;c.strokeStyle='rgba(251,248,238,.7)';c.lineWidth=2;c.beginPath();c.ellipse(cx,cy,R,R,0,0,Math.PI*2);c.stroke();for(let i=0;i<8;i++){const a=t*.3*n+i*Math.PI/4;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);c.stroke();c.fillStyle=['#d4644f','#e2c26a','#5c8fc0','#8cc07a'][i%4];c.fillRect(cx+Math.cos(a)*R-5,cy+Math.sin(a)*R,10,8);}}
- if(id==='seafarers'){for(let i=0;i<6;i++){const u=(t*.025+i/6)%1,x=-60+u*(w+120),y=h*(.72+(i%3)*.08)+Math.sin(t*1.5+i)*3*n;c.fillStyle='#8f6f5a';c.beginPath();c.moveTo(x-18,y);c.lineTo(x+18,y);c.lineTo(x+12,y+7);c.lineTo(x-12,y+7);c.closePath();c.fill();c.fillStyle='#f3efcf';c.beginPath();c.moveTo(x,y-2);c.lineTo(x,y-30);c.lineTo(x+16,y-6);c.closePath();c.fill();c.fillStyle=['#d4644f','#5c8fc0','#e2c26a'][i%3];c.fillRect(x,y-34,8,4);}}
- if(id==='phoenix'){for(let i=0;i<40;i++){const u=(t*.12+credHash(i,6))%1;c.fillStyle=`rgba(255,${150+Math.floor(credHash(i,7)*80)},80,${1-u})`;c.beginPath();c.ellipse(w*credHash(i,8)+Math.sin(t+i)*10*n,h*(1-u),2,2,0,0,Math.PI*2);c.fill();}
-  const x=((t*.08)%1.3-.15)*w,y=h*.25+Math.sin(t)*20*n;c.fillStyle='#e8913c';c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x-40,y-30-Math.sin(t*6)*12*n,x-70,y-10);c.quadraticCurveTo(x-40,y-5,x-25,y+8);c.closePath();c.fill();}
- if(['independent','sanctuary','phoenix','miracles','artists','funfair','seafarers'].includes(id)&&!reduced){for(let k=0;k<3;k++){const cycle=(t*.3+k*.33)%1,cx=w*(.2+credHash(k,Math.floor(t*.3+k*.33))*.6),cy=h*(.12+credHash(k,9)*.25),col=['#d4644f','#e2c26a','#7fa3a8','#c98fb0'][(k+Math.floor(t))%4];if(cycle>.25){const open=(cycle-.25)/.75;c.save();c.globalAlpha=1-open;c.fillStyle=col;for(let i=0;i<14;i++){const a=i/14*Math.PI*2;c.beginPath();c.ellipse(cx+Math.cos(a)*open*40,cy+Math.sin(a)*open*30+open*10,2,2,0,0,Math.PI*2);c.fill();}c.restore();}}}
-}
-// Halfway through the film the inspection stamp drops onto the island, and the checklist ticks itself off.
-function drawKeur(c,w,h,s,u,reduced){
- if(u<.42)return;
- const keur=currentScores(s,s.outcome?.scores),k=reduced?1:Math.min(1,(u-.42)/.06),drop=1+(1-k)*1.6,panel=Math.min(360,w*.52),cx=Math.max(110,(w-panel-18)/2),cy=h*.42;
- if((keur.level.id==='perfect'||keur.level.id==='gold')&&!reduced){
-  const tt=u*60;for(let k=0;k<5;k++){const cyc=(tt*.35+k*.21)%1,cx2=w*(.08+((k*37)%60)/100),cy2=h*(.12+((k*23)%30)/100),col=['#d4644f','#e2c26a','#7fa3a8','#c98fb0','#8cc07a'][k];if(cyc>.2){const open=(cyc-.2)/.8;c.save();c.globalAlpha=1-open;c.fillStyle=col;for(let i=0;i<18;i++){const a=i/18*Math.PI*2;c.beginPath();c.ellipse(cx2+Math.cos(a)*open*46,cy2+Math.sin(a)*open*36+open*14,2,2,0,0,Math.PI*2);c.fill();}c.restore();}}
-  for(let i=0;i<40;i++){const fall=(tt*.05+((i*53)%100)/100)%1;c.fillStyle=['#d4644f','#e2c26a','#7fa3a8','#c98fb0','#8cc07a'][i%5];c.save();c.translate(((i*71)%100)/100*(w-360),fall*h);c.rotate(tt*2+i);c.fillRect(-2.5,-1.2,5,2.4);c.restore();}
- }
- if(keur.level.id==='perfect'&&!reduced){c.save();c.globalAlpha=.45*Math.min(1,(u-.42)/.1);c.lineWidth=12;['#e46b5d','#eda04f','#efd36a','#8cc07a','#6fa8d6','#8f7fc4'].forEach((col,i)=>{c.strokeStyle=col;c.beginPath();c.ellipse(cx,h*.95,Math.min(w,h)*.62-i*12,Math.min(w,h)*.62-i*12,0,Math.PI*1.05,Math.PI*1.95);c.stroke();});c.restore();}
- c.save();c.translate(cx,cy);c.scale(drop,drop);c.rotate(-.08*(1-k)-.05);c.globalAlpha=k;
- c.fillStyle='rgba(20,34,28,.35)';c.beginPath();c.ellipse(4,6,74,74,0,0,Math.PI*2);c.fill();
- c.fillStyle=keur.level.color;c.beginPath();c.ellipse(0,0,74,74,0,0,Math.PI*2);c.fill();
- c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=3;c.beginPath();c.ellipse(0,0,64,64,0,0,Math.PI*2);c.stroke();
- for(let i=0;i<24;i++){const a=i/24*Math.PI*2;c.fillStyle='rgba(255,255,255,.45)';c.beginPath();c.ellipse(Math.cos(a)*69,Math.sin(a)*69,2,2,0,0,Math.PI*2);c.fill();}
- c.fillStyle='#293d32';c.textAlign='center';c.font='600 9px sans-serif';c.fillText('DE EILANDKEUR',0,-30);
- c.font='44px Georgia, serif';c.fillText(String(keur.total),0,12);c.font='10px sans-serif';c.fillText('VAN 100',0,28);
- c.restore();
- c.save();c.globalAlpha=k;c.textAlign='center';c.fillStyle='#fbf8ee';c.font='22px Georgia, serif';c.fillText(keur.level.title,cx,cy+104);
- if(keur.level.id==='perfect'){c.save();c.translate(cx,cy-104);c.rotate(-.04);c.fillStyle='#c98fb0';c.fillRect(-120,-16,240,30);c.fillStyle='#fbf8ee';c.font='600 13px sans-serif';c.fillText('HET PERFECTE EILAND',0,4);c.restore();}
- // One tick per item, appearing one after another.
- const shown=reduced?keur.items:Math.floor(Math.min(1,(u-.48)/.2)*keur.items),cols=12,size=14;
- keur.checklist.forEach((item,i)=>{if(i>=Math.max(0,shown))return;const x=cx+((i%cols)-(cols-1)/2)*size*1.3,y=cy+124+Math.floor(i/cols)*size*1.3;c.fillStyle=item.done?'#8cc07a':'rgba(251,248,238,.25)';c.beginPath();c.ellipse(x,y,size/2,size/2,0,0,Math.PI*2);c.fill();if(item.done){c.strokeStyle='#22372c';c.lineWidth=2;c.beginPath();c.moveTo(x-3.5,y);c.lineTo(x-1,y+3);c.lineTo(x+4,y-3);c.stroke();}});
- if(shown>=keur.items){c.fillStyle='#dfe9d4';c.font='12px sans-serif';c.fillText(`${keur.done} van ${keur.items} dingen erop en eraan`,cx,cy+124+2*size*1.3+8);}
- c.restore();
-}
+const credEase=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
+// The closing film: only the island, slowly coming closer while the light turns to evening, and a few quiet lines.
 function drawCredits(c,w,h,s,movie,reduced,island){
- if(!movie)return;const t=reduced?Math.floor(movie.elapsed/6)*6:movie.elapsed,id=movie.id;
- c.setTransform(1,0,0,1,0,0);c.fillStyle='#22372c';c.fillRect(0,0,w,h);
- // The real island, slowly coming closer.
- if(island&&island.width&&island.height){const zoom=1.05+t/movie.duration*.25,iw=island.width,ih=island.height,scale=Math.max(w/iw,h/ih)*zoom;c.globalAlpha=.9;c.drawImage(island,(w-iw*scale)/2,(h-ih*scale)/2,iw*scale,ih*scale);c.globalAlpha=1;}
- c.fillStyle='rgba(20,34,28,.25)';c.fillRect(0,0,w,h);
- particles(c,id,w,h,t,reduced);
- drawKeur(c,w,h,s,t/movie.duration,reduced);
- // Credits roll up through a soft paper panel.
- const lines=creditsFor(s),panelW=Math.min(360,w*.52),x0=w-panelW-18;
- c.fillStyle='rgba(251,248,238,.9)';c.fillRect(x0,0,panelW,h);
- const lineH=42,total=lines.length*lineH+h,offset=h-(t/movie.duration)*total;
- c.save();c.beginPath();c.rect(x0,0,panelW,h);c.clip();c.textAlign='center';
- lines.forEach((line,i)=>{const y=offset+i*lineH;if(y<-40||y>h+40)return;const cx=x0+panelW/2;
-  if(line.kind==='title'){c.fillStyle='#293d32';c.font='26px Georgia, serif';c.fillText(line.text,cx,y);c.fillStyle='#7b866e';c.font='italic 14px Georgia, serif';c.fillText(line.sub,cx,y+18);}
-  else if(line.kind==='head'){c.fillStyle='#8a7552';c.font='600 10px sans-serif';c.fillText(line.text.toUpperCase(),cx,y+10);}
-  else if(line.kind==='end'){c.fillStyle='#293d32';c.font='20px Georgia, serif';c.fillText(line.text,cx,y);c.fillStyle='#7b866e';c.font='10px sans-serif';c.fillText(line.sub,cx,y+16);}
-  else{c.fillStyle='#293d32';c.font=line.kind==='award'?'600 13px sans-serif':line.kind==='thanks'?'italic 13px Georgia, serif':'13px sans-serif';
-   const words=line.text.split(' ');let row='',rows=[];for(const word of words){if(c.measureText(row+word).width>panelW-30&&row){rows.push(row);row='';}row+=word+' ';}rows.push(row);rows.slice(0,2).forEach((r,k)=>c.fillText(r.trim(),cx,y+k*15));
-   if(line.sub){c.fillStyle='#6f7f61';c.font='11px sans-serif';c.fillText(line.sub,cx,y+(rows.length>1?30:15));}}
- });
+ if(!movie)return;const u=reduced?Math.min(1,Math.floor(movie.elapsed/6)*6/movie.duration+.0001):Math.min(1,movie.elapsed/movie.duration),t=movie.elapsed;
+ c.setTransform(1,0,0,1,0,0);c.fillStyle='#1d2a24';c.fillRect(0,0,w,h);
+ if(island&&island.width&&island.height){const zoom=1.02+u*.1,iw=island.width,ih=island.height,scale=Math.max(w/iw,h/ih)*zoom;c.drawImage(island,(w-iw*scale)/2,(h-ih*scale)/2-u*h*.03,iw*scale,ih*scale);}
+ // Golden hour first, then dusk settles.
+ const warm=credEase(0,.45,u)*(1-credEase(.7,1,u)),dusk=credEase(.5,1,u);
+ c.save();c.globalCompositeOperation='soft-light';c.fillStyle=`rgba(255,170,90,${(.55*warm).toFixed(3)})`;c.fillRect(0,0,w,h);c.restore();
+ c.save();c.globalCompositeOperation='multiply';c.fillStyle=`rgba(70,80,120,${(.55*dusk).toFixed(3)})`;c.fillRect(0,0,w,h);c.restore();
+ const v=c.createRadialGradient(w/2,h*.5,Math.min(w,h)*.25,w/2,h*.5,Math.max(w,h)*.75);if(v?.addColorStop){v.addColorStop(0,'rgba(10,16,14,0)');v.addColorStop(1,`rgba(10,16,14,${(.45+.25*u).toFixed(3)})`);c.fillStyle=v;c.fillRect(0,0,w,h);}
+ const keur=currentScores(s,s.outcome?.scores),o=s.outcome||{};
+ // Only a perfect island gets a little extra: soft golden lights drifting up.
+ if(keur.level.id==='perfect'&&!reduced)for(let i=0;i<26;i++){const f=(t*.03+credHash(i,3))%1;c.fillStyle=`rgba(255,226,150,${(Math.sin(f*Math.PI)*.7).toFixed(3)})`;c.beginPath();c.ellipse(w*credHash(i,4)+Math.sin(t*.5+i)*12,h*(1-f),1.6,1.6,0,0,Math.PI*2);c.fill();}
+ const scale=Math.min(1.25,Math.max(.6,w/900)),text=(str,y,font,alpha,color='#fbf8ee')=>{if(alpha<=.01)return;c.globalAlpha=alpha;c.fillStyle=color;c.font=font;c.fillText(str,w/2,y);c.globalAlpha=1;};
+ // A soft dark haze behind the words, so they read against a busy island.
+ const words=Math.max(credEase(.16,.25,u)*(1-credEase(.6,.68,u)),credEase(.68,.74,u)*(1-credEase(.88,.93,u)));
+ if(words>0){const g=c.createRadialGradient(w/2,h*.5,0,w/2,h*.5,Math.max(w,h)*.55);if(g?.addColorStop){g.addColorStop(0,`rgba(12,18,16,${(.72*words).toFixed(3)})`);g.addColorStop(.55,`rgba(12,18,16,${(.42*words).toFixed(3)})`);g.addColorStop(1,'rgba(12,18,16,0)');c.fillStyle=g;c.fillRect(0,0,w,h);}}
+ c.save();c.textAlign='center';c.shadowColor='rgba(0,0,0,.45)';c.shadowBlur=14;
+ const name=islandIdentity(s).name,showName=credEase(.16,.25,u)*(1-credEase(.6,.68,u)),showLine=credEase(.3,.38,u)*(1-credEase(.6,.68,u)),showCredits=credEase(.68,.74,u)*(1-credEase(.88,.93,u)),showEnd=credEase(.92,.97,u);
+ text(name,h*.44,`${Math.round(62*scale)}px Georgia, serif`,showName);
+ text(`JAAR 1 – ${o.year||s.year}`,h*.44+30*scale,`600 ${Math.round(12*scale)}px sans-serif`,showName*.85,'#e8dfc4');
+ text(nl(o.title||''),h*.56,`italic ${Math.round(22*scale)}px Georgia, serif`,showLine);
+ if(o.quote)text(`“${nl(o.quote)}”`,h*.56+30*scale,`${Math.round(14*scale)}px Georgia, serif`,showLine*.8,'#e8dfc4');
+ const family=s.family;
+ [[family?`Familie ${family.lastName} · ${family.generations.length} generaties sleutelhouders`:'',0],[`${Math.round(o.population??s.population).toLocaleString('nl-NL')} eilanders`,1],[`Eilandkeur ${keur.total} · ${keur.level.title.toLowerCase()}`,2]].forEach(([line,i])=>text(line,h*.44+i*28*scale,`${Math.round(16*scale)}px Georgia, serif`,showCredits*credEase(.68+i*.03,.74+i*.03,u)));
+ c.shadowBlur=0;c.fillStyle=`rgba(10,14,12,${(showEnd*.75).toFixed(3)})`;c.fillRect(0,0,w,h);
+ text('Do Nothing Island',h*.5,`${Math.round(26*scale)}px Georgia, serif`,showEnd);
  c.restore();
 }
 
@@ -4485,7 +4462,7 @@ function drawFestive(r){
 
 // How the weather looks: rain, lightning, fog banks, a dry tint, heat shimmer, snow and a rainbow afterwards.
 const wfHash=(a,b)=>{const n=Math.sin(a*127.1+b*311.7)*43758.5453;return n-Math.floor(n);};
-const RAINBOW_SECONDS=16,RAINBOW_REST=360;
+const RAINBOW_SECONDS=9,RAINBOW_REST=360;
 function drawWeather(r){
  const s=r.sim,w=s.weather;if(!w||s.ending){r.rainbowShowing=false;return;}
  const active=s.year<=w.until?w.kind:null,c=r.ctx,W=r.width,H=r.height,t=r.reduced?0:r.time;
@@ -4519,7 +4496,7 @@ function drawWeather(r){
   if(day&&rested&&!r.reduced)r._rainbowStart=now;
  }
  const since=(now-(r._rainbowStart||0))/1000;
- const rainbow=r._rainbowStart&&since<RAINBOW_SECONDS?Math.min(1,since/3,(RAINBOW_SECONDS-since)/4):0;
+ const rainbow=r._rainbowStart&&since<RAINBOW_SECONDS?Math.min(1,since/2,(RAINBOW_SECONDS-since)/2.5):0;
  r.rainbowShowing=rainbow>0;
  if(rainbow>0){
   // Anchored to the island: it moves and scales with the camera instead of hanging on the screen.
@@ -4745,7 +4722,8 @@ class IslandRenderer {
     x=Math.max(10,Math.min(this.width-w-10,x-w/2));
     for(const shift of [0,-h-10,h+10,-2*h-20,2*h+20]){
       const top=Math.max(64,Math.min(this.height-110-h,y+shift));
-      const box={x,y:top,w,h};
+      // Whole pixels keep the label text crisp.
+      const box={x:Math.round(x),y:Math.round(top),w,h};
       const obstacles=[...this.labelBoxes,{x:14,y:55,w:this.width<600?130:185,h:this.width<600?155:180}];
       if(obstacles.some(b=>x<b.x+b.w+8&&x+w+8>b.x&&top<b.y+b.h+8&&top+h+8>b.y))continue;
       this.labelBoxes.push(box);return box;
@@ -4945,7 +4923,9 @@ class IslandRenderer {
       this.lavaLight(0,-h+3.6,active?1.6:.9);
       // Lava flows: a ribbon that widens as it runs down, with a dark crust, glowing lava and a bright core.
       // Quiet, only a short trickle glows below the crater; in an eruption the flows reach the foot.
-      const flows=[[[2,-h+5],[6,-h*.72],[3,-h*.5],[12,-h*.22],[15,-2]],[[-3,-h+5],[-8,-h*.66],[-6,-h*.42],[-14,-h*.15]]];
+      const flows=[[[2,-h+5],[6,-h*.72],[3,-h*.5],[12,-h*.22],[16,-h*.06],[19,4]],[[-3,-h+5],[-8,-h*.66],[-6,-h*.42],[-14,-h*.15],[-19,1]]];
+      // Quiet: the old flows lie cooled all the way down, with only a short glowing trickle at the top.
+      if(!active)for(const full of flows){const left=[],right=[];full.forEach(([x,y],i)=>{const w=.8+i*.35;left.push([x-w,y]);right.push([x+w,y+.4]);});this.poly([...left,...right.reverse()],'rgba(60,40,34,.55)');}
       for(const [n,full] of flows.entries()){
         const path=active?full:full.slice(0,n?2:3);if(path.length<2)continue;
         const ribbon=(w0,w1)=>{const left=[],right=[];path.forEach(([x,y],i)=>{const a=path[Math.max(0,i-1)],b=path[Math.min(path.length-1,i+1)],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy)||1,w=w0+(w1-w0)*i/(path.length-1);left.push([x-dy/len*w,y+dx/len*w*.6]);right.push([x+dy/len*w,y-dx/len*w*.6]);});return[...left,...right.reverse()];};
@@ -4956,7 +4936,6 @@ class IslandRenderer {
         for(let k=0;k<(active?4:2);k++){const f=((t*(active?.25:.12))+k/(active?4:2)+n*.3)%1,seg=f*(path.length-1),i=Math.min(path.length-2,Math.floor(seg)),u=seg-i,x=path[i][0]+(path[i+1][0]-path[i][0])*u,y=path[i][1]+(path[i+1][1]-path[i][1])*u;this.ellipse(x,y,active?1.1:.7,active?.8:.5,'#fff0b0');if(active||k===0)this.lavaLight(x,y,active?.6:.35);}
       }
       if(active){const c=this.ctx;c.save();c.globalCompositeOperation='lighter';this.ellipse(0,-h+2,18,9,'rgba(255,120,60,.18)');c.restore();for(let i=0;i<4;i++){const f=(t*.9+i*.25)%1;this.ellipse(-3+i*2+Math.sin(i+t)*4,-h-f*16,1.2,1.2,`rgba(255,${150+i*20},80,${(1-f).toFixed(3)})`);}}
-      if(!active&&this.light.winter>0)this.poly([[-11,-h+5],[-6,-h+1],[-1,-h+3],[4,-h],[10,-h+4],[8,-h*.8],[2,-h*.85],[-4,-h*.78],[-9,-h*.82]],`rgba(246,248,249,${(this.light.winter*.85).toFixed(3)})`);
       for(let i=0;i<(active?7:3);i++){const f=(t*(active?.32:.1)+i*.17)%1,sh=active?92:150;this.ellipse(-2+f*16+Math.sin(f*5+i)*3,-h-3-f*(active?48:22),3+f*(active?13:6),2.4+f*(active?8:4),`rgba(${sh},${sh-4},${sh-10},${((1-f)*(active?.7:.3)).toFixed(3)})`);}
     }
     this.ellipse(-21,4,4,2,'#a7ae8a');this.ellipse(18,6,3,1.7,'#b5b896');c.restore();
@@ -5420,7 +5399,7 @@ class IslandRenderer {
     const tower=(x,y,r,h,flag=false)=>{
       this.ellipse(x,y,r,r*.5,stoneDark);this.rect(x-r,y-h,r,h,stone);this.rect(x,y-h,r,h,stoneDark);this.ellipse(x,y-h,r,r*.5,'#cfc8b2');
       this.window([[x-r*.45,y-h*.55],[x-r*.05,y-h*.55],[x-r*.05,y-h*.55-3.4],[x-r*.45,y-h*.55-3.4]],'#6d7a72');
-      this.poly([[x-r-1.2,y-h],[x,y-h-r*2.8],[x,y-h+r*.5]],roof);this.poly([[x,y-h-r*2.8],[x+r+1.2,y-h],[x,y-h+r*.5]],roofDark);this.snow([[x-r-1.2,y-h],[x,y-h-r*2.8],[x+r+1.2,y-h],[x,y-h+r*.5]]);
+      this.poly([[x-r-1.2,y-h],[x,y-h-r*2.8],[x,y-h+r*.5]],roof);this.poly([[x,y-h-r*2.8],[x+r+1.2,y-h],[x,y-h+r*.5]],roofDark);this.snow([[x-r-1.2,y-h],[x,y-h-r*2.8],[x,y-h+r*.5]]);this.snow([[x,y-h-r*2.8],[x+r+1.2,y-h],[x,y-h+r*.5]],true);
       if(flag)this.islandFlag(x,y-h-r*2.8,.55);
     };
     this.diamond(0,1,24,12,'#b9b39b');
@@ -5430,7 +5409,7 @@ class IslandRenderer {
     // The keep.
     const kh=26+stage*4;
     this.poly([[-9,-3],[0,1.5],[0,1.5-kh],[-9,-3-kh]],stone);this.poly([[0,1.5],[9,-3],[9,-3-kh],[0,1.5-kh]],stoneDark);
-    this.poly([[-11,-3-kh],[0,-14-kh],[11,-3-kh],[0,3-kh]],roof);this.poly([[0,-14-kh],[11,-3-kh],[0,3-kh]],roofDark);this.snow([[-11,-3-kh],[0,-14-kh],[11,-3-kh],[0,3-kh]]);
+    this.poly([[-11,-3-kh],[0,-14-kh],[11,-3-kh],[0,3-kh]],roof);this.poly([[0,-14-kh],[11,-3-kh],[0,3-kh]],roofDark);this.snow([[-11,-3-kh],[0,-14-kh],[0,3-kh]]);this.snow([[0,-14-kh],[11,-3-kh],[0,3-kh]],true);
     for(let i=0;i<2+Math.min(stage,1);i++){this.window([[-7,-9-i*8],[-4,-7.5-i*8],[-4,-12-i*8],[-7,-13.5-i*8]],'#6d7a72');this.window([[3,-7.5-i*8],[6,-9-i*8],[6,-13.5-i*8],[3,-12-i*8]],'#5f6c65');}
     this.islandFlag(0,-14-kh,.8);
     if(stage>=2){
@@ -5730,26 +5709,59 @@ class IslandRenderer {
     c.restore();
   }
   // Statues stand tall: a stepped plinth, a little fence with chains, flower boxes and a name plate, and a figure half again as big.
+  // A smooth closed shape through the given points, for figures that should not look like polygons.
+  blob(points,color){const c=this.ctx,n=points.length;c.beginPath();const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];let m=mid(points[n-1],points[0]);c.moveTo(m[0],m[1]);for(let i=0;i<n;i++){const p=points[i],q=points[(i+1)%n],mm=mid(p,q);c.quadraticCurveTo(p[0],p[1],mm[0],mm[1]);}c.closePath();c.fillStyle=color;c.fill();}
+  // Statues: a classical pedestal (base, die and cornice) with a bronze or stone figure that reads at a glance.
   monumentStatue(kind){
-    const L=this.light||{},flower=L.winter>.6?'#eef1f3':L.autumn>.5?'#d9822b':'#d4644f';
+    const L=this.light||{},flower=L.winter>.6?'#eef1f3':L.autumn>.5?'#d9822b':'#d4644f',stone='#d6cfb9',stoneSide='#b7af98',stoneDark='#a29a83';
     this.ellipse(4,5,22,7,'rgba(40,55,40,.12)');
-    this.diamond(0,1,17,8.5,'#c3bba3');this.poly([[-17,1],[0,9.5],[0,12],[-17,3.5]],'#a8a089');this.poly([[0,9.5],[17,1],[17,3.5],[0,12]],'#958d77');
-    this.diamond(0,-1.5,12,6,'#d3ccb6');this.poly([[-12,-1.5],[0,4.5],[0,6.5],[-12,.5]],'#b5ad96');this.poly([[0,4.5],[12,-1.5],[12,.5],[0,6.5]],'#a39b84');
-    for(const [x,y] of [[-15,1],[0,8.5],[15,1],[0,-6.5]]){this.line([[x,y],[x,y-4]],'#5a554c',1);this.ellipse(x,y-4,.9,.5,'#7a7468');}
-    for(const [a,b] of [[[-15,-3],[0,4.5]],[[0,4.5],[15,-3]]]){const m=[(a[0]+b[0])/2,(a[1]+b[1])/2+1.5];this.ctx.beginPath();this.ctx.moveTo(a[0],a[1]);this.ctx.quadraticCurveTo(m[0],m[1],b[0],b[1]);this.ctx.strokeStyle='#6f6a60';this.ctx.lineWidth=.5;this.ctx.stroke();}
-    for(const [x,y] of [[-11,4],[11,4]]){this.rect(x-3,y-2,6,2.4,'#8a6a4c');for(let i=0;i<3;i++)this.ellipse(x-2+i*2,y-2.6,1.1,1,i%2?flower:'#f2e6b8');}
-    this.poly([[1,3],[5,1],[5,-1],[1,1]],'#b89a5e');
-    this.ctx.save();this.ctx.translate(0,-4);this.ctx.scale(1.55,1.55);this.monumentFigure(kind);this.ctx.restore();
+    this.diamond(0,2,18,9,'#c9c1a8');
+    for(const [x,y] of [[-12,5],[12,5]]){this.rect(x-3,y-2,6,2.4,'#8a6a4c');for(let i=0;i<3;i++)this.ellipse(x-2+i*2,y-2.6,1.1,1,i%2?flower:'#f2e6b8');}
+    const box=(L,H,lift,top,side,front)=>this.isoBox(L,L,H,lift,top,side,front);
+    box(12,3,0,'#e0d9c4',stoneSide,stoneDark);box(8.5,12,3,stone,stoneSide,stoneDark);box(11,2,15,'#e6e0cc',stoneSide,stoneDark);
+    const plate=this.isoBox(8.5,8.5,0,9,stone,stoneSide,stoneDark).at;this.poly([plate(4.25,-1.6,6),plate(4.25,1.6,6),plate(4.25,1.6,9.5),plate(4.25,-1.6,9.5)],'#b89a5e');
+    this.ctx.save();this.ctx.translate(0,-17);this.monumentFigure(kind);this.ctx.restore();
   }
   monumentFigure(kind){
-    const stone='#cfc8b3',dark='#aaa38e',bronze='#8a7350';
-    this.ellipse(3,3,13,4,'#58654414');this.poly([[-7,0],[0,3.5],[7,0],[0,-3.5]],'#bdb59d');this.poly([[-5,-1],[0,1.5],[0,-8],[-5,-10.5]],stone);this.poly([[0,1.5],[5,-1],[5,-10.5],[0,-8]],dark);this.poly([[-5,-10.5],[0,-8],[5,-10.5],[0,-13]],'#ddd6c2');
-    if(kind==='hand'){this.ellipse(0,-34,11,6,'#eef0ea');this.ellipse(-6,-35,6,4.5,'#f6f7f2');this.poly([[-3,-12],[3,-12],[4,-24],[-4,-24]],stone);for(let i=0;i<4;i++)this.poly([[-4+i*2.3,-24],[-2.6+i*2.3,-24],[-2.8+i*2.3,-31+Math.abs(i-1.5)],[-4.2+i*2.3,-31+Math.abs(i-1.5)]],stone);this.poly([[4,-22],[6.5,-26],[5.4,-27],[3.4,-24]],stone);}
-    else if(kind==='watcher'){this.line([[-9,4],[-1,8]],'#8f7a58',1.8);this.line([[-9,1],[-1,5]],'#a58e66',1.2);this.ellipse(4,-14,2.6,1.2,'#d58f7a');this.ellipse(-2,-14,2,1,'#e2c26a');}
-    else if(kind==='founder'){this.ellipse(0,-14,3.4,2,bronze);this.poly([[-3,-13],[3,-13],[2.4,-25],[-2.4,-25]],bronze);this.ellipse(0,-27.5,2.4,2.4,bronze);this.poly([[-3.5,-29],[3.5,-29],[0,-32]],'#6f5c40');this.line([[3,-22],[7,-33]],'#6f5c40',1.2);this.line([[5.5,-33],[8.5,-32]],'#6f5c40',1.2);}
-    else if(kind==='chicken'){this.ellipse(0,-20,7,6,stone);this.ellipse(5,-27,3.4,3.4,stone);this.poly([[8,-27.5],[11,-26.5],[8,-25.5]],'#d9a24e');this.poly([[4,-31],[5,-33.5],[6,-31]],'#c0574d');this.poly([[-6,-22],[-11,-27],[-7,-18]],dark);}
-    else if(kind==='cat'){this.ellipse(0,-17,4.6,5,bronze);this.ellipse(0,-25,3.4,3,bronze);this.poly([[-2.6,-27],[-2,-30.5],[-.6,-27.6]],bronze);this.poly([[2.6,-27],[2,-30.5],[.6,-27.6]],bronze);this.line([[4,-13],[8,-20]],bronze,1.4);}
-    else{this.poly([[-4,-11],[4,-11],[3,-20],[0,-31],[-2,-22],[-4,-26]],'#d1a074');this.poly([[-1.5,-12],[2,-12],[1.5,-18],[0,-24],[-1,-18]],'#efc98a');}
+    const bronze='#5f7a66',light='#88a48b',dark='#465c4d',shine='#c4d6c1',stone='#ddd6c2',stoneShade='#b9b19b';
+    this.ellipse(0,0,6,2.6,dark);
+    if(kind==='founder'){
+      // The first resident: coat, hat and a hoe over the shoulder.
+      this.blob([[-3.6,0],[-2.6,-9],[-1,-9],[-.8,0]],dark);this.blob([[.6,0],[1,-9],[2.8,-9],[3.4,0]],bronze);
+      this.blob([[-5,-7],[-4.4,-17],[-2,-20],[2.4,-20],[4.6,-17],[5,-7],[0,-6]],bronze);this.blob([[0,-20],[2.4,-20],[4.6,-17],[5,-7],[0,-6]],dark);
+      this.line([[-4.4,-17],[-6,-11],[-5,-7]],bronze,2);this.line([[4.4,-17],[6.4,-21],[5.5,-25]],light,1.8);
+      this.ellipse(0,-23,2.6,2.8,light);this.ellipse(.8,-23,1.5,2.6,bronze);
+      this.ellipse(0,-25.6,4.6,1.4,dark);this.blob([[-2.6,-25.8],[-2.2,-29],[2.2,-29],[2.6,-25.8]],bronze);
+      this.line([[7.5,-34],[2,-6]],'#4a3a2a',1);this.poly([[7.5,-34],[11,-33],[10.5,-31.5],[7.2,-32]],dark);
+      this.line([[-3.8,-16],[-3.2,-9]],shine,.5);
+    }else if(kind==='cat'){
+      // The lighthouse cat, sitting tall, tail curled round its paws.
+      this.blob([[-5,0],[-5.4,-7],[-3.6,-13],[0,-15],[3.4,-13],[4.8,-7],[4.4,0]],bronze);this.blob([[0,-15],[3.4,-13],[4.8,-7],[4.4,0],[1,0]],dark);
+      this.blob([[-3.2,-14],[-3.6,-19],[-1.4,-21],[1.6,-21],[3.6,-19],[3,-14],[0,-13]],light);
+      this.poly([[-3.2,-19.5],[-3.4,-24],[-1,-21]],bronze);this.poly([[3.2,-19.5],[3.4,-24],[1,-21]],dark);
+      this.ellipse(-1.2,-18,.5,.7,'#e8d27a');this.ellipse(1.2,-18,.5,.7,'#e8d27a');
+      this.ctx.beginPath();this.ctx.moveTo(4,-1);this.ctx.quadraticCurveTo(9,-2,7,-8);this.ctx.quadraticCurveTo(6,-11,8,-12);this.ctx.strokeStyle=bronze;this.ctx.lineWidth=1.6;this.ctx.lineCap='round';this.ctx.stroke();
+      this.line([[-3.6,-11],[-4.2,-4]],shine,.5);
+    }else if(kind==='chicken'){
+      // The sacred chicken in stone: plump, tail feathers up, a proud comb.
+      this.blob([[-6,-4],[-4,-11],[2,-12],[6,-9],[5,-3],[0,-1]],stone);this.blob([[2,-12],[6,-9],[5,-3],[0,-1],[1,-7]],stoneShade);
+      for(let i=0;i<3;i++)this.blob([[-5,-8],[-9-i,-15+i*2],[-7.5-i,-16+i*2],[-4,-10]],i%2?stoneShade:stone);
+      this.ellipse(5.4,-14,2.6,2.6,stone);this.poly([[7.6,-14.6],[10,-14],[7.6,-13.2]],'#d9a24e');this.blob([[4,-16.4],[4.8,-18.6],[5.8,-17.4],[6.8,-18.4],[7,-16.2]],'#c0574d');this.ellipse(6.2,-14.6,.45,.45,'#3f3a36');
+      this.line([[-1,-1],[-1.4,1]],'#8a8270',.7);this.line([[2,-1],[2.4,1]],'#8a8270',.7);
+    }else if(kind==='hand'){
+      // The invisible hand: a stone hand reaching up from a cloud.
+      this.blob([[-11,-2],[-8,-7],[-2,-8],[4,-7],[10,-5],[11,-1],[4,1],[-6,1]],'#f2f3ee');this.blob([[-8,-6],[-3,-10],[2,-9],[0,-5]],'#ffffff');
+      this.blob([[-3,-6],[-3.2,-16],[3,-16],[3.2,-6]],stone);this.blob([[0,-16],[3,-16],[3.2,-6],[0,-6]],stoneShade);
+      for(let i=0;i<4;i++){const x=-3+i*1.9,top=-25+Math.abs(i-1.4)*1.6;this.blob([[x-.9,-15.6],[x-.8,top+1],[x,top],[x+.8,top+1],[x+.9,-15.6]],i>1?stoneShade:stone);}
+      this.blob([[3,-13],[5.6,-17],[6.4,-15.6],[4,-10.5]],stoneShade);
+    }else if(kind==='watcher'){
+      // For whoever did nothing: an empty pedestal top with a bench, and two flowers someone keeps bringing.
+      this.line([[-9,-1],[-1,3]],'#8f7a58',1.8);this.line([[-9,-4],[-1,0]],'#a58e66',1.2);this.ellipse(4,-2,2.6,1.2,'#d58f7a');this.ellipse(-2,-2,2,1,'#e2c26a');
+    }else{
+      // The great fire, remembered as a flame in gilded bronze.
+      this.blob([[-5,0],[-6,-8],[-3,-15],[-1,-12],[0,-22],[2,-14],[4,-17],[5.5,-8],[4.5,0]],'#b88a4a');
+      this.blob([[-3,0],[-3.4,-7],[-1,-11],[0,-8],[1.2,-15],[2.6,-9],[3,0]],'#d9b26a');this.blob([[-1,0],[-1.2,-5],[.4,-9],[1.4,-5],[1,0]],'#f2d79a');
+    }
   }
   watchtower(){
     this.ellipse(4,4,14,5,'#58654418');
@@ -6009,13 +6021,13 @@ class IslandRenderer {
   }
   // The first huts come in three shapes with their own thatch, so a young village never looks copied.
   // Snow settles on roofs in winter: a white layer over the roof plane.
-  snow(points){
+  // Snow per roof face: white on the lit face, cool grey-blue on the shaded one, a strip of tiles left at the eaves
+  // and a soft bright lip along the snow's lower edge.
+  snow(points,shaded=false){
     const w=this.light?.winter||0;if(w<=.25)return;const k=Math.min(1,(w-.25)*1.6);
-    // Solid snow: a cool white layer that leaves a thin edge of roof showing, brighter towards the top for some volume.
-    const cx=points.reduce((a,p)=>a+p[0],0)/points.length,cy=points.reduce((a,p)=>a+p[1],0)/points.length,inset=points.map(([x,y])=>[x+(cx-x)*.08,y+(cy-y)*.08]);
-    this.poly(inset,`rgba(226,233,238,${(.95*k).toFixed(3)})`);
-    const top=points.reduce((a,p)=>p[1]<a[1]?p:a,points[0]),upper=inset.map(([x,y])=>[x+(top[0]-x)*.45,y+(top[1]-y)*.45]);
-    this.poly(upper,`rgba(246,249,250,${(.9*k).toFixed(3)})`);
+    const top=points.reduce((a,p)=>p[1]<a[1]?p:a,points[0]),cover=points.map(([x,y])=>[x+(top[0]-x)*.16,y+(top[1]-y)*.16]);
+    this.poly(cover,shaded?`rgba(205,216,224,${(.97*k).toFixed(3)})`:`rgba(240,244,246,${(.97*k).toFixed(3)})`);
+    const low=cover.slice().sort((a,b)=>b[1]-a[1]).slice(0,2).sort((a,b)=>a[0]-b[0]);this.line(low,`rgba(255,255,255,${(.7*k).toFixed(3)})`,.8);
   }
   // A brick chimney with a cap, and smoke that curls away.
   chimney(x,y,smoke=true){
@@ -6030,7 +6042,7 @@ class IslandRenderer {
     if(shape===0){
       // A round hut with a conical straw roof.
       this.ellipse(0,-3,12,6,shadeColor(L.wall,.92));this.poly([[-12,-3],[-12,-12],[12,-12],[12,-3]],L.wall);this.ellipse(0,-12,12,6,L.side);this.ellipse(0,-3,12,6,'#00000000');
-      this.poly([[-15,-12],[0,-32],[15,-12],[0,-6]],thatch);this.poly([[0,-32],[15,-12],[0,-6]],shade);this.snow([[-15,-12],[0,-32],[15,-12],[0,-9]]);for(let i=0;i<4;i++)this.line([[-12+i*6,-11+Math.abs(i-1.5)],[-1+i*.4,-30]],'#00000014',.6);
+      this.poly([[-15,-12],[0,-32],[15,-12],[0,-6]],thatch);this.poly([[0,-32],[15,-12],[0,-6]],shade);this.snow([[-15,-12],[0,-32],[0,-6]]);this.snow([[0,-32],[15,-12],[0,-6]],true);for(let i=0;i<4;i++)this.line([[-12+i*6,-11+Math.abs(i-1.5)],[-1+i*.4,-30]],'#00000014',.6);
       this.poly([[3,-3],[7,-4.5],[7,-10],[3,-8.5]],'#6f5a40');
     }else if(shape===1){
       // A long farmhouse, low and wide, with the roof nearly to the ground.
@@ -6062,7 +6074,7 @@ class IslandRenderer {
     // Visible gable and two sloped roof planes.
     this.poly([[-17,-h-3],[-2,-h-17],[12,-h-10],[-2,-h+4]],L.gable||(v>.5?'#bd8b69':'#af805e'));
     this.poly([[-2,-h-17],[17,-h-7],[2,-h+5],[-2,-h+4]],roof);
-    this.snow([[-17,-h-3],[-2,-h-20],[17,-h-11],[2,-h-1]]);this.snow([[-2,-h-17],[17,-h-7],[2,-h+3],[-2,-h+2]]);
+    this.snow([[-17,-h-3],[-2,-h-20],[17,-h-11],[2,-h-1]]);this.snow([[-2,-h-17],[17,-h-7],[2,-h+3],[-2,-h+2]],true);
     this.poly([[-8,-2],[-3,0],[-3,-8],[-8,-10]],'#897957');
     this.window([[5,-7],[9,-9],[9,-14],[5,-12]],L.shutter);
     if(L.flowers){this.poly([[4,-6],[10,-9],[10,-7],[4,-4]],'#8d7a5a');for(let i=0;i<3;i++)this.ellipse(5.5+i*2,-6.6-i,1.2,1,L.flowers);}
@@ -6092,7 +6104,7 @@ class IslandRenderer {
     this.poly([rl,ra,rr,rf],roof);
     this.poly([rl,ra,rf],this.look?L.gable:medieval?'#b0a078':'#c29879');
     this.poly([rf,ra,rr],shadeColor(roof,.9));
-    this.snow([rl,ra,rr,rf]);
+    this.snow([rl,ra,rf]);this.snow([rf,ra,rr],true);
     this.poly([[-8,-1],[-3,2],[-3,-9],[-8,-12]],'#8c7958');
     if(medieval){
       for(const x of [-12,-2])this.line([[x,-3+(x+12)*.5],[x,-25+(x+12)*.5]],'#8e7857',1.4);
@@ -6345,9 +6357,9 @@ class IslandRenderer {
   landmarkLabel(label,x,y){
     const p={x},c=this.ctx;
     if(p.x<25||p.x>this.width-25||y<25||y>this.height-40)return;
-    c.save();c.font='500 8px "DM Sans", sans-serif';const w=c.measureText(label).width+18;
+    c.save();c.font='600 9.5px "DM Sans", sans-serif';const w=Math.round(c.measureText(label).width+18);
     const box=this.reserveLabel(p.x,y-12,w,21);if(!box){c.restore();return;}
-    c.fillStyle='#faf5dfed';c.fillRect(box.x,box.y,w,21);c.fillStyle='#80704b';c.textAlign='center';c.fillText(label,box.x+w/2,box.y+14);c.restore();
+    c.fillStyle='#faf5dfed';c.fillRect(box.x,box.y,w,21);c.fillStyle='#80704b';c.textAlign='center';c.fillText(label,Math.round(box.x+w/2),box.y+14);c.restore();
   }
   drawDistrictLabels(){
     if(cinemaVisible(this.sim)||this.focus||!this.showDistricts||this.width<620||this.sim.land.length<65)return;
@@ -6359,9 +6371,9 @@ class IslandRenderer {
       const p=this.point(center.x,center.y);let x=p.x+dx,y=p.y+dy;
       if(x<215||x>this.width-80||y<60||y>this.height-100)continue;
       for(const other of used)if(Math.abs(other.x-x)<80&&Math.abs(other.y-y)<19)y-=21;
-      used.push({x,y});c.save();c.font='500 8px "DM Sans", sans-serif';const w=c.measureText(name).width+14;
+      used.push({x,y});c.save();c.font='600 9.5px "DM Sans", sans-serif';const w=Math.round(c.measureText(name).width+14);
       const box=this.reserveLabel(x,y-9,w,18);if(!box){c.restore();continue;}
-      c.fillStyle='#f7f8e7d9';c.fillRect(box.x,box.y,w,18);c.fillStyle='#778768';c.textAlign='center';c.fillText(name,box.x+w/2,box.y+12);c.restore();
+      c.fillStyle='#f7f8e7d9';c.fillRect(box.x,box.y,w,18);c.fillStyle='#778768';c.textAlign='center';c.fillText(name,Math.round(box.x+w/2),box.y+12);c.restore();
     }
   }
   drawVisitors(){
@@ -6419,11 +6431,11 @@ class IslandRenderer {
     const c=this.ctx;
     for(const effect of this.effects.filter(e=>e.label&&e.elapsed<1.9).sort((a,b)=>(b.priority||0)-(a.priority||0)||a.elapsed-b.elapsed).slice(0,2)){
       const p=this.point(effect.x,effect.y),rise=this.reduced?0:Math.min(12,effect.elapsed*4);
-      c.save();c.globalAlpha=Math.max(0,Math.min(1,effect.elapsed*5,(1.9-effect.elapsed)/.6));c.font='500 10px "DM Sans", sans-serif';
-      const translated=nl(effect.label),label=translated.length>46?translated.slice(0,43)+'…':translated,width=Math.min(this.width-24,c.measureText(label).width+16);
+      c.save();c.globalAlpha=Math.max(0,Math.min(1,effect.elapsed*5,(1.9-effect.elapsed)/.6));c.font='500 11px "DM Sans", sans-serif';
+      const translated=nl(effect.label),label=translated.length>46?translated.slice(0,43)+'…':translated,width=Math.round(Math.min(this.width-24,c.measureText(label).width+16));
       const box=this.reserveLabel(p.x,p.y-64*this.zoom-rise,width,22);if(!box){c.restore();continue;}
       c.fillStyle=effect.type==='rumble'?'#f1e2c9f0':'#f9f8e8ee';c.fillRect(box.x,box.y,width,22);
-      c.fillStyle=effect.type==='rumble'?'#9a7051':'#65784e';c.textAlign='center';c.fillText(label,box.x+width/2,box.y+14);c.restore();
+      c.fillStyle=effect.type==='rumble'?'#9a7051':'#65784e';c.textAlign='center';c.fillText(label,Math.round(box.x+width/2),box.y+14);c.restore();
     }
   }
   smallBoat(sail=true){
@@ -6900,7 +6912,8 @@ function miniMap(land){
 }
 function renderEnding(){
   const o=Object.fromEntries(Object.entries(sim.outcome||ENDINGS.independent).map(([key,value])=>[key,typeof value==='string'?nl(value):value]));
-  $('ending-title').textContent=o.title;$('ending-quote').textContent='“'+o.quote+'”';$('ending-description').textContent=o.description;$('ending-consequence').textContent=o.consequence;$('ending-detail').textContent=o.detail;
+  // The island's own name is the title; how it ended is a sentence below it.
+  $('ending-title').textContent=islandIdentity(sim).name;$('ending-quote').textContent=o.title;$('ending-description').textContent=`“${o.quote}” ${o.description}`;$('ending-consequence').textContent=o.consequence;$('ending-detail').textContent=o.detail;
   $('ending-stats').textContent=`Jaar ${o.year||sim.year} · ${Math.round(o.population??sim.population).toLocaleString("nl-NL")} inwoners · ${o.land??sim.land.length} landtegels · ${o.interferences??sim.interferences} ingrepen`;
   const first=sim.snapshots[0];$('ending-before').innerHTML=miniMap(first?.land||[]);$('ending-after').innerHTML=miniMap(o.coast||sim.land.map(t=>`${t.x},${t.y}`));
   const influence=o.influence||sim.influence;
@@ -6910,7 +6923,7 @@ function renderEnding(){
   $('keur-title').textContent=score.level.title;$('keur-line').textContent=score.level.line;$('keur-medal').style.setProperty?.('--medal',score.level.color);
   $('keur-count').textContent=`Alles erop en eraan: ${score.done} van ${score.items}`;
   $('keur-list').replaceChildren(...score.checklist.map(item=>{const li=document.createElement('li');li.textContent=item.label;li.dataset.done=String(item.done);return li;}));
-  $('score-breakdown').replaceChildren(...Object.entries(score.values).map(([name,value])=>{const item=document.createElement('div');item.className='score-row';const label=document.createElement('span'),number=document.createElement('strong'),bar=document.createElement('progress'),note=document.createElement('small'),info=explainScore(name,value,score.maxes?.[name]||score.max||100);label.textContent=name;number.textContent=value;const max=score.maxes?.[name]||score.max||100;bar.max=max;bar.value=value;bar.setAttribute('aria-label',`${name}: ${value} van ${max}. ${info.what}. ${info.verdict}`);note.className='score-note';note.textContent=`${info.what}. ${info.verdict}`;item.append(label,bar,number,note);return item;}));
+  $('score-breakdown').replaceChildren(...Object.entries(score.values).map(([name,value])=>{const item=document.createElement('details');item.className='score-row';const label=document.createElement('span'),number=document.createElement('strong'),bar=document.createElement('progress'),note=document.createElement('small'),info=explainScore(name,value,score.maxes?.[name]||score.max||100);label.textContent=name;number.textContent=value;const max=score.maxes?.[name]||score.max||100;bar.max=max;bar.value=value;bar.setAttribute('aria-label',`${name}: ${value} van ${max}. ${info.what}. ${info.verdict}`);note.className='score-note';note.textContent=`${info.what}. ${info.verdict}`;const head=document.createElement('summary');head.append(label,bar,number);item.append(head,note);return item;}));
 }
 function cinemaActive(){return !!sim.cinematic&&!sim.cinematic.completed;}
 // 2.8: before the finale, the camera visits the island's big moments and ends under the old tree.

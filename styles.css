@@ -274,3 +274,17 @@ body>main{padding:0;margin:0;max-width:none}
  #open-ending::before{content:'Einde';font-size:10px}
  #new-island span{font-size:13px!important}
 }
+
+/* The closing film fills the screen: the island and its words, with two small buttons in the corner. */
+.cinema-dialog{width:100vw!important;max-width:none!important;height:100vh!important;max-height:none!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#1d2a24!important;overflow:hidden}
+.cinema-dialog::backdrop{background:#1d2a24}
+.cinema-dialog #finale-canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
+.cinema-dialog>.eyebrow,.cinema-dialog .dialog-note,.cinema-dialog progress,.cinema-dialog #cinema-title,.cinema-dialog #cinema-line,.cinema-dialog .cinema-caption>.eyebrow,#cinema-cheer{display:none!important}
+.cinema-dialog .cinema-caption{position:absolute!important;right:16px;bottom:14px;width:auto!important;background:none}
+.cinema-dialog .cinema-caption div{display:flex;gap:6px}
+.cinema-dialog button#cinema-skip,.cinema-dialog #cinema-pause{position:relative;font-size:11px;padding:6px 12px;border-radius:16px;background:rgba(250,249,240,.16);color:#f3efe2;border:1px solid rgba(250,249,240,.3)}
+.cinema-dialog #cinema-pause{position:absolute;right:16px;bottom:52px}
+.cinema-dialog #cinema-close{z-index:3;color:#f3efe2;background:rgba(250,249,240,.12);border-color:rgba(250,249,240,.3)}
+
+.keur-fold{margin:12px 0}.keur-fold summary{cursor:pointer;list-style:none}.keur-fold summary::-webkit-details-marker{display:none}.keur-fold summary::after{content:' ▾';color:#8a9a7c}.keur-fold[open] summary::after{content:' ▴'}
+details.score-row{display:block}details.score-row>summary{display:grid;grid-template-columns:115px 1fr 30px;align-items:center;gap:10px;cursor:pointer;list-style:none}details.score-row>summary::-webkit-details-marker{display:none}details.score-row .score-note{margin:4px 0 6px!important}

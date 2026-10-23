@@ -406,7 +406,8 @@ function miniMap(land){
 }
 function renderEnding(){
   const o=Object.fromEntries(Object.entries(sim.outcome||ENDINGS.independent).map(([key,value])=>[key,typeof value==='string'?nl(value):value]));
-  $('ending-title').textContent=o.title;$('ending-quote').textContent='“'+o.quote+'”';$('ending-description').textContent=o.description;$('ending-consequence').textContent=o.consequence;$('ending-detail').textContent=o.detail;
+  // The island's own name is the title; how it ended is a sentence below it.
+  $('ending-title').textContent=islandIdentity(sim).name;$('ending-quote').textContent=o.title;$('ending-description').textContent=`“${o.quote}” ${o.description}`;$('ending-consequence').textContent=o.consequence;$('ending-detail').textContent=o.detail;
   $('ending-stats').textContent=`Jaar ${o.year||sim.year} · ${Math.round(o.population??sim.population).toLocaleString("nl-NL")} inwoners · ${o.land??sim.land.length} landtegels · ${o.interferences??sim.interferences} ingrepen`;
   const first=sim.snapshots[0];$('ending-before').innerHTML=miniMap(first?.land||[]);$('ending-after').innerHTML=miniMap(o.coast||sim.land.map(t=>`${t.x},${t.y}`));
   const influence=o.influence||sim.influence;
@@ -416,7 +417,7 @@ function renderEnding(){
   $('keur-title').textContent=score.level.title;$('keur-line').textContent=score.level.line;$('keur-medal').style.setProperty?.('--medal',score.level.color);
   $('keur-count').textContent=`Alles erop en eraan: ${score.done} van ${score.items}`;
   $('keur-list').replaceChildren(...score.checklist.map(item=>{const li=document.createElement('li');li.textContent=item.label;li.dataset.done=String(item.done);return li;}));
-  $('score-breakdown').replaceChildren(...Object.entries(score.values).map(([name,value])=>{const item=document.createElement('div');item.className='score-row';const label=document.createElement('span'),number=document.createElement('strong'),bar=document.createElement('progress'),note=document.createElement('small'),info=explainScore(name,value,score.maxes?.[name]||score.max||100);label.textContent=name;number.textContent=value;const max=score.maxes?.[name]||score.max||100;bar.max=max;bar.value=value;bar.setAttribute('aria-label',`${name}: ${value} van ${max}. ${info.what}. ${info.verdict}`);note.className='score-note';note.textContent=`${info.what}. ${info.verdict}`;item.append(label,bar,number,note);return item;}));
+  $('score-breakdown').replaceChildren(...Object.entries(score.values).map(([name,value])=>{const item=document.createElement('details');item.className='score-row';const label=document.createElement('span'),number=document.createElement('strong'),bar=document.createElement('progress'),note=document.createElement('small'),info=explainScore(name,value,score.maxes?.[name]||score.max||100);label.textContent=name;number.textContent=value;const max=score.maxes?.[name]||score.max||100;bar.max=max;bar.value=value;bar.setAttribute('aria-label',`${name}: ${value} van ${max}. ${info.what}. ${info.verdict}`);note.className='score-note';note.textContent=`${info.what}. ${info.verdict}`;const head=document.createElement('summary');head.append(label,bar,number);item.append(head,note);return item;}));
 }
 function cinemaActive(){return !!sim.cinematic&&!sim.cinematic.completed;}
 // 2.8: before the finale, the camera visits the island's big moments and ends under the old tree.

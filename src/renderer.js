@@ -95,7 +95,8 @@ export class IslandRenderer {
     x=Math.max(10,Math.min(this.width-w-10,x-w/2));
     for(const shift of [0,-h-10,h+10,-2*h-20,2*h+20]){
       const top=Math.max(64,Math.min(this.height-110-h,y+shift));
-      const box={x,y:top,w,h};
+      // Whole pixels keep the label text crisp.
+      const box={x:Math.round(x),y:Math.round(top),w,h};
       const obstacles=[...this.labelBoxes,{x:14,y:55,w:this.width<600?130:185,h:this.width<600?155:180}];
       if(obstacles.some(b=>x<b.x+b.w+8&&x+w+8>b.x&&top<b.y+b.h+8&&top+h+8>b.y))continue;
       this.labelBoxes.push(box);return box;
@@ -295,7 +296,9 @@ export class IslandRenderer {
       this.lavaLight(0,-h+3.6,active?1.6:.9);
       // Lava flows: a ribbon that widens as it runs down, with a dark crust, glowing lava and a bright core.
       // Quiet, only a short trickle glows below the crater; in an eruption the flows reach the foot.
-      const flows=[[[2,-h+5],[6,-h*.72],[3,-h*.5],[12,-h*.22],[15,-2]],[[-3,-h+5],[-8,-h*.66],[-6,-h*.42],[-14,-h*.15]]];
+      const flows=[[[2,-h+5],[6,-h*.72],[3,-h*.5],[12,-h*.22],[16,-h*.06],[19,4]],[[-3,-h+5],[-8,-h*.66],[-6,-h*.42],[-14,-h*.15],[-19,1]]];
+      // Quiet: the old flows lie cooled all the way down, with only a short glowing trickle at the top.
+      if(!active)for(const full of flows){const left=[],right=[];full.forEach(([x,y],i)=>{const w=.8+i*.35;left.push([x-w,y]);right.push([x+w,y+.4]);});this.poly([...left,...right.reverse()],'rgba(60,40,34,.55)');}
       for(const [n,full] of flows.entries()){
         const path=active?full:full.slice(0,n?2:3);if(path.length<2)continue;
         const ribbon=(w0,w1)=>{const left=[],right=[];path.forEach(([x,y],i)=>{const a=path[Math.max(0,i-1)],b=path[Math.min(path.length-1,i+1)],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy)||1,w=w0+(w1-w0)*i/(path.length-1);left.push([x-dy/len*w,y+dx/len*w*.6]);right.push([x+dy/len*w,y-dx/len*w*.6]);});return[...left,...right.reverse()];};
@@ -306,7 +309,6 @@ export class IslandRenderer {
         for(let k=0;k<(active?4:2);k++){const f=((t*(active?.25:.12))+k/(active?4:2)+n*.3)%1,seg=f*(path.length-1),i=Math.min(path.length-2,Math.floor(seg)),u=seg-i,x=path[i][0]+(path[i+1][0]-path[i][0])*u,y=path[i][1]+(path[i+1][1]-path[i][1])*u;this.ellipse(x,y,active?1.1:.7,active?.8:.5,'#fff0b0');if(active||k===0)this.lavaLight(x,y,active?.6:.35);}
       }
       if(active){const c=this.ctx;c.save();c.globalCompositeOperation='lighter';this.ellipse(0,-h+2,18,9,'rgba(255,120,60,.18)');c.restore();for(let i=0;i<4;i++){const f=(t*.9+i*.25)%1;this.ellipse(-3+i*2+Math.sin(i+t)*4,-h-f*16,1.2,1.2,`rgba(255,${150+i*20},80,${(1-f).toFixed(3)})`);}}
-      if(!active&&this.light.winter>0)this.poly([[-11,-h+5],[-6,-h+1],[-1,-h+3],[4,-h],[10,-h+4],[8,-h*.8],[2,-h*.85],[-4,-h*.78],[-9,-h*.82]],`rgba(246,248,249,${(this.light.winter*.85).toFixed(3)})`);
       for(let i=0;i<(active?7:3);i++){const f=(t*(active?.32:.1)+i*.17)%1,sh=active?92:150;this.ellipse(-2+f*16+Math.sin(f*5+i)*3,-h-3-f*(active?48:22),3+f*(active?13:6),2.4+f*(active?8:4),`rgba(${sh},${sh-4},${sh-10},${((1-f)*(active?.7:.3)).toFixed(3)})`);}
     }
     this.ellipse(-21,4,4,2,'#a7ae8a');this.ellipse(18,6,3,1.7,'#b5b896');c.restore();
@@ -770,7 +772,7 @@ export class IslandRenderer {
     const tower=(x,y,r,h,flag=false)=>{
       this.ellipse(x,y,r,r*.5,stoneDark);this.rect(x-r,y-h,r,h,stone);this.rect(x,y-h,r,h,stoneDark);this.ellipse(x,y-h,r,r*.5,'#cfc8b2');
       this.window([[x-r*.45,y-h*.55],[x-r*.05,y-h*.55],[x-r*.05,y-h*.55-3.4],[x-r*.45,y-h*.55-3.4]],'#6d7a72');
-      this.poly([[x-r-1.2,y-h],[x,y-h-r*2.8],[x,y-h+r*.5]],roof);this.poly([[x,y-h-r*2.8],[x+r+1.2,y-h],[x,y-h+r*.5]],roofDark);this.snow([[x-r-1.2,y-h],[x,y-h-r*2.8],[x+r+1.2,y-h],[x,y-h+r*.5]]);
+      this.poly([[x-r-1.2,y-h],[x,y-h-r*2.8],[x,y-h+r*.5]],roof);this.poly([[x,y-h-r*2.8],[x+r+1.2,y-h],[x,y-h+r*.5]],roofDark);this.snow([[x-r-1.2,y-h],[x,y-h-r*2.8],[x,y-h+r*.5]]);this.snow([[x,y-h-r*2.8],[x+r+1.2,y-h],[x,y-h+r*.5]],true);
       if(flag)this.islandFlag(x,y-h-r*2.8,.55);
     };
     this.diamond(0,1,24,12,'#b9b39b');
@@ -780,7 +782,7 @@ export class IslandRenderer {
     // The keep.
     const kh=26+stage*4;
     this.poly([[-9,-3],[0,1.5],[0,1.5-kh],[-9,-3-kh]],stone);this.poly([[0,1.5],[9,-3],[9,-3-kh],[0,1.5-kh]],stoneDark);
-    this.poly([[-11,-3-kh],[0,-14-kh],[11,-3-kh],[0,3-kh]],roof);this.poly([[0,-14-kh],[11,-3-kh],[0,3-kh]],roofDark);this.snow([[-11,-3-kh],[0,-14-kh],[11,-3-kh],[0,3-kh]]);
+    this.poly([[-11,-3-kh],[0,-14-kh],[11,-3-kh],[0,3-kh]],roof);this.poly([[0,-14-kh],[11,-3-kh],[0,3-kh]],roofDark);this.snow([[-11,-3-kh],[0,-14-kh],[0,3-kh]]);this.snow([[0,-14-kh],[11,-3-kh],[0,3-kh]],true);
     for(let i=0;i<2+Math.min(stage,1);i++){this.window([[-7,-9-i*8],[-4,-7.5-i*8],[-4,-12-i*8],[-7,-13.5-i*8]],'#6d7a72');this.window([[3,-7.5-i*8],[6,-9-i*8],[6,-13.5-i*8],[3,-12-i*8]],'#5f6c65');}
     this.islandFlag(0,-14-kh,.8);
     if(stage>=2){
@@ -1080,26 +1082,59 @@ export class IslandRenderer {
     c.restore();
   }
   // Statues stand tall: a stepped plinth, a little fence with chains, flower boxes and a name plate, and a figure half again as big.
+  // A smooth closed shape through the given points, for figures that should not look like polygons.
+  blob(points,color){const c=this.ctx,n=points.length;c.beginPath();const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];let m=mid(points[n-1],points[0]);c.moveTo(m[0],m[1]);for(let i=0;i<n;i++){const p=points[i],q=points[(i+1)%n],mm=mid(p,q);c.quadraticCurveTo(p[0],p[1],mm[0],mm[1]);}c.closePath();c.fillStyle=color;c.fill();}
+  // Statues: a classical pedestal (base, die and cornice) with a bronze or stone figure that reads at a glance.
   monumentStatue(kind){
-    const L=this.light||{},flower=L.winter>.6?'#eef1f3':L.autumn>.5?'#d9822b':'#d4644f';
+    const L=this.light||{},flower=L.winter>.6?'#eef1f3':L.autumn>.5?'#d9822b':'#d4644f',stone='#d6cfb9',stoneSide='#b7af98',stoneDark='#a29a83';
     this.ellipse(4,5,22,7,'rgba(40,55,40,.12)');
-    this.diamond(0,1,17,8.5,'#c3bba3');this.poly([[-17,1],[0,9.5],[0,12],[-17,3.5]],'#a8a089');this.poly([[0,9.5],[17,1],[17,3.5],[0,12]],'#958d77');
-    this.diamond(0,-1.5,12,6,'#d3ccb6');this.poly([[-12,-1.5],[0,4.5],[0,6.5],[-12,.5]],'#b5ad96');this.poly([[0,4.5],[12,-1.5],[12,.5],[0,6.5]],'#a39b84');
-    for(const [x,y] of [[-15,1],[0,8.5],[15,1],[0,-6.5]]){this.line([[x,y],[x,y-4]],'#5a554c',1);this.ellipse(x,y-4,.9,.5,'#7a7468');}
-    for(const [a,b] of [[[-15,-3],[0,4.5]],[[0,4.5],[15,-3]]]){const m=[(a[0]+b[0])/2,(a[1]+b[1])/2+1.5];this.ctx.beginPath();this.ctx.moveTo(a[0],a[1]);this.ctx.quadraticCurveTo(m[0],m[1],b[0],b[1]);this.ctx.strokeStyle='#6f6a60';this.ctx.lineWidth=.5;this.ctx.stroke();}
-    for(const [x,y] of [[-11,4],[11,4]]){this.rect(x-3,y-2,6,2.4,'#8a6a4c');for(let i=0;i<3;i++)this.ellipse(x-2+i*2,y-2.6,1.1,1,i%2?flower:'#f2e6b8');}
-    this.poly([[1,3],[5,1],[5,-1],[1,1]],'#b89a5e');
-    this.ctx.save();this.ctx.translate(0,-4);this.ctx.scale(1.55,1.55);this.monumentFigure(kind);this.ctx.restore();
+    this.diamond(0,2,18,9,'#c9c1a8');
+    for(const [x,y] of [[-12,5],[12,5]]){this.rect(x-3,y-2,6,2.4,'#8a6a4c');for(let i=0;i<3;i++)this.ellipse(x-2+i*2,y-2.6,1.1,1,i%2?flower:'#f2e6b8');}
+    const box=(L,H,lift,top,side,front)=>this.isoBox(L,L,H,lift,top,side,front);
+    box(12,3,0,'#e0d9c4',stoneSide,stoneDark);box(8.5,12,3,stone,stoneSide,stoneDark);box(11,2,15,'#e6e0cc',stoneSide,stoneDark);
+    const plate=this.isoBox(8.5,8.5,0,9,stone,stoneSide,stoneDark).at;this.poly([plate(4.25,-1.6,6),plate(4.25,1.6,6),plate(4.25,1.6,9.5),plate(4.25,-1.6,9.5)],'#b89a5e');
+    this.ctx.save();this.ctx.translate(0,-17);this.monumentFigure(kind);this.ctx.restore();
   }
   monumentFigure(kind){
-    const stone='#cfc8b3',dark='#aaa38e',bronze='#8a7350';
-    this.ellipse(3,3,13,4,'#58654414');this.poly([[-7,0],[0,3.5],[7,0],[0,-3.5]],'#bdb59d');this.poly([[-5,-1],[0,1.5],[0,-8],[-5,-10.5]],stone);this.poly([[0,1.5],[5,-1],[5,-10.5],[0,-8]],dark);this.poly([[-5,-10.5],[0,-8],[5,-10.5],[0,-13]],'#ddd6c2');
-    if(kind==='hand'){this.ellipse(0,-34,11,6,'#eef0ea');this.ellipse(-6,-35,6,4.5,'#f6f7f2');this.poly([[-3,-12],[3,-12],[4,-24],[-4,-24]],stone);for(let i=0;i<4;i++)this.poly([[-4+i*2.3,-24],[-2.6+i*2.3,-24],[-2.8+i*2.3,-31+Math.abs(i-1.5)],[-4.2+i*2.3,-31+Math.abs(i-1.5)]],stone);this.poly([[4,-22],[6.5,-26],[5.4,-27],[3.4,-24]],stone);}
-    else if(kind==='watcher'){this.line([[-9,4],[-1,8]],'#8f7a58',1.8);this.line([[-9,1],[-1,5]],'#a58e66',1.2);this.ellipse(4,-14,2.6,1.2,'#d58f7a');this.ellipse(-2,-14,2,1,'#e2c26a');}
-    else if(kind==='founder'){this.ellipse(0,-14,3.4,2,bronze);this.poly([[-3,-13],[3,-13],[2.4,-25],[-2.4,-25]],bronze);this.ellipse(0,-27.5,2.4,2.4,bronze);this.poly([[-3.5,-29],[3.5,-29],[0,-32]],'#6f5c40');this.line([[3,-22],[7,-33]],'#6f5c40',1.2);this.line([[5.5,-33],[8.5,-32]],'#6f5c40',1.2);}
-    else if(kind==='chicken'){this.ellipse(0,-20,7,6,stone);this.ellipse(5,-27,3.4,3.4,stone);this.poly([[8,-27.5],[11,-26.5],[8,-25.5]],'#d9a24e');this.poly([[4,-31],[5,-33.5],[6,-31]],'#c0574d');this.poly([[-6,-22],[-11,-27],[-7,-18]],dark);}
-    else if(kind==='cat'){this.ellipse(0,-17,4.6,5,bronze);this.ellipse(0,-25,3.4,3,bronze);this.poly([[-2.6,-27],[-2,-30.5],[-.6,-27.6]],bronze);this.poly([[2.6,-27],[2,-30.5],[.6,-27.6]],bronze);this.line([[4,-13],[8,-20]],bronze,1.4);}
-    else{this.poly([[-4,-11],[4,-11],[3,-20],[0,-31],[-2,-22],[-4,-26]],'#d1a074');this.poly([[-1.5,-12],[2,-12],[1.5,-18],[0,-24],[-1,-18]],'#efc98a');}
+    const bronze='#5f7a66',light='#88a48b',dark='#465c4d',shine='#c4d6c1',stone='#ddd6c2',stoneShade='#b9b19b';
+    this.ellipse(0,0,6,2.6,dark);
+    if(kind==='founder'){
+      // The first resident: coat, hat and a hoe over the shoulder.
+      this.blob([[-3.6,0],[-2.6,-9],[-1,-9],[-.8,0]],dark);this.blob([[.6,0],[1,-9],[2.8,-9],[3.4,0]],bronze);
+      this.blob([[-5,-7],[-4.4,-17],[-2,-20],[2.4,-20],[4.6,-17],[5,-7],[0,-6]],bronze);this.blob([[0,-20],[2.4,-20],[4.6,-17],[5,-7],[0,-6]],dark);
+      this.line([[-4.4,-17],[-6,-11],[-5,-7]],bronze,2);this.line([[4.4,-17],[6.4,-21],[5.5,-25]],light,1.8);
+      this.ellipse(0,-23,2.6,2.8,light);this.ellipse(.8,-23,1.5,2.6,bronze);
+      this.ellipse(0,-25.6,4.6,1.4,dark);this.blob([[-2.6,-25.8],[-2.2,-29],[2.2,-29],[2.6,-25.8]],bronze);
+      this.line([[7.5,-34],[2,-6]],'#4a3a2a',1);this.poly([[7.5,-34],[11,-33],[10.5,-31.5],[7.2,-32]],dark);
+      this.line([[-3.8,-16],[-3.2,-9]],shine,.5);
+    }else if(kind==='cat'){
+      // The lighthouse cat, sitting tall, tail curled round its paws.
+      this.blob([[-5,0],[-5.4,-7],[-3.6,-13],[0,-15],[3.4,-13],[4.8,-7],[4.4,0]],bronze);this.blob([[0,-15],[3.4,-13],[4.8,-7],[4.4,0],[1,0]],dark);
+      this.blob([[-3.2,-14],[-3.6,-19],[-1.4,-21],[1.6,-21],[3.6,-19],[3,-14],[0,-13]],light);
+      this.poly([[-3.2,-19.5],[-3.4,-24],[-1,-21]],bronze);this.poly([[3.2,-19.5],[3.4,-24],[1,-21]],dark);
+      this.ellipse(-1.2,-18,.5,.7,'#e8d27a');this.ellipse(1.2,-18,.5,.7,'#e8d27a');
+      this.ctx.beginPath();this.ctx.moveTo(4,-1);this.ctx.quadraticCurveTo(9,-2,7,-8);this.ctx.quadraticCurveTo(6,-11,8,-12);this.ctx.strokeStyle=bronze;this.ctx.lineWidth=1.6;this.ctx.lineCap='round';this.ctx.stroke();
+      this.line([[-3.6,-11],[-4.2,-4]],shine,.5);
+    }else if(kind==='chicken'){
+      // The sacred chicken in stone: plump, tail feathers up, a proud comb.
+      this.blob([[-6,-4],[-4,-11],[2,-12],[6,-9],[5,-3],[0,-1]],stone);this.blob([[2,-12],[6,-9],[5,-3],[0,-1],[1,-7]],stoneShade);
+      for(let i=0;i<3;i++)this.blob([[-5,-8],[-9-i,-15+i*2],[-7.5-i,-16+i*2],[-4,-10]],i%2?stoneShade:stone);
+      this.ellipse(5.4,-14,2.6,2.6,stone);this.poly([[7.6,-14.6],[10,-14],[7.6,-13.2]],'#d9a24e');this.blob([[4,-16.4],[4.8,-18.6],[5.8,-17.4],[6.8,-18.4],[7,-16.2]],'#c0574d');this.ellipse(6.2,-14.6,.45,.45,'#3f3a36');
+      this.line([[-1,-1],[-1.4,1]],'#8a8270',.7);this.line([[2,-1],[2.4,1]],'#8a8270',.7);
+    }else if(kind==='hand'){
+      // The invisible hand: a stone hand reaching up from a cloud.
+      this.blob([[-11,-2],[-8,-7],[-2,-8],[4,-7],[10,-5],[11,-1],[4,1],[-6,1]],'#f2f3ee');this.blob([[-8,-6],[-3,-10],[2,-9],[0,-5]],'#ffffff');
+      this.blob([[-3,-6],[-3.2,-16],[3,-16],[3.2,-6]],stone);this.blob([[0,-16],[3,-16],[3.2,-6],[0,-6]],stoneShade);
+      for(let i=0;i<4;i++){const x=-3+i*1.9,top=-25+Math.abs(i-1.4)*1.6;this.blob([[x-.9,-15.6],[x-.8,top+1],[x,top],[x+.8,top+1],[x+.9,-15.6]],i>1?stoneShade:stone);}
+      this.blob([[3,-13],[5.6,-17],[6.4,-15.6],[4,-10.5]],stoneShade);
+    }else if(kind==='watcher'){
+      // For whoever did nothing: an empty pedestal top with a bench, and two flowers someone keeps bringing.
+      this.line([[-9,-1],[-1,3]],'#8f7a58',1.8);this.line([[-9,-4],[-1,0]],'#a58e66',1.2);this.ellipse(4,-2,2.6,1.2,'#d58f7a');this.ellipse(-2,-2,2,1,'#e2c26a');
+    }else{
+      // The great fire, remembered as a flame in gilded bronze.
+      this.blob([[-5,0],[-6,-8],[-3,-15],[-1,-12],[0,-22],[2,-14],[4,-17],[5.5,-8],[4.5,0]],'#b88a4a');
+      this.blob([[-3,0],[-3.4,-7],[-1,-11],[0,-8],[1.2,-15],[2.6,-9],[3,0]],'#d9b26a');this.blob([[-1,0],[-1.2,-5],[.4,-9],[1.4,-5],[1,0]],'#f2d79a');
+    }
   }
   watchtower(){
     this.ellipse(4,4,14,5,'#58654418');
@@ -1359,13 +1394,13 @@ export class IslandRenderer {
   }
   // The first huts come in three shapes with their own thatch, so a young village never looks copied.
   // Snow settles on roofs in winter: a white layer over the roof plane.
-  snow(points){
+  // Snow per roof face: white on the lit face, cool grey-blue on the shaded one, a strip of tiles left at the eaves
+  // and a soft bright lip along the snow's lower edge.
+  snow(points,shaded=false){
     const w=this.light?.winter||0;if(w<=.25)return;const k=Math.min(1,(w-.25)*1.6);
-    // Solid snow: a cool white layer that leaves a thin edge of roof showing, brighter towards the top for some volume.
-    const cx=points.reduce((a,p)=>a+p[0],0)/points.length,cy=points.reduce((a,p)=>a+p[1],0)/points.length,inset=points.map(([x,y])=>[x+(cx-x)*.08,y+(cy-y)*.08]);
-    this.poly(inset,`rgba(226,233,238,${(.95*k).toFixed(3)})`);
-    const top=points.reduce((a,p)=>p[1]<a[1]?p:a,points[0]),upper=inset.map(([x,y])=>[x+(top[0]-x)*.45,y+(top[1]-y)*.45]);
-    this.poly(upper,`rgba(246,249,250,${(.9*k).toFixed(3)})`);
+    const top=points.reduce((a,p)=>p[1]<a[1]?p:a,points[0]),cover=points.map(([x,y])=>[x+(top[0]-x)*.16,y+(top[1]-y)*.16]);
+    this.poly(cover,shaded?`rgba(205,216,224,${(.97*k).toFixed(3)})`:`rgba(240,244,246,${(.97*k).toFixed(3)})`);
+    const low=cover.slice().sort((a,b)=>b[1]-a[1]).slice(0,2).sort((a,b)=>a[0]-b[0]);this.line(low,`rgba(255,255,255,${(.7*k).toFixed(3)})`,.8);
   }
   // A brick chimney with a cap, and smoke that curls away.
   chimney(x,y,smoke=true){
@@ -1380,7 +1415,7 @@ export class IslandRenderer {
     if(shape===0){
       // A round hut with a conical straw roof.
       this.ellipse(0,-3,12,6,shadeColor(L.wall,.92));this.poly([[-12,-3],[-12,-12],[12,-12],[12,-3]],L.wall);this.ellipse(0,-12,12,6,L.side);this.ellipse(0,-3,12,6,'#00000000');
-      this.poly([[-15,-12],[0,-32],[15,-12],[0,-6]],thatch);this.poly([[0,-32],[15,-12],[0,-6]],shade);this.snow([[-15,-12],[0,-32],[15,-12],[0,-9]]);for(let i=0;i<4;i++)this.line([[-12+i*6,-11+Math.abs(i-1.5)],[-1+i*.4,-30]],'#00000014',.6);
+      this.poly([[-15,-12],[0,-32],[15,-12],[0,-6]],thatch);this.poly([[0,-32],[15,-12],[0,-6]],shade);this.snow([[-15,-12],[0,-32],[0,-6]]);this.snow([[0,-32],[15,-12],[0,-6]],true);for(let i=0;i<4;i++)this.line([[-12+i*6,-11+Math.abs(i-1.5)],[-1+i*.4,-30]],'#00000014',.6);
       this.poly([[3,-3],[7,-4.5],[7,-10],[3,-8.5]],'#6f5a40');
     }else if(shape===1){
       // A long farmhouse, low and wide, with the roof nearly to the ground.
@@ -1412,7 +1447,7 @@ export class IslandRenderer {
     // Visible gable and two sloped roof planes.
     this.poly([[-17,-h-3],[-2,-h-17],[12,-h-10],[-2,-h+4]],L.gable||(v>.5?'#bd8b69':'#af805e'));
     this.poly([[-2,-h-17],[17,-h-7],[2,-h+5],[-2,-h+4]],roof);
-    this.snow([[-17,-h-3],[-2,-h-20],[17,-h-11],[2,-h-1]]);this.snow([[-2,-h-17],[17,-h-7],[2,-h+3],[-2,-h+2]]);
+    this.snow([[-17,-h-3],[-2,-h-20],[17,-h-11],[2,-h-1]]);this.snow([[-2,-h-17],[17,-h-7],[2,-h+3],[-2,-h+2]],true);
     this.poly([[-8,-2],[-3,0],[-3,-8],[-8,-10]],'#897957');
     this.window([[5,-7],[9,-9],[9,-14],[5,-12]],L.shutter);
     if(L.flowers){this.poly([[4,-6],[10,-9],[10,-7],[4,-4]],'#8d7a5a');for(let i=0;i<3;i++)this.ellipse(5.5+i*2,-6.6-i,1.2,1,L.flowers);}
@@ -1442,7 +1477,7 @@ export class IslandRenderer {
     this.poly([rl,ra,rr,rf],roof);
     this.poly([rl,ra,rf],this.look?L.gable:medieval?'#b0a078':'#c29879');
     this.poly([rf,ra,rr],shadeColor(roof,.9));
-    this.snow([rl,ra,rr,rf]);
+    this.snow([rl,ra,rf]);this.snow([rf,ra,rr],true);
     this.poly([[-8,-1],[-3,2],[-3,-9],[-8,-12]],'#8c7958');
     if(medieval){
       for(const x of [-12,-2])this.line([[x,-3+(x+12)*.5],[x,-25+(x+12)*.5]],'#8e7857',1.4);
@@ -1695,9 +1730,9 @@ export class IslandRenderer {
   landmarkLabel(label,x,y){
     const p={x},c=this.ctx;
     if(p.x<25||p.x>this.width-25||y<25||y>this.height-40)return;
-    c.save();c.font='500 8px "DM Sans", sans-serif';const w=c.measureText(label).width+18;
+    c.save();c.font='600 9.5px "DM Sans", sans-serif';const w=Math.round(c.measureText(label).width+18);
     const box=this.reserveLabel(p.x,y-12,w,21);if(!box){c.restore();return;}
-    c.fillStyle='#faf5dfed';c.fillRect(box.x,box.y,w,21);c.fillStyle='#80704b';c.textAlign='center';c.fillText(label,box.x+w/2,box.y+14);c.restore();
+    c.fillStyle='#faf5dfed';c.fillRect(box.x,box.y,w,21);c.fillStyle='#80704b';c.textAlign='center';c.fillText(label,Math.round(box.x+w/2),box.y+14);c.restore();
   }
   drawDistrictLabels(){
     if(cinemaVisible(this.sim)||this.focus||!this.showDistricts||this.width<620||this.sim.land.length<65)return;
@@ -1709,9 +1744,9 @@ export class IslandRenderer {
       const p=this.point(center.x,center.y);let x=p.x+dx,y=p.y+dy;
       if(x<215||x>this.width-80||y<60||y>this.height-100)continue;
       for(const other of used)if(Math.abs(other.x-x)<80&&Math.abs(other.y-y)<19)y-=21;
-      used.push({x,y});c.save();c.font='500 8px "DM Sans", sans-serif';const w=c.measureText(name).width+14;
+      used.push({x,y});c.save();c.font='600 9.5px "DM Sans", sans-serif';const w=Math.round(c.measureText(name).width+14);
       const box=this.reserveLabel(x,y-9,w,18);if(!box){c.restore();continue;}
-      c.fillStyle='#f7f8e7d9';c.fillRect(box.x,box.y,w,18);c.fillStyle='#778768';c.textAlign='center';c.fillText(name,box.x+w/2,box.y+12);c.restore();
+      c.fillStyle='#f7f8e7d9';c.fillRect(box.x,box.y,w,18);c.fillStyle='#778768';c.textAlign='center';c.fillText(name,Math.round(box.x+w/2),box.y+12);c.restore();
     }
   }
   drawVisitors(){
@@ -1769,11 +1804,11 @@ export class IslandRenderer {
     const c=this.ctx;
     for(const effect of this.effects.filter(e=>e.label&&e.elapsed<1.9).sort((a,b)=>(b.priority||0)-(a.priority||0)||a.elapsed-b.elapsed).slice(0,2)){
       const p=this.point(effect.x,effect.y),rise=this.reduced?0:Math.min(12,effect.elapsed*4);
-      c.save();c.globalAlpha=Math.max(0,Math.min(1,effect.elapsed*5,(1.9-effect.elapsed)/.6));c.font='500 10px "DM Sans", sans-serif';
-      const translated=nl(effect.label),label=translated.length>46?translated.slice(0,43)+'…':translated,width=Math.min(this.width-24,c.measureText(label).width+16);
+      c.save();c.globalAlpha=Math.max(0,Math.min(1,effect.elapsed*5,(1.9-effect.elapsed)/.6));c.font='500 11px "DM Sans", sans-serif';
+      const translated=nl(effect.label),label=translated.length>46?translated.slice(0,43)+'…':translated,width=Math.round(Math.min(this.width-24,c.measureText(label).width+16));
       const box=this.reserveLabel(p.x,p.y-64*this.zoom-rise,width,22);if(!box){c.restore();continue;}
       c.fillStyle=effect.type==='rumble'?'#f1e2c9f0':'#f9f8e8ee';c.fillRect(box.x,box.y,width,22);
-      c.fillStyle=effect.type==='rumble'?'#9a7051':'#65784e';c.textAlign='center';c.fillText(label,box.x+width/2,box.y+14);c.restore();
+      c.fillStyle=effect.type==='rumble'?'#9a7051':'#65784e';c.textAlign='center';c.fillText(label,Math.round(box.x+width/2),box.y+14);c.restore();
     }
   }
   smallBoat(sail=true){

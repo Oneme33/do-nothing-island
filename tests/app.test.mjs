@@ -48,7 +48,7 @@ test('the actual application shows a contextual recap, then permits explicit fre
  assert.equal(e.get('ending-dialog').open,false);assert.equal(e.get('cinema-caption').hidden,false);
  e.get('cinema-cheer').handlers.click();assert.match(e.get('cinema-cheer').textContent,/1/);
  a.advance(9);assert.equal(e.get('cinema-skip').hidden,false);e.get('cinema-skip').handlers.click();
- assert.equal(e.get('ending-dialog').open,true);assert.equal(e.get('ending-title').textContent,nl(sim.outcome.title));assert.match(e.get('ending-before').innerHTML,/<rect/);assert.match(e.get('ending-after').innerHTML,/<rect/);
+ assert.equal(e.get('ending-dialog').open,true);assert.equal(e.get('ending-quote').textContent,nl(sim.outcome.title));assert.ok(e.get('ending-title').textContent.length>2,'the island name is the title');assert.match(e.get('ending-before').innerHTML,/<rect/);assert.match(e.get('ending-after').innerHTML,/<rect/);
  assert.match(e.get('ending-causes').textContent,/Jij keek toe/);assert.equal(e.get('score-breakdown').children.length,6);const stats=e.get('ending-stats').textContent,score=e.get('ending-score').textContent;
  e.get('ending-replay').handlers.click();assert.equal(e.get('ending-dialog').open,false);assert.equal(a.saved().cinematic.elapsed,0);
  a.advance(41);assert.equal(e.get('ending-dialog').open,true);assert.equal(a.saved().cinematic.completed,true);
