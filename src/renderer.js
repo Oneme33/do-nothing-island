@@ -349,6 +349,16 @@ export class IslandRenderer {
     if(!t.building && t.variant>.78 && t.kind==='land'){
       for(let i=0;i<3;i++){const xx=x+(hash(i+t.x,t.y)-.5)*27,yy=y+(hash(t.y,i+t.x)-.5)*8;this.ellipse(xx,yy,1.2,.7,'#d4d7a4');}
     }
+    if(t.river){
+      // The river: a ribbon of water towards each river neighbour and to the sea at the mouth.
+      const links=[[1,0],[-1,0],[0,1],[0,-1]].filter(([dx,dy])=>{const n=this.sim.tile(t.x+dx,t.y+dy);return n?.river||n?.kind==='water';});
+      for(const [dx,dy] of links){const q=this.p(t.x+dx,t.y+dy),m={x:(x+q.x)/2,y:(y+q.y)/2};this.line([[x,y],[m.x,m.y]],'#86b9c4',7);this.line([[x,y],[m.x,m.y]],'#a9d2da',3);}
+      this.ellipse(x,y,4.5,2.4,'#86b9c4');
+      if(!this.reduced){const f=(this.time*.4+t.x*.3)%1;this.ellipse(x-4+f*8,y-1+f*2,1.4,.5,'rgba(255,255,255,.7)');}
+      if(t.road){this.line([[x-8,y-6],[x+8,y+2]],'#9b8463',1.2);this.line([[x-8,y-2],[x+8,y+6]],'#9b8463',1.2);}
+      const mouth=this.sim.river?.mouth;
+      if(mouth&&mouth.x===t.x&&mouth.y===t.y&&this.sim.year>=1250&&this.sim.reclaimed.some(r=>Math.hypot(r.x-t.x,r.y-t.y)<=4)){this.rect(x-6,y-9,12,6,'#8a8f94');this.rect(x-5,y-12,2,3,'#6d7278');this.rect(x+3,y-12,2,3,'#6d7278');}
+    }
     if(t.wetUntil>=this.sim.year){this.ellipse(x-10,y+4,5,1.7,'#9dbfb388');this.ellipse(x+12,y,4,1.4,'#a6c7bb99');}
     if(t.crackUntil>=this.sim.year)this.line([[x-15,y-1],[x-8,y+1],[x-5,y-2],[x+2,y+4],[x+8,y+2],[x+15,y+5]],'#967d5d',1.5);
     if(t.scorchedUntil>=this.sim.year||t.burntForest){this.diamond(x,y-1,18,8,'#877b6655');for(let i=0;i<3;i++)this.line([[x-10+i*8,y+2],[x-11+i*8,y-5]],'#696552',2);}
@@ -489,6 +499,7 @@ export class IslandRenderer {
     else if(b==='royal-palace'){c.scale(2.1,2.1);this.royal=true;this.palace(true,t.variant);this.royal=false;}
     else if(b==='circus')this.circus();
     else if(b==='zoo')this.zoo();
+    else if(b==='watermill')this.watermill();
     else if(b==='watchtower')this.watchtower();
     else if(b==='rose-garden')this.roseGarden();
     else if(b==='grand-fountain')this.grandFountain();
@@ -942,6 +953,12 @@ export class IslandRenderer {
     this.poly([[-6,-2],[0,1],[0,-40],[-6,-43]],'#ddd2b4');this.poly([[0,1],[6,-2],[6,-43],[0,-40]],'#bdb699');
     this.poly([[-5,-30],[0,-28],[0,-36],[-5,-38]],'#5d564b');const swing=this.reduced?0:Math.sin(this.time*2)*1.2;this.ellipse(-2.5+swing,-32,1.8,2.2,'#c9a24e');
     this.ellipse(3,-20,2.4,2.4,'#f3eedd');this.line([[3,-20],[3,-22]],'#3f3a36',.6);this.poly([[-8,-43],[0,-54],[8,-43],[0,-40]],'#6f8a8c');this.line([[0,-54],[0,-58]],'#c9a24e',1);
+  }
+  watermill(){
+    this.ellipse(4,4,15,5,'#58654418');
+    this.poly([[-12,-2],[0,4],[0,-14],[-12,-20]],'#d9c7a6');this.poly([[0,4],[10,-1],[10,-19],[0,-14]],'#b8a586');this.poly([[-14,-19],[-2,-30],[12,-19],[0,-12]],'#8a6a4c');
+    const c=this.ctx;c.save();c.translate(12,-6);c.rotate(this.reduced?0:this.time*1.4);for(let i=0;i<8;i++){c.rotate(Math.PI/4);this.line([[0,0],[0,-9]],'#7a6248',1.2);this.rect(-1.5,-10,3,3,'#9b8463');}c.restore();this.ellipse(12,-6,2,2,'#6f5a40');
+    this.window([[-8,-6],[-4,-4],[-4,-10],[-8,-12]],'#7d937c');
   }
   zoo(){
     const t=this.reduced?0:this.time;

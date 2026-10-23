@@ -1175,7 +1175,7 @@ function drawFinale(c,w,h,s,m,reduced=false){
  c.restore();
 }
 
-const PLACE_NAMES={hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',lighthouse:'Vuurtoren','town-square':'Dorpsplein','petting-farm':'Kinderboerderij',museum:'Eilandmuseum',monument:'Standbeeld','royal-palace':'Het nieuwe paleis',zoo:'Dierentuin',watchtower:'Uitkijktoren','rose-garden':'Rozentuin','grand-fountain':'Grote fontein',carillon:'Klokkentoren','theme-park':'Pretpark',circus:'Circustent',station:'Treinstation',pool:'Openluchtzwembad',spaceport:'Ruimtehaven',observatory:'Sterrenwacht','ice-cream':'IJssalon',greenhouse:'Kas',ruins:'Ruïne'};
+const PLACE_NAMES={hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',lighthouse:'Vuurtoren','town-square':'Dorpsplein','petting-farm':'Kinderboerderij',museum:'Eilandmuseum',monument:'Standbeeld','royal-palace':'Het nieuwe paleis',zoo:'Dierentuin',watermill:'Watermolen',watchtower:'Uitkijktoren','rose-garden':'Rozentuin','grand-fountain':'Grote fontein',carillon:'Klokkentoren','theme-park':'Pretpark',circus:'Circustent',station:'Treinstation',pool:'Openluchtzwembad',spaceport:'Ruimtehaven',observatory:'Sterrenwacht','ice-cream':'IJssalon',greenhouse:'Kas',ruins:'Ruïne'};
 const names=['Noor','Sam','Bo','Mila','Daan','Lou','Iris','Mo','Tess','Finn','Ada','Jip'];
 const surnames=['de Vries','van de Kust','Bos','van Dijk','de Boer','Steen','van de Berg','Visser'];
 function describePlot(s,t){
@@ -1924,6 +1924,31 @@ function advanceSquare(s){
  s.signal('celebrate',tiles[0],'Een dorpsplein!');s.rebuildRoads();
 }
 
+// A river runs from the high ground to the sea. Its tiles stay free of buildings; roads cross it on little bridges.
+const riverAround=t=>[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:t.x+dx,y:t.y+dy}));
+function carveRiver(s){
+ if(s.river)return s.river;
+ const high=s.land.filter(t=>t.landform).sort((a,b)=>(b.relief||0)-(a.relief||0));
+ const ok=t=>t&&t.kind==='land'&&!t.landform&&!t.building&&!t.reservedFor&&!t.foundingHome&&Math.hypot(t.x,t.y)>2.5;
+ for(const peak of high){
+  const start=riverAround(peak).map(p=>s.tile(p.x,p.y)).find(ok);if(!start)continue;
+  // Search the island and flow to a coast well away from the mountain, through free ground only.
+  const prev=new Map([[`${start.x},${start.y}`,null]]),dist=new Map([[`${start.x},${start.y}`,0]]),queue=[start];let end=null,best=-1;
+  for(let q=0;q<queue.length;q++){const cur=queue[q],d=dist.get(`${cur.x},${cur.y}`);
+   if(d>=5&&d<=16&&riverAround(cur).some(p=>s.tile(p.x,p.y)?.kind==='water')){const far=Math.hypot(cur.x-peak.x,cur.y-peak.y);if(far>best){best=far;end=cur;}}
+   if(d>=16)continue;
+   for(const p of riverAround(cur)){const t=s.tile(p.x,p.y),k=`${p.x},${p.y}`;if(ok(t)&&!dist.has(k)){dist.set(k,d+1);prev.set(k,cur);queue.push(t);}}
+  }
+  if(!end)continue;
+  const path=[];for(let cur=end;cur;cur=prev.get(`${cur.x},${cur.y}`))path.unshift(cur);
+  const cur=end;
+  for(const t of path){t.river=true;t.reservedFor='river';}
+  s.river={tiles:path.map(t=>`${t.x},${t.y}`),mouth:{x:cur.x,y:cur.y}};
+  return s.river;
+ }
+ s.river={tiles:[],mouth:null};return s.river;
+}
+
 // Every island earns a name and a flag from its seed and, once it has one, its character.
 const NAME_PARTS={
  none:['Nooitgedacht','Boomrust','Wolkenrijk','Schelpenoog','Lantaarnoog','Kribbeland'],
@@ -1998,6 +2023,7 @@ const DELIGHTS=[
  {type:'spaceport',since:2060,population:800,name:'Ruimtehaven',label:'Aftellen!',opening:'Een ruimtehaven! De eerste raket gaat naar de maan en komt terug met een steen en een selfie.',where:(s,t,near)=>near(t,p=>p?.kind==='water'||p?.building==='beach')},
  {type:'zoo',since:1700,population:350,name:'Dierentuin',label:'Kijk, een giraf!',opening:'De dierentuin opent. De giraf kijkt over het hek en vindt de mensen het interessantst.',where:(s,t)=>Math.hypot(t.x,t.y)>=4},
  {type:'theme-park',since:1960,population:700,name:'Pretpark',label:'Nog een keer!',opening:'Een pretpark opent, met een achtbaan die precies één looping te veel heeft.',where:(s,t)=>Math.hypot(t.x,t.y)>=5},
+ {type:'watermill',since:600,population:60,name:'Watermolen',label:'Klik-klak, klik-klak',opening:'Aan de rivier draait een watermolen. De molenaar praat alleen nog in het ritme van het rad.',where:(s,t,near)=>near(t,p=>!!p?.river)},
  {type:'petting-farm',since:150,population:40,name:'Kinderboerderij',label:'Mèèh!',opening:'Een kinderboerderij opent. De geit wordt direct verkozen tot burgemeester van de kinderen.',where:(s,t)=>Math.hypot(t.x,t.y)>=3&&Math.hypot(t.x,t.y)<=8},
  {type:'observatory',since:1600,population:200,name:'Sterrenwacht',label:'Sterren kijken',opening:'Een sterrenwacht verrijst bij de berg. De eerste ontdekking: de maan is er nog.',where:(s,t,near)=>near(t,p=>!!p?.landform)||s.year>=1900&&Math.hypot(t.x,t.y)>=5},
  {type:'ice-cream',since:1800,population:300,name:'IJssalon',label:'Een ijsje!',opening:'Een ijssalon opent bij het strand. Het eiland leert het woord ‘nog eentje’.',where:(s,t,near)=>near(t,p=>p?.building==='beach')},
@@ -2260,6 +2286,7 @@ class Civilization {
     for(const beach of coast.slice(0,2))beach.building='beach';
     ensureStory(this);
     ensureSquare(this);
+    carveRiver(this);
     seedPleasures(this);
     this.rebuildRoads();
     this.log('A tree. A few people. An unreasonable amount of potential.','tree',{x:0,y:0});
@@ -3043,7 +3070,7 @@ class Civilization {
       if(!parsed.character && sim.year>=32)sim.character=CHARACTERS[sim.seed%CHARACTERS.length].id;
       if(!Array.isArray(parsed.routes) || !parsed.tiles.every(([,tile])=>typeof tile.road==='boolean'))sim.rebuildRoads();
       if(!parsed.storyVersion){sim.storyVersion=0;sim.snapshots=[];}
-      ensureStory(sim,true);if(!parsed.square)delete sim.square;ensureSquare(sim,{restoring:true});
+      ensureStory(sim,true);if(!parsed.square)delete sim.square;if(!parsed.river)sim.river={tiles:[],mouth:null};ensureSquare(sim,{restoring:true});
       ensureSpectacle(sim);
       if(!parsed.family)delete sim.family;
       ensureFamily(sim,{restoring:true});
@@ -4063,6 +4090,16 @@ class IslandRenderer {
     if(!t.building && t.variant>.78 && t.kind==='land'){
       for(let i=0;i<3;i++){const xx=x+(hash(i+t.x,t.y)-.5)*27,yy=y+(hash(t.y,i+t.x)-.5)*8;this.ellipse(xx,yy,1.2,.7,'#d4d7a4');}
     }
+    if(t.river){
+      // The river: a ribbon of water towards each river neighbour and to the sea at the mouth.
+      const links=[[1,0],[-1,0],[0,1],[0,-1]].filter(([dx,dy])=>{const n=this.sim.tile(t.x+dx,t.y+dy);return n?.river||n?.kind==='water';});
+      for(const [dx,dy] of links){const q=this.p(t.x+dx,t.y+dy),m={x:(x+q.x)/2,y:(y+q.y)/2};this.line([[x,y],[m.x,m.y]],'#86b9c4',7);this.line([[x,y],[m.x,m.y]],'#a9d2da',3);}
+      this.ellipse(x,y,4.5,2.4,'#86b9c4');
+      if(!this.reduced){const f=(this.time*.4+t.x*.3)%1;this.ellipse(x-4+f*8,y-1+f*2,1.4,.5,'rgba(255,255,255,.7)');}
+      if(t.road){this.line([[x-8,y-6],[x+8,y+2]],'#9b8463',1.2);this.line([[x-8,y-2],[x+8,y+6]],'#9b8463',1.2);}
+      const mouth=this.sim.river?.mouth;
+      if(mouth&&mouth.x===t.x&&mouth.y===t.y&&this.sim.year>=1250&&this.sim.reclaimed.some(r=>Math.hypot(r.x-t.x,r.y-t.y)<=4)){this.rect(x-6,y-9,12,6,'#8a8f94');this.rect(x-5,y-12,2,3,'#6d7278');this.rect(x+3,y-12,2,3,'#6d7278');}
+    }
     if(t.wetUntil>=this.sim.year){this.ellipse(x-10,y+4,5,1.7,'#9dbfb388');this.ellipse(x+12,y,4,1.4,'#a6c7bb99');}
     if(t.crackUntil>=this.sim.year)this.line([[x-15,y-1],[x-8,y+1],[x-5,y-2],[x+2,y+4],[x+8,y+2],[x+15,y+5]],'#967d5d',1.5);
     if(t.scorchedUntil>=this.sim.year||t.burntForest){this.diamond(x,y-1,18,8,'#877b6655');for(let i=0;i<3;i++)this.line([[x-10+i*8,y+2],[x-11+i*8,y-5]],'#696552',2);}
@@ -4203,6 +4240,7 @@ class IslandRenderer {
     else if(b==='royal-palace'){c.scale(2.1,2.1);this.royal=true;this.palace(true,t.variant);this.royal=false;}
     else if(b==='circus')this.circus();
     else if(b==='zoo')this.zoo();
+    else if(b==='watermill')this.watermill();
     else if(b==='watchtower')this.watchtower();
     else if(b==='rose-garden')this.roseGarden();
     else if(b==='grand-fountain')this.grandFountain();
@@ -4656,6 +4694,12 @@ class IslandRenderer {
     this.poly([[-6,-2],[0,1],[0,-40],[-6,-43]],'#ddd2b4');this.poly([[0,1],[6,-2],[6,-43],[0,-40]],'#bdb699');
     this.poly([[-5,-30],[0,-28],[0,-36],[-5,-38]],'#5d564b');const swing=this.reduced?0:Math.sin(this.time*2)*1.2;this.ellipse(-2.5+swing,-32,1.8,2.2,'#c9a24e');
     this.ellipse(3,-20,2.4,2.4,'#f3eedd');this.line([[3,-20],[3,-22]],'#3f3a36',.6);this.poly([[-8,-43],[0,-54],[8,-43],[0,-40]],'#6f8a8c');this.line([[0,-54],[0,-58]],'#c9a24e',1);
+  }
+  watermill(){
+    this.ellipse(4,4,15,5,'#58654418');
+    this.poly([[-12,-2],[0,4],[0,-14],[-12,-20]],'#d9c7a6');this.poly([[0,4],[10,-1],[10,-19],[0,-14]],'#b8a586');this.poly([[-14,-19],[-2,-30],[12,-19],[0,-12]],'#8a6a4c');
+    const c=this.ctx;c.save();c.translate(12,-6);c.rotate(this.reduced?0:this.time*1.4);for(let i=0;i<8;i++){c.rotate(Math.PI/4);this.line([[0,0],[0,-9]],'#7a6248',1.2);this.rect(-1.5,-10,3,3,'#9b8463');}c.restore();this.ellipse(12,-6,2,2,'#6f5a40');
+    this.window([[-8,-6],[-4,-4],[-4,-10],[-8,-12]],'#7d937c');
   }
   zoo(){
     const t=this.reduced?0:this.time;
