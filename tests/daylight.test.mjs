@@ -46,3 +46,8 @@ test('a window behind a house in front of it stays dark',()=>{
  front.building='house';assert.equal(lightHidden(s,back),true);
  front.building='farm';assert.equal(lightHidden(s,back),false,'a field in front hides nothing');
 });
+test('seasonal customs and night life draw safely in every season and at night',()=>{
+ const s=new Civilization(31);while(s.year<400)s.tick();const before=s.serialize();
+ for(const season of [0,1,2,3])for(const phase of [.02,.5]){const {canvas}=canvasHarness(),r=new IslandRenderer(canvas,s);r.dayClock=(season*SEASON_DAYS+phase)*DAY_SECONDS;r.time=30;assert.doesNotThrow(()=>r.draw(16));}
+ assert.equal(s.serialize(),before);
+});

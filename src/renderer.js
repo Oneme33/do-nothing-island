@@ -5,6 +5,7 @@ import {drawSeaLife} from './sea.js';
 import {drawInterventionFx} from './fx.js';
 import {drawAnimals} from './animals.js';
 import {drawFestive} from './festive.js';
+import {drawSeasonal,drawNightLife} from './ambient.js';
 import {drawWeather} from './weatherfx.js';
 import {squareRole} from './square.js';
 import {islandIdentity} from './identity.js';
@@ -176,6 +177,7 @@ export class IslandRenderer {
     this.drawWorkers();
     drawInterventionFx(this);
     drawAnimals(this);
+    drawSeasonal(this);
     drawFestive(this);
     this.drawVisitors();drawLifeWorld(this);
     this.scene.sort((a,b)=>a.depth-b.depth);
@@ -196,6 +198,7 @@ export class IslandRenderer {
     if(this.sim.storm)this.drawRain();
     drawWeather(this);
     drawDaylight(this,this.light);
+    drawNightLife(this);
     this.drawEffectLabels();
     this.drawDistrictLabels();
     if(!cinemaVisible(this.sim))this.drawLandmarkLabels();
