@@ -6666,7 +6666,9 @@ class IslandRenderer {
   }
   drawEffectLabels(){
     const c=this.ctx;
-    for(const effect of this.effects.filter(e=>e.label&&e.elapsed<1.9).sort((a,b)=>(b.priority||0)-(a.priority||0)||a.elapsed-b.elapsed).slice(0,2)){
+    // Only real moments get a label in the picture: no 'new home' or 'open for business' for every building.
+    const worth=e=>e.moment||['rumble','flood','gift','ending','endgame','crisis'].includes(e.type)||(e.priority||0)>=80||e.title;
+    for(const effect of this.effects.filter(e=>e.label&&e.elapsed<1.9&&worth(e)).sort((a,b)=>(b.priority||0)-(a.priority||0)||a.elapsed-b.elapsed).slice(0,this.width<700?1:2)){
       const p=this.point(effect.x,effect.y),rise=this.reduced?0:Math.min(12,effect.elapsed*4);
       c.save();c.globalAlpha=Math.max(0,Math.min(1,effect.elapsed*5,(1.9-effect.elapsed)/.6));c.font='500 11px "DM Sans", sans-serif';
       const translated=nl(effect.label),label=translated.length>46?translated.slice(0,43)+'…':translated,width=Math.round(Math.min(this.width-24,c.measureText(label).width+16));
@@ -6946,12 +6948,15 @@ function renderChallenges(){
   }));
 }
 let wishHeard=null;
+let bubbleTimer=null,bubbleQuiet=null;
 function updateWishBubble(){
   const wish=ensureWishes(sim).active;
+  // The cloud shows a new wish for ten seconds, then only the question mark on the island stays.
+  if(wish&&!wish.hidden&&wish.id!==wishHeard){clearTimeout(bubbleTimer);const id=wish.id;bubbleTimer=setTimeout(()=>{bubbleQuiet=id;$('wish-bubble').hidden=true;},10000);}
   // A soft ping when someone starts asking for something.
   if(wish&&!wish.hidden&&wish.id!==wishHeard){if(wishHeard!==null)soundscape?.play('wish');wishHeard=wish.id;hintOnce('wish','Iemand heeft een vraag. Klik op het vraagteken of het wolkje als je wilt helpen; het mag ook niet.');}else if(!wish&&wishHeard===null)wishHeard='';
   $('book-tab-wishes').dataset.pending=String(!!wish&&!sim.ending);
-  $('wish-bubble').hidden=!wish||wish.hidden||sim.config.wishBubbles===false||!!sim.ending;
+  $('wish-bubble').hidden=!wish||wish.hidden||sim.config.wishBubbles===false||!!sim.ending||bubbleQuiet===wish.id;
   if(wish){$('wish-speaker').textContent=wish.speaker;$('wish-text').textContent=wish.text;}
 }
 function renderWishes(){
@@ -7130,7 +7135,8 @@ function momentTarget(entry){
 function focusPlace(tile){if(!tile)return;renderer.focusTile(tile);inspectTile(tile);}
 let chipAt=-Infinity,chipTimer=null,chipEntry=null;
 function surfaceStory(entries){
-  const now=performance.now();if(now-chipAt<75000||sim.ending)return;
+  // A quiet start: no story notes in the first 150 years, and on a phone not while a wish is showing.
+  const now=performance.now();if(now-chipAt<75000||sim.ending||sim.year<150||typeof window!=='undefined'&&window.innerWidth<700&&!$('wish-bubble').hidden)return;
   const pick=entries.find(e=>e.type==='family')||entries.find(e=>['famous','treasure','delight','palace'].includes(e.type));if(!pick)return;
   chipAt=now;chipEntry=pick;const text=nl(pick.text),short=text.length>90?text.slice(0,88)+'…':text;
   $('story-chip-text').textContent=short;$('story-chip').hidden=false;clearTimeout(chipTimer);chipTimer=setTimeout(()=>{$('story-chip').hidden=true;},14000);

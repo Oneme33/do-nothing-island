@@ -1833,7 +1833,9 @@ export class IslandRenderer {
   }
   drawEffectLabels(){
     const c=this.ctx;
-    for(const effect of this.effects.filter(e=>e.label&&e.elapsed<1.9).sort((a,b)=>(b.priority||0)-(a.priority||0)||a.elapsed-b.elapsed).slice(0,2)){
+    // Only real moments get a label in the picture: no 'new home' or 'open for business' for every building.
+    const worth=e=>e.moment||['rumble','flood','gift','ending','endgame','crisis'].includes(e.type)||(e.priority||0)>=80||e.title;
+    for(const effect of this.effects.filter(e=>e.label&&e.elapsed<1.9&&worth(e)).sort((a,b)=>(b.priority||0)-(a.priority||0)||a.elapsed-b.elapsed).slice(0,this.width<700?1:2)){
       const p=this.point(effect.x,effect.y),rise=this.reduced?0:Math.min(12,effect.elapsed*4);
       c.save();c.globalAlpha=Math.max(0,Math.min(1,effect.elapsed*5,(1.9-effect.elapsed)/.6));c.font='500 11px "DM Sans", sans-serif';
       const translated=nl(effect.label),label=translated.length>46?translated.slice(0,43)+'…':translated,width=Math.round(Math.min(this.width-24,c.measureText(label).width+16));
