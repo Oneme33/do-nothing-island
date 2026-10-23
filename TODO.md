@@ -55,3 +55,44 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 **Fase 2 (deel), gepusht:** rustige, zelf meegroeiende muziek per tijdperk (fluit, luit, speeldoos, elektrische piano, glazen klanken) die 's nachts zachter wordt; aparte volumeregelaars voor muziek en geluiden; rijkere geluiden voor regen, beving, vuur en een duwtje, plus een belletje bij een nieuwe wens, water bij een overstroming en wind bij storm; een tijdlijn bovenin met de vijf tijdperken, een markering voor nu en stipjes voor grote momenten; het kasteel groeit in zeven stappen met steigers ertussen; minder boerderijen en silo's; de ruimtehaven op een eigen betonplatform aan zee.
 
 **Ronde na fase 2, gepusht en online op coenvermeer.nl/nothing-island:** seizoenen (bloesem in de lente, warme zomer met picknicks en zonnebloemen, kale bomen en dwarrelende bladeren in de herfst, dekkende sneeuw op daken, kasteel en bomen in de winter); bakstenen schoorstenen; rechte piramidedaken; een echte vulkaan die 's nachts gloeit; een haven die per tijdperk groeit; roofvogels om de bergtop; akkers en omheinde weilanden apart; pakhuizen met trapgevel; middeleeuwse momenten per eeuw (klooster, jaarmarkt, drakenvlieger, toernooi, pelgrims, kathedraal, gilden, troubadours, drukpers, kermis, tulpenmanie); een titelscherm; vuurwerk bij een gouden of perfect eiland; keur met hongerjaren, strengere natuur en verdiende standbeelden en cadeaus; grotere standbeelden; een rustigere mobiele weergave met alleen de tijd; snellere weergave op telefoons.
+
+## Wensenlijst ronde 7 (nog niet gebouwd)
+
+### 1. Natuurrampen met echte gevolgen
+- **Lavastroom:** bij een uitbarsting stroomt de lava echt naar beneden, steekt onderaan branden aan en verwoest een paar huizen.
+- **Waterval bij de heuvels:** een waterval midden in het heuvelland. Bij veel regen overstroomt die, met hetzelfde soort gevolgen als de lavastroom (natte, beschadigde huizen beneden).
+- **Lawine bij de bergen:** een aardbeving kan een lawine veroorzaken, ook met dezelfde gevolgen.
+- **Herbouwen kost tijd:** verwoeste huizen staan eerst een tijd als ruïne of bouwplaats voordat ze terugkomen.
+- **Verwoestingsmodus:** wie heel vaak op vuur, beving of regen klikt, kan het eiland echt verwoesten (branden, ingestorte wijken, overstromingen). De keur zakt dan flink.
+
+### 2. Keur en speelstijl
+- **Win-win:** helpen mag nooit alleen maar kosten, en niet helpen nooit alleen maar punten missen. Elke ingreep (helpen, regen, vuur, beving) levert ergens iets op en kost alleen in overmaat iets; het ene onderdeel werkt het andere niet tegen.
+- **Bonus voor geduld:** net iets meer punten als je minstens 75% van de tijd op de langzaamste snelheid hebt gespeeld. Alleen tijd waarin je echt meekijkt telt, niet het doorspelen terwijl je weg bent.
+- **Cadeaus plaatsen:** na het verdienen kies je "kies zelf de plek" of "laat de bewoners kiezen" (dan zet het eiland het automatisch op een goede plek).
+- **Beloning voor echt niets doen:** raak je 10 minuten niets aan, dan gebeurt er iets zeldzaams: noorderlicht, een meteorenregen of een walvis die vlak bij de kust springt.
+
+### 3. Land, kust en buren
+- **Molens bij elke polder:** aan het eind van elke landwinning staan molens, zodat duidelijk is dat het land met molens is drooggemalen.
+- **Buureilandjes koppelen:** soms worden de buureilandjes met een dijk of brug aan het hoofdeiland vastgemaakt.
+- **Vliegveldje:** tegen het einde een kleine landingsbaan met een vliegveldje op een nieuw drooggemaakte polder, met af en toe een vliegtuigje.
+
+### 4. Seizoenen, feesten en avond
+- **Winter:** meer kerstsfeer: gekleurde lampjes, kerstbomen, een kerstman met een zak en een yeti in de bergen.
+- **Zomer:** één dag carnaval met optocht en vuurwerk.
+- **Herfst:** Halloween, met pompoenen en lichtjes.
+- **Lente:** een bloemen- of oogstfeest.
+- **Pretpark 's avonds verlicht:** het reuzenrad en de achtbaan met lampjes.
+- **Dierentuin 's nachts dicht:** het hek gaat dicht en de dieren liggen te slapen.
+
+### 5. Sfeer en eigenheid
+- **Iets unieks per eiland:** elk eiland begint met één bijzonder ding dat alleen dat eiland heeft, meestal iets natuurlijks of iets uit de oudheid: een eeuwenoude reuzeneik, een steencirkel, een hunebed, een natuurlijke rotsboog, een warme bron of een scheepswrak. Het komt terug in het museum en het naschrift.
+- **Sterrenbeelden naar jou genoemd:** na veel ingrepen ontstaan sterrenbeelden aan de nachtlucht, zoals "De Grote Hand" of "De Brandende Emmer".
+
+### 6. Meespelen en bewaren
+- **Minispelletjes bij helpen:** een heel kort spelletje van hooguit 10 seconden, altijd over te slaan, als je een wens helpt (bijvoorbeeld regendruppels op de akker mikken).
+- **Volg een bewoner:** klik op iemand en de camera loopt een dag mee, met naam en een gedachtewolkje.
+- **Eiland opslaan en delen:** een eiland als bestand of link bewaren en aan iemand anders geven.
+- **Fotomodus met filters:** polaroid, tilt-shift en een oude kaart in sepia, met de eilandnaam erop.
+
+### 7. Eindscherm
+- **Mooier en aansprekender:** het oorspronkelijke kleine, groene eiland naast het grote, volle eiland van het einde, netter vormgegeven en minder tekst.
