@@ -113,4 +113,4 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 
 ### Nog te doen: kleine wensen
 - **Cadeau zonder inzoomen:** bij het bouwen van een cadeau door de bewoners niet automatisch inzoomen, maar een duidelijke marker op de plek laten zien (bijvoorbeeld een vlaggetje of een strik boven de bouwplaats, tot het klaar is).
-- **Kerk met kerkhof:** de kerk krijgt een kerkhof ernaast. In het begin een kleine kerk met een paar grafjes; later groeit het kerkhof mee en staat er aan het einde een grote kerk ergens achterin het eiland, met een flink kerkhof.
+- **Kerk met kerkhof:** de kerk krijgt een kerkhof ernaast. In het begin een kleine kerk met een paar grafjes; later groeit het kerkhof mee en staat er aan het einde een grote kerk ergens achterin het eiland, met een flink kerkhof. Hoe meer je voor de bewoners doet (geholpen wensen), hoe groter en imposanter de kerk wordt.
