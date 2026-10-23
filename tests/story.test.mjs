@@ -80,3 +80,13 @@ test('modern life and the finale receive readable time even when automatic accel
  const s=new Civilization(31);let modernSeconds=0;for(let y=1920;y<2080;y++){s.year=y;modernSeconds+=s.yearDuration;}
  assert.ok(modernSeconds>=90);s.endgameStarted=true;s.year=2150;assert.ok(s.yearDuration>=.65);
 });
+import {islandScores,scoreInputs} from '../src/finale.js';
+test('a perfect island scores 100, and asked-for help never costs independence',()=>{
+ const s=new Civilization(31);while(s.year<1500)s.tick();
+ s.food=s.population*3;s.freshwater=90;s.prosperity=80;s.environment=95;s.pollution=5;s.interferences=4;s.wishes.history=[1,2,3,4].map(i=>({id:`w${i}`,status:'helped'}));s.influence.dependence=6;
+ s.rebuiltFires=3;for(const t of s.land)if(t.building==='ruins')t.building='house';s.partiesHeld=6;
+ const kinds=['museum','circus','station','pool','spaceport','zoo','theme-park','petting-farm','observatory','ice-cream'];s.land.filter(t=>t.building==='house'&&!t.foundingHome).slice(0,10).forEach((t,i)=>t.building=kinds[i]);
+ for(const t of s.land.filter(t=>!t.building&&!t.reservedFor).slice(0,14))t.building='park';
+ assert.equal(scoreInputs(s).unrequested,0);const score=islandScores(s);assert.equal(score.total,100,JSON.stringify(score.values));
+ s.interferences=9;assert.ok(islandScores(s).values.zelfstandigheid<100,'unasked interventions do count');
+});

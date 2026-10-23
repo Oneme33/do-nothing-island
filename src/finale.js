@@ -1,10 +1,17 @@
 const score100=n=>Math.round(Math.max(0,Math.min(100,n)));
+// Five scores of 0–100 that can all reach 100 together. Wishes that residents asked for never count as interfering.
+export const SCORE_RECIPE='Zo haal je 100: grijp alleen in als iemand erom vraagt (een vraagteken), help veel wensen zodat er feesten zijn, laat het eiland groen en schoon, zorg dat ze minstens drie rampen te boven komen (bliksem, hoog water of een brand die op verzoek geblust wordt) zonder ruïnes aan het einde, en laat ze lang genoeg bouwen voor al hun speciale gebouwen.';
+export function scoreInputs(s){
+ const helped=(s.wishes?.history||[]).filter(w=>w.status==='helped').length;
+ return{helped,unrequested:Math.max(0,(s.interferences||0)-helped),ownDependence:Math.max(0,(s.influence?.dependence||0)-helped*1.5),recovered:(s.rebuiltFires||0)+s.land.filter(t=>t.floodMemorial).length,ruins:s.land.filter(t=>t.building==='ruins').length,parties:s.partiesHeld||0,delights:s.land.filter(t=>['museum','circus','station','pool','spaceport','zoo','theme-park','petting-farm','observatory','ice-cream','greenhouse'].includes(t.building)).length};
+}
 export function islandScores(s){
- const living=score100(s.prosperity*.45+s.freshwater*.25+Math.min(100,s.food/Math.max(1,s.population)*45)*.3);
- const nature=score100(s.environment*.75+(100-s.pollution)*.25);
- const independent=score100(100-s.influence.dependence*.7-Math.min(45,s.interferences*1.4));
- const resilience=score100(35+Math.min(25,(s.rebuiltFires||0)*5)+Math.min(20,s.storyStats.reforms*3)+Math.min(20,s.houses.filter(t=>t.retrofitted||t.material==='stone').length*2));
- const culture=score100(20+Math.min(40,s.recreation.length*3)+Math.min(25,(s.fireTraditions||0)*5)+Math.min(15,s.storyStats.reforms*2));
+ const k=scoreInputs(s),cap=v=>Math.min(1,Math.max(0,v));
+ const living=score100(100*(.4*cap(s.food/Math.max(1,s.population)/2)+.3*cap(s.freshwater/70)+.3*cap(s.prosperity/60)));
+ const nature=score100(100*(.7*cap(s.environment/85)+.3*cap((100-s.pollution)/70)));
+ const independent=score100(100-Math.min(60,k.unrequested*8)-Math.min(40,Math.max(0,k.ownDependence-3)*3));
+ const resilience=score100(40+Math.min(40,k.recovered*14)+(k.ruins?0:20));
+ const culture=score100(Math.min(50,s.recreation.length*4)+Math.min(30,k.parties*6)+Math.min(20,k.delights*2));
  const values={leefbaarheid:living,natuur:nature,zelfstandigheid:independent,veerkracht:resilience,cultuur:culture};
  return {values,total:score100(Object.values(values).reduce((a,b)=>a+b,0)/5)};
 }
@@ -12,9 +19,9 @@ export function islandScores(s){
 const SCORE_MEANING={
  leefbaarheid:['Eten, water en welvaart voor iedereen',['Het was vaak krap.','De meeste mensen kwamen goed rond.','Iedereen had het goed.']],
  natuur:['Hoe groen en schoon het eiland bleef',['Er bleef weinig natuur over.','Een redelijk groen eiland.','Een levend, schoon landschap.']],
- zelfstandigheid:['Hoeveel ze zelf deden, zonder jouw hulp',['Ze leunden flink op jou.','Soms hielp je een handje.','Ze deden bijna alles zelf.']],
- veerkracht:['Hoe goed ze terugkwamen na brand, beving en hoog water',['Elke ramp bleef lang zichtbaar.','Ze herstelden op eigen tempo.','Na elke ramp stonden ze sterker op.']],
- cultuur:['Parken, feesten, tradities en bijzondere plekken',['Weinig tijd voor plezier.','Er was genoeg te doen.','Een eiland vol leven en feest.']]
+ zelfstandigheid:['Hoeveel ze zelf deden; gevraagde hulp telt niet mee',['Ze leunden flink op jou.','Soms hielp je een handje.','Ze deden bijna alles zelf.']],
+ veerkracht:['Rampen die ze te boven kwamen, zonder ruïnes aan het einde',['Elke ramp bleef lang zichtbaar.','Ze herstelden op eigen tempo.','Na elke ramp stonden ze sterker op.']],
+ cultuur:['Parken, feesten en speciale gebouwen',['Weinig tijd voor plezier.','Er was genoeg te doen.','Een eiland vol leven en feest.']]
 };
 export function explainScore(name,value){const [what,verdicts]=SCORE_MEANING[name]||['',['','','']];return{what,verdict:verdicts[value>=70?2:value>=45?1:0]};}
 export function drawFinale(c,w,h,s,m,reduced=false){

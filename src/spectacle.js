@@ -50,7 +50,7 @@ export function extinguish(s,spot){
 // A party with a reason: a wish that came true, or the opening of a statue or special building.
 export function startParty(s,tile,title,quips,years=4){
  // Parties stay special: short, and followed by at least thirty quiet years.
- if(!tile||s.ending||s.year<(s.partyQuietUntil||0))return null;years=Math.min(years,4);s.partyQuietUntil=s.year+years+30;
+ if(!tile||s.ending||s.year<(s.partyQuietUntil||0))return null;years=Math.min(years,4);s.partyQuietUntil=s.year+years+30;s.partiesHeld=(s.partiesHeld||0)+1;
  s.festival={kind:'party',x:tile.x,y:tile.y,title,quips:quips||['Er is taart. Niemand weet wie hem heeft gebakken.','De fanfare speelt het enige liedje dat ze kent. Twee keer.','Iemand houdt een toespraak. Hij duurt gelukkig kort.'],until:s.year+years};
  s.signal('celebrate',tile,title);return s.festival;
 }
@@ -73,7 +73,7 @@ export function advancePleasures(s){
  if(bakery)choices.push({kind:'pancakes',spot:bakery,title:'The Pancake Emergency',quips:['Too many pancakes. An unprecedented crisis.','The council forms a tasting committee.','The emergency lasts until lunchtime.']});
  if(!choices.length)return;
  const event=choices[Math.floor(s.random()*choices.length)];
- s.festival={kind:event.kind,x:event.spot.x,y:event.spot.y,title:event.title,quips:event.quips,until:s.year+6};s.partyQuietUntil=s.year+36;
+ s.festival={kind:event.kind,x:event.spot.x,y:event.spot.y,title:event.title,quips:event.quips,until:s.year+6};s.partyQuietUntil=s.year+36;s.partiesHeld=(s.partiesHeld||0)+1;
  s.log(`${event.title}. ${event.quips[Math.floor(s.random()*event.quips.length)]}`,'fun',{x:event.spot.x,y:event.spot.y});
  s.signal('celebrate',event.spot,event.title);s.unrest=Math.max(0,s.unrest-5);s.prosperity=Math.min(94,s.prosperity+2);s.food=Math.max(0,s.food-Math.min(12,s.population*.04));
  s.nextFestival=s.year+55+Math.floor(s.random()*65);
