@@ -51,7 +51,7 @@ test('the actual application shows a contextual recap, then permits explicit fre
  assert.equal(e.get('ending-dialog').open,true);assert.equal(e.get('ending-title').textContent,nl(sim.outcome.title));assert.match(e.get('ending-before').innerHTML,/<rect/);assert.match(e.get('ending-after').innerHTML,/<rect/);
  assert.match(e.get('ending-causes').textContent,/Jij keek toe/);assert.equal(e.get('score-breakdown').children.length,5);const stats=e.get('ending-stats').textContent,score=e.get('ending-score').textContent;
  e.get('ending-replay').handlers.click();assert.equal(e.get('ending-dialog').open,false);assert.equal(a.saved().cinematic.elapsed,0);
- a.advance(25);assert.equal(e.get('ending-dialog').open,true);assert.equal(a.saved().cinematic.completed,true);
+ a.advance(41);assert.equal(e.get('ending-dialog').open,true);assert.equal(a.saved().cinematic.completed,true);
  e.get('ending-sandbox').handlers.click();assert.equal(e.get('ending-dialog').open,false);assert.equal(a.saved().sandbox,true);
  a.advance(5);assert.ok(e.get('year').textContent>sim.year);
  e.get('open-ending').handlers.click();assert.equal(e.get('ending-dialog').open,true);assert.equal(e.get('ending-stats').textContent,stats,'recap keeps the original ending rather than the free-play world');
@@ -74,11 +74,11 @@ test('population remarks update before their normal hold when six residents beco
 test('an unfinished reclamation card is hidden after the ending',async()=>{
  const sim=new Civilization(31);while(!sim.ending)sim.tick();sim.cinematic.toured=true;sim.project={stage:2,elapsed:5,tiles:[],manual:false};
  const a=await appHarness(sim);assert.equal(a.elements.get('project-overlay').hidden,true);
- a.advance(25);assert.equal(a.elements.get('project-overlay').hidden,true);assert.equal(a.elements.get('cinema-dialog').open,false);assert.equal(a.elements.get('ending-dialog').open,true);
+ a.advance(41);assert.equal(a.elements.get('project-overlay').hidden,true);assert.equal(a.elements.get('cinema-dialog').open,false);assert.equal(a.elements.get('ending-dialog').open,true);
 });
 test('a saved ending resumes its scene, while a completed recap stays completed on reload',async()=>{
  const sim=new Civilization(31);while(!sim.ending)sim.tick();sim.cinematic.toured=true;sim.cinematic.elapsed=12;sim.cinematic.cheers=2;
- const a=await appHarness(sim);assert.equal(a.elements.get('cinema-caption').hidden,false);a.advance(13);
+ const a=await appHarness(sim);assert.equal(a.elements.get('cinema-caption').hidden,false);a.advance(29);
  assert.equal(a.elements.get('ending-dialog').open,true);assert.equal(a.saved().cinematic.cheers,2);
  const b=await appHarness(Civilization.restore(JSON.stringify(a.saved())));
  assert.equal(b.elements.get('cinema-caption').hidden,true);assert.equal(b.elements.get('ending-dialog').open,false);
@@ -99,7 +99,7 @@ test('the intro and ending windows can be dismissed immediately without a replac
  const intro=await appHarness(new Civilization(31),{firstVisit:true});intro.elements.get('intro-close').handlers.click();assert.equal(intro.elements.get('intro-dialog').open,false);intro.advance(2);assert.ok(intro.elements.get('year').textContent>1);
  const sim=new Civilization(31);while(!sim.ending)sim.tick();sim.cinematic.toured=true;const a=await appHarness(sim),e=a.elements;
  assert.equal(e.get('cinema-dialog').open,true);e.get('cinema-close').handlers.click();assert.equal(e.get('cinema-dialog').open,false);assert.equal(e.get('ending-dialog').open,false);
- a.advance(25);assert.equal(e.get('cinema-dialog').open,false);assert.equal(e.get('ending-dialog').open,false);
+ a.advance(41);assert.equal(e.get('cinema-dialog').open,false);assert.equal(e.get('ending-dialog').open,false);
  e.get('open-ending').handlers.click();assert.equal(e.get('ending-dialog').open,true);e.get('ending-close').handlers.click();a.advance(1);assert.equal(e.get('ending-dialog').open,false);
 });
 test('the family tree is opened deliberately, pauses time and points back to the founding home',async()=>{

@@ -35,10 +35,17 @@ test('every ending has four cinematic beats, a finite duration and explicit repl
  const s=new Civilization(31);s.ending=true;
  for(const id of Object.keys(ENDINGS)){
   startCinema(s,id);assert.equal(cinemaVisible(s),true);
-  for(const [elapsed,index] of [[0,0],[5,1],[11,2],[19,3]]){s.cinematic.elapsed=elapsed;assert.equal(cinemaBeat(s.cinematic).index,index);}
-  s.cinematic.elapsed=23.9;assert.equal(advanceCinema(s,.2),true);assert.equal(s.cinematic.elapsed,24);
+  const d=s.cinematic.duration;for(const [elapsed,index] of [[0,0],[5,1],[11,2],[19,3]]){s.cinematic.elapsed=elapsed*d/24;assert.equal(cinemaBeat(s.cinematic).index,index);}
+  s.cinematic.elapsed=d-.1;assert.equal(advanceCinema(s,.2),true);assert.equal(s.cinematic.elapsed,d);
   assert.equal(advanceCinema(s,.2),false);assert.equal(cinemaBeat(s.cinematic).progress,1);
   startCinema(s,id,true);assert.equal(s.cinematic.elapsed,0);assert.equal(s.cinematic.replay,true);
  }
  resumeSandbox(s);assert.equal(cinemaVisible(s),false);assert.equal(s.cinematic.completed,true);
+});
+import {creditsFor,drawCredits} from '../src/credits.js';
+test('the credits are written from the island itself and draw safely for every ending',()=>{
+ const s=new Civilization(31);while(!s.ending)s.tick();const lines=creditsFor(s);
+ assert.ok(lines.length>15);assert.ok(lines.some(l=>l.kind==='award'));assert.ok(lines.some(l=>/broden/.test(l.text)));assert.match(lines.find(l=>l.kind==='thanks').text,/geduld|helpen|Hand/);
+ const ctx=new Proxy({measureText:t=>({width:t.length*6})},{get:(t,k)=>k in t?t[k]:(...a)=>{for(const v of a)if(typeof v==='number')assert.ok(Number.isFinite(v),String(k));},set:(t,k,v)=>(t[k]=v,true)});
+ for(const id of Object.keys(ENDINGS))for(const elapsed of [0,10,25,39])assert.doesNotThrow(()=>drawCredits(ctx,800,380,s,{id,elapsed,duration:40},false,{width:1200,height:600}));
 });

@@ -84,7 +84,7 @@ export function jokeAfterTouch(s,spot,type){
  s.liveJoke={x:spot.x,y:spot.y,text:options[s.interferences%options.length],until:s.year+12};
 }
 export function startCinema(s,endingId,replay=false){
- s.cinematic={id:endingId,elapsed:0,duration:24,completed:false,cheers:0,replay,toured:!!replay};s.endingSeen=false;
+ s.cinematic={id:endingId,elapsed:0,duration:40,completed:false,cheers:0,replay,toured:!!replay};s.endingSeen=false;
 }
 export function advanceCinema(s,seconds){
  const movie=s.cinematic;if(!movie||movie.completed)return false;
@@ -92,7 +92,7 @@ export function advanceCinema(s,seconds){
  if(movie.elapsed>=movie.duration){movie.completed=true;return true;}return false;
 }
 export function cinemaBeat(movie){
- if(!movie)return null;const t=movie.elapsed;
+ if(!movie)return null;const t=movie.elapsed*24/(movie.duration||24);
  const beats={
   independent:['THEY HAVE A PLAN.','THE LAST GREAT INVENTION','NO MORE RESPONSIBILITY.','THEY HAVE LIFTED OFF.'],
   sanctuary:['ONE LAST DEVELOPMENT PLAN.','MORE SHADE. LESS EVERYTHING.','THE WORLD’S MOST ADVANCED PICNIC.','PROGRESS CAN WAIT.'],

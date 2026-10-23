@@ -1450,7 +1450,7 @@ function jokeAfterTouch(s,spot,type){
  s.liveJoke={x:spot.x,y:spot.y,text:options[s.interferences%options.length],until:s.year+12};
 }
 function startCinema(s,endingId,replay=false){
- s.cinematic={id:endingId,elapsed:0,duration:24,completed:false,cheers:0,replay,toured:!!replay};s.endingSeen=false;
+ s.cinematic={id:endingId,elapsed:0,duration:40,completed:false,cheers:0,replay,toured:!!replay};s.endingSeen=false;
 }
 function advanceCinema(s,seconds){
  const movie=s.cinematic;if(!movie||movie.completed)return false;
@@ -1458,7 +1458,7 @@ function advanceCinema(s,seconds){
  if(movie.elapsed>=movie.duration){movie.completed=true;return true;}return false;
 }
 function cinemaBeat(movie){
- if(!movie)return null;const t=movie.elapsed;
+ if(!movie)return null;const t=movie.elapsed*24/(movie.duration||24);
  const beats={
   independent:['THEY HAVE A PLAN.','THE LAST GREAT INVENTION','NO MORE RESPONSIBILITY.','THEY HAVE LIFTED OFF.'],
   sanctuary:['ONE LAST DEVELOPMENT PLAN.','MORE SHADE. LESS EVERYTHING.','THE WORLD’S MOST ADVANCED PICNIC.','PROGRESS CAN WAIT.'],
@@ -3115,6 +3115,85 @@ function tourStops(s){
  return stops;
 }
 
+// The ending as a film: the real island in the background, an effect per ending, and credits written from this island's own history.
+const credHash=(a,b=0)=>{const n=Math.sin(a*91.17+b*57.3)*43758.5453;return n-Math.floor(n);};
+const credPick=(s,list,salt)=>list[Math.floor(credHash((s.seed>>>0)%9973,salt)*list.length)];
+const nlNumber=n=>n>=1e6?`${(n/1e6).toFixed(1).replace('.',',')} miljoen`:Math.round(n).toLocaleString('nl-NL');
+function islandAnimal(s){
+ if(s.land.some(t=>t.building==='zoo'))return'de giraf, die alles van bovenaf zag';
+ if((s.wishes?.history||[]).some(w=>w.kind==='sheep'))return'schaap Bertha, van het schuurdak';
+ if(s.coast?.lighthouse)return'de vuurtorenkat en haar trap';
+ return credPick(s,['een eend met ambitie','de haan die leerde klokkijken','een meeuw met een patatverleden'],3);
+}
+function creditsFor(s){
+ const id=islandIdentity(s),family=s.family,o=s.outcome||{},helped=(s.wishes?.history||[]).filter(w=>w.status==='helped').length,unasked=Math.max(0,(s.interferences||0)-helped);
+ const houses=s.houses.length,towers=s.houses.filter(t=>t.building==='tower').length,years=s.year,pop=Math.floor(s.population);
+ const treasure=TREASURE_CATALOG.find(t=>t.id===s.coast?.treasures?.[0]?.id);
+ const lines=[
+  {kind:'title',text:id.name,sub:nl(o.title||'Een eilandverhaal')},
+  {kind:'head',text:'In de hoofdrol'},
+  {kind:'line',text:`${nlNumber(pop)} eilanders`,sub:'die het allemaal zelf bedachten (min of meer)'},
+  {kind:'line',text:`Familie ${family?.lastName||'van het eerste huis'}`,sub:`${family?.generations.length||1} generaties sleutelhouders`},
+  {kind:'head',text:'Bijrollen'},
+  {kind:'line',text:'De oude boom',sub:'was er als eerste, en is er nog'},
+  {kind:'line',text:islandAnimal(s)},
+  ...(treasure?[{kind:'line',text:treasure.title,sub:'gevonden, gepoetst en in het museum gezet'}]:[]),
+  ...(s.court?[{kind:'line',text:'Het kasteel',sub:credPick(s,['met meer kamers dan mensen','en een trap die nooit ophoudt','dat elke eeuw een stukje groter werd'],5)}]:[]),
+  {kind:'head',text:'Prijzen'},
+  {kind:'award',text:'Langste vergadering',sub:`de gemeenteraad, ${nlNumber(years/3)} uur over de kleur van de bankjes`},
+  {kind:'award',text:'Mooiste dak',sub:`familie ${credPick(s,['Bos','Visser','de Boer','Steen','van Dijk'],7)}, voor ‘onverwacht petrol’`},
+  {kind:'award',text:'Beste uitzicht',sub:s.land.some(t=>t.building==='watchtower')?'de uitkijktoren die jij liet bouwen':s.land.some(t=>t.building==='lighthouse')?'de vuurtorenwachter, elke ochtend':'iedereen die even op de heuvel ging zitten'},
+  {kind:'head',text:'In cijfers'},
+  {kind:'stat',text:'Gebakken broden',sub:nlNumber(pop*years*.6)},
+  {kind:'stat',text:'Kopjes koffie op het plein',sub:nlNumber(pop*Math.max(1,years-40)*.4)},
+  {kind:'stat',text:'Huizen',sub:`${nlNumber(houses)}${towers?`, waarvan ${towers} torenflats`:''}`},
+  {kind:'stat',text:'Feesten',sub:`${s.partiesHeld||0}, waarvan ${Math.max(0,(s.partiesHeld||0)-1)} met taart`},
+  {kind:'stat',text:'Keren dat iemand ‘wat was dát?’ riep',sub:nlNumber((s.interferences||0)*37+(s.fireCount||0)*12+3)},
+  {kind:'head',text:'Met dank aan'},
+  {kind:'thanks',text:s.interferences===0?'Jou, voor het geduld. Je deed helemaal niets, en dat was precies goed.':unasked===0?`Jou, voor ${helped} keer helpen. Ze vroegen het zelf, dus het telt niet.`:unasked>8?`De Hand, die echt niet kon stilzitten (${unasked} keer).`:`De Hand, voor ${helped} keer helpen en ${unasked} keer… nou ja.`},
+  {kind:'line',text:o.quote?`“${nl(o.quote)}”`:'Einde.',sub:''},
+  {kind:'end',text:'Do Nothing Island',sub:'Geen dieren of eilanders kwamen iets tekort tijdens het maken van dit eiland.'}
+ ];
+ return lines;
+}
+function particles(c,id,w,h,t,reduced){
+ const n=reduced?0:1;
+ if(id==='independent'){
+  for(let i=0;i<4;i++){const x=w*(.15+i*.22)+Math.sin(t*.6+i)*20*n,y=h*(.18+credHash(i,2)*.2)+Math.cos(t*.8+i)*10*n;c.fillStyle=['#d4644f','#e2c26a','#7fa3a8','#c98fb0'][i];c.beginPath();c.moveTo(x,y-10);c.lineTo(x+7,y);c.lineTo(x,y+10);c.lineTo(x-7,y);c.closePath();c.fill();c.strokeStyle='rgba(60,60,60,.4)';c.beginPath();c.moveTo(x,y+10);c.quadraticCurveTo(x+10,y+40,x-5,h*.8);c.stroke();}
+ }
+ if(id==='sanctuary'){for(let i=0;i<30;i++){const u=(t*.05+credHash(i,4))%1;c.fillStyle=['#c99a4a','#a8b46a','#d4704f'][i%3];c.beginPath();c.ellipse(w*credHash(i,5)+Math.sin(t+i)*14*n,u*h,3,1.6,t+i,0,Math.PI*2);c.fill();}}
+ if(id==='miracles'){c.save();c.globalAlpha=.35;for(let i=0;i<7;i++){const a=-Math.PI/2+(i-3)*.18+Math.sin(t*.4)*.04*n;c.fillStyle='#f6dc8a';c.beginPath();c.moveTo(w*.5,-20);c.lineTo(w*.5+Math.cos(a-.05)*h*1.4,-20+Math.sin(a-.05)*-h*1.4*-1);c.lineTo(w*.5+Math.cos(a+.05)*h*1.4,-20+Math.sin(a+.05)*-h*1.4*-1);c.closePath();c.fill();}c.restore();
+  const wave=Math.sin(t*3)*.25*n;c.save();c.translate(w*.5,h*.12);c.rotate(wave);c.fillStyle='#f4efe4';c.beginPath();c.ellipse(0,0,26,30,0,0,Math.PI*2);c.fill();for(let i=0;i<4;i++){c.beginPath();c.ellipse(-15+i*10,-30,4.5,14,0,0,Math.PI*2);c.fill();}c.restore();}
+ if(id==='fortress'){for(let i=0;i<5;i++){const x=w*(.1+i*.2),sway=Math.sin(t*2+i)*3*n;c.strokeStyle='#6d675a';c.beginPath();c.moveTo(x,h*.55);c.lineTo(x,h*.25);c.stroke();c.fillStyle=['#a35a45','#3f5f7a'][i%2];c.beginPath();c.moveTo(x,h*.25);c.lineTo(x+26,h*.27+sway);c.lineTo(x+26,h*.36+sway);c.lineTo(x,h*.34);c.closePath();c.fill();}}
+ if(id==='retreat'){for(let i=0;i<4;i++){const u=(t*.03+i*.22)%1,x=w*(.2+i*.18)+u*w*.3,y=h*(.7-u*.35);c.fillStyle='#8f6f5a';c.beginPath();c.moveTo(x-12,y);c.lineTo(x+12,y);c.lineTo(x+8,y+5);c.lineTo(x-8,y+5);c.closePath();c.fill();c.fillStyle='#f3efcf';c.beginPath();c.moveTo(x,y-1);c.lineTo(x,y-20);c.lineTo(x+11,y-4);c.closePath();c.fill();}}
+ if(id==='last-drop'){const level=Math.min(1,t/18);c.fillStyle=`rgba(90,150,170,${.45*(1-level)})`;c.fillRect(0,h*(.35+level*.6),w,h);for(let i=0;i<5;i++){const hop=Math.abs(Math.sin(t*3+i))*14*n;c.fillStyle='#c9d3cf';c.beginPath();c.ellipse(w*(.2+i*.15),h*.92-hop,6,2.6,Math.sin(t+i),0,Math.PI*2);c.fill();}}
+ if(id==='phoenix'){for(let i=0;i<40;i++){const u=(t*.12+credHash(i,6))%1;c.fillStyle=`rgba(255,${150+Math.floor(credHash(i,7)*80)},80,${1-u})`;c.beginPath();c.ellipse(w*credHash(i,8)+Math.sin(t+i)*10*n,h*(1-u),2,2,0,0,Math.PI*2);c.fill();}
+  const x=((t*.08)%1.3-.15)*w,y=h*.25+Math.sin(t)*20*n;c.fillStyle='#e8913c';c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x-40,y-30-Math.sin(t*6)*12*n,x-70,y-10);c.quadraticCurveTo(x-40,y-5,x-25,y+8);c.closePath();c.fill();}
+ if(['independent','sanctuary','phoenix','miracles'].includes(id)&&!reduced){for(let k=0;k<3;k++){const cycle=(t*.3+k*.33)%1,cx=w*(.2+credHash(k,Math.floor(t*.3+k*.33))*.6),cy=h*(.12+credHash(k,9)*.25),col=['#d4644f','#e2c26a','#7fa3a8','#c98fb0'][(k+Math.floor(t))%4];if(cycle>.25){const open=(cycle-.25)/.75;c.save();c.globalAlpha=1-open;c.fillStyle=col;for(let i=0;i<14;i++){const a=i/14*Math.PI*2;c.beginPath();c.ellipse(cx+Math.cos(a)*open*40,cy+Math.sin(a)*open*30+open*10,2,2,0,0,Math.PI*2);c.fill();}c.restore();}}}
+}
+function drawCredits(c,w,h,s,movie,reduced,island){
+ if(!movie)return;const t=reduced?Math.floor(movie.elapsed/6)*6:movie.elapsed,id=movie.id;
+ c.setTransform(1,0,0,1,0,0);c.fillStyle='#22372c';c.fillRect(0,0,w,h);
+ // The real island, slowly coming closer.
+ if(island&&island.width&&island.height){const zoom=1.05+t/movie.duration*.25,iw=island.width,ih=island.height,scale=Math.max(w/iw,h/ih)*zoom;c.globalAlpha=.9;c.drawImage(island,(w-iw*scale)/2,(h-ih*scale)/2,iw*scale,ih*scale);c.globalAlpha=1;}
+ c.fillStyle='rgba(20,34,28,.25)';c.fillRect(0,0,w,h);
+ particles(c,id,w,h,t,reduced);
+ // Credits roll up through a soft paper panel.
+ const lines=creditsFor(s),panelW=Math.min(360,w*.52),x0=w-panelW-18;
+ c.fillStyle='rgba(251,248,238,.9)';c.fillRect(x0,0,panelW,h);
+ const lineH=42,total=lines.length*lineH+h,offset=h-(t/movie.duration)*total;
+ c.save();c.beginPath();c.rect(x0,0,panelW,h);c.clip();c.textAlign='center';
+ lines.forEach((line,i)=>{const y=offset+i*lineH;if(y<-40||y>h+40)return;const cx=x0+panelW/2;
+  if(line.kind==='title'){c.fillStyle='#293d32';c.font='26px Georgia, serif';c.fillText(line.text,cx,y);c.fillStyle='#7b866e';c.font='italic 14px Georgia, serif';c.fillText(line.sub,cx,y+18);}
+  else if(line.kind==='head'){c.fillStyle='#8a7552';c.font='600 10px sans-serif';c.fillText(line.text.toUpperCase(),cx,y+10);}
+  else if(line.kind==='end'){c.fillStyle='#293d32';c.font='20px Georgia, serif';c.fillText(line.text,cx,y);c.fillStyle='#7b866e';c.font='10px sans-serif';c.fillText(line.sub,cx,y+16);}
+  else{c.fillStyle='#293d32';c.font=line.kind==='award'?'600 13px sans-serif':line.kind==='thanks'?'italic 13px Georgia, serif':'13px sans-serif';
+   const words=line.text.split(' ');let row='',rows=[];for(const word of words){if(c.measureText(row+word).width>panelW-30&&row){rows.push(row);row='';}row+=word+' ';}rows.push(row);rows.slice(0,2).forEach((r,k)=>c.fillText(r.trim(),cx,y+k*15));
+   if(line.sub){c.fillStyle='#6f7f61';c.font='11px sans-serif';c.fillText(line.sub,cx,y+(rows.length>1?30:15));}}
+ });
+ c.restore();
+}
+
 // Postcards from the island: a framed photo of the canvas, and a shareable card for the ending.
 function drawFlag(c,id,x,y,w){
  const h=w*2/3;c.fillStyle=id.main;c.fillRect(x,y,w,h);c.fillStyle=id.second;c.globalAlpha=.75;
@@ -3147,17 +3226,27 @@ function wrap(c,text,x,y,width,lineHeight){
  for(const word of words){if(c.measureText(line+word).width>width&&line){c.fillText(line.trim(),x,y);y+=lineHeight;line='';}line+=word+' ';}
  c.fillText(line.trim(),x,y);return y;
 }
-function makeEndCard({identity,title,quote,familyName,generations,seed,year,score,before,after,link}){
- const w=1200,h=675,{canvas,c}=paper(w,h);
- drawFlag(c,identity,60,56,60);c.fillStyle='#7b866e';c.font='600 16px sans-serif';c.fillText(`${identity.name.toUpperCase()} · JAAR ${year}`,136,82);
- c.fillStyle='#293d32';c.font='54px Georgia, serif';c.fillText(title,60,170);
- c.fillStyle='#5c6c4e';c.font='italic 26px Georgia, serif';wrap(c,`“${quote}”`,60,222,560,34);
- miniMap(c,before,700,70,220);miniMap(c,after,940,70,220);
- c.fillStyle='#7b866e';c.font='15px sans-serif';c.fillText('Het begin',700,315);c.fillText('Het eiland dat zij maakten',940,315);
- c.fillStyle='#293d32';c.font='22px sans-serif';
- c.fillText(`Familie ${familyName} · ${generations} generaties`,60,420);c.fillText(`Eilandscore ${score} / 100`,60,460);
- c.fillStyle='#6f7f61';c.font='18px sans-serif';c.fillText(`Speel hetzelfde eiland: seed ${seed}`,60,560);if(link)c.fillText(link,60,590);
- c.textAlign='right';c.fillText('Do Nothing Island',w-60,h-50);
+// The end card: a real photo of the island, the verdict, three awards and a stamp of approval from the old tree.
+function makeEndCard({identity,title,quote,familyName,generations,seed,year,score,before,after,link,photo,awards=[],stats=[]}){
+ const w=1500,h=1000,{canvas,c}=paper(w,h);
+ c.fillStyle='#dcebe4';c.fillRect(48,48,860,560);
+ if(photo&&photo.width){const scale=Math.max(860/photo.width,560/photo.height),pw=photo.width*scale,ph=photo.height*scale;c.save();c.beginPath();c.rect(48,48,860,560);c.clip();c.drawImage(photo,48+(860-pw)/2,48+(560-ph)/2,pw,ph);c.restore();}
+ c.strokeStyle='#fbf8ee';c.lineWidth=10;c.strokeRect(53,53,850,550);
+ drawFlag(c,identity,950,60,64);c.fillStyle='#7b866e';c.font='600 18px sans-serif';c.fillText(`${identity.name.toUpperCase()} · JAAR ${year}`,1030,88);
+ c.fillStyle='#293d32';c.font='48px Georgia, serif';wrap(c,title,950,170,500,52);
+ c.fillStyle='#5c6c4e';c.font='italic 24px Georgia, serif';wrap(c,`“${quote}”`,950,260,500,32);
+ miniMap(c,before,950,360,150);miniMap(c,after,1120,360,150);c.fillStyle='#7b866e';c.font='14px sans-serif';c.fillText('toen',950,530);c.fillText('nu',1120,530);
+ // A score badge.
+ c.fillStyle='#e2c26a';c.beginPath();c.ellipse(1360,445,62,62,0,0,Math.PI*2);c.fill();c.fillStyle='#293d32';c.textAlign='center';c.font='bold 40px Georgia, serif';c.fillText(String(score),1360,452);c.font='13px sans-serif';c.fillText('VAN 100',1360,475);c.textAlign='left';
+ c.fillStyle='#293d32';c.font='600 16px sans-serif';c.fillText('PRIJZEN',60,660);
+ awards.slice(0,3).forEach((a,i)=>{c.fillStyle='#8a7552';c.font='600 20px sans-serif';c.fillText(`🏆 ${a.text}`,60,700+i*58);c.fillStyle='#5f6a5e';c.font='17px sans-serif';wrap(c,a.sub,92,724+i*58,780,20);});
+ c.fillStyle='#293d32';c.font='600 16px sans-serif';c.fillText('IN CIJFERS',950,600);
+ stats.slice(0,4).forEach((st,i)=>{c.fillStyle='#5f6a5e';c.font='17px sans-serif';c.fillText(`${st.text}: ${st.sub}`,950,636+i*30);});
+ c.fillStyle='#293d32';c.font='20px sans-serif';c.fillText(`Familie ${familyName} · ${generations} generaties`,950,790);
+ c.fillStyle='#6f7f61';c.font='17px sans-serif';c.fillText(`Speel hetzelfde eiland: seed ${seed}`,950,830);if(link)c.fillText(link,950,856);
+ // The stamp.
+ c.save();c.translate(1330,900);c.rotate(-.14);c.strokeStyle='#a5483c';c.lineWidth=4;c.strokeRect(-150,-38,300,76);c.fillStyle='#a5483c';c.textAlign='center';c.font='bold 18px sans-serif';c.fillText('GOEDGEKEURD DOOR',0,-6);c.fillText('DE OUDE BOOM',0,20);c.restore();
+ c.fillStyle='#6f7f61';c.font='16px sans-serif';c.fillText('Do Nothing Island',60,h-50);
  return canvas;
 }
 function downloadCanvas(canvas,filename){
@@ -5439,7 +5528,7 @@ function frame(now){
   if(cinemaActive()){
     const stage=$('finale-canvas'),box=stage.getBoundingClientRect(),w=Math.max(300,Math.round(box.width)),h=Math.max(200,Math.round(box.height));
     if(stage.width!==w||stage.height!==h){stage.width=w;stage.height=h;}
-    drawFinale(stage.getContext('2d'),w,h,sim,sim.cinematic,renderer.reduced);
+    drawCredits(stage.getContext('2d'),w,h,sim,sim.cinematic,renderer.reduced,canvas);
   }
   requestAnimationFrame(frame);
 }
@@ -5512,7 +5601,7 @@ $('photo-night').addEventListener('click',()=>setPhotoLight(true));
 $('photo-save').addEventListener('click',()=>{try{const id=islandIdentity(sim);downloadCanvas(makePostcard(canvas,{identity:id,year:sim.year,line:`${Math.floor(sim.population).toLocaleString('nl-NL')} inwoners · ${nl(sim.age.name)}`}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-jaar-${sim.year}.png`);showToast('Ansichtkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
 function islandLink(){try{return `${location.origin}${location.pathname}?seed=${sim.seed}`;}catch{return `?seed=${sim.seed}`;}}
 $('ending-card').addEventListener('click',()=>{try{const id=islandIdentity(sim),o=sim.outcome||ENDINGS.independent,family=ensureFamily(sim),score=(o.scores||islandScores(sim)).total;
-  downloadCanvas(makeEndCard({identity:id,title:nl(o.title),quote:nl(o.quote),familyName:family.lastName,generations:family.generations.length,seed:sim.seed,year:o.year||sim.year,score,before:sim.snapshots[0]?.land,after:o.coast||sim.land.map(t=>`${t.x},${t.y}`),link:islandLink()}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-eindkaart.png`);showToast('Eindkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
+  const lines=creditsFor(sim);downloadCanvas(makeEndCard({identity:id,title:nl(o.title),quote:nl(o.quote),familyName:family.lastName,generations:family.generations.length,seed:sim.seed,year:o.year||sim.year,score,before:sim.snapshots[0]?.land,after:o.coast||sim.land.map(t=>`${t.x},${t.y}`),link:islandLink(),photo:canvas,awards:lines.filter(l=>l.kind==='award'),stats:lines.filter(l=>l.kind==='stat')}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-eindkaart.png`);showToast('Eindkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
 $('ending-link').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(islandLink());showToast('Link gekopieerd. Een vriend speelt hetzelfde eiland en mag anders ingrijpen.',3600);}catch{showToast(islandLink(),6000);}});
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));

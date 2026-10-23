@@ -30,17 +30,27 @@ function wrap(c,text,x,y,width,lineHeight){
  for(const word of words){if(c.measureText(line+word).width>width&&line){c.fillText(line.trim(),x,y);y+=lineHeight;line='';}line+=word+' ';}
  c.fillText(line.trim(),x,y);return y;
 }
-export function makeEndCard({identity,title,quote,familyName,generations,seed,year,score,before,after,link}){
- const w=1200,h=675,{canvas,c}=paper(w,h);
- drawFlag(c,identity,60,56,60);c.fillStyle='#7b866e';c.font='600 16px sans-serif';c.fillText(`${identity.name.toUpperCase()} · JAAR ${year}`,136,82);
- c.fillStyle='#293d32';c.font='54px Georgia, serif';c.fillText(title,60,170);
- c.fillStyle='#5c6c4e';c.font='italic 26px Georgia, serif';wrap(c,`“${quote}”`,60,222,560,34);
- miniMap(c,before,700,70,220);miniMap(c,after,940,70,220);
- c.fillStyle='#7b866e';c.font='15px sans-serif';c.fillText('Het begin',700,315);c.fillText('Het eiland dat zij maakten',940,315);
- c.fillStyle='#293d32';c.font='22px sans-serif';
- c.fillText(`Familie ${familyName} · ${generations} generaties`,60,420);c.fillText(`Eilandscore ${score} / 100`,60,460);
- c.fillStyle='#6f7f61';c.font='18px sans-serif';c.fillText(`Speel hetzelfde eiland: seed ${seed}`,60,560);if(link)c.fillText(link,60,590);
- c.textAlign='right';c.fillText('Do Nothing Island',w-60,h-50);
+// The end card: a real photo of the island, the verdict, three awards and a stamp of approval from the old tree.
+export function makeEndCard({identity,title,quote,familyName,generations,seed,year,score,before,after,link,photo,awards=[],stats=[]}){
+ const w=1500,h=1000,{canvas,c}=paper(w,h);
+ c.fillStyle='#dcebe4';c.fillRect(48,48,860,560);
+ if(photo&&photo.width){const scale=Math.max(860/photo.width,560/photo.height),pw=photo.width*scale,ph=photo.height*scale;c.save();c.beginPath();c.rect(48,48,860,560);c.clip();c.drawImage(photo,48+(860-pw)/2,48+(560-ph)/2,pw,ph);c.restore();}
+ c.strokeStyle='#fbf8ee';c.lineWidth=10;c.strokeRect(53,53,850,550);
+ drawFlag(c,identity,950,60,64);c.fillStyle='#7b866e';c.font='600 18px sans-serif';c.fillText(`${identity.name.toUpperCase()} · JAAR ${year}`,1030,88);
+ c.fillStyle='#293d32';c.font='48px Georgia, serif';wrap(c,title,950,170,500,52);
+ c.fillStyle='#5c6c4e';c.font='italic 24px Georgia, serif';wrap(c,`“${quote}”`,950,260,500,32);
+ miniMap(c,before,950,360,150);miniMap(c,after,1120,360,150);c.fillStyle='#7b866e';c.font='14px sans-serif';c.fillText('toen',950,530);c.fillText('nu',1120,530);
+ // A score badge.
+ c.fillStyle='#e2c26a';c.beginPath();c.ellipse(1360,445,62,62,0,0,Math.PI*2);c.fill();c.fillStyle='#293d32';c.textAlign='center';c.font='bold 40px Georgia, serif';c.fillText(String(score),1360,452);c.font='13px sans-serif';c.fillText('VAN 100',1360,475);c.textAlign='left';
+ c.fillStyle='#293d32';c.font='600 16px sans-serif';c.fillText('PRIJZEN',60,660);
+ awards.slice(0,3).forEach((a,i)=>{c.fillStyle='#8a7552';c.font='600 20px sans-serif';c.fillText(`🏆 ${a.text}`,60,700+i*58);c.fillStyle='#5f6a5e';c.font='17px sans-serif';wrap(c,a.sub,92,724+i*58,780,20);});
+ c.fillStyle='#293d32';c.font='600 16px sans-serif';c.fillText('IN CIJFERS',950,600);
+ stats.slice(0,4).forEach((st,i)=>{c.fillStyle='#5f6a5e';c.font='17px sans-serif';c.fillText(`${st.text}: ${st.sub}`,950,636+i*30);});
+ c.fillStyle='#293d32';c.font='20px sans-serif';c.fillText(`Familie ${familyName} · ${generations} generaties`,950,790);
+ c.fillStyle='#6f7f61';c.font='17px sans-serif';c.fillText(`Speel hetzelfde eiland: seed ${seed}`,950,830);if(link)c.fillText(link,950,856);
+ // The stamp.
+ c.save();c.translate(1330,900);c.rotate(-.14);c.strokeStyle='#a5483c';c.lineWidth=4;c.strokeRect(-150,-38,300,76);c.fillStyle='#a5483c';c.textAlign='center';c.font='bold 18px sans-serif';c.fillText('GOEDGEKEURD DOOR',0,-6);c.fillText('DE OUDE BOOM',0,20);c.restore();
+ c.fillStyle='#6f7f61';c.font='16px sans-serif';c.fillText('Do Nothing Island',60,h-50);
  return canvas;
 }
 export function downloadCanvas(canvas,filename){

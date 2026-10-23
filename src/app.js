@@ -4,7 +4,8 @@ import { eventPriority, resumeSandbox, ENDINGS } from './story.js';
 import { Civilization, ERAS, PROJECT_STAGES, AGES } from './simulation.js';
 import { IslandRenderer } from './renderer.js';
 import {describePlot} from './inspection.js';
-import {drawFinale,islandScores,explainScore,SCORE_RECIPE} from './finale.js';
+import {islandScores,explainScore,SCORE_RECIPE} from './finale.js';
+import {drawCredits,creditsFor} from './credits.js';
 import {ensureFamily,currentRelative,familyLore,sentenceCase} from './family.js';
 import {tourStops} from './tour.js';
 import {museumExhibits} from './museum.js';
@@ -432,7 +433,7 @@ function frame(now){
   if(cinemaActive()){
     const stage=$('finale-canvas'),box=stage.getBoundingClientRect(),w=Math.max(300,Math.round(box.width)),h=Math.max(200,Math.round(box.height));
     if(stage.width!==w||stage.height!==h){stage.width=w;stage.height=h;}
-    drawFinale(stage.getContext('2d'),w,h,sim,sim.cinematic,renderer.reduced);
+    drawCredits(stage.getContext('2d'),w,h,sim,sim.cinematic,renderer.reduced,canvas);
   }
   requestAnimationFrame(frame);
 }
@@ -505,7 +506,7 @@ $('photo-night').addEventListener('click',()=>setPhotoLight(true));
 $('photo-save').addEventListener('click',()=>{try{const id=islandIdentity(sim);downloadCanvas(makePostcard(canvas,{identity:id,year:sim.year,line:`${Math.floor(sim.population).toLocaleString('nl-NL')} inwoners · ${nl(sim.age.name)}`}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-jaar-${sim.year}.png`);showToast('Ansichtkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
 function islandLink(){try{return `${location.origin}${location.pathname}?seed=${sim.seed}`;}catch{return `?seed=${sim.seed}`;}}
 $('ending-card').addEventListener('click',()=>{try{const id=islandIdentity(sim),o=sim.outcome||ENDINGS.independent,family=ensureFamily(sim),score=(o.scores||islandScores(sim)).total;
-  downloadCanvas(makeEndCard({identity:id,title:nl(o.title),quote:nl(o.quote),familyName:family.lastName,generations:family.generations.length,seed:sim.seed,year:o.year||sim.year,score,before:sim.snapshots[0]?.land,after:o.coast||sim.land.map(t=>`${t.x},${t.y}`),link:islandLink()}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-eindkaart.png`);showToast('Eindkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
+  const lines=creditsFor(sim);downloadCanvas(makeEndCard({identity:id,title:nl(o.title),quote:nl(o.quote),familyName:family.lastName,generations:family.generations.length,seed:sim.seed,year:o.year||sim.year,score,before:sim.snapshots[0]?.land,after:o.coast||sim.land.map(t=>`${t.x},${t.y}`),link:islandLink(),photo:canvas,awards:lines.filter(l=>l.kind==='award'),stats:lines.filter(l=>l.kind==='stat')}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-eindkaart.png`);showToast('Eindkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
 $('ending-link').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(islandLink());showToast('Link gekopieerd. Een vriend speelt hetzelfde eiland en mag anders ingrijpen.',3600);}catch{showToast(islandLink(),6000);}});
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));
