@@ -18,5 +18,5 @@ test('pause, short visits, old saves, disabled progress and backwards clocks nev
  const s=new Civilization(31);s.lastVisitAt=1000;assert.equal(returnFromAway(s,59000),null);assert.equal(s.year,1);
 });
 test('an ending reached during absence is preserved without an automatic movie or recap',()=>{
- const s=new Civilization(31);while(s.year<2230)s.tick();s.lastVisitAt=1000;const r=returnFromAway(s,121000);assert.ok(s.ending);assert.ok(r.years<300);assert.equal(r.biggest.type,'ending');assert.equal(s.endingSeen,true);assert.equal(s.cinematic.completed,true);assert.ok(s.outcome.scores);
+ const s=new Civilization(31);while(!s.ending&&!(s.endgameStarted&&s.year>=s.finaleDeadline-20))s.tick();s.lastVisitAt=1000;const r=returnFromAway(s,121000);assert.ok(s.ending);assert.ok(r.years<300);assert.equal(r.biggest.type,'ending');assert.equal(s.endingSeen,true);assert.equal(s.cinematic.completed,true);assert.ok(s.outcome.scores);
 });

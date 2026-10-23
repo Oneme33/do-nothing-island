@@ -26,7 +26,7 @@ export function advanceVisitors(s){
  v.current={kind:def.kind,year:s.year,until:s.year+def.stay,x:at.x,y:at.y};
  def.effect(s);
  s.log(def.arrive,'visitor',{x:at.x,y:at.y});
- s.signal('celebrate',s.tile(at.x,at.y)||at,def.label);
+ s.signal('celebrate',s.tile(at.x,at.y)||at,def.label,{sound:def.by==='sea'?'horn':'whoosh',text:`${def.label} Bezoek van overzee.`});
 }
 // Drawing only: the renderer keeps track of when it first saw a visitor, so arrivals glide in on the wall clock.
 const visitorSeen=new Map();

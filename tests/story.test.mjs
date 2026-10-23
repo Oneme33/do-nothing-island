@@ -10,7 +10,7 @@ const run=(seed=31,mode=null,count=0,config={})=>{
 test('ordinary untouched islands tell a full story and finish by 2240 without requiring a rare setting',()=>{
  for(const seed of [8,31,201]){
   const s=run(seed,null,0,{rareEndings:false});
-  assert.equal(s.ending,true);assert.equal(s.year,2240);assert.ok(s.outcome?.quote);assert.notEqual(s.outcome.id,'last-drop');
+  assert.equal(s.ending,true);assert.ok(s.year>=2170&&s.year<=2270,`ends at ${s.year}`);assert.ok(s.outcome?.quote);assert.notEqual(s.outcome.id,'last-drop');
   assert.ok(s.storyStats.reforms>=3,'autonomous civic stories complete without help');
   assert.ok(s.buildings.some(t=>t.civicLegacy),'civic arguments leave actual places');
   const year=s.year;s.tick();assert.equal(s.year,year);
@@ -19,8 +19,8 @@ test('ordinary untouched islands tell a full story and finish by 2240 without re
 });
 test('the same island remembers different intervention types and reaches different endings',()=>{
  const quiet=run(31),rain=run(31,'rain',12),quake=run(31,'rumble',8);
- assert.ok(['independent','sanctuary'].includes(quiet.outcome.id),'an untouched island keeps its autonomy, with room for a nature-led culture');assert.equal(rain.outcome.id,'miracles');assert.equal(quake.outcome.id,'fortress');
- assert.equal(quiet.year,2240);assert.ok(rain.year<quiet.year);assert.ok(quake.year<quiet.year);
+ assert.ok(['independent','sanctuary','artists','funfair','seafarers'].includes(quiet.outcome.id),'an untouched island follows its own calling');assert.equal(rain.outcome.id,'miracles');assert.equal(quake.outcome.id,'fortress');
+ assert.ok(quiet.year>=2170);assert.ok(rain.year<quiet.year);assert.ok(quake.year<quiet.year);
  assert.equal(rain.interventionLedger.length,12);assert.ok(rain.influence.dependence>=16);
  assert.ok(quake.houses.some(t=>t.retrofitted),'earthquake memories change construction');
  assert.ok(rain.land.some(t=>(t.irrigated||0)>(quiet.tile(t.x,t.y)?.irrigated||0)),'rain leaves physical irrigation even when both coastlines reach the same space limit');

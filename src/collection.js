@@ -4,7 +4,7 @@ import {nl} from './language.js';
 import {TREASURE_CATALOG} from './coast.js';
 
 export const COLLECTION_STORAGE_KEY='do-nothing-island-collection-v1';
-const endingHints={independent:'Soms is blijven kijken genoeg.',sanctuary:'Misschien hoeft vooruitgang niet alles te vullen.',miracles:'Wat als de hemel deel van de begroting wordt?',fortress:'Een onrustige grond laat sporen in een cultuur.',phoenix:'As kan het begin van iets moois zijn.',retreat:'Een stap terug kan ook een toekomst zijn.','last-drop':'Er bestaat een grens aan winnen van de zee.'};
+const endingHints={artists:'Een eiland vol beroemde makers kiest misschien voor de kunst.',funfair:'Wie houdt van dieren, draaimolens en feest…',seafarers:'Bezoekers, buren en veerboten verbinden een eiland met de wereld.',independent:'Soms is blijven kijken genoeg.',sanctuary:'Misschien hoeft vooruitgang niet alles te vullen.',miracles:'Wat als de hemel deel van de begroting wordt?',fortress:'Een onrustige grond laat sporen in een cultuur.',phoenix:'As kan het begin van iets moois zijn.',retreat:'Een stap terug kan ook een toekomst zijn.','last-drop':'Er bestaat een grens aan winnen van de zee.'};
 export const SECRET_CATALOG=[
  {discovery:'old-tree-bloom',title:'Hij wist nog hoe het moest',description:'Na drie gerichte regenbuien bloeit de oude boom. De bloesem blijft als herinnering.',hint:'Misschien herinnert een oude vriend zich de lente nog.'},
  {discovery:'quake-volcano',title:'De slapende berg',description:'Een beving bij de vulkaan veroorzaakte een uitbarsting. As verrijkte de grond.',hint:'Sommige slapende reuzen voelen de grond bewegen.'},

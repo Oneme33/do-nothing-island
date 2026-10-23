@@ -67,7 +67,7 @@ export function tendFires(s){
   for(const other of adjacentPlots(s,t)){
    if(other.kind!=='land'||!other.building||other.fire||protectedPlot(other)||['farm','beach','well','fire-station','ruins','quarry'].includes(other.building)||other.wetUntil>s.year)continue;
    const stone=other.material==='stone'||other.material==='brick'||s.era>=2;
-   const chance=(stone?.15:s.era<1?.75:.45)*(brigade?.25:1);
+   const chance=(stone?.1:s.era<1?.45:.28)*(brigade?.25:1);
    if(s.random()<chance){startBlaze(s,other,true);changed=true;}
   }
  }

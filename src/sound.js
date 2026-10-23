@@ -66,6 +66,9 @@ export class Soundscape{
   else if(type==='fire'){this.hiss(1.4,{volume:.035,filter:'bandpass',frequency:900,attack:.2});for(let i=0;i<10;i++)this.hiss(.03,{volume:.04,delay:Math.random()*1.3,filter:'highpass',frequency:2500,attack:.002});}
   else if(type==='nudge'||type==='repair'){[659,784,988].forEach((f,i)=>this.tone(f,.5,{volume:.03,delay:i*.09}));}
   else if(type==='treasure'){[1047,1319,1568,2093].forEach((f,i)=>this.tone(f,.4,{type:'triangle',volume:.025,delay:i*.07}));}
+  else if(type==='horn'){this.tone(98,2.2,{type:'sawtooth',volume:.018,to:92});this.tone(147,2,{type:'triangle',volume:.014,to:139});}
+  else if(type==='whoosh'){this.hiss(2.4,{volume:.05,filter:'bandpass',frequency:600,attack:.8});}
+  else if(type==='chime'){[1319,1568,1976].forEach((f,i)=>this.tone(f,1.4,{volume:.02,delay:i*.22}));}
   else if(type==='fanfare'){[[523,0],[659,.12],[784,.24],[1047,.4]].forEach(([f,d])=>this.tone(f,d===.4?.7:.18,{type:'triangle',volume:.03,delay:d}));}
   else if(type==='century'){for(let i=0;i<4;i++){this.tone(392,2.2,{volume:.045,delay:i*1.1});this.tone(784,1.6,{volume:.015,delay:i*1.1});}}
   else if(type==='age'){[392,523,659,784].forEach((f,i)=>this.tone(f,1.1,{type:'triangle',volume:.03,delay:i*.28}));}

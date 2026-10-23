@@ -18,16 +18,42 @@ export const DELIGHT_TYPES=DELIGHTS.map(d=>d.type);
 export const DELIGHT_NAMES=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.name]));
 export const DELIGHT_LABELS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.label]));
 export const DELIGHT_OPENINGS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.opening]));
+// The zoo and the theme park need a whole block, so from year 200 the island keeps one free for each of them.
+const BIG_DELIGHTS=['zoo','theme-park'];
+const DELIGHT_RING=[[-1,0],[0,-1],[-1,-1],[1,1],[1,0],[0,1],[1,-1],[-1,1]],DELIGHT_ROLES=[0,1,2,3,4,4,6,6];
+export function reserveDelightGrounds(s){
+ s.delightGrounds??={};
+ for(const type of BIG_DELIGHTS){
+  if(s.delightGrounds[type]||[...s.tiles.values()].some(t=>t.building===type||t.buildSite?.type===type))continue;
+  const free=t=>t?.kind==='land'&&!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.foundingHome&&!t.river&&!t.road;
+  // A block of five by five, like the castle grounds: three enclosures or rides at the back, a plaza at the front,
+  // and a ring of park around it so no houses crowd in and hide it.
+  const ring2=[];for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)if(Math.max(Math.abs(dx),Math.abs(dy))===2)ring2.push([dx,dy]);
+  const spots=s.land.filter(t=>free(t)&&Math.hypot(t.x,t.y)>=3&&DELIGHT_RING.every(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy)))&&ring2.filter(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy))).length>=7);
+  if(!spots.length)continue;
+  const spot=spots[(s.seed+type.length*31)%spots.length];
+  spot.reservedFor=`delight:${type}`;s.delightGrounds[type]={x:spot.x,y:spot.y};
+  const claim=(dx,dy,i)=>{const yard=s.tile(spot.x+dx,spot.y+dy);if(!free(yard))return;yard.reservedFor='delight';yard.yardOf={type,x:spot.x,y:spot.y,i};};
+  DELIGHT_RING.forEach(([dx,dy],k)=>claim(dx,dy,DELIGHT_ROLES[k]));for(const [dx,dy] of ring2)claim(dx,dy,6);
+ }
+}
 // Plans at most one delight at a time; returns true when something was planned.
 export function planDelight(s){
  const planned=[...s.tiles.values()].some(t=>t.buildSite&&DELIGHT_TYPES.includes(t.buildSite.type));if(planned)return false;
  for(const d of DELIGHTS){
   if(s.year<d.since||s.population<d.population||[...s.tiles.values()].some(t=>t.building===d.type||t.rebuildFrom===d.type||t.buildSite?.type===d.type))continue;
+  const ground=s.delightGrounds?.[d.type]&&s.tile(s.delightGrounds[d.type].x,s.delightGrounds[d.type].y);
+  if(ground?.reservedFor===`delight:${d.type}`){ground.reservedFor=null;if(['tree','garden','park'].includes(ground.building))ground.building=null;if(!ground.building&&s.planBuilding(ground,d.type))return true;ground.reservedFor=`delight:${d.type}`;}
   // A lone tree may make way; homes, farms and reserved plots never do.
   const near=(t,r)=>delightAround(t).some(p=>r(s.tile(p.x,p.y)))||[[1,1],[-1,-1],[1,-1],[-1,1],[2,0],[-2,0],[0,2],[0,-2]].some(([dx,dy])=>r(s.tile(t.x+dx,t.y+dy)));
   const spots=s.land.filter(t=>(!t.building||['tree','garden','park'].includes(t.building)||d.type==='observatory'&&t.building==='forest')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
-  const spot=spots[(s.year*13+s.seed)%spots.length],tree=spot.building;if(tree)spot.building=null;
-  if(s.planBuilding(spot,d.type))return true;
+  // A special building gets breathing room: prefer plots with open ground around, and keep some of it open.
+  const open=t=>delightAround(t).filter(p=>{const n=s.tile(p.x,p.y);return n?.kind==='land'&&!n.building&&!n.buildSite&&!n.reservedFor&&!n.landform&&!n.foundingHome;});
+  // The zoo and the theme park spread over three extra plots of enclosures and rides; the others get a small plaza.
+  const yards=['zoo','theme-park'].includes(d.type)?3:2;
+  const roomy=spots.filter(t=>open(t).length>=yards),pool=roomy.length?roomy:spots.filter(t=>open(t).length>=2).length?spots.filter(t=>open(t).length>=2):spots;
+  const spot=pool[(s.year*13+s.seed)%pool.length],tree=spot.building;if(tree)spot.building=null;
+  if(s.planBuilding(spot,d.type)){open(spot).slice(0,yards).forEach((n,i)=>{const yard=s.tile(n.x,n.y);yard.reservedFor='delight';yard.yardOf={type:d.type,x:spot.x,y:spot.y,i};});return true;}
   if(tree)spot.building=tree;
  }
  return false;

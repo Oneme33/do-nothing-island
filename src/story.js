@@ -4,6 +4,9 @@ import {islandScores} from './finale.js';
 export const STORY_VERSION=1;
 export const eventPriority=type=>({ending:100,endgame:98,palace:96,age:92,discovery:91,treasure:90,delight:83,famous:81,visitor:78,islet:70,lighthouse:80,crisis:90,fire:89,flood:88,abandon:87,reform:86,family:85,interference:84,legacy:82,technology:76,culture:68,land:66,district:65,repair:55,storm:45,life:35,trade:25,farm:20,build:10}[type]||30);
 export const ENDINGS={
+  artists:{title:'Het Kunstenaarseiland.',quote:'Ze hebben het eiland zo vaak geschilderd dat het zelf is gaan poseren.',description:'Schilders, dichters, componisten en uitvinders maakten van dit eiland een plek waar iedereen iets maakt. Het museum is te klein, de musea daarna ook.',consequence:'Een eiland vol makers',detail:'Op elke muur hangt iets. Op sommige muren hangt een schilderij van een muur.'},
+  funfair:{title:'Het Pretparkeiland.',quote:'Nog één keer! En dan nog één keer.',description:'Een dierentuin, een circus, een pretpark en veel te veel feesten: dit eiland koos voor plezier en heeft daar nooit spijt van gehad.',consequence:'Een eiland dat altijd feest viert',detail:'De achtbaan heeft een eigen kroniek. De giraf ook.'},
+  seafarers:{title:'Het Zeevaardersvolk.',quote:'Thuis is waar de veerboot aanlegt.',description:'Schepen, ballonnen en veerboten brachten de wereld naar dit eiland, en het eiland naar de wereld. Op de buureilandjes wonen neven, op de kaart staan ze allemaal.',consequence:'Een eiland met vrienden overzee',detail:'Elke haven kent hun vlag. De meeuwen spreken drie talen.'},
   phoenix:{title:'De Feniksstad.',quote:'Ze zijn vaker herbouwd dan verslagen.',description:'Branden veranderden deze stad. Uit houten wijken verrezen stenen huizen, een vaste brandweer en pleinen waar het lichtfeest elk jaar terugkeert.',consequence:'Een stad die opnieuw begint',detail:'De gevels zijn mooier. De emmers staan klaar. Het verleden is hier geen weggepoetste vlek.'},
   independent:{title:'They figured it out.',quote:'The island would like to take all the credit.',description:'A civilization has learned to live with its limits. Generations come and go; the little world can look after itself.',consequence:'An independent island',detail:'Their greatest achievement is an ordinary tomorrow.'},
   sanctuary:{title:'A little room for nothing.',quote:'Progress has been postponed until after the picnic.',description:'The island chooses gardens, clean water and a coastline worth keeping. Its grandest invention turns out to be enough.',consequence:'A living island',detail:'The old tree has rather more company now.'},
@@ -183,8 +186,20 @@ export function chooseFinalPlan(s){
   if(s.influence.fear>=18)return'fortress';
   if(s.influence.dependence>=16)return'miracles';
   if(s.scarcityYears>20||s.freshwater<25||s.environment<35||s.reclaimed.filter(t=>t.kind==='flooded').length>s.land.length*.12)return'retreat';
-  if(s.environment>76&&(s.character==='garden'||s.policies.conservation))return'sanctuary';
-  return'independent';
+  return islandCalling(s);
+}
+// Without outside pressure the ending follows what the island became best at, with a little of its own temperament.
+export function islandCalling(s){
+  const jitter=k=>{const n=Math.sin(((s.seed>>>0)%100000)*.0137+k*12.9898)*43758.5453;return(n-Math.floor(n))*.3;};
+  const has=type=>s.land.some(t=>t.building===type),green=s.land.length?s.land.filter(t=>['park','forest','tree','garden','castle-garden'].includes(t.building)).length/s.land.length:0;
+  const callings={
+    artists:(s.famous?.length||0)/8*.5+Math.min(1,(s.digs?.finds?.length||0)/7)*.2+(s.prosperity>58?.15:0)+jitter(1),
+    funfair:Math.min(1,(s.partiesHeld||0)/16)*.5+(has('theme-park')&&has('zoo')&&has('circus')?.3:0)+jitter(2),
+    seafarers:Math.min(1,(s.visitors?.history?.length||0)/12)*.5+Math.min(1,(s.coast?.beaches?.length||0)/4)*.15+(s.islets?.list?.every(i=>i.houses>=i.cap)?.15:0)+jitter(3),
+    sanctuary:Math.max(0,(s.environment-60)/40)*.5+Math.min(1,green/.15)*.25+(s.character==='garden'||s.policies.conservation?.25:0)+jitter(4),
+    independent:.76+jitter(5)
+  };
+  return Object.entries(callings).sort((a,b)=>b[1]-a[1])[0][0];
 }
 export function finishStory(s,id){
   if(s.outcome&&!s.sandbox)return;
@@ -196,17 +211,17 @@ export function finishStory(s,id){
 }
 export function advanceFinale(s){
   if(s.sandbox||s.ending)return;
-  if(!s.endgameStarted&&s.year>=s.endgameYear){
+  if(!s.endgameStarted&&s.year>=s.endgameYear&&(s.endgameYear<2085||s.year>=2170||s.year%5===0&&islandReady(s))){
     s.endgameStarted=true;s.endgameAt=s.year;s.finalPlan=chooseFinalPlan(s);s.endgamePhase=0;
-    s.finaleDeadline=s.year+(s.finalPlan==='last-drop'?420:140);
+    s.finaleDeadline=s.year+(s.finalPlan==='last-drop'?420:100);
     s.log(`The final age begins. ${s.finalPlan==='last-drop'?'The engineers announce a last, impossible ambition: discontinue the ocean.':s.finalPlan==='miracles'?'The council debates a future built around your miracles.':s.finalPlan==='fortress'?'The island plans a future prepared for the next tremor.':s.finalPlan==='retreat'?'The city must decide which ground is worth keeping.':'The island asks what is worth passing on to its children.'}`,'endgame',{x:0,y:1});
     s.signal('endgame',s.tile(0,1),'The final age · a future to choose');captureSnapshot(s,'The final age begins');
   }
   if(!s.endgameStarted)return;
   s.finalPlan ||= chooseFinalPlan(s);
-  s.finaleDeadline ||= s.endgameAt+(s.finalPlan==='last-drop'?420:140);
+  s.finaleDeadline ||= s.endgameAt+(s.finalPlan==='last-drop'?420:100);
   const elapsed=s.year-s.endgameAt;
-  if(elapsed>=35&&s.endgamePhase<1){
+  if(elapsed>=25&&s.endgamePhase<1){
     s.endgamePhase=1;s.endgameEvents++;
     const plan=s.finalPlan;
     if(plan==='sanctuary'){s.policies.conservation=true;s.policies.publicSpace=true;}
@@ -221,7 +236,7 @@ export function advanceFinale(s){
     const spot=s.freeLand[0];if(spot&&plan!=='last-drop'){spot.building=plan==='miracles'?'shrine':'park';spot.civicLegacy='The final-age charter';s.rebuildRoads();}
     s.signal('endgame',s.tile(-1,2),'The last great project');
   }
-  if(elapsed>=90&&s.endgamePhase<2){
+  if(elapsed>=65&&s.endgamePhase<2){
     s.endgamePhase=2;s.endgameEvents++;
     s.log('The last great project enters its final test. What remains will be the island’s legacy.','endgame',{x:0,y:0});
     s.signal('endgame',s.tile(0,0),'A legacy takes shape');
@@ -232,4 +247,7 @@ export function advanceFinale(s){
     finishStory(s,result==='last-drop'?'independent':result);
   }
 }
+// The final age begins once the island has (almost) everything a complete island has.
+// Each island has its own sense of timing, so the last chapter does not start in the same year everywhere.
+export function islandReady(s){if(s.year<2070+(Math.imul(s.seed>>>0,2654435761)>>>0)%6*12)return false;const k=islandScores(s);return k.done>=k.items-3;}
 export function resumeSandbox(s){s.sandbox=true;s.ending=false;s.endingSeen=true;if(s.cinematic)s.cinematic.completed=true;}

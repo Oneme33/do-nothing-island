@@ -47,3 +47,5 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 **Volgende rondes:** zie de to-do lijst in `INVENTARIS.md`.
 
 **Kasteelgrond, gepusht:** het kasteel krijgt twee ringen grond (24 tegels): een siertuin en daaromheen een kasteelpark met bomen, vijvertjes en bankjes. Het label staat weer bij het kasteel.
+
+**Fase 1, gepusht:** spel van ongeveer 58 naar 35 minuten op 1×; het slothoofdstuk begint pas als het eiland (bijna) compleet is, per eiland tussen 2085 en 2170; drie nieuwe eindes zonder ingreep (Kunstenaarseiland, Pretparkeiland, Zeevaardersvolk); de helft minder branden en ruim een derde minder feesten; maximaal één vuurtoren; wijken met karakter (oude binnenstad en kustvilla's laag, één torencentrum van hooguit 14 torens, rijtjeshuizen met huizen ertussen); dierentuin en pretpark op een eigen blok van 5×5 met verblijven, attracties, plein en parkring; bijzondere gebouwen houden een pleintje vrij; wegen met stoep en middenstreep; isometrische auto's, bussen en zweefauto's die met de straat meedraaien; grote momenten met camera, melding en geluid; groter eilandvenster met details achter een knop.

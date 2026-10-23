@@ -10,7 +10,10 @@ export function ensureCoast(s){
 function hasHarbor(s){for(const t of s.tiles.values())if(t.building==='dock'||t.building==='harbor')return true;return false;}
 // The lighthouse stands on the most exposed free point of the coast, once ships have somewhere to go.
 export function placeLighthouse(s){
- const coast=ensureCoast(s),standing=s.land.find(t=>t.building==='lighthouse');
+ const coast=ensureCoast(s),towers=[...s.tiles.values()].filter(t=>t.building==='lighthouse'||t.rebuildFrom==='lighthouse'||t.buildSite?.type==='lighthouse');
+ // There is only ever one lighthouse: a ruin waiting to be rebuilt or a tower under water still counts.
+ if(towers.length>1){const keep=towers.find(t=>t.kind==='land'&&t.building==='lighthouse')||towers[0];for(const t of towers)if(t!==keep){if(t.building==='lighthouse')t.building=t.kind==='land'?'park':null;if(t.rebuildFrom==='lighthouse')t.rebuildFrom='house';if(t.buildSite?.type==='lighthouse')t.buildSite=null;}towers.length=0;towers.push(keep);}
+ const standing=towers[0];
  if(standing){coast.lighthouse={...coast.lighthouse,x:standing.x,y:standing.y};return standing;}
  if(s.year<LIGHTHOUSE_YEAR||s.storm||s.ending||!hasHarbor(s))return null;
  const candidates=s.land.filter(t=>s.isCoast(t)&&!t.building&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.foundingHome&&!t.protectedCoast);
@@ -46,7 +49,7 @@ export function growBeach(s){
 }
 export function advanceCoast(s){
  ensureCoast(s);
- if(s.year%7===0)placeLighthouse(s);
+ if(s.year%7===0||s.year%7===3)placeLighthouse(s);
  if(s.year>=s.coast.nextBeachAt)growBeach(s);
  seasonalFinds(s);
 }

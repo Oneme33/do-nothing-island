@@ -24,7 +24,7 @@ export function advanceFamous(s){
  s.famous.push({id:def.id,name,year:s.year,x:home.x,y:home.y});
  def.effect(s);
  s.log(`${name}, ${def.role} van het eiland, ${def.deed} Er komt een blauw bordje op het huis.`,'famous',{x:home.x,y:home.y});
- s.signal('celebrate',home,`${name}, ${def.role}`);
+ s.signal('celebrate',home,`${name}, ${def.role}`,{sound:'chime',text:`${name} wordt beroemd als ${def.role}.`});
 }
 // Archaeology: from 1890 careful people with small brushes look for the island's own past.
 export const DIG_YEAR=1890;
@@ -47,7 +47,7 @@ export function advanceDigs(s){
   if(s.year<d.site.until)return;
   const find=FINDS.find(f=>f.id===d.site.find);
   if(t){if(t.dig?.before&&!t.building)t.building=t.dig.before;t.dig=null;if(t.reservedFor==='dig')t.reservedFor=null;}
-  if(find){d.finds.push({id:find.id,year:s.year,x:d.site.x,y:d.site.y});s.log(`De archeologen vinden ${find.title(s).replace(/^(Een|De) /,m=>m.toLowerCase())}. ${find.text}`,'treasure',{x:d.site.x,y:d.site.y});s.signal('celebrate',t||d.site,'Een vondst!');}
+  if(find){d.finds.push({id:find.id,year:s.year,x:d.site.x,y:d.site.y});s.log(`De archeologen vinden ${find.title(s).replace(/^(Een|De) /,m=>m.toLowerCase())}. ${find.text}`,'treasure',{x:d.site.x,y:d.site.y});s.signal('celebrate',t||d.site,'Een vondst!',{sound:'treasure',text:`Opgraving: ${find.title(s).replace(/^(Een|De) /,m=>m.toLowerCase())}.`});}
   d.site=null;return;
  }
  if(s.year<DIG_YEAR||s.year%37!==19||s.storm)return;
@@ -66,7 +66,7 @@ export function drawFamous(r){
   if(tile.kind!=='land')continue;
   if(tile.plaque&&HOMES.has(tile.building)){
    const p=r.p(tile.x,tile.y);
-   r.enqueueActor(p.y+6,()=>{r.ellipse(p.x+9,p.y-7,2.3,2.3,'#f4f1e8');r.ellipse(p.x+9,p.y-7,1.8,1.8,'#2f5f9a');if(r.zoom>1.4){const b=still?0:Math.sin(t*2+tile.x)*1;r.poly([[p.x,p.y-46+b],[p.x+1.2,p.y-43.4+b],[p.x+3.8,p.y-43.2+b],[p.x+1.8,p.y-41.6+b],[p.x+2.4,p.y-39+b],[p.x,p.y-40.4+b],[p.x-2.4,p.y-39+b],[p.x-1.8,p.y-41.6+b],[p.x-3.8,p.y-43.2+b],[p.x-1.2,p.y-43.4+b]],'#f2c94c');}});
+   r.enqueueActor(p.y+6,()=>{r.ellipse(p.x+9,p.y-7,2.3,2.3,'#f4f1e8');r.ellipse(p.x+9,p.y-7,1.8,1.8,'#2f5f9a');});
   }
   if(tile.dig){
    const p=r.p(tile.x,tile.y),brush=still?0:Math.sin(t*5)*1.5;

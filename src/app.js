@@ -447,7 +447,7 @@ function frame(now){
   advanceTour(now);
   if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite),close:Math.max(0,Math.min(1,(renderer.zoom/Math.max(.3,renderer.fitZoom||1)-1)/1.1))});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
-  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');}sim.signals=[];}
+  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');if(signal.moment){maybeDive(signal.x,signal.y,true);soundscape?.play(signal.moment.sound);showToast(signal.moment.text,5200);}}sim.signals=[];}
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;
@@ -531,6 +531,7 @@ $('photo-save').addEventListener('click',()=>{try{const id=islandIdentity(sim);d
 function islandLink(){try{return `${location.origin}${location.pathname}?seed=${sim.seed}`;}catch{return `?seed=${sim.seed}`;}}
 $('ending-card').addEventListener('click',()=>{try{const id=islandIdentity(sim),o=sim.outcome||ENDINGS.independent,family=ensureFamily(sim),keur=currentScores(sim,o.scores),score=keur.total;
   const lines=creditsFor(sim);downloadCanvas(makeEndCard({identity:id,title:nl(o.title),quote:nl(o.quote),familyName:family.lastName,generations:family.generations.length,seed:sim.seed,year:o.year||sim.year,score,before:sim.snapshots[0]?.land,after:o.coast||sim.land.map(t=>`${t.x},${t.y}`),link:islandLink(),photo:canvas,keur,awards:lines.filter(l=>l.kind==='award'),stats:lines.filter(l=>l.kind==='stat')}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-eindkaart.png`);showToast('Eindkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
+$('toggle-details').addEventListener('click',()=>{const on=$('island-window').classList.toggle('show-details');$('toggle-details').setAttribute('aria-pressed',String(!!on));});
 $('ending-link').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(islandLink());showToast('Link gekopieerd. Een vriend speelt hetzelfde eiland en mag anders ingrijpen.',3600);}catch{showToast(islandLink(),6000);}});
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));

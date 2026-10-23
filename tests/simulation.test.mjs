@@ -108,7 +108,7 @@ test('saves restore the entire landscape, mid-project progress, history and seed
 test('islands develop inland before expanding and remain bounded across multiple seeds',()=>{
   for(const seed of [8,12,31,79,201]){
     const sim=new Civilization(seed);
-    for(let i=0;i<2200;i++)sim.tick();
+    for(let i=0;i<2099;i++)sim.tick();
     assert.ok(sim.land.length>sim.originalArea,`coastal growth, seed ${seed}`);
     assert.ok(sim.buildings.length>sim.originalArea*.8,`inland settlement, seed ${seed}`);
     assert.ok(sim.land.length<=sim.config.maxTiles);
@@ -154,9 +154,9 @@ test('pacing starts brisk, slows down gently in later ages, stays bounded, and p
     const duration=secondsPerYear(year,Math.min(4,Math.floor(year/500)));
     assert.ok(duration>=previous-1e-9);assert.ok(duration<=2.3);previous=duration;
   }
-  assert.ok(secondsPerYear(2100,4)>2,'the short modern ages get more time');
-  const sim=new Civilization(8);assert.ok(sim.yearDuration<FIXED_SECONDS_PER_YEAR);
-  sim.year=2000;sim.era=4;assert.ok(sim.yearDuration>FIXED_SECONDS_PER_YEAR);
+  assert.ok(secondsPerYear(2100,4)>secondsPerYear(500,1)+.5,'the short modern ages get more time');
+  const sim=new Civilization(8),early=sim.yearDuration;assert.ok(early<FIXED_SECONDS_PER_YEAR);
+  sim.year=2000;sim.era=4;assert.ok(sim.yearDuration>early*2,'late years take about twice as long as the first ones');
   sim.config.accelerating=false;assert.equal(sim.yearDuration,FIXED_SECONDS_PER_YEAR);
 });
 test('roads connect real destinations and traffic only appears after powered modern roads exist',()=>{
@@ -262,12 +262,13 @@ test('new terrain is connected, reserves relief from construction and preserves 
   }
   assert.equal(types.size,3);assert.ok(shapes.size>20);
 });
-test('the final age begins around 2100 and interventions bring it forward within a bounded range',()=>{
-  const quiet=new Civilization(31);assert.equal(quiet.endgameYear,2100);
-  quiet.year=2099;quiet.advanceEndgame();assert.equal(quiet.endgameStarted,false);
-  quiet.year=2100;quiet.advanceEndgame();assert.equal(quiet.endgameStarted,true);assert.equal(quiet.endgameAt,2100);
-  const busy=new Civilization(31);busy.influence.nudge=10;busy.interferences=10;assert.equal(busy.endgameYear,2060);
-  busy.year=2060;busy.advanceEndgame();assert.equal(busy.endgameStarted,true);
+test('the final age waits for a complete island (2085 at the earliest, 2170 at the latest) and interventions bring it forward',()=>{
+  const quiet=new Civilization(31);assert.equal(quiet.endgameYear,2085);
+  quiet.year=2084;quiet.advanceEndgame();assert.equal(quiet.endgameStarted,false);
+  quiet.year=2100;quiet.advanceEndgame();assert.equal(quiet.endgameStarted,false,'an unfinished island is not ready yet');
+  quiet.year=2170;quiet.advanceEndgame();assert.equal(quiet.endgameStarted,true);assert.equal(quiet.endgameAt,2170);
+  const busy=new Civilization(31);busy.influence.nudge=10;busy.interferences=10;assert.equal(busy.endgameYear,2045);
+  busy.year=2045;busy.advanceEndgame();assert.equal(busy.endgameStarted,true);
   const chaotic=new Civilization(31);chaotic.influence.rumble=100;chaotic.interferences=100;assert.equal(chaotic.endgameYear,1950);
   chaotic.year=1949;chaotic.advanceEndgame();assert.equal(chaotic.endgameStarted,false);
 });

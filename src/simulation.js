@@ -7,7 +7,7 @@ import {advanceCollection} from './collection.js';
 import {advanceCoast,coastNotice} from './coast.js';
 import {ensureSquare,advanceSquare} from './square.js';
 import {carveRiver} from './river.js';
-import {planDelight,DELIGHT_LABELS,DELIGHT_OPENINGS} from './delights.js';
+import {planDelight,reserveDelightGrounds,DELIGHT_LABELS,DELIGHT_OPENINGS} from './delights.js';
 import {advanceMonuments,buildCastle} from './monuments.js';
 import {advanceWeather} from './weather.js';
 import {advanceCommissions} from './commissions.js';
@@ -62,8 +62,9 @@ export const key = (x,y) => `${x},${y}`;
 export const neighbors = t => [[t.x+1,t.y],[t.x-1,t.y],[t.x,t.y+1],[t.x,t.y-1]];
 export const isUsable = t => t.kind === 'land';
 // Early centuries pass briskly; later ages, which span fewer years, get more time per year.
-export const secondsPerYear = (year,era=0) => Math.min(2.3,.75+Math.max(0,year-1)/1500+era*.05);
+export const secondsPerYear = (year,era=0) => Math.min(1.4,.55+Math.max(0,year-1)/3200+era*.04);
 export const FIXED_SECONDS_PER_YEAR=1.5;
+export const TOWER_CAP=14,TOWER_RADIUS=2.7;
 const clamp = (v,min,max) => Math.max(min,Math.min(max,v));
 const noise = (x,y) => { const n = Math.sin(x*127.1+y*311.7)*43758.5453; return n-Math.floor(n); };
 export function landscapeForSeed(seed) {
@@ -190,7 +191,7 @@ export class Civilization {
   get forests() { return this.land.filter(t=>t.building==='forest'); }
   get beaches() { return this.land.filter(t=>t.building==='beach' && this.isCoast(t)); }
   get recreation() { return this.land.filter(t=>RECREATION.includes(t.building)); }
-  get endgameYear() { const i=this.influence||{};return this.endgameStarted?this.endgameAt:Math.max(1950,2100-Math.min(150,(i.fire||0)*5+(i.rumble||0)*9+(i.nudge||0)*4+(i.rain||0)*3+(i.rescues||0)*2)); }
+  get endgameYear() { const i=this.influence||{};return this.endgameStarted?this.endgameAt:Math.max(1950,2085-Math.min(150,(i.fire||0)*5+(i.rumble||0)*9+(i.nudge||0)*4+(i.rain||0)*3+(i.rescues||0)*2)); }
   isCoast(tile) { return tile?.kind==='land' && neighbors(tile).some(([x,y])=>this.tile(x,y)?.kind==='water'&&!this.tile(x,y)?.building); }
   get capacity() { return this.houses.reduce((sum,t)=>sum+ERAS[this.era].housing*(t.building==='palace'?4:t.building==='manor'?2:1)*(t.quakeDamage?.5:1)*(t.inspired?1.1:1)*(1+(t.extensionLevel||0)*.25),0); }
   get yearDuration() { const base=this.config.accelerating?secondsPerYear(this.year,this.era):FIXED_SECONDS_PER_YEAR;return Math.max(base,this.endgameStarted&&!this.sandbox?.65:this.year>=1920?.6:this.year>=1750?.38:0); }
@@ -244,11 +245,23 @@ export class Civilization {
     const score=t=>baseScore(t)+roomAround(t)+(desired&&t.district!==desired?5:0)+(t.district==='heritage'?12:0)+(this.era===0?Math.hypot(t.x,t.y)*.6:0)-(t.burntForest&&['hut','house','townhouse','tower'].includes(type)?4:0);
     let best,bestScore=Infinity;for(const tile of plots){const value=score(tile);if(value<bestScore){best=tile;bestScore=value;}}return best;
   }
+  // Late towns get districts with their own character: an old town around the first home and villas along the
+  // water stay low, one compact centre gets the towers, and the ring between mixes townhouses with houses.
+  skylineCentre() {
+    if(this.skyline&&this.tile(this.skyline.x,this.skyline.y)?.kind==='land')return this.skyline;
+    const bounds=this.layoutBounds(),score=t=>{const p=this.plotPosition(t,bounds);return Math.abs(p.depth-.25)*6+Math.abs(p.side-.45)*4+(t.landform?50:0)+(Math.hypot(t.x+1,t.y-1)<5?20:0)+(t.castle||t.reservedFor==='castle'?30:0);};
+    const best=this.land.slice().sort((a,b)=>score(a)-score(b))[0]||{x:0,y:-4};
+    this.skyline={x:best.x,y:best.y};return this.skyline;
+  }
+  inOldTown(tile){return Math.hypot(tile.x+1,tile.y-1)<=3.2;}
   homeTypeFor(tile) {
     if(this.era<3)return this.era===0?'hut':'house';
-    if(this.year<1960)return'townhouse';
-    const roomForTower=tile.building==='tower'||this.houses.filter(t=>t.building==='tower').length<Math.max(2,Math.ceil(this.houses.length*.3));
-    return this.plotPosition(tile).depth<.43&&roomForTower?'tower':'townhouse';
+    if(this.inOldTown(tile)||this.isCoast(tile))return'house';
+    if(this.year>=1960){
+      const c=this.skylineCentre(),near=Math.hypot(tile.x-c.x,tile.y-c.y)<=TOWER_RADIUS;
+      if(near&&(tile.building==='tower'||this.houses.filter(t=>t.building==='tower').length<TOWER_CAP))return'tower';
+    }
+    return(((tile.x*73856093)^(tile.y*19349663))>>>0)%4===0?'house':'townhouse';
   }
   get energySource() { return this.power>0?(this.era>=4?'Advanced grid':this.buildings.some(t=>t.building==='solar')?'Steam + sun + wind':'Wood-fired steam'):this.buildings.some(t=>t.building==='windmill')?'Fire + wind power':'Campfires'; }
   chooseRemark() {
@@ -290,8 +303,9 @@ export class Civilization {
     if(this.history.length>350){let index=this.history.findIndex((e,i)=>i>0&&(e.priority||eventPriority(e.type))<82);if(index<0)index=1;this.history.splice(index,1);}
     this.events.push(entry);rememberInFamily(this,entry);coastNotice(this,entry);return entry;
   }
-  signal(type,tile,label) {
-    this.signals.push({type,x:tile?.x??0,y:tile?.y??0,label,priority:eventPriority(type)});
+  // A moment ({sound,text}) asks the app to look, listen and say it out loud.
+  signal(type,tile,label,moment=null) {
+    this.signals.push({type,x:tile?.x??0,y:tile?.y??0,label,priority:eventPriority(type)+(moment?20:0),...(moment?{moment}:{})});
     if(this.signals.length>40){const lowest=this.signals.reduce((index,e,i,a)=>e.priority<a[index].priority?i:index,0);this.signals.splice(lowest,1);}
   }
   tick() {
@@ -384,6 +398,7 @@ export class Civilization {
     advancePleasures(this);advanceCoast(this);advanceSquare(this);
     // Delights do not wait for a housing lull: they claim a fitting free plot when their time comes.
     if(this.year%9===4&&!this.storm)planDelight(this);
+    if(this.year>=200&&this.year%10===7)reserveDelightGrounds(this);
     advanceMonuments(this);advanceWeather(this);advanceCommissions(this);
     advanceVisitors(this);advanceIslets(this);advanceFamous(this);advanceDigs(this);
     advanceCivicStory(this);
@@ -412,7 +427,7 @@ export class Civilization {
     if(needHome || needFood) {
       if(needFood && planned.some(t=>t.buildSite.type==='farm'))return;
       if(planned.length>=2+this.era)return;
-      const wanted=needFood?'farm':this.era>=3&&this.houses.filter(t=>t.building==='tower').length<this.houses.length*.3?'tower':this.era>=3?'townhouse':this.era===0?'hut':'house';
+      const wanted=needFood?'farm':this.era>=3?'townhouse':this.era===0?'hut':'house';
       const t=this.choosePlot(wanted,free);
       this.planBuilding(t,needFood?'farm':this.homeTypeFor(t));
     } else if(free.length>5){
@@ -467,7 +482,8 @@ export class Civilization {
   organizeDistricts() {
     const bounds=this.layoutBounds();let changed=false,moves=0;
     // Foreground homes stay low; the skyline belongs behind everyday street life.
-    for(const home of this.houses)if(home.building==='tower'&&this.plotPosition(home,bounds).depth>=.43){home.building='townhouse';changed=true;}
+    const centre=this.skylineCentre();
+    for(const home of this.houses)if(home.building==='tower'&&Math.hypot(home.x-centre.x,home.y-centre.y)>TOWER_RADIUS){home.building='townhouse';changed=true;}
     const movable=this.houses.filter(t=>!t.foundingHome&&!t.buildSite&&!t.quakeDamage&&t.district!=='heritage');
     for(const type of ['farm','factory','powerplant','school','science-center']){
       const misplaced=this.buildings.filter(t=>t.building===type).filter(t=>{
@@ -664,8 +680,7 @@ export class Civilization {
   // Old streets renew over time: houses become townhouses in the age of steam, back districts get towers from 1960.
   renewHomes() {
     const homes=this.houses.filter(t=>!t.foundingHome&&!t.buildSite&&t.district!=='heritage');
-    const towers=homes.filter(t=>t.building==='tower').length;
-    const candidates=homes.filter(t=>t.building==='house'||t.building==='hut'||this.year>=1960&&t.building==='townhouse'&&towers<homes.length*.35&&this.plotPosition(t).depth<.5);
+    const candidates=homes.filter(t=>t.building==='hut'||this.era>=3&&['house','townhouse'].includes(t.building)&&this.homeTypeFor(t)!==t.building||this.era<3&&t.building==='house');
     for(const t of candidates.sort((a,b)=>(a.builtYear||0)-(b.builtYear||0)).slice(0,this.year>=1960?3:2)){
       const next=this.homeTypeFor(t);if(next===t.building)continue;
       t.building=next;t.architecture=this.age.id;t.builtYear=this.year;this.signal('built',t,next==='tower'?'Een torenflat!':'Een nieuw herenhuis');
@@ -826,7 +841,7 @@ export class Civilization {
       } else if(t.floodYears>28) {
         const b=t.building;
         const relocation=this.freeLand.find(t=>!t.reclaimed);
-        if(b && b!=='pump' && relocation) {relocation.building=b; relocation.builtYear=this.year;}
+        if(b && b!=='pump' && b!=='lighthouse' && relocation) {relocation.building=b; relocation.builtYear=this.year;}
         t.building=null; t.buildSite=null; t.kind='water'; t.reclaimed=false;t.abandonedYear=this.year;this.storyStats.abandoned++;changed=true;
         this.log('A flooded district is abandoned. The sea calls it a homecoming.','abandon');
       }

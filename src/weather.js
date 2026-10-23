@@ -16,9 +16,9 @@ function strike(s){
  const targets=s.land.filter(t=>['tree','forest','house','hut','townhouse','farm','windmill'].includes(t.building)&&!t.fire);if(!targets.length)return null;
  const t=targets[Math.floor(wxHash(s.seed,s.year,7)*targets.length)];
  // Lightning rods arrive with the age of steam and stop most strikes from becoming fires.
- const rod=s.year>=1750&&wxHash(s.seed,s.year,8)<.75;
+ const rod=wxHash(s.seed,s.year,8)<(s.year>=1750?.8:.45);
  s.weather.strike={x:t.x,y:t.y};
- if(rod){s.log('De bliksem slaat in, maar de bliksemafleider vangt hem op. De buurt applaudisseert voor een stuk ijzer.','storm',{x:t.x,y:t.y});return t;}
+ if(rod){s.log(s.year>=1750?'De bliksem slaat in, maar de bliksemafleider vangt hem op. De buurt applaudisseert voor een stuk ijzer.':'De bliksem slaat in een natte boom. Het sist, het rookt, en dat is alles.','storm',{x:t.x,y:t.y});return t;}
  startBlaze(s,t);s.log('De bliksem slaat in! Er ontstaat brand en de emmers komen tevoorschijn.','fire',{x:t.x,y:t.y});s.signal('rumble',t,'Bliksem!');return t;
 }
 export function advanceWeather(s){

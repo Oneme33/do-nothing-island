@@ -49,8 +49,8 @@ export function extinguish(s,spot){
 }
 // A party with a reason: a wish that came true, or the opening of a statue or special building.
 export function startParty(s,tile,title,quips,years=4){
- // Parties stay special: short, and followed by at least thirty quiet years.
- if(!tile||s.ending||s.year<(s.partyQuietUntil||0))return null;years=Math.min(years,4);s.partyQuietUntil=s.year+years+30;s.partiesHeld=(s.partiesHeld||0)+1;
+ // Parties stay special: short, and followed by at least sixty quiet years.
+ if(!tile||s.ending||s.year<(s.partyQuietUntil||0))return null;years=Math.min(years,4);s.partyQuietUntil=s.year+years+60;s.partiesHeld=(s.partiesHeld||0)+1;
  s.festival={kind:'party',x:tile.x,y:tile.y,title,quips:quips||['Er is taart. Niemand weet wie hem heeft gebakken.','De fanfare speelt het enige liedje dat ze kent. Twee keer.','Iemand houdt een toespraak. Hij duurt gelukkig kort.'],until:s.year+years};
  s.signal('celebrate',tile,title);return s.festival;
 }
@@ -73,7 +73,7 @@ export function advancePleasures(s){
  if(bakery)choices.push({kind:'pancakes',spot:bakery,title:'The Pancake Emergency',quips:['Too many pancakes. An unprecedented crisis.','The council forms a tasting committee.','The emergency lasts until lunchtime.']});
  if(!choices.length)return;
  const event=choices[Math.floor(s.random()*choices.length)];
- s.festival={kind:event.kind,x:event.spot.x,y:event.spot.y,title:event.title,quips:event.quips,until:s.year+6};s.partyQuietUntil=s.year+36;s.partiesHeld=(s.partiesHeld||0)+1;
+ s.festival={kind:event.kind,x:event.spot.x,y:event.spot.y,title:event.title,quips:event.quips,until:s.year+6};s.partyQuietUntil=s.year+120;s.partiesHeld=(s.partiesHeld||0)+1;
  s.log(`${event.title}. ${event.quips[Math.floor(s.random()*event.quips.length)]}`,'fun',{x:event.spot.x,y:event.spot.y});
  s.signal('celebrate',event.spot,event.title);s.unrest=Math.max(0,s.unrest-5);s.prosperity=Math.min(94,s.prosperity+2);s.food=Math.max(0,s.food-Math.min(12,s.population*.04));
  s.nextFestival=s.year+55+Math.floor(s.random()*65);
@@ -98,6 +98,9 @@ export function cinemaBeat(movie){
   sanctuary:['ONE LAST DEVELOPMENT PLAN.','MORE SHADE. LESS EVERYTHING.','THE WORLD’S MOST ADVANCED PICNIC.','PROGRESS CAN WAIT.'],
   miracles:['THEY BUILT YOU SOMETHING.','A MONUMENT TO THE VISITING HAND','PLEASE KEEP TOUCHING.','YOU ARE NOW A PUBLIC UTILITY.'],
   fortress:['THE SKY IS CONSIDERED UNRELIABLE.','THE GREAT NATIONAL UMBRELLA','THEY ARE READY FOR YOU.','PLEASE KNOCK NEXT TIME.'],
+  artists:['IEDEREEN PAKT EEN KWAST.','HET GROOTSTE SCHILDERIJ OOIT','HET EILAND POSEERT.','KUNST. OVERAL.'],
+  funfair:['NOG ÉÉN RONDJE.','DE ACHTBAAN VAN HET HELE EILAND','DE GIRAF IN DE DRAAIMOLEN.','HET FEEST STOPT NOOIT.'],
+  seafarers:['ALLE SCHEPEN KOMEN THUIS.','EEN BRUG VAN BOOTJES','DE BUREN ZWAAIEN TERUG.','THUIS IS WAAR DE VEERBOOT AANLEGT.'],
   phoenix:['UIT DE AS.','STEEDS WEER HERBOUWD.','DE STAD DIE TERUGKWAM.','MOOIER. EN MET BRANDWEER.'],
   retreat:['THE SEA HAS KEPT THE RECEIPT.','A VERY ORGANIZED RETREAT','SMALLER IS STILL SOMEWHERE.','THEY LIVE TO ARGUE ANOTHER DAY.'],
   'last-drop':['THE LAST BASIN IS EMPTY.','THE OCEAN IS BEING DISCONTINUED.','THE VERY LAST DROP.','ONE SMALL WATER SHORTAGE.']

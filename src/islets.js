@@ -16,7 +16,7 @@ export function advanceIslets(s){
  if(!isles.ferry&&s.year>=FERRY_YEAR&&s.year%5===0&&isleHarbor(s)){
   isles.ferry=s.year;
   s.log(`De eerste veerboot vaart naar ${isles.list[0].name}. De kapitein heeft één pet, één fluitje en heel veel meningen over golven.`,'islet');
-  s.signal('celebrate',s.tile(0,0),'De veerboot vaart!');
+  s.signal('celebrate',s.tile(0,0),'De veerboot vaart!',{sound:'horn',text:`De eerste veerboot vaart naar ${isles.list[0].name}.`});
  }
  if(!isles.ferry||s.year%15!==0)return;
  for(const [i,islet] of isles.list.entries()){

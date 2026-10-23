@@ -177,7 +177,8 @@ export class IslandRenderer {
     for(const t of sorted){
       this.drawDetails(t);
       const p=this.p(t.x,t.y),depth=p.y+(t.landform?10:['tree','original-tree'].includes(t.building)?0:5);
-      if(t.kind==='land'&&!t.building&&!t.buildSite&&!t.landform&&!t.road&&t.reservedFor!=='square'&&!t.foundingHome&&hash(t.x*5+1,t.y*3-2)<.24)this.scene.push({depth:depth-2,draw:()=>this.meadowTree(t)});
+      if(t.yardOf&&!t.building&&this.sim.tile(t.yardOf.x,t.yardOf.y)?.building===t.yardOf.type)this.scene.push({depth:depth-1,draw:()=>this.delightYard(t)});
+      else if(t.kind==='land'&&!t.building&&!t.buildSite&&!t.landform&&!t.road&&t.reservedFor!=='square'&&!t.foundingHome&&hash(t.x*5+1,t.y*3-2)<.24)this.scene.push({depth:depth-2,draw:()=>this.meadowTree(t)});
       if(t.treasure&&this.sim.year-t.treasure.year<40)this.scene.push({depth:depth+1,draw:()=>this.treasureChest(t)});
       if(t.landform||t.building||t.buildSite)this.scene.push({depth,draw:()=>{if(t.landform)this.drawLandform(t);if(t.building)this.drawBuilding(t);if(t.buildSite)this.drawBuildingSite(t);}});
     }
@@ -403,7 +404,9 @@ export class IslandRenderer {
     const paved=t=>this.sim.era>=3&&!['forest','beach','park','garden','playground'].includes(t.building);
     // Roads grow up: a fresh trail through the grass, a sandy path, cobbles in the old centre, then asphalt.
     const stage=t=>paved(t)?3:this.sim.year>=1250&&Math.hypot(t.x,t.y)<=6?2:this.sim.year-(t.roadYear??-999)<35?0:1;
-    const ROAD_WIDTH=[2.6,4.8,5.6,6],ROAD_COLOR=['#c3bb8d','#c8b68e','#bfb49a','#a5aca1'],JOIN=[5,6.8,7.6,8.5];
+    const ROAD_WIDTH=[2.6,4.8,5.6,5.4],ROAD_COLOR=['#c3bb8d','#c8b68e','#bfb49a','#8f9792'],JOIN=[5,6.8,7.6,7.8];
+    // Cobbles get a darker edge; asphalt gets a pale pavement on both sides.
+    const KERB=[0,0,.9,2],KERB_COLOR=['','','#a99d80','#d6d1c0'];
     // Project a strip onto the ground plane, with no raised rim or circular couplings.
     const ribbon=(a,b,half,color)=>{
       const dx=b.x-a.x,dy=(b.y-a.y)*2,length=Math.hypot(dx,dy);if(!length)return;
@@ -414,6 +417,8 @@ export class IslandRenderer {
       const next=this.sim.tile(nx,ny);
       if(next?.road&&next.kind!=='flooded'&&next.kind!=='construction'&&t.roadLinks?.includes(key(nx,ny)))edges.push({a:this.streetPoint(t),b:this.streetPoint(next),paved:paved(t)&&paved(next),stage:Math.min(stage(t),stage(next)),tile:t});
     }
+    for(const edge of edges)if(KERB[edge.stage])ribbon(edge.a,edge.b,ROAD_WIDTH[edge.stage]+KERB[edge.stage],KERB_COLOR[edge.stage]);
+    for(const t of roads){const p=this.streetPoint(t),k=stage(t);if(KERB[k])this.diamond(p.x,p.y,JOIN[k]+KERB[k]*1.6,(JOIN[k]+KERB[k]*1.6)/2,KERB_COLOR[k]);}
     for(const edge of edges)ribbon(edge.a,edge.b,ROAD_WIDTH[edge.stage],ROAD_COLOR[edge.stage]);
     // Join every branch with the same flat surface, before any markings or texture.
     for(const t of roads){const p=this.streetPoint(t),k=stage(t);this.diamond(p.x,p.y,JOIN[k],JOIN[k]/2,ROAD_COLOR[k]);}
@@ -421,7 +426,8 @@ export class IslandRenderer {
       if(k===0)continue;
       if(k===2){for(let i=1;i<6;i++){const f=i/6;this.ellipse(mix(a.x,b.x,f)+(i%2?1.4:-1.4),mix(a.y,b.y,f)+(i%2?.7:-.7),.9,.5,'#d6ceb5');}continue;}
       if(hard){
-        ribbon({x:mix(a.x,b.x,.38),y:mix(a.y,b.y,.38)},{x:mix(a.x,b.x,.62),y:mix(a.y,b.y,.62)},.45,'#e8e4cf');
+        // Two short dashes down the middle of every stretch of asphalt.
+        for(const [u,v] of [[.24,.4],[.6,.76]])ribbon({x:mix(a.x,b.x,u),y:mix(a.y,b.y,u)},{x:mix(a.x,b.x,v),y:mix(a.y,b.y,v)},.32,'#eee8d2');
       }else{
         for(const sign of [-1,1]){
           const dx=b.x-a.x,dy=(b.y-a.y)*2,length=Math.hypot(dx,dy),ox=-dy/length*sign*1.7,oy=dx/length*sign*.85;
@@ -1059,6 +1065,53 @@ export class IslandRenderer {
     const ex=8+Math.sin(t*.2)*1.5;this.ellipse(ex,-5,5.5,4,'#9a9c98');this.ellipse(ex+5,-6,2.6,2.6,'#9a9c98');this.line([[ex+7,-5],[ex+8,-1+Math.sin(t*1.4)]],'#9a9c98',1.6);this.ellipse(ex+3,-7,1.8,2.2,'#888a86');for(const lx of [-3,2])this.line([[ex+lx,-2],[ex+lx,1]],'#858782',2);
     this.ellipse(1,6,7,3,'#8fbcc8');for(let i=0;i<3;i++){const px=-3+i*3,hop=this.reduced?0:Math.abs(Math.sin(t*3+i))*1.5;this.ellipse(px,4-hop,1,1.6,'#2f3236');this.ellipse(px,4.4-hop,.6,1,'#f2f0ea');}
   }
+  // The grounds next to a special building: enclosures for the zoo, big rides for the theme park, a plaza for the rest.
+  delightYard(t){
+    const p=this.p(t.x,t.y),c=this.ctx,time=this.reduced?0:this.time,{type,i}=t.yardOf,fence=(color='#8a7552')=>{for(const [a,b] of [[[-21,0],[0,-10.5]],[[0,-10.5],[21,0]],[[21,0],[0,10.5]],[[0,10.5],[-21,0]]])this.line([a,b],color,.9);for(const [x,y] of [[-21,0],[0,-10.5],[21,0],[0,10.5],[-10.5,-5.25],[10.5,-5.25],[10.5,5.25],[-10.5,5.25]])this.line([[x,y],[x,y-3]],color,.8);};
+    c.save();c.translate(p.x,p.y-1);
+    if(type==='zoo'&&i<3){
+      this.diamond(0,0,22,11,i===1?'#c7d8d2':'#b9c58f');
+      if(i===0){// Elephants by a muddy pool.
+        this.ellipse(4,3,9,3.4,'#9cb7ae');for(const [x,ph] of [[-7,0],[8,2]]){const ex=x+Math.sin(time*.25+ph)*1.5;this.ellipse(ex,-4,6,4.4,'#9a9c98');this.ellipse(ex+5.4,-5.6,2.8,2.8,'#9a9c98');this.ellipse(ex+3,-6.4,2,2.6,'#888a86');this.line([[ex+7.6,-4.6],[ex+8.6,-.6+Math.sin(time*1.3+ph)]],'#9a9c98',1.7);for(const lx of [-3.5,2.5])this.line([[ex+lx,-1.2],[ex+lx,1.8]],'#858782',2.2);}
+      }else if(i===1){// Penguins on an ice floe, one diving.
+        this.ellipse(0,1,14,5.5,'#8fbcc8');this.poly([[-12,-1],[-4,-5],[4,-3],[2,1],[-9,2]],'#f2f5f6');
+        for(let k=0;k<5;k++){const px=-9+k*3,hop=this.reduced?0:Math.max(0,Math.sin(time*3+k))*1.8;this.ellipse(px,-3-hop,1.1,1.8,'#2f3236');this.ellipse(px,-2.6-hop,.7,1.1,'#f2f0ea');this.ellipse(px+.6,-4.4-hop,.4,.25,'#e0a040');}
+        const dive=(time*.5)%1;if(!this.reduced&&dive<.3)this.ellipse(8,2-Math.sin(dive/.3*Math.PI)*5,1,1.7,'#2f3236');
+      }else{// A rock with lions and a monkey tree.
+        this.poly([[-14,2],[-8,-8],[0,-6],[3,2]],'#b3a68a');this.poly([[0,-6],[3,2],[-2,3]],'#9d917a');
+        const lion=(x,y)=>{this.ellipse(x,y,4,2.2,'#d1a35c');this.ellipse(x+3.6,y-1.4,2.4,2.2,'#a8743a');this.ellipse(x+3.9,y-1.2,1.5,1.4,'#d1a35c');};lion(-9,-8.5);lion(-2,1.5);
+        c.save();c.translate(11,0);c.scale(.6,.6);this.tree(false,1);c.restore();const sw=this.reduced?0:Math.sin(time*1.8)*3;this.line([[12,-14],[12+sw,-9]],'#6e5a44',.6);this.ellipse(12+sw,-8,1.4,1.6,'#7a5a40');
+      }
+      fence();
+    }else if(type==='theme-park'&&i<3){
+      this.diamond(0,0,22,11,'#cfc7ac');
+      if(i===0){// A ferris wheel, the tallest thing in town.
+        const cx=0,cy=-30,R=22,a0=time*.25;this.line([[-8,4],[cx,cy]],'#7d7464',1.6);this.line([[8,4],[cx,cy]],'#7d7464',1.6);
+        c.beginPath();c.ellipse(cx,cy,R,R,0,0,Math.PI*2);c.strokeStyle='#c95b4c';c.lineWidth=1.4;c.stroke();
+        for(let k=0;k<10;k++){const a=a0+k*Math.PI/5,x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;this.line([[cx,cy],[x,y]],'#d9cbb2',.5);this.rect(x-2.4,y,4.8,3.6,['#e2c26a','#5c8fc0','#8cc07a','#c98fb0','#d4644f'][k%5]);}
+        this.ellipse(cx,cy,2,2,'#7d7464');
+      }else if(i===1){// A roller coaster with a train racing round.
+        const track=[[-21,2],[-16,-26],[-8,-30],[-2,-10],[4,-6],[10,-20],[16,-16],[20,2]];this.line(track,'#c95b4c',1.8);for(const [x,y] of track)this.line([[x,y],[x,3]],'#9b9488',.6);
+        const u=(time*.18)%1,seg=u*(track.length-1),k=Math.floor(seg),f=seg-k,a=track[k],b=track[Math.min(track.length-1,k+1)];for(let j=0;j<3;j++){const g=Math.max(0,f-j*.12);this.rect(a[0]+(b[0]-a[0])*g-2,a[1]+(b[1]-a[1])*g-3,4,2.6,['#e2c26a','#5c8fc0','#e2c26a'][j]);}
+      }else{// A carousel, a candy-floss stall and balloons.
+        this.ellipse(-6,3,10,4,'#e2c26a');this.poly([[-17,1],[-6,-12],[5,1]],'#7fa3a8');this.poly([[-6,-12],[5,1],[-6,3]],'#6b8e93');for(let k=0;k<6;k++){const a=time*1.5+k*Math.PI/3;this.line([[-6+Math.cos(a)*7,1+Math.sin(a)*2.6],[-6+Math.cos(a)*7,-4+Math.sin(a)*2.6]],'#d9cbb2',.5);this.ellipse(-6+Math.cos(a)*7,-1+Math.sin(a)*2.6,1.4,1.8,'#f1ead6');}
+        this.rect(9,-6,8,6,'#f1ead6');this.poly([[8,-6],[13,-10],[18,-6]],'#c98fb0');this.ellipse(13,-3,1.6,1.6,'#f1c6d0');
+        for(let k=0;k<3;k++){const bx=16+k*2,by=-16-k*2+Math.sin(time*2+k)*1;this.line([[15,-6],[bx,by+3]],'#8a8478',.4);this.ellipse(bx,by,1.8,2.2,['#d4644f','#5c8fc0','#e2c26a'][k]);}
+      }
+      this.person(-14,6,'#b18d6b',1);this.person(14,5,'#879c76',2);
+    }else if(i===6){
+      // The green ring around the zoo and the theme park, drawn like the castle park.
+      this.castleGarden({x:t.x,y:t.y,gardenStyle:'park'});
+    }else{
+      // A small paved plaza with benches, flower tubs and a lamp.
+      this.diamond(0,0,20,10,'#ddd3bd');this.diamond(0,0,15,7.5,'#e8e0cc');
+      for(const [x,y] of [[-11,0],[11,0]]){this.ellipse(x,y-1,2.6,1.4,'#8a6a4c');this.ellipse(x,y-2.4,2.4,1.6,'#6f8f4f');this.ellipse(x-.6,y-3,.8,.8,'#d4644f');}
+      this.rect(-4,3,8,1.2,'#8a6a4c');this.line([[6,-2],[6,-12]],'#5d5a52',.8);this.ellipse(6,-12.5,1.4,1.4,'#f2e6b8');this.lampLight(6,-12.5,t);
+      // In front of the zoo and the theme park: a snack cart and a few visitors.
+      if(type==='zoo'||type==='theme-park'){this.rect(-9,-6,7,4,'#f1ead6');this.poly([[-10,-6],[-5.5,-9.5],[-1,-6]],type==='zoo'?'#8cc07a':'#d4644f');this.ellipse(-7,-1.6,1.2,1.2,'#5d5a52');this.ellipse(-3,-1.6,1.2,1.2,'#5d5a52');this.person(2,2,'#b18d6b',i);this.person(-12,4,'#879c76',i+2);if(type==='theme-park')this.ellipse(-12,-6,1.6,2,'#5c8fc0');}
+    }
+    c.restore();
+  }
   themePark(){
     const t=this.reduced?0:this.time;
     this.diamond(0,0,22,11,'#c9c2a8');
@@ -1351,16 +1404,42 @@ export class IslandRenderer {
       const span=(route.length-1)*2,travel=this.reduced?.5:(this.activityTime*speed+i*2.1)%span;
       const distance=travel<=route.length-1?travel:span-travel,segment=Math.min(route.length-2,Math.floor(distance));
       const a=this.sim.tiles.get(route[segment]),b=this.sim.tiles.get(route[segment+1]);if(!a||!b)continue;
-      const p=this.streetPosition(a,b,distance-segment,-.8),step=this.reduced?0:Math.sin(this.activityTime*9+i);
-      this.enqueueActor(p.y,()=>{this.ctx.save();this.ctx.translate(p.x,p.y);this.vehicle(kind,i,step);this.ctx.restore();});
+      const back=travel>route.length-1,p=this.streetPosition(a,b,distance-segment,back?.9:-.9),step=this.reduced?0:Math.sin(this.activityTime*9+i);
+      const from=this.streetPoint(back?b:a),to=this.streetPoint(back?a:b),flip=(to.x-from.x)*(to.y-from.y)<0,away=to.y<from.y;
+      this.enqueueActor(p.y,()=>{this.ctx.save();this.ctx.translate(p.x,p.y);if(flip)this.ctx.scale(-1,1);this.vehicle(kind,i,step,away);this.ctx.restore();});
     }
   }
   horse(x,y,step){
     this.ellipse(x,y-5,5,2.6,'#8a6a4c');this.poly([[x+4,y-6],[x+8,y-10],[x+9,y-8],[x+5,y-4]],'#8a6a4c');this.ellipse(x+9,y-9,1.6,1.2,'#7a5c42');
     for(const [lx,ph] of [[x-3,step],[x+3,-step]])this.line([[lx,y-3],[lx+ph*.8,y+1]],'#6c5038',1);this.line([[x-5,y-6],[x-7,y-3]],'#5e4632',.9);
   }
-  vehicle(kind,i,step){
+  // An isometric box along the street: length runs along (1,.5), its near side faces the viewer.
+  isoBox(L,W,H,lift,top,side,front,shrink=null){
+    const f=[1,.5],s=[-1,.5],at=(u,v,h)=>[f[0]*u+s[0]*v,f[1]*u+s[1]*v-h];
+    const [u0,u1,w]=shrink||[-L/2,L/2,W/2];
+    const A=at(u0,-w,lift),B=at(u1,-w,lift),C=at(u1,w,lift),D=at(u0,w,lift),up=p=>[p[0],p[1]-H];
+    this.poly([D,C,up(C),up(D)],side);this.poly([B,C,up(C),up(B)],front);this.poly([up(A),up(B),up(C),up(D)],top);
+    return{at,D,C,B,up};
+  }
+  car(i,away,{L=13,W=6,H=3.6,cabin=true,color,glass='#cfe0e4',wheels=true,lift=1.6}={}){
+    const body=color||['#5c8fc0','#d4644f','#e2c26a','#8cc07a','#e8e4da','#4d5b66'][i%6],dark=shadeColor(body,.78),darker=shadeColor(body,.64);
+    this.ellipse(0,1,L*.75,L*.32,'rgba(35,45,40,.18)');
+    const box=this.isoBox(L,W,H,lift,body,dark,darker);
+    if(wheels)for(const u of [-L*.3,L*.3]){const [x,y]=box.at(u,W/2,lift-1.2);this.ellipse(x,y,1.8,1.6,'#2b2b2b');this.ellipse(x,y,.8,.7,'#9a9a96');}
+    if(cabin){const c=this.isoBox(L,W,H*.85,lift+H,shadeColor(body,1.06),glass,shadeColor(glass,.85),[-L*.32,L*.12,W*.42]);this.line([c.at(-L*.1,W*.42,lift+H+.3),c.at(-L*.1,W*.42,lift+H*1.75)],dark,.7);}
+    // Headlights at the front, red lights at the back when it drives away from you.
+    // The visible end is the front when it comes towards you, the back when it drives away.
+    const [hx,hy]=box.at(L/2,W*.28,lift+H*.45),[gx,gy]=box.at(L/2,-W*.28,lift+H*.45);
+    for(const [x,y] of [[hx,hy],[gx,gy]])this.ellipse(x,y,away?.9:1.1,away?.7:.9,away?'#d9534a':'#fff2b8');
+  }
+  vehicle(kind,i,step,away=false){
     const wheel=(x,y,r=2,c='#627464')=>this.ellipse(x,y,r,r*.9,c);
+    if(kind==='car'){
+      if(this.sim.year>=2080){const bob=this.reduced?0:Math.sin(this.activityTime*2+i)*1;this.ellipse(0,2,8,3,'rgba(120,200,220,.25)');this.ctx.save();this.ctx.translate(0,-3+bob);this.car(i,away,{wheels:false,color:['#e8eef0','#9fd3dc','#c9b6e4'][i%3],glass:'#7fb6d6',L:12,H:3});this.ctx.restore();return;}
+      if(i%7===3){this.car(i,away,{L:22,W:7,H:7,cabin:false,color:'#e2c26a'});const box=this.isoBox(22,7,0,1.6+7,'#e2c26a','#e2c26a','#e2c26a');for(let k=0;k<5;k++){const [x,y]=box.at(-8+k*4,3.5,1.6+5);this.poly([[x-1.4,y-.7],[x+1.4,y+.7],[x+1.4,y-1.6],[x-1.4,y-3]],'#cfe0e4');}return;}
+      this.car(i,away);return;
+    }
+    if(kind==='oldtimer'){this.car(i,away,{L:12,W:5.6,H:3.2,color:['#3d3a36','#6e2f2a','#2f4a3e','#c9b27a'][i%4],glass:'#d8dcc4'});return;}
     if(kind==='handcart'){wheel(-2,2,2.2,'#7c6a4c');this.poly([[-7,-2],[1,1],[5,-1],[-3,-4]],'#b79c70');this.rect(-4,-5,4,2,'#cdb37a');this.line([[3,-1],[7,-3]],'#8a7552',1);this.person(9,1,'#a2926e',i+step);}
     else if(kind==='horse'){wheel(-6,2,2.4,'#7c6a4c');wheel(1,3,2.4,'#7c6a4c');this.poly([[-10,-2],[2,2],[5,0],[-7,-4]],'#a88a5e');this.rect(-7,-6,8,3,'#c9a76c');this.line([[4,0],[8,-3]],'#7c6a4c',1);this.horse(11,1,step);}
     else if(kind==='coach'){wheel(-7,2);wheel(1,3);this.poly([[-10,-2],[2,3],[2,-8],[-10,-13]],'#3f5f4f');this.poly([[2,3],[5,1],[5,-10],[2,-8]],'#30483c');this.poly([[-10,-13],[2,-8],[5,-10],[-7,-15]],'#2b3d33');this.rect(-7,-10,4,3,'#e7d9a7');this.line([[5,-1],[9,-3]],'#5f5040',1);this.horse(13,1,step);}

@@ -148,6 +148,16 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 
 .album-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:18px}.album-grid figure{margin:0;padding:8px 8px 12px;background:#fbfaf4;border:1px solid #dcd8c6;border-radius:4px;box-shadow:0 2px 6px #4a4a3016;transform:rotate(var(--tilt,0deg))}.album-grid img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:2px;background:#dfe9e2}.album-grid figcaption{font-size:11px;line-height:1.5;margin-top:8px;color:#5d6b50}.album-grid figcaption strong{display:block;font-family:var(--serif);font-weight:400;font-size:15px;color:#3f4a36}
 .keur-head{display:flex;gap:18px;align-items:center;margin:10px 0 16px}.keur-head h3{font-family:var(--serif);font-weight:400;font-size:26px;margin:0}.keur-head p{margin:4px 0 0;font-size:12px;color:#5f6a5e}.keur-medal{flex:none;width:92px;height:92px;border-radius:50%;display:grid;place-content:center;text-align:center;background:var(--medal,#e2b84a);box-shadow:inset 0 0 0 5px #ffffff55,0 3px 10px #4a4a3022;color:#293d32}.keur-medal strong{font-family:var(--serif);font-size:34px;font-weight:400;line-height:1}.keur-medal small{font-size:9px;letter-spacing:.08em;text-transform:uppercase}.island-scores .keur-medal>#ending-score{margin:0;font-size:34px}.keur-count{font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin:18px 0 8px;color:#596f46}.keur-list{list-style:none;padding:0;margin:0 0 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:4px 12px;font-size:12px}.keur-list li{color:#9aa38e}.keur-list li::before{content:'○ ';}.keur-list li[data-done=true]{color:#3f4a36}.keur-list li[data-done=true]::before{content:'✓ ';color:#5d8a4c;font-weight:700}
+
+/* A calmer island: bigger, with the details tucked away until you ask for them. */
+@media(min-width:700px){.island-window{height:clamp(480px,calc(100vh - 130px),920px)}}
+.island-window:not(.show-details) .civic-overview,.island-window:not(.show-details) .map-coordinate{display:none}
+.island-window:not(.show-details) .population-card{width:auto;padding:10px 14px}
+.island-window:not(.show-details) .population-card>:not(.eyebrow):not(.population-count){display:none}
+.island-window.show-details #toggle-details{background:#e1ead2}
+#instruction{animation:hint-fade 1.2s ease 60s forwards}
+@keyframes hint-fade{to{opacity:0;visibility:hidden}}
+.map-controls #toggle-details{width:auto;padding:0 10px;font-size:10px;border-right:1px solid #dfe4d4}
 </style>
 </head>
 <body>
@@ -183,7 +193,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
       <aside class="population-card" aria-label="Overzicht van de beschaving"><span class="eyebrow">DE BEWONERS</span><div class="population-count"><span id="population">6</span><svg viewBox="0 0 32 24"><circle cx="16" cy="6" r="3"/><path d="M10 21v-6a6 6 0 0 1 12 0v6M4 20v-5a4 4 0 0 1 4-4M28 20v-5a4 4 0 0 0-4-4"/><circle cx="5" cy="7" r="2"/><circle cx="27" cy="7" r="2"/></svg></div><p id="population-note">Zes mensen. Geen vergaderingen.</p><div class="card-rule"></div><div class="mini-stat"><span>Geluk</span><span><i class="happiness-dot"></i><b id="happiness">Tevreden</b></span></div><div class="mini-stat"><span>Ingrepen</span><b id="interference-count">0</b></div></aside>
 
       <div class="map-coordinate" id="geography-label">EEN KLEINE PLEK IN EEN GROOT NIETS</div>
-      <div class="map-controls"><button id="find-beach" title="Bekijk het strand">Strand ↗</button><button id="zoom-out" aria-label="Zoom uit">−</button><button id="recenter" aria-label="Zet het eiland in het midden" title="Zet het eiland in het midden"><svg viewBox="0 0 20 20"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4"/></svg></button><button id="zoom-in" aria-label="Zoom in">+</button></div>
+      <div class="map-controls"><button id="toggle-details" aria-pressed="false" title="Toon of verberg de details over het eiland">Details</button><button id="find-beach" title="Bekijk het strand">Strand ↗</button><button id="zoom-out" aria-label="Zoom uit">−</button><button id="recenter" aria-label="Zet het eiland in het midden" title="Zet het eiland in het midden"><svg viewBox="0 0 20 20"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4"/></svg></button><button id="zoom-in" aria-label="Zoom in">+</button></div>
       <div class="island-toolbar"><div class="time-controls"><button id="pause" aria-label="Pauzeer het eiland" title="Pauze (spatie)"><svg id="pause-icon" viewBox="0 0 20 20"><path d="M6 4v12M14 4v12"/></svg></button><div class="speed-buttons" role="group" aria-label="Snelheid van het eiland"><button class="active" data-speed="1" aria-pressed="true">1×</button><button data-speed="2" aria-pressed="false">2×</button><button data-speed="3" aria-pressed="false">3×</button><button data-speed="10" aria-pressed="false">10×</button></div><span class="time-caption" id="time-caption">GEEN BIJZONDERE HAAST</span></div><button id="photo-mode" title="Fotomodus: verberg de knoppen en maak een ansichtkaart" aria-pressed="false">Foto</button><button id="canvas-journal" title="Open het eilandboek: kroniek, familie, wensen, uitdagingen en verzameling" aria-haspopup="dialog">Eilandboek ↗</button></div>
     <aside class="story-moment" id="moment-card" aria-live="polite" hidden>
       <div><span class="eyebrow" id="moment-year">EILANDGESCHIEDENIS</span><strong id="moment-title">Een beetje geschiedenis</strong><p id="moment-text"></p></div>
@@ -1365,7 +1375,7 @@ function tendFires(s){
   for(const other of adjacentPlots(s,t)){
    if(other.kind!=='land'||!other.building||other.fire||protectedPlot(other)||['farm','beach','well','fire-station','ruins','quarry'].includes(other.building)||other.wetUntil>s.year)continue;
    const stone=other.material==='stone'||other.material==='brick'||s.era>=2;
-   const chance=(stone?.15:s.era<1?.75:.45)*(brigade?.25:1);
+   const chance=(stone?.1:s.era<1?.45:.28)*(brigade?.25:1);
    if(s.random()<chance){startBlaze(s,other,true);changed=true;}
   }
  }
@@ -1487,8 +1497,8 @@ function extinguish(s,spot){
 }
 // A party with a reason: a wish that came true, or the opening of a statue or special building.
 function startParty(s,tile,title,quips,years=4){
- // Parties stay special: short, and followed by at least thirty quiet years.
- if(!tile||s.ending||s.year<(s.partyQuietUntil||0))return null;years=Math.min(years,4);s.partyQuietUntil=s.year+years+30;s.partiesHeld=(s.partiesHeld||0)+1;
+ // Parties stay special: short, and followed by at least sixty quiet years.
+ if(!tile||s.ending||s.year<(s.partyQuietUntil||0))return null;years=Math.min(years,4);s.partyQuietUntil=s.year+years+60;s.partiesHeld=(s.partiesHeld||0)+1;
  s.festival={kind:'party',x:tile.x,y:tile.y,title,quips:quips||['Er is taart. Niemand weet wie hem heeft gebakken.','De fanfare speelt het enige liedje dat ze kent. Twee keer.','Iemand houdt een toespraak. Hij duurt gelukkig kort.'],until:s.year+years};
  s.signal('celebrate',tile,title);return s.festival;
 }
@@ -1511,7 +1521,7 @@ function advancePleasures(s){
  if(bakery)choices.push({kind:'pancakes',spot:bakery,title:'The Pancake Emergency',quips:['Too many pancakes. An unprecedented crisis.','The council forms a tasting committee.','The emergency lasts until lunchtime.']});
  if(!choices.length)return;
  const event=choices[Math.floor(s.random()*choices.length)];
- s.festival={kind:event.kind,x:event.spot.x,y:event.spot.y,title:event.title,quips:event.quips,until:s.year+6};s.partyQuietUntil=s.year+36;s.partiesHeld=(s.partiesHeld||0)+1;
+ s.festival={kind:event.kind,x:event.spot.x,y:event.spot.y,title:event.title,quips:event.quips,until:s.year+6};s.partyQuietUntil=s.year+120;s.partiesHeld=(s.partiesHeld||0)+1;
  s.log(`${event.title}. ${event.quips[Math.floor(s.random()*event.quips.length)]}`,'fun',{x:event.spot.x,y:event.spot.y});
  s.signal('celebrate',event.spot,event.title);s.unrest=Math.max(0,s.unrest-5);s.prosperity=Math.min(94,s.prosperity+2);s.food=Math.max(0,s.food-Math.min(12,s.population*.04));
  s.nextFestival=s.year+55+Math.floor(s.random()*65);
@@ -1536,6 +1546,9 @@ function cinemaBeat(movie){
   sanctuary:['ONE LAST DEVELOPMENT PLAN.','MORE SHADE. LESS EVERYTHING.','THE WORLD’S MOST ADVANCED PICNIC.','PROGRESS CAN WAIT.'],
   miracles:['THEY BUILT YOU SOMETHING.','A MONUMENT TO THE VISITING HAND','PLEASE KEEP TOUCHING.','YOU ARE NOW A PUBLIC UTILITY.'],
   fortress:['THE SKY IS CONSIDERED UNRELIABLE.','THE GREAT NATIONAL UMBRELLA','THEY ARE READY FOR YOU.','PLEASE KNOCK NEXT TIME.'],
+  artists:['IEDEREEN PAKT EEN KWAST.','HET GROOTSTE SCHILDERIJ OOIT','HET EILAND POSEERT.','KUNST. OVERAL.'],
+  funfair:['NOG ÉÉN RONDJE.','DE ACHTBAAN VAN HET HELE EILAND','DE GIRAF IN DE DRAAIMOLEN.','HET FEEST STOPT NOOIT.'],
+  seafarers:['ALLE SCHEPEN KOMEN THUIS.','EEN BRUG VAN BOOTJES','DE BUREN ZWAAIEN TERUG.','THUIS IS WAAR DE VEERBOOT AANLEGT.'],
   phoenix:['UIT DE AS.','STEEDS WEER HERBOUWD.','DE STAD DIE TERUGKWAM.','MOOIER. EN MET BRANDWEER.'],
   retreat:['THE SEA HAS KEPT THE RECEIPT.','A VERY ORGANIZED RETREAT','SMALLER IS STILL SOMEWHERE.','THEY LIVE TO ARGUE ANOTHER DAY.'],
   'last-drop':['THE LAST BASIN IS EMPTY.','THE OCEAN IS BEING DISCONTINUED.','THE VERY LAST DROP.','ONE SMALL WATER SHORTAGE.']
@@ -1550,6 +1563,9 @@ function cinemaVisible(s){return !!s.cinematic&&(!s.cinematic.completed||s.endin
 const STORY_VERSION=1;
 const eventPriority=type=>({ending:100,endgame:98,palace:96,age:92,discovery:91,treasure:90,delight:83,famous:81,visitor:78,islet:70,lighthouse:80,crisis:90,fire:89,flood:88,abandon:87,reform:86,family:85,interference:84,legacy:82,technology:76,culture:68,land:66,district:65,repair:55,storm:45,life:35,trade:25,farm:20,build:10}[type]||30);
 const ENDINGS={
+  artists:{title:'Het Kunstenaarseiland.',quote:'Ze hebben het eiland zo vaak geschilderd dat het zelf is gaan poseren.',description:'Schilders, dichters, componisten en uitvinders maakten van dit eiland een plek waar iedereen iets maakt. Het museum is te klein, de musea daarna ook.',consequence:'Een eiland vol makers',detail:'Op elke muur hangt iets. Op sommige muren hangt een schilderij van een muur.'},
+  funfair:{title:'Het Pretparkeiland.',quote:'Nog één keer! En dan nog één keer.',description:'Een dierentuin, een circus, een pretpark en veel te veel feesten: dit eiland koos voor plezier en heeft daar nooit spijt van gehad.',consequence:'Een eiland dat altijd feest viert',detail:'De achtbaan heeft een eigen kroniek. De giraf ook.'},
+  seafarers:{title:'Het Zeevaardersvolk.',quote:'Thuis is waar de veerboot aanlegt.',description:'Schepen, ballonnen en veerboten brachten de wereld naar dit eiland, en het eiland naar de wereld. Op de buureilandjes wonen neven, op de kaart staan ze allemaal.',consequence:'Een eiland met vrienden overzee',detail:'Elke haven kent hun vlag. De meeuwen spreken drie talen.'},
   phoenix:{title:'De Feniksstad.',quote:'Ze zijn vaker herbouwd dan verslagen.',description:'Branden veranderden deze stad. Uit houten wijken verrezen stenen huizen, een vaste brandweer en pleinen waar het lichtfeest elk jaar terugkeert.',consequence:'Een stad die opnieuw begint',detail:'De gevels zijn mooier. De emmers staan klaar. Het verleden is hier geen weggepoetste vlek.'},
   independent:{title:'They figured it out.',quote:'The island would like to take all the credit.',description:'A civilization has learned to live with its limits. Generations come and go; the little world can look after itself.',consequence:'An independent island',detail:'Their greatest achievement is an ordinary tomorrow.'},
   sanctuary:{title:'A little room for nothing.',quote:'Progress has been postponed until after the picnic.',description:'The island chooses gardens, clean water and a coastline worth keeping. Its grandest invention turns out to be enough.',consequence:'A living island',detail:'The old tree has rather more company now.'},
@@ -1729,8 +1745,20 @@ function chooseFinalPlan(s){
   if(s.influence.fear>=18)return'fortress';
   if(s.influence.dependence>=16)return'miracles';
   if(s.scarcityYears>20||s.freshwater<25||s.environment<35||s.reclaimed.filter(t=>t.kind==='flooded').length>s.land.length*.12)return'retreat';
-  if(s.environment>76&&(s.character==='garden'||s.policies.conservation))return'sanctuary';
-  return'independent';
+  return islandCalling(s);
+}
+// Without outside pressure the ending follows what the island became best at, with a little of its own temperament.
+function islandCalling(s){
+  const jitter=k=>{const n=Math.sin(((s.seed>>>0)%100000)*.0137+k*12.9898)*43758.5453;return(n-Math.floor(n))*.3;};
+  const has=type=>s.land.some(t=>t.building===type),green=s.land.length?s.land.filter(t=>['park','forest','tree','garden','castle-garden'].includes(t.building)).length/s.land.length:0;
+  const callings={
+    artists:(s.famous?.length||0)/8*.5+Math.min(1,(s.digs?.finds?.length||0)/7)*.2+(s.prosperity>58?.15:0)+jitter(1),
+    funfair:Math.min(1,(s.partiesHeld||0)/16)*.5+(has('theme-park')&&has('zoo')&&has('circus')?.3:0)+jitter(2),
+    seafarers:Math.min(1,(s.visitors?.history?.length||0)/12)*.5+Math.min(1,(s.coast?.beaches?.length||0)/4)*.15+(s.islets?.list?.every(i=>i.houses>=i.cap)?.15:0)+jitter(3),
+    sanctuary:Math.max(0,(s.environment-60)/40)*.5+Math.min(1,green/.15)*.25+(s.character==='garden'||s.policies.conservation?.25:0)+jitter(4),
+    independent:.76+jitter(5)
+  };
+  return Object.entries(callings).sort((a,b)=>b[1]-a[1])[0][0];
 }
 function finishStory(s,id){
   if(s.outcome&&!s.sandbox)return;
@@ -1742,17 +1770,17 @@ function finishStory(s,id){
 }
 function advanceFinale(s){
   if(s.sandbox||s.ending)return;
-  if(!s.endgameStarted&&s.year>=s.endgameYear){
+  if(!s.endgameStarted&&s.year>=s.endgameYear&&(s.endgameYear<2085||s.year>=2170||s.year%5===0&&islandReady(s))){
     s.endgameStarted=true;s.endgameAt=s.year;s.finalPlan=chooseFinalPlan(s);s.endgamePhase=0;
-    s.finaleDeadline=s.year+(s.finalPlan==='last-drop'?420:140);
+    s.finaleDeadline=s.year+(s.finalPlan==='last-drop'?420:100);
     s.log(`The final age begins. ${s.finalPlan==='last-drop'?'The engineers announce a last, impossible ambition: discontinue the ocean.':s.finalPlan==='miracles'?'The council debates a future built around your miracles.':s.finalPlan==='fortress'?'The island plans a future prepared for the next tremor.':s.finalPlan==='retreat'?'The city must decide which ground is worth keeping.':'The island asks what is worth passing on to its children.'}`,'endgame',{x:0,y:1});
     s.signal('endgame',s.tile(0,1),'The final age · a future to choose');captureSnapshot(s,'The final age begins');
   }
   if(!s.endgameStarted)return;
   s.finalPlan ||= chooseFinalPlan(s);
-  s.finaleDeadline ||= s.endgameAt+(s.finalPlan==='last-drop'?420:140);
+  s.finaleDeadline ||= s.endgameAt+(s.finalPlan==='last-drop'?420:100);
   const elapsed=s.year-s.endgameAt;
-  if(elapsed>=35&&s.endgamePhase<1){
+  if(elapsed>=25&&s.endgamePhase<1){
     s.endgamePhase=1;s.endgameEvents++;
     const plan=s.finalPlan;
     if(plan==='sanctuary'){s.policies.conservation=true;s.policies.publicSpace=true;}
@@ -1767,7 +1795,7 @@ function advanceFinale(s){
     const spot=s.freeLand[0];if(spot&&plan!=='last-drop'){spot.building=plan==='miracles'?'shrine':'park';spot.civicLegacy='The final-age charter';s.rebuildRoads();}
     s.signal('endgame',s.tile(-1,2),'The last great project');
   }
-  if(elapsed>=90&&s.endgamePhase<2){
+  if(elapsed>=65&&s.endgamePhase<2){
     s.endgamePhase=2;s.endgameEvents++;
     s.log('The last great project enters its final test. What remains will be the island’s legacy.','endgame',{x:0,y:0});
     s.signal('endgame',s.tile(0,0),'A legacy takes shape');
@@ -1778,6 +1806,9 @@ function advanceFinale(s){
     finishStory(s,result==='last-drop'?'independent':result);
   }
 }
+// The final age begins once the island has (almost) everything a complete island has.
+// Each island has its own sense of timing, so the last chapter does not start in the same year everywhere.
+function islandReady(s){if(s.year<2070+(Math.imul(s.seed>>>0,2654435761)>>>0)%6*12)return false;const k=islandScores(s);return k.done>=k.items-3;}
 function resumeSandbox(s){s.sandbox=true;s.ending=false;s.endingSeen=true;if(s.cinematic)s.cinematic.completed=true;}
 
 // The coast keeps its own small stories. Nothing here draws on the simulation's random numbers.
@@ -1792,7 +1823,10 @@ function ensureCoast(s){
 function hasHarbor(s){for(const t of s.tiles.values())if(t.building==='dock'||t.building==='harbor')return true;return false;}
 // The lighthouse stands on the most exposed free point of the coast, once ships have somewhere to go.
 function placeLighthouse(s){
- const coast=ensureCoast(s),standing=s.land.find(t=>t.building==='lighthouse');
+ const coast=ensureCoast(s),towers=[...s.tiles.values()].filter(t=>t.building==='lighthouse'||t.rebuildFrom==='lighthouse'||t.buildSite?.type==='lighthouse');
+ // There is only ever one lighthouse: a ruin waiting to be rebuilt or a tower under water still counts.
+ if(towers.length>1){const keep=towers.find(t=>t.kind==='land'&&t.building==='lighthouse')||towers[0];for(const t of towers)if(t!==keep){if(t.building==='lighthouse')t.building=t.kind==='land'?'park':null;if(t.rebuildFrom==='lighthouse')t.rebuildFrom='house';if(t.buildSite?.type==='lighthouse')t.buildSite=null;}towers.length=0;towers.push(keep);}
+ const standing=towers[0];
  if(standing){coast.lighthouse={...coast.lighthouse,x:standing.x,y:standing.y};return standing;}
  if(s.year<LIGHTHOUSE_YEAR||s.storm||s.ending||!hasHarbor(s))return null;
  const candidates=s.land.filter(t=>s.isCoast(t)&&!t.building&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.foundingHome&&!t.protectedCoast);
@@ -1828,7 +1862,7 @@ function growBeach(s){
 }
 function advanceCoast(s){
  ensureCoast(s);
- if(s.year%7===0)placeLighthouse(s);
+ if(s.year%7===0||s.year%7===3)placeLighthouse(s);
  if(s.year>=s.coast.nextBeachAt)growBeach(s);
  seasonalFinds(s);
 }
@@ -1871,7 +1905,7 @@ function seasonalFinds(s){
 
 
 const COLLECTION_STORAGE_KEY='do-nothing-island-collection-v1';
-const endingHints={independent:'Soms is blijven kijken genoeg.',sanctuary:'Misschien hoeft vooruitgang niet alles te vullen.',miracles:'Wat als de hemel deel van de begroting wordt?',fortress:'Een onrustige grond laat sporen in een cultuur.',phoenix:'As kan het begin van iets moois zijn.',retreat:'Een stap terug kan ook een toekomst zijn.','last-drop':'Er bestaat een grens aan winnen van de zee.'};
+const endingHints={artists:'Een eiland vol beroemde makers kiest misschien voor de kunst.',funfair:'Wie houdt van dieren, draaimolens en feest…',seafarers:'Bezoekers, buren en veerboten verbinden een eiland met de wereld.',independent:'Soms is blijven kijken genoeg.',sanctuary:'Misschien hoeft vooruitgang niet alles te vullen.',miracles:'Wat als de hemel deel van de begroting wordt?',fortress:'Een onrustige grond laat sporen in een cultuur.',phoenix:'As kan het begin van iets moois zijn.',retreat:'Een stap terug kan ook een toekomst zijn.','last-drop':'Er bestaat een grens aan winnen van de zee.'};
 const SECRET_CATALOG=[
  {discovery:'old-tree-bloom',title:'Hij wist nog hoe het moest',description:'Na drie gerichte regenbuien bloeit de oude boom. De bloesem blijft als herinnering.',hint:'Misschien herinnert een oude vriend zich de lente nog.'},
  {discovery:'quake-volcano',title:'De slapende berg',description:'Een beving bij de vulkaan veroorzaakte een uitbarsting. As verrijkte de grond.',hint:'Sommige slapende reuzen voelen de grond bewegen.'},
@@ -2108,16 +2142,42 @@ const DELIGHT_TYPES=DELIGHTS.map(d=>d.type);
 const DELIGHT_NAMES=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.name]));
 const DELIGHT_LABELS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.label]));
 const DELIGHT_OPENINGS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.opening]));
+// The zoo and the theme park need a whole block, so from year 200 the island keeps one free for each of them.
+const BIG_DELIGHTS=['zoo','theme-park'];
+const DELIGHT_RING=[[-1,0],[0,-1],[-1,-1],[1,1],[1,0],[0,1],[1,-1],[-1,1]],DELIGHT_ROLES=[0,1,2,3,4,4,6,6];
+function reserveDelightGrounds(s){
+ s.delightGrounds??={};
+ for(const type of BIG_DELIGHTS){
+  if(s.delightGrounds[type]||[...s.tiles.values()].some(t=>t.building===type||t.buildSite?.type===type))continue;
+  const free=t=>t?.kind==='land'&&!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.foundingHome&&!t.river&&!t.road;
+  // A block of five by five, like the castle grounds: three enclosures or rides at the back, a plaza at the front,
+  // and a ring of park around it so no houses crowd in and hide it.
+  const ring2=[];for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)if(Math.max(Math.abs(dx),Math.abs(dy))===2)ring2.push([dx,dy]);
+  const spots=s.land.filter(t=>free(t)&&Math.hypot(t.x,t.y)>=3&&DELIGHT_RING.every(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy)))&&ring2.filter(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy))).length>=7);
+  if(!spots.length)continue;
+  const spot=spots[(s.seed+type.length*31)%spots.length];
+  spot.reservedFor=`delight:${type}`;s.delightGrounds[type]={x:spot.x,y:spot.y};
+  const claim=(dx,dy,i)=>{const yard=s.tile(spot.x+dx,spot.y+dy);if(!free(yard))return;yard.reservedFor='delight';yard.yardOf={type,x:spot.x,y:spot.y,i};};
+  DELIGHT_RING.forEach(([dx,dy],k)=>claim(dx,dy,DELIGHT_ROLES[k]));for(const [dx,dy] of ring2)claim(dx,dy,6);
+ }
+}
 // Plans at most one delight at a time; returns true when something was planned.
 function planDelight(s){
  const planned=[...s.tiles.values()].some(t=>t.buildSite&&DELIGHT_TYPES.includes(t.buildSite.type));if(planned)return false;
  for(const d of DELIGHTS){
   if(s.year<d.since||s.population<d.population||[...s.tiles.values()].some(t=>t.building===d.type||t.rebuildFrom===d.type||t.buildSite?.type===d.type))continue;
+  const ground=s.delightGrounds?.[d.type]&&s.tile(s.delightGrounds[d.type].x,s.delightGrounds[d.type].y);
+  if(ground?.reservedFor===`delight:${d.type}`){ground.reservedFor=null;if(['tree','garden','park'].includes(ground.building))ground.building=null;if(!ground.building&&s.planBuilding(ground,d.type))return true;ground.reservedFor=`delight:${d.type}`;}
   // A lone tree may make way; homes, farms and reserved plots never do.
   const near=(t,r)=>delightAround(t).some(p=>r(s.tile(p.x,p.y)))||[[1,1],[-1,-1],[1,-1],[-1,1],[2,0],[-2,0],[0,2],[0,-2]].some(([dx,dy])=>r(s.tile(t.x+dx,t.y+dy)));
   const spots=s.land.filter(t=>(!t.building||['tree','garden','park'].includes(t.building)||d.type==='observatory'&&t.building==='forest')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
-  const spot=spots[(s.year*13+s.seed)%spots.length],tree=spot.building;if(tree)spot.building=null;
-  if(s.planBuilding(spot,d.type))return true;
+  // A special building gets breathing room: prefer plots with open ground around, and keep some of it open.
+  const open=t=>delightAround(t).filter(p=>{const n=s.tile(p.x,p.y);return n?.kind==='land'&&!n.building&&!n.buildSite&&!n.reservedFor&&!n.landform&&!n.foundingHome;});
+  // The zoo and the theme park spread over three extra plots of enclosures and rides; the others get a small plaza.
+  const yards=['zoo','theme-park'].includes(d.type)?3:2;
+  const roomy=spots.filter(t=>open(t).length>=yards),pool=roomy.length?roomy:spots.filter(t=>open(t).length>=2).length?spots.filter(t=>open(t).length>=2):spots;
+  const spot=pool[(s.year*13+s.seed)%pool.length],tree=spot.building;if(tree)spot.building=null;
+  if(s.planBuilding(spot,d.type)){open(spot).slice(0,yards).forEach((n,i)=>{const yard=s.tile(n.x,n.y);yard.reservedFor='delight';yard.yardOf={type:d.type,x:spot.x,y:spot.y,i};});return true;}
   if(tree)spot.building=tree;
  }
  return false;
@@ -2214,9 +2274,9 @@ function strike(s){
  const targets=s.land.filter(t=>['tree','forest','house','hut','townhouse','farm','windmill'].includes(t.building)&&!t.fire);if(!targets.length)return null;
  const t=targets[Math.floor(wxHash(s.seed,s.year,7)*targets.length)];
  // Lightning rods arrive with the age of steam and stop most strikes from becoming fires.
- const rod=s.year>=1750&&wxHash(s.seed,s.year,8)<.75;
+ const rod=wxHash(s.seed,s.year,8)<(s.year>=1750?.8:.45);
  s.weather.strike={x:t.x,y:t.y};
- if(rod){s.log('De bliksem slaat in, maar de bliksemafleider vangt hem op. De buurt applaudisseert voor een stuk ijzer.','storm',{x:t.x,y:t.y});return t;}
+ if(rod){s.log(s.year>=1750?'De bliksem slaat in, maar de bliksemafleider vangt hem op. De buurt applaudisseert voor een stuk ijzer.':'De bliksem slaat in een natte boom. Het sist, het rookt, en dat is alles.','storm',{x:t.x,y:t.y});return t;}
  startBlaze(s,t);s.log('De bliksem slaat in! Er ontstaat brand en de emmers komen tevoorschijn.','fire',{x:t.x,y:t.y});s.signal('rumble',t,'Bliksem!');return t;
 }
 function advanceWeather(s){
@@ -2270,7 +2330,7 @@ function advanceVisitors(s){
  v.current={kind:def.kind,year:s.year,until:s.year+def.stay,x:at.x,y:at.y};
  def.effect(s);
  s.log(def.arrive,'visitor',{x:at.x,y:at.y});
- s.signal('celebrate',s.tile(at.x,at.y)||at,def.label);
+ s.signal('celebrate',s.tile(at.x,at.y)||at,def.label,{sound:def.by==='sea'?'horn':'whoosh',text:`${def.label} Bezoek van overzee.`});
 }
 // Drawing only: the renderer keeps track of when it first saw a visitor, so arrivals glide in on the wall clock.
 const visitorSeen=new Map();
@@ -2349,7 +2409,7 @@ function advanceIslets(s){
  if(!isles.ferry&&s.year>=FERRY_YEAR&&s.year%5===0&&isleHarbor(s)){
   isles.ferry=s.year;
   s.log(`De eerste veerboot vaart naar ${isles.list[0].name}. De kapitein heeft één pet, één fluitje en heel veel meningen over golven.`,'islet');
-  s.signal('celebrate',s.tile(0,0),'De veerboot vaart!');
+  s.signal('celebrate',s.tile(0,0),'De veerboot vaart!',{sound:'horn',text:`De eerste veerboot vaart naar ${isles.list[0].name}.`});
  }
  if(!isles.ferry||s.year%15!==0)return;
  for(const [i,islet] of isles.list.entries()){
@@ -2434,7 +2494,7 @@ function advanceFamous(s){
  s.famous.push({id:def.id,name,year:s.year,x:home.x,y:home.y});
  def.effect(s);
  s.log(`${name}, ${def.role} van het eiland, ${def.deed} Er komt een blauw bordje op het huis.`,'famous',{x:home.x,y:home.y});
- s.signal('celebrate',home,`${name}, ${def.role}`);
+ s.signal('celebrate',home,`${name}, ${def.role}`,{sound:'chime',text:`${name} wordt beroemd als ${def.role}.`});
 }
 // Archaeology: from 1890 careful people with small brushes look for the island's own past.
 const DIG_YEAR=1890;
@@ -2457,7 +2517,7 @@ function advanceDigs(s){
   if(s.year<d.site.until)return;
   const find=FINDS.find(f=>f.id===d.site.find);
   if(t){if(t.dig?.before&&!t.building)t.building=t.dig.before;t.dig=null;if(t.reservedFor==='dig')t.reservedFor=null;}
-  if(find){d.finds.push({id:find.id,year:s.year,x:d.site.x,y:d.site.y});s.log(`De archeologen vinden ${find.title(s).replace(/^(Een|De) /,m=>m.toLowerCase())}. ${find.text}`,'treasure',{x:d.site.x,y:d.site.y});s.signal('celebrate',t||d.site,'Een vondst!');}
+  if(find){d.finds.push({id:find.id,year:s.year,x:d.site.x,y:d.site.y});s.log(`De archeologen vinden ${find.title(s).replace(/^(Een|De) /,m=>m.toLowerCase())}. ${find.text}`,'treasure',{x:d.site.x,y:d.site.y});s.signal('celebrate',t||d.site,'Een vondst!',{sound:'treasure',text:`Opgraving: ${find.title(s).replace(/^(Een|De) /,m=>m.toLowerCase())}.`});}
   d.site=null;return;
  }
  if(s.year<DIG_YEAR||s.year%37!==19||s.storm)return;
@@ -2476,7 +2536,7 @@ function drawFamous(r){
   if(tile.kind!=='land')continue;
   if(tile.plaque&&HOMES.has(tile.building)){
    const p=r.p(tile.x,tile.y);
-   r.enqueueActor(p.y+6,()=>{r.ellipse(p.x+9,p.y-7,2.3,2.3,'#f4f1e8');r.ellipse(p.x+9,p.y-7,1.8,1.8,'#2f5f9a');if(r.zoom>1.4){const b=still?0:Math.sin(t*2+tile.x)*1;r.poly([[p.x,p.y-46+b],[p.x+1.2,p.y-43.4+b],[p.x+3.8,p.y-43.2+b],[p.x+1.8,p.y-41.6+b],[p.x+2.4,p.y-39+b],[p.x,p.y-40.4+b],[p.x-2.4,p.y-39+b],[p.x-1.8,p.y-41.6+b],[p.x-3.8,p.y-43.2+b],[p.x-1.2,p.y-43.4+b]],'#f2c94c');}});
+   r.enqueueActor(p.y+6,()=>{r.ellipse(p.x+9,p.y-7,2.3,2.3,'#f4f1e8');r.ellipse(p.x+9,p.y-7,1.8,1.8,'#2f5f9a');});
   }
   if(tile.dig){
    const p=r.p(tile.x,tile.y),brush=still?0:Math.sin(t*5)*1.5;
@@ -2539,8 +2599,9 @@ const key = (x,y) => `${x},${y}`;
 const neighbors = t => [[t.x+1,t.y],[t.x-1,t.y],[t.x,t.y+1],[t.x,t.y-1]];
 const isUsable = t => t.kind === 'land';
 // Early centuries pass briskly; later ages, which span fewer years, get more time per year.
-const secondsPerYear = (year,era=0) => Math.min(2.3,.75+Math.max(0,year-1)/1500+era*.05);
+const secondsPerYear = (year,era=0) => Math.min(1.4,.55+Math.max(0,year-1)/3200+era*.04);
 const FIXED_SECONDS_PER_YEAR=1.5;
+const TOWER_CAP=14,TOWER_RADIUS=2.7;
 const clamp = (v,min,max) => Math.max(min,Math.min(max,v));
 const noise = (x,y) => { const n = Math.sin(x*127.1+y*311.7)*43758.5453; return n-Math.floor(n); };
 function landscapeForSeed(seed) {
@@ -2667,7 +2728,7 @@ class Civilization {
   get forests() { return this.land.filter(t=>t.building==='forest'); }
   get beaches() { return this.land.filter(t=>t.building==='beach' && this.isCoast(t)); }
   get recreation() { return this.land.filter(t=>RECREATION.includes(t.building)); }
-  get endgameYear() { const i=this.influence||{};return this.endgameStarted?this.endgameAt:Math.max(1950,2100-Math.min(150,(i.fire||0)*5+(i.rumble||0)*9+(i.nudge||0)*4+(i.rain||0)*3+(i.rescues||0)*2)); }
+  get endgameYear() { const i=this.influence||{};return this.endgameStarted?this.endgameAt:Math.max(1950,2085-Math.min(150,(i.fire||0)*5+(i.rumble||0)*9+(i.nudge||0)*4+(i.rain||0)*3+(i.rescues||0)*2)); }
   isCoast(tile) { return tile?.kind==='land' && neighbors(tile).some(([x,y])=>this.tile(x,y)?.kind==='water'&&!this.tile(x,y)?.building); }
   get capacity() { return this.houses.reduce((sum,t)=>sum+ERAS[this.era].housing*(t.building==='palace'?4:t.building==='manor'?2:1)*(t.quakeDamage?.5:1)*(t.inspired?1.1:1)*(1+(t.extensionLevel||0)*.25),0); }
   get yearDuration() { const base=this.config.accelerating?secondsPerYear(this.year,this.era):FIXED_SECONDS_PER_YEAR;return Math.max(base,this.endgameStarted&&!this.sandbox?.65:this.year>=1920?.6:this.year>=1750?.38:0); }
@@ -2721,11 +2782,23 @@ class Civilization {
     const score=t=>baseScore(t)+roomAround(t)+(desired&&t.district!==desired?5:0)+(t.district==='heritage'?12:0)+(this.era===0?Math.hypot(t.x,t.y)*.6:0)-(t.burntForest&&['hut','house','townhouse','tower'].includes(type)?4:0);
     let best,bestScore=Infinity;for(const tile of plots){const value=score(tile);if(value<bestScore){best=tile;bestScore=value;}}return best;
   }
+  // Late towns get districts with their own character: an old town around the first home and villas along the
+  // water stay low, one compact centre gets the towers, and the ring between mixes townhouses with houses.
+  skylineCentre() {
+    if(this.skyline&&this.tile(this.skyline.x,this.skyline.y)?.kind==='land')return this.skyline;
+    const bounds=this.layoutBounds(),score=t=>{const p=this.plotPosition(t,bounds);return Math.abs(p.depth-.25)*6+Math.abs(p.side-.45)*4+(t.landform?50:0)+(Math.hypot(t.x+1,t.y-1)<5?20:0)+(t.castle||t.reservedFor==='castle'?30:0);};
+    const best=this.land.slice().sort((a,b)=>score(a)-score(b))[0]||{x:0,y:-4};
+    this.skyline={x:best.x,y:best.y};return this.skyline;
+  }
+  inOldTown(tile){return Math.hypot(tile.x+1,tile.y-1)<=3.2;}
   homeTypeFor(tile) {
     if(this.era<3)return this.era===0?'hut':'house';
-    if(this.year<1960)return'townhouse';
-    const roomForTower=tile.building==='tower'||this.houses.filter(t=>t.building==='tower').length<Math.max(2,Math.ceil(this.houses.length*.3));
-    return this.plotPosition(tile).depth<.43&&roomForTower?'tower':'townhouse';
+    if(this.inOldTown(tile)||this.isCoast(tile))return'house';
+    if(this.year>=1960){
+      const c=this.skylineCentre(),near=Math.hypot(tile.x-c.x,tile.y-c.y)<=TOWER_RADIUS;
+      if(near&&(tile.building==='tower'||this.houses.filter(t=>t.building==='tower').length<TOWER_CAP))return'tower';
+    }
+    return(((tile.x*73856093)^(tile.y*19349663))>>>0)%4===0?'house':'townhouse';
   }
   get energySource() { return this.power>0?(this.era>=4?'Advanced grid':this.buildings.some(t=>t.building==='solar')?'Steam + sun + wind':'Wood-fired steam'):this.buildings.some(t=>t.building==='windmill')?'Fire + wind power':'Campfires'; }
   chooseRemark() {
@@ -2767,8 +2840,9 @@ class Civilization {
     if(this.history.length>350){let index=this.history.findIndex((e,i)=>i>0&&(e.priority||eventPriority(e.type))<82);if(index<0)index=1;this.history.splice(index,1);}
     this.events.push(entry);rememberInFamily(this,entry);coastNotice(this,entry);return entry;
   }
-  signal(type,tile,label) {
-    this.signals.push({type,x:tile?.x??0,y:tile?.y??0,label,priority:eventPriority(type)});
+  // A moment ({sound,text}) asks the app to look, listen and say it out loud.
+  signal(type,tile,label,moment=null) {
+    this.signals.push({type,x:tile?.x??0,y:tile?.y??0,label,priority:eventPriority(type)+(moment?20:0),...(moment?{moment}:{})});
     if(this.signals.length>40){const lowest=this.signals.reduce((index,e,i,a)=>e.priority<a[index].priority?i:index,0);this.signals.splice(lowest,1);}
   }
   tick() {
@@ -2861,6 +2935,7 @@ class Civilization {
     advancePleasures(this);advanceCoast(this);advanceSquare(this);
     // Delights do not wait for a housing lull: they claim a fitting free plot when their time comes.
     if(this.year%9===4&&!this.storm)planDelight(this);
+    if(this.year>=200&&this.year%10===7)reserveDelightGrounds(this);
     advanceMonuments(this);advanceWeather(this);advanceCommissions(this);
     advanceVisitors(this);advanceIslets(this);advanceFamous(this);advanceDigs(this);
     advanceCivicStory(this);
@@ -2889,7 +2964,7 @@ class Civilization {
     if(needHome || needFood) {
       if(needFood && planned.some(t=>t.buildSite.type==='farm'))return;
       if(planned.length>=2+this.era)return;
-      const wanted=needFood?'farm':this.era>=3&&this.houses.filter(t=>t.building==='tower').length<this.houses.length*.3?'tower':this.era>=3?'townhouse':this.era===0?'hut':'house';
+      const wanted=needFood?'farm':this.era>=3?'townhouse':this.era===0?'hut':'house';
       const t=this.choosePlot(wanted,free);
       this.planBuilding(t,needFood?'farm':this.homeTypeFor(t));
     } else if(free.length>5){
@@ -2944,7 +3019,8 @@ class Civilization {
   organizeDistricts() {
     const bounds=this.layoutBounds();let changed=false,moves=0;
     // Foreground homes stay low; the skyline belongs behind everyday street life.
-    for(const home of this.houses)if(home.building==='tower'&&this.plotPosition(home,bounds).depth>=.43){home.building='townhouse';changed=true;}
+    const centre=this.skylineCentre();
+    for(const home of this.houses)if(home.building==='tower'&&Math.hypot(home.x-centre.x,home.y-centre.y)>TOWER_RADIUS){home.building='townhouse';changed=true;}
     const movable=this.houses.filter(t=>!t.foundingHome&&!t.buildSite&&!t.quakeDamage&&t.district!=='heritage');
     for(const type of ['farm','factory','powerplant','school','science-center']){
       const misplaced=this.buildings.filter(t=>t.building===type).filter(t=>{
@@ -3141,8 +3217,7 @@ class Civilization {
   // Old streets renew over time: houses become townhouses in the age of steam, back districts get towers from 1960.
   renewHomes() {
     const homes=this.houses.filter(t=>!t.foundingHome&&!t.buildSite&&t.district!=='heritage');
-    const towers=homes.filter(t=>t.building==='tower').length;
-    const candidates=homes.filter(t=>t.building==='house'||t.building==='hut'||this.year>=1960&&t.building==='townhouse'&&towers<homes.length*.35&&this.plotPosition(t).depth<.5);
+    const candidates=homes.filter(t=>t.building==='hut'||this.era>=3&&['house','townhouse'].includes(t.building)&&this.homeTypeFor(t)!==t.building||this.era<3&&t.building==='house');
     for(const t of candidates.sort((a,b)=>(a.builtYear||0)-(b.builtYear||0)).slice(0,this.year>=1960?3:2)){
       const next=this.homeTypeFor(t);if(next===t.building)continue;
       t.building=next;t.architecture=this.age.id;t.builtYear=this.year;this.signal('built',t,next==='tower'?'Een torenflat!':'Een nieuw herenhuis');
@@ -3303,7 +3378,7 @@ class Civilization {
       } else if(t.floodYears>28) {
         const b=t.building;
         const relocation=this.freeLand.find(t=>!t.reclaimed);
-        if(b && b!=='pump' && relocation) {relocation.building=b; relocation.builtYear=this.year;}
+        if(b && b!=='pump' && b!=='lighthouse' && relocation) {relocation.building=b; relocation.builtYear=this.year;}
         t.building=null; t.buildSite=null; t.kind='water'; t.reclaimed=false;t.abandonedYear=this.year;this.storyStats.abandoned++;changed=true;
         this.log('A flooded district is abandoned. The sea calls it a homecoming.','abandon');
       }
@@ -3566,9 +3641,13 @@ function particles(c,id,w,h,t,reduced){
  if(id==='fortress'){for(let i=0;i<5;i++){const x=w*(.1+i*.2),sway=Math.sin(t*2+i)*3*n;c.strokeStyle='#6d675a';c.beginPath();c.moveTo(x,h*.55);c.lineTo(x,h*.25);c.stroke();c.fillStyle=['#a35a45','#3f5f7a'][i%2];c.beginPath();c.moveTo(x,h*.25);c.lineTo(x+26,h*.27+sway);c.lineTo(x+26,h*.36+sway);c.lineTo(x,h*.34);c.closePath();c.fill();}}
  if(id==='retreat'){for(let i=0;i<4;i++){const u=(t*.03+i*.22)%1,x=w*(.2+i*.18)+u*w*.3,y=h*(.7-u*.35);c.fillStyle='#8f6f5a';c.beginPath();c.moveTo(x-12,y);c.lineTo(x+12,y);c.lineTo(x+8,y+5);c.lineTo(x-8,y+5);c.closePath();c.fill();c.fillStyle='#f3efcf';c.beginPath();c.moveTo(x,y-1);c.lineTo(x,y-20);c.lineTo(x+11,y-4);c.closePath();c.fill();}}
  if(id==='last-drop'){const level=Math.min(1,t/18);c.fillStyle=`rgba(90,150,170,${.45*(1-level)})`;c.fillRect(0,h*(.35+level*.6),w,h);for(let i=0;i<5;i++){const hop=Math.abs(Math.sin(t*3+i))*14*n;c.fillStyle='#c9d3cf';c.beginPath();c.ellipse(w*(.2+i*.15),h*.92-hop,6,2.6,Math.sin(t+i),0,Math.PI*2);c.fill();}}
+ if(id==='artists'){for(let i=0;i<26;i++){const u=(t*.04+credHash(i,11))%1;c.save();c.globalAlpha=.6*Math.sin(u*Math.PI);c.fillStyle=['#d4644f','#e2c26a','#5c8fc0','#8cc07a','#c98fb0'][i%5];c.beginPath();c.ellipse(w*credHash(i,12),h*credHash(i,13)+Math.sin(t+i)*6*n,8+credHash(i,14)*14,5+credHash(i,15)*8,credHash(i,16)*3,0,Math.PI*2);c.fill();c.restore();}}
+ if(id==='funfair'){for(let i=0;i<9;i++){const u=(t*.05+i/9)%1,x=w*(.08+credHash(i,17)*.55)+Math.sin(t+i)*12*n,y=h*(1.05-u*1.2);c.fillStyle=['#d4644f','#e2c26a','#5c8fc0','#c98fb0'][i%4];c.beginPath();c.ellipse(x,y,9,11,0,0,Math.PI*2);c.fill();c.strokeStyle='rgba(60,60,60,.5)';c.beginPath();c.moveTo(x,y+11);c.lineTo(x+Math.sin(t*2+i)*4,y+34);c.stroke();}
+  const cx=w*.22,cy=h*.55,R=Math.min(w,h)*.18;c.strokeStyle='rgba(251,248,238,.7)';c.lineWidth=2;c.beginPath();c.ellipse(cx,cy,R,R,0,0,Math.PI*2);c.stroke();for(let i=0;i<8;i++){const a=t*.3*n+i*Math.PI/4;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);c.stroke();c.fillStyle=['#d4644f','#e2c26a','#5c8fc0','#8cc07a'][i%4];c.fillRect(cx+Math.cos(a)*R-5,cy+Math.sin(a)*R,10,8);}}
+ if(id==='seafarers'){for(let i=0;i<6;i++){const u=(t*.025+i/6)%1,x=-60+u*(w+120),y=h*(.72+(i%3)*.08)+Math.sin(t*1.5+i)*3*n;c.fillStyle='#8f6f5a';c.beginPath();c.moveTo(x-18,y);c.lineTo(x+18,y);c.lineTo(x+12,y+7);c.lineTo(x-12,y+7);c.closePath();c.fill();c.fillStyle='#f3efcf';c.beginPath();c.moveTo(x,y-2);c.lineTo(x,y-30);c.lineTo(x+16,y-6);c.closePath();c.fill();c.fillStyle=['#d4644f','#5c8fc0','#e2c26a'][i%3];c.fillRect(x,y-34,8,4);}}
  if(id==='phoenix'){for(let i=0;i<40;i++){const u=(t*.12+credHash(i,6))%1;c.fillStyle=`rgba(255,${150+Math.floor(credHash(i,7)*80)},80,${1-u})`;c.beginPath();c.ellipse(w*credHash(i,8)+Math.sin(t+i)*10*n,h*(1-u),2,2,0,0,Math.PI*2);c.fill();}
   const x=((t*.08)%1.3-.15)*w,y=h*.25+Math.sin(t)*20*n;c.fillStyle='#e8913c';c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x-40,y-30-Math.sin(t*6)*12*n,x-70,y-10);c.quadraticCurveTo(x-40,y-5,x-25,y+8);c.closePath();c.fill();}
- if(['independent','sanctuary','phoenix','miracles'].includes(id)&&!reduced){for(let k=0;k<3;k++){const cycle=(t*.3+k*.33)%1,cx=w*(.2+credHash(k,Math.floor(t*.3+k*.33))*.6),cy=h*(.12+credHash(k,9)*.25),col=['#d4644f','#e2c26a','#7fa3a8','#c98fb0'][(k+Math.floor(t))%4];if(cycle>.25){const open=(cycle-.25)/.75;c.save();c.globalAlpha=1-open;c.fillStyle=col;for(let i=0;i<14;i++){const a=i/14*Math.PI*2;c.beginPath();c.ellipse(cx+Math.cos(a)*open*40,cy+Math.sin(a)*open*30+open*10,2,2,0,0,Math.PI*2);c.fill();}c.restore();}}}
+ if(['independent','sanctuary','phoenix','miracles','artists','funfair','seafarers'].includes(id)&&!reduced){for(let k=0;k<3;k++){const cycle=(t*.3+k*.33)%1,cx=w*(.2+credHash(k,Math.floor(t*.3+k*.33))*.6),cy=h*(.12+credHash(k,9)*.25),col=['#d4644f','#e2c26a','#7fa3a8','#c98fb0'][(k+Math.floor(t))%4];if(cycle>.25){const open=(cycle-.25)/.75;c.save();c.globalAlpha=1-open;c.fillStyle=col;for(let i=0;i<14;i++){const a=i/14*Math.PI*2;c.beginPath();c.ellipse(cx+Math.cos(a)*open*40,cy+Math.sin(a)*open*30+open*10,2,2,0,0,Math.PI*2);c.fill();}c.restore();}}}
 }
 // Halfway through the film the inspection stamp drops onto the island, and the checklist ticks itself off.
 function drawKeur(c,w,h,s,u,reduced){
@@ -4148,6 +4227,9 @@ class Soundscape{
   else if(type==='fire'){this.hiss(1.4,{volume:.035,filter:'bandpass',frequency:900,attack:.2});for(let i=0;i<10;i++)this.hiss(.03,{volume:.04,delay:Math.random()*1.3,filter:'highpass',frequency:2500,attack:.002});}
   else if(type==='nudge'||type==='repair'){[659,784,988].forEach((f,i)=>this.tone(f,.5,{volume:.03,delay:i*.09}));}
   else if(type==='treasure'){[1047,1319,1568,2093].forEach((f,i)=>this.tone(f,.4,{type:'triangle',volume:.025,delay:i*.07}));}
+  else if(type==='horn'){this.tone(98,2.2,{type:'sawtooth',volume:.018,to:92});this.tone(147,2,{type:'triangle',volume:.014,to:139});}
+  else if(type==='whoosh'){this.hiss(2.4,{volume:.05,filter:'bandpass',frequency:600,attack:.8});}
+  else if(type==='chime'){[1319,1568,1976].forEach((f,i)=>this.tone(f,1.4,{volume:.02,delay:i*.22}));}
   else if(type==='fanfare'){[[523,0],[659,.12],[784,.24],[1047,.4]].forEach(([f,d])=>this.tone(f,d===.4?.7:.18,{type:'triangle',volume:.03,delay:d}));}
   else if(type==='century'){for(let i=0;i<4;i++){this.tone(392,2.2,{volume:.045,delay:i*1.1});this.tone(784,1.6,{volume:.015,delay:i*1.1});}}
   else if(type==='age'){[392,523,659,784].forEach((f,i)=>this.tone(f,1.1,{type:'triangle',volume:.03,delay:i*.28}));}
@@ -4317,7 +4399,8 @@ class IslandRenderer {
     for(const t of sorted){
       this.drawDetails(t);
       const p=this.p(t.x,t.y),depth=p.y+(t.landform?10:['tree','original-tree'].includes(t.building)?0:5);
-      if(t.kind==='land'&&!t.building&&!t.buildSite&&!t.landform&&!t.road&&t.reservedFor!=='square'&&!t.foundingHome&&hash(t.x*5+1,t.y*3-2)<.24)this.scene.push({depth:depth-2,draw:()=>this.meadowTree(t)});
+      if(t.yardOf&&!t.building&&this.sim.tile(t.yardOf.x,t.yardOf.y)?.building===t.yardOf.type)this.scene.push({depth:depth-1,draw:()=>this.delightYard(t)});
+      else if(t.kind==='land'&&!t.building&&!t.buildSite&&!t.landform&&!t.road&&t.reservedFor!=='square'&&!t.foundingHome&&hash(t.x*5+1,t.y*3-2)<.24)this.scene.push({depth:depth-2,draw:()=>this.meadowTree(t)});
       if(t.treasure&&this.sim.year-t.treasure.year<40)this.scene.push({depth:depth+1,draw:()=>this.treasureChest(t)});
       if(t.landform||t.building||t.buildSite)this.scene.push({depth,draw:()=>{if(t.landform)this.drawLandform(t);if(t.building)this.drawBuilding(t);if(t.buildSite)this.drawBuildingSite(t);}});
     }
@@ -4543,7 +4626,9 @@ class IslandRenderer {
     const paved=t=>this.sim.era>=3&&!['forest','beach','park','garden','playground'].includes(t.building);
     // Roads grow up: a fresh trail through the grass, a sandy path, cobbles in the old centre, then asphalt.
     const stage=t=>paved(t)?3:this.sim.year>=1250&&Math.hypot(t.x,t.y)<=6?2:this.sim.year-(t.roadYear??-999)<35?0:1;
-    const ROAD_WIDTH=[2.6,4.8,5.6,6],ROAD_COLOR=['#c3bb8d','#c8b68e','#bfb49a','#a5aca1'],JOIN=[5,6.8,7.6,8.5];
+    const ROAD_WIDTH=[2.6,4.8,5.6,5.4],ROAD_COLOR=['#c3bb8d','#c8b68e','#bfb49a','#8f9792'],JOIN=[5,6.8,7.6,7.8];
+    // Cobbles get a darker edge; asphalt gets a pale pavement on both sides.
+    const KERB=[0,0,.9,2],KERB_COLOR=['','','#a99d80','#d6d1c0'];
     // Project a strip onto the ground plane, with no raised rim or circular couplings.
     const ribbon=(a,b,half,color)=>{
       const dx=b.x-a.x,dy=(b.y-a.y)*2,length=Math.hypot(dx,dy);if(!length)return;
@@ -4554,6 +4639,8 @@ class IslandRenderer {
       const next=this.sim.tile(nx,ny);
       if(next?.road&&next.kind!=='flooded'&&next.kind!=='construction'&&t.roadLinks?.includes(key(nx,ny)))edges.push({a:this.streetPoint(t),b:this.streetPoint(next),paved:paved(t)&&paved(next),stage:Math.min(stage(t),stage(next)),tile:t});
     }
+    for(const edge of edges)if(KERB[edge.stage])ribbon(edge.a,edge.b,ROAD_WIDTH[edge.stage]+KERB[edge.stage],KERB_COLOR[edge.stage]);
+    for(const t of roads){const p=this.streetPoint(t),k=stage(t);if(KERB[k])this.diamond(p.x,p.y,JOIN[k]+KERB[k]*1.6,(JOIN[k]+KERB[k]*1.6)/2,KERB_COLOR[k]);}
     for(const edge of edges)ribbon(edge.a,edge.b,ROAD_WIDTH[edge.stage],ROAD_COLOR[edge.stage]);
     // Join every branch with the same flat surface, before any markings or texture.
     for(const t of roads){const p=this.streetPoint(t),k=stage(t);this.diamond(p.x,p.y,JOIN[k],JOIN[k]/2,ROAD_COLOR[k]);}
@@ -4561,7 +4648,8 @@ class IslandRenderer {
       if(k===0)continue;
       if(k===2){for(let i=1;i<6;i++){const f=i/6;this.ellipse(mix(a.x,b.x,f)+(i%2?1.4:-1.4),mix(a.y,b.y,f)+(i%2?.7:-.7),.9,.5,'#d6ceb5');}continue;}
       if(hard){
-        ribbon({x:mix(a.x,b.x,.38),y:mix(a.y,b.y,.38)},{x:mix(a.x,b.x,.62),y:mix(a.y,b.y,.62)},.45,'#e8e4cf');
+        // Two short dashes down the middle of every stretch of asphalt.
+        for(const [u,v] of [[.24,.4],[.6,.76]])ribbon({x:mix(a.x,b.x,u),y:mix(a.y,b.y,u)},{x:mix(a.x,b.x,v),y:mix(a.y,b.y,v)},.32,'#eee8d2');
       }else{
         for(const sign of [-1,1]){
           const dx=b.x-a.x,dy=(b.y-a.y)*2,length=Math.hypot(dx,dy),ox=-dy/length*sign*1.7,oy=dx/length*sign*.85;
@@ -5199,6 +5287,53 @@ class IslandRenderer {
     const ex=8+Math.sin(t*.2)*1.5;this.ellipse(ex,-5,5.5,4,'#9a9c98');this.ellipse(ex+5,-6,2.6,2.6,'#9a9c98');this.line([[ex+7,-5],[ex+8,-1+Math.sin(t*1.4)]],'#9a9c98',1.6);this.ellipse(ex+3,-7,1.8,2.2,'#888a86');for(const lx of [-3,2])this.line([[ex+lx,-2],[ex+lx,1]],'#858782',2);
     this.ellipse(1,6,7,3,'#8fbcc8');for(let i=0;i<3;i++){const px=-3+i*3,hop=this.reduced?0:Math.abs(Math.sin(t*3+i))*1.5;this.ellipse(px,4-hop,1,1.6,'#2f3236');this.ellipse(px,4.4-hop,.6,1,'#f2f0ea');}
   }
+  // The grounds next to a special building: enclosures for the zoo, big rides for the theme park, a plaza for the rest.
+  delightYard(t){
+    const p=this.p(t.x,t.y),c=this.ctx,time=this.reduced?0:this.time,{type,i}=t.yardOf,fence=(color='#8a7552')=>{for(const [a,b] of [[[-21,0],[0,-10.5]],[[0,-10.5],[21,0]],[[21,0],[0,10.5]],[[0,10.5],[-21,0]]])this.line([a,b],color,.9);for(const [x,y] of [[-21,0],[0,-10.5],[21,0],[0,10.5],[-10.5,-5.25],[10.5,-5.25],[10.5,5.25],[-10.5,5.25]])this.line([[x,y],[x,y-3]],color,.8);};
+    c.save();c.translate(p.x,p.y-1);
+    if(type==='zoo'&&i<3){
+      this.diamond(0,0,22,11,i===1?'#c7d8d2':'#b9c58f');
+      if(i===0){// Elephants by a muddy pool.
+        this.ellipse(4,3,9,3.4,'#9cb7ae');for(const [x,ph] of [[-7,0],[8,2]]){const ex=x+Math.sin(time*.25+ph)*1.5;this.ellipse(ex,-4,6,4.4,'#9a9c98');this.ellipse(ex+5.4,-5.6,2.8,2.8,'#9a9c98');this.ellipse(ex+3,-6.4,2,2.6,'#888a86');this.line([[ex+7.6,-4.6],[ex+8.6,-.6+Math.sin(time*1.3+ph)]],'#9a9c98',1.7);for(const lx of [-3.5,2.5])this.line([[ex+lx,-1.2],[ex+lx,1.8]],'#858782',2.2);}
+      }else if(i===1){// Penguins on an ice floe, one diving.
+        this.ellipse(0,1,14,5.5,'#8fbcc8');this.poly([[-12,-1],[-4,-5],[4,-3],[2,1],[-9,2]],'#f2f5f6');
+        for(let k=0;k<5;k++){const px=-9+k*3,hop=this.reduced?0:Math.max(0,Math.sin(time*3+k))*1.8;this.ellipse(px,-3-hop,1.1,1.8,'#2f3236');this.ellipse(px,-2.6-hop,.7,1.1,'#f2f0ea');this.ellipse(px+.6,-4.4-hop,.4,.25,'#e0a040');}
+        const dive=(time*.5)%1;if(!this.reduced&&dive<.3)this.ellipse(8,2-Math.sin(dive/.3*Math.PI)*5,1,1.7,'#2f3236');
+      }else{// A rock with lions and a monkey tree.
+        this.poly([[-14,2],[-8,-8],[0,-6],[3,2]],'#b3a68a');this.poly([[0,-6],[3,2],[-2,3]],'#9d917a');
+        const lion=(x,y)=>{this.ellipse(x,y,4,2.2,'#d1a35c');this.ellipse(x+3.6,y-1.4,2.4,2.2,'#a8743a');this.ellipse(x+3.9,y-1.2,1.5,1.4,'#d1a35c');};lion(-9,-8.5);lion(-2,1.5);
+        c.save();c.translate(11,0);c.scale(.6,.6);this.tree(false,1);c.restore();const sw=this.reduced?0:Math.sin(time*1.8)*3;this.line([[12,-14],[12+sw,-9]],'#6e5a44',.6);this.ellipse(12+sw,-8,1.4,1.6,'#7a5a40');
+      }
+      fence();
+    }else if(type==='theme-park'&&i<3){
+      this.diamond(0,0,22,11,'#cfc7ac');
+      if(i===0){// A ferris wheel, the tallest thing in town.
+        const cx=0,cy=-30,R=22,a0=time*.25;this.line([[-8,4],[cx,cy]],'#7d7464',1.6);this.line([[8,4],[cx,cy]],'#7d7464',1.6);
+        c.beginPath();c.ellipse(cx,cy,R,R,0,0,Math.PI*2);c.strokeStyle='#c95b4c';c.lineWidth=1.4;c.stroke();
+        for(let k=0;k<10;k++){const a=a0+k*Math.PI/5,x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;this.line([[cx,cy],[x,y]],'#d9cbb2',.5);this.rect(x-2.4,y,4.8,3.6,['#e2c26a','#5c8fc0','#8cc07a','#c98fb0','#d4644f'][k%5]);}
+        this.ellipse(cx,cy,2,2,'#7d7464');
+      }else if(i===1){// A roller coaster with a train racing round.
+        const track=[[-21,2],[-16,-26],[-8,-30],[-2,-10],[4,-6],[10,-20],[16,-16],[20,2]];this.line(track,'#c95b4c',1.8);for(const [x,y] of track)this.line([[x,y],[x,3]],'#9b9488',.6);
+        const u=(time*.18)%1,seg=u*(track.length-1),k=Math.floor(seg),f=seg-k,a=track[k],b=track[Math.min(track.length-1,k+1)];for(let j=0;j<3;j++){const g=Math.max(0,f-j*.12);this.rect(a[0]+(b[0]-a[0])*g-2,a[1]+(b[1]-a[1])*g-3,4,2.6,['#e2c26a','#5c8fc0','#e2c26a'][j]);}
+      }else{// A carousel, a candy-floss stall and balloons.
+        this.ellipse(-6,3,10,4,'#e2c26a');this.poly([[-17,1],[-6,-12],[5,1]],'#7fa3a8');this.poly([[-6,-12],[5,1],[-6,3]],'#6b8e93');for(let k=0;k<6;k++){const a=time*1.5+k*Math.PI/3;this.line([[-6+Math.cos(a)*7,1+Math.sin(a)*2.6],[-6+Math.cos(a)*7,-4+Math.sin(a)*2.6]],'#d9cbb2',.5);this.ellipse(-6+Math.cos(a)*7,-1+Math.sin(a)*2.6,1.4,1.8,'#f1ead6');}
+        this.rect(9,-6,8,6,'#f1ead6');this.poly([[8,-6],[13,-10],[18,-6]],'#c98fb0');this.ellipse(13,-3,1.6,1.6,'#f1c6d0');
+        for(let k=0;k<3;k++){const bx=16+k*2,by=-16-k*2+Math.sin(time*2+k)*1;this.line([[15,-6],[bx,by+3]],'#8a8478',.4);this.ellipse(bx,by,1.8,2.2,['#d4644f','#5c8fc0','#e2c26a'][k]);}
+      }
+      this.person(-14,6,'#b18d6b',1);this.person(14,5,'#879c76',2);
+    }else if(i===6){
+      // The green ring around the zoo and the theme park, drawn like the castle park.
+      this.castleGarden({x:t.x,y:t.y,gardenStyle:'park'});
+    }else{
+      // A small paved plaza with benches, flower tubs and a lamp.
+      this.diamond(0,0,20,10,'#ddd3bd');this.diamond(0,0,15,7.5,'#e8e0cc');
+      for(const [x,y] of [[-11,0],[11,0]]){this.ellipse(x,y-1,2.6,1.4,'#8a6a4c');this.ellipse(x,y-2.4,2.4,1.6,'#6f8f4f');this.ellipse(x-.6,y-3,.8,.8,'#d4644f');}
+      this.rect(-4,3,8,1.2,'#8a6a4c');this.line([[6,-2],[6,-12]],'#5d5a52',.8);this.ellipse(6,-12.5,1.4,1.4,'#f2e6b8');this.lampLight(6,-12.5,t);
+      // In front of the zoo and the theme park: a snack cart and a few visitors.
+      if(type==='zoo'||type==='theme-park'){this.rect(-9,-6,7,4,'#f1ead6');this.poly([[-10,-6],[-5.5,-9.5],[-1,-6]],type==='zoo'?'#8cc07a':'#d4644f');this.ellipse(-7,-1.6,1.2,1.2,'#5d5a52');this.ellipse(-3,-1.6,1.2,1.2,'#5d5a52');this.person(2,2,'#b18d6b',i);this.person(-12,4,'#879c76',i+2);if(type==='theme-park')this.ellipse(-12,-6,1.6,2,'#5c8fc0');}
+    }
+    c.restore();
+  }
   themePark(){
     const t=this.reduced?0:this.time;
     this.diamond(0,0,22,11,'#c9c2a8');
@@ -5491,16 +5626,42 @@ class IslandRenderer {
       const span=(route.length-1)*2,travel=this.reduced?.5:(this.activityTime*speed+i*2.1)%span;
       const distance=travel<=route.length-1?travel:span-travel,segment=Math.min(route.length-2,Math.floor(distance));
       const a=this.sim.tiles.get(route[segment]),b=this.sim.tiles.get(route[segment+1]);if(!a||!b)continue;
-      const p=this.streetPosition(a,b,distance-segment,-.8),step=this.reduced?0:Math.sin(this.activityTime*9+i);
-      this.enqueueActor(p.y,()=>{this.ctx.save();this.ctx.translate(p.x,p.y);this.vehicle(kind,i,step);this.ctx.restore();});
+      const back=travel>route.length-1,p=this.streetPosition(a,b,distance-segment,back?.9:-.9),step=this.reduced?0:Math.sin(this.activityTime*9+i);
+      const from=this.streetPoint(back?b:a),to=this.streetPoint(back?a:b),flip=(to.x-from.x)*(to.y-from.y)<0,away=to.y<from.y;
+      this.enqueueActor(p.y,()=>{this.ctx.save();this.ctx.translate(p.x,p.y);if(flip)this.ctx.scale(-1,1);this.vehicle(kind,i,step,away);this.ctx.restore();});
     }
   }
   horse(x,y,step){
     this.ellipse(x,y-5,5,2.6,'#8a6a4c');this.poly([[x+4,y-6],[x+8,y-10],[x+9,y-8],[x+5,y-4]],'#8a6a4c');this.ellipse(x+9,y-9,1.6,1.2,'#7a5c42');
     for(const [lx,ph] of [[x-3,step],[x+3,-step]])this.line([[lx,y-3],[lx+ph*.8,y+1]],'#6c5038',1);this.line([[x-5,y-6],[x-7,y-3]],'#5e4632',.9);
   }
-  vehicle(kind,i,step){
+  // An isometric box along the street: length runs along (1,.5), its near side faces the viewer.
+  isoBox(L,W,H,lift,top,side,front,shrink=null){
+    const f=[1,.5],s=[-1,.5],at=(u,v,h)=>[f[0]*u+s[0]*v,f[1]*u+s[1]*v-h];
+    const [u0,u1,w]=shrink||[-L/2,L/2,W/2];
+    const A=at(u0,-w,lift),B=at(u1,-w,lift),C=at(u1,w,lift),D=at(u0,w,lift),up=p=>[p[0],p[1]-H];
+    this.poly([D,C,up(C),up(D)],side);this.poly([B,C,up(C),up(B)],front);this.poly([up(A),up(B),up(C),up(D)],top);
+    return{at,D,C,B,up};
+  }
+  car(i,away,{L=13,W=6,H=3.6,cabin=true,color,glass='#cfe0e4',wheels=true,lift=1.6}={}){
+    const body=color||['#5c8fc0','#d4644f','#e2c26a','#8cc07a','#e8e4da','#4d5b66'][i%6],dark=shadeColor(body,.78),darker=shadeColor(body,.64);
+    this.ellipse(0,1,L*.75,L*.32,'rgba(35,45,40,.18)');
+    const box=this.isoBox(L,W,H,lift,body,dark,darker);
+    if(wheels)for(const u of [-L*.3,L*.3]){const [x,y]=box.at(u,W/2,lift-1.2);this.ellipse(x,y,1.8,1.6,'#2b2b2b');this.ellipse(x,y,.8,.7,'#9a9a96');}
+    if(cabin){const c=this.isoBox(L,W,H*.85,lift+H,shadeColor(body,1.06),glass,shadeColor(glass,.85),[-L*.32,L*.12,W*.42]);this.line([c.at(-L*.1,W*.42,lift+H+.3),c.at(-L*.1,W*.42,lift+H*1.75)],dark,.7);}
+    // Headlights at the front, red lights at the back when it drives away from you.
+    // The visible end is the front when it comes towards you, the back when it drives away.
+    const [hx,hy]=box.at(L/2,W*.28,lift+H*.45),[gx,gy]=box.at(L/2,-W*.28,lift+H*.45);
+    for(const [x,y] of [[hx,hy],[gx,gy]])this.ellipse(x,y,away?.9:1.1,away?.7:.9,away?'#d9534a':'#fff2b8');
+  }
+  vehicle(kind,i,step,away=false){
     const wheel=(x,y,r=2,c='#627464')=>this.ellipse(x,y,r,r*.9,c);
+    if(kind==='car'){
+      if(this.sim.year>=2080){const bob=this.reduced?0:Math.sin(this.activityTime*2+i)*1;this.ellipse(0,2,8,3,'rgba(120,200,220,.25)');this.ctx.save();this.ctx.translate(0,-3+bob);this.car(i,away,{wheels:false,color:['#e8eef0','#9fd3dc','#c9b6e4'][i%3],glass:'#7fb6d6',L:12,H:3});this.ctx.restore();return;}
+      if(i%7===3){this.car(i,away,{L:22,W:7,H:7,cabin:false,color:'#e2c26a'});const box=this.isoBox(22,7,0,1.6+7,'#e2c26a','#e2c26a','#e2c26a');for(let k=0;k<5;k++){const [x,y]=box.at(-8+k*4,3.5,1.6+5);this.poly([[x-1.4,y-.7],[x+1.4,y+.7],[x+1.4,y-1.6],[x-1.4,y-3]],'#cfe0e4');}return;}
+      this.car(i,away);return;
+    }
+    if(kind==='oldtimer'){this.car(i,away,{L:12,W:5.6,H:3.2,color:['#3d3a36','#6e2f2a','#2f4a3e','#c9b27a'][i%4],glass:'#d8dcc4'});return;}
     if(kind==='handcart'){wheel(-2,2,2.2,'#7c6a4c');this.poly([[-7,-2],[1,1],[5,-1],[-3,-4]],'#b79c70');this.rect(-4,-5,4,2,'#cdb37a');this.line([[3,-1],[7,-3]],'#8a7552',1);this.person(9,1,'#a2926e',i+step);}
     else if(kind==='horse'){wheel(-6,2,2.4,'#7c6a4c');wheel(1,3,2.4,'#7c6a4c');this.poly([[-10,-2],[2,2],[5,0],[-7,-4]],'#a88a5e');this.rect(-7,-6,8,3,'#c9a76c');this.line([[4,0],[8,-3]],'#7c6a4c',1);this.horse(11,1,step);}
     else if(kind==='coach'){wheel(-7,2);wheel(1,3);this.poly([[-10,-2],[2,3],[2,-8],[-10,-13]],'#3f5f4f');this.poly([[2,3],[5,1],[5,-10],[2,-8]],'#30483c');this.poly([[-10,-13],[2,-8],[5,-10],[-7,-15]],'#2b3d33');this.rect(-7,-10,4,3,'#e7d9a7');this.line([[5,-1],[9,-3]],'#5f5040',1);this.horse(13,1,step);}
@@ -6151,7 +6312,7 @@ function frame(now){
   advanceTour(now);
   if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite),close:Math.max(0,Math.min(1,(renderer.zoom/Math.max(.3,renderer.fitZoom||1)-1)/1.1))});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
-  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');}sim.signals=[];}
+  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');if(signal.moment){maybeDive(signal.x,signal.y,true);soundscape?.play(signal.moment.sound);showToast(signal.moment.text,5200);}}sim.signals=[];}
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;
@@ -6235,6 +6396,7 @@ $('photo-save').addEventListener('click',()=>{try{const id=islandIdentity(sim);d
 function islandLink(){try{return `${location.origin}${location.pathname}?seed=${sim.seed}`;}catch{return `?seed=${sim.seed}`;}}
 $('ending-card').addEventListener('click',()=>{try{const id=islandIdentity(sim),o=sim.outcome||ENDINGS.independent,family=ensureFamily(sim),keur=currentScores(sim,o.scores),score=keur.total;
   const lines=creditsFor(sim);downloadCanvas(makeEndCard({identity:id,title:nl(o.title),quote:nl(o.quote),familyName:family.lastName,generations:family.generations.length,seed:sim.seed,year:o.year||sim.year,score,before:sim.snapshots[0]?.land,after:o.coast||sim.land.map(t=>`${t.x},${t.y}`),link:islandLink(),photo:canvas,keur,awards:lines.filter(l=>l.kind==='award'),stats:lines.filter(l=>l.kind==='stat')}),`${id.name.replace(/\s+/g,'-').toLowerCase()}-eindkaart.png`);showToast('Eindkaart bewaard.',2400);}catch{showToast('Bewaren lukt niet in deze browser.');}});
+$('toggle-details').addEventListener('click',()=>{const on=$('island-window').classList.toggle('show-details');$('toggle-details').setAttribute('aria-pressed',String(!!on));});
 $('ending-link').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(islandLink());showToast('Link gekopieerd. Een vriend speelt hetzelfde eiland en mag anders ingrijpen.',3600);}catch{showToast(islandLink(),6000);}});
 $('ending-replay').addEventListener('click',()=>{$('ending-dialog').close();startCinema(sim,sim.outcome.id,true);paused=false;renderer.focus=null;renderer.recenter();updateCinemaUI();updatePause();save();});
 $('find-beach').addEventListener('click',()=>focusPlace(sim.beaches[Math.floor(sim.beaches.length/2)]));
