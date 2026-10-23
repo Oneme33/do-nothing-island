@@ -285,8 +285,8 @@ body>main{padding:0;margin:0;max-width:none}
 }
 
 /* The closing film fills the screen: the island and its words, with two small buttons in the corner. */
-.cinema-dialog{width:100vw!important;max-width:none!important;height:100vh!important;max-height:none!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#1d2a24!important;overflow:hidden}
-.cinema-dialog::backdrop{background:#1d2a24}
+.cinema-dialog{width:100vw!important;max-width:none!important;height:100vh!important;max-height:none!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#000!important;overflow:hidden}
+.cinema-dialog::backdrop{background:#000}
 .cinema-dialog #finale-canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
 .cinema-dialog>.eyebrow,.cinema-dialog .dialog-note,.cinema-dialog progress,.cinema-dialog #cinema-title,.cinema-dialog #cinema-line,.cinema-dialog .cinema-caption>.eyebrow,#cinema-cheer{display:none!important}
 .cinema-dialog .cinema-caption{position:absolute!important;right:16px;bottom:14px;width:auto!important;background:none}
@@ -4107,7 +4107,7 @@ const credEase=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*
 // The closing film: only the island, slowly coming closer while the light turns to evening, and a few quiet lines.
 function drawCredits(c,w,h,s,movie,reduced,island){
  if(!movie)return;const u=reduced?Math.min(1,Math.floor(movie.elapsed/6)*6/movie.duration+.0001):Math.min(1,movie.elapsed/movie.duration),t=movie.elapsed;
- c.setTransform(1,0,0,1,0,0);c.fillStyle='#1d2a24';c.fillRect(0,0,w,h);
+ c.setTransform(1,0,0,1,0,0);c.fillStyle='#000';c.fillRect(0,0,w,h);
  if(island&&island.width&&island.height){const zoom=1.02+u*.1,iw=island.width,ih=island.height,scale=Math.max(w/iw,h/ih)*zoom;c.drawImage(island,(w-iw*scale)/2,(h-ih*scale)/2-u*h*.03,iw*scale,ih*scale);}
  // Golden hour first, then dusk settles.
  const warm=credEase(0,.45,u)*(1-credEase(.7,1,u)),dusk=credEase(.5,1,u);
@@ -4129,7 +4129,7 @@ function drawCredits(c,w,h,s,movie,reduced,island){
  if(o.quote)text(`“${nl(o.quote)}”`,h*.56+30*scale,`${Math.round(14*scale)}px Georgia, serif`,showLine*.8,'#e8dfc4');
  const family=s.family;
  [[family?`Familie ${family.lastName} · ${family.generations.length} generaties sleutelhouders`:'',0],[`${Math.round(o.population??s.population).toLocaleString('nl-NL')} eilanders`,1],[`Eilandkeur ${keur.total} · ${keur.level.title.toLowerCase()}`,2]].forEach(([line,i])=>text(line,h*.44+i*28*scale,`${Math.round(16*scale)}px Georgia, serif`,showCredits*credEase(.68+i*.03,.74+i*.03,u)));
- c.shadowBlur=0;c.fillStyle=`rgba(10,14,12,${(showEnd*.75).toFixed(3)})`;c.fillRect(0,0,w,h);
+ c.shadowBlur=0;c.fillStyle=`rgba(0,0,0,${(showEnd*.8).toFixed(3)})`;c.fillRect(0,0,w,h);
  text('Do Nothing Island',h*.5,`${Math.round(26*scale)}px Georgia, serif`,showEnd);
  c.restore();
 }

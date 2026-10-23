@@ -276,8 +276,8 @@ body>main{padding:0;margin:0;max-width:none}
 }
 
 /* The closing film fills the screen: the island and its words, with two small buttons in the corner. */
-.cinema-dialog{width:100vw!important;max-width:none!important;height:100vh!important;max-height:none!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#1d2a24!important;overflow:hidden}
-.cinema-dialog::backdrop{background:#1d2a24}
+.cinema-dialog{width:100vw!important;max-width:none!important;height:100vh!important;max-height:none!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#000!important;overflow:hidden}
+.cinema-dialog::backdrop{background:#000}
 .cinema-dialog #finale-canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
 .cinema-dialog>.eyebrow,.cinema-dialog .dialog-note,.cinema-dialog progress,.cinema-dialog #cinema-title,.cinema-dialog #cinema-line,.cinema-dialog .cinema-caption>.eyebrow,#cinema-cheer{display:none!important}
 .cinema-dialog .cinema-caption{position:absolute!important;right:16px;bottom:14px;width:auto!important;background:none}
