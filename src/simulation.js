@@ -14,6 +14,7 @@ import {advanceCommissions} from './commissions.js';
 import {advanceVisitors} from './visitors.js';
 import {advanceIslets} from './islets.js';
 import {advanceFamous,advanceDigs} from './famous.js';
+import {advanceMedieval} from './medieval.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 // New islands sit in a 29×29 sea; the natural island stays within the original 25×25, so the extra sea is room for polders.
@@ -404,7 +405,9 @@ export class Civilization {
     if(this.year%9===4&&!this.storm)planDelight(this);
     if(this.year>=200&&this.year%10===7)reserveDelightGrounds(this);
     advanceMonuments(this);advanceWeather(this);advanceCommissions(this);
-    advanceVisitors(this);advanceIslets(this);advanceFamous(this);advanceDigs(this);
+    advanceVisitors(this);advanceIslets(this);advanceFamous(this);advanceDigs(this);advanceMedieval(this);
+    // Years in which the stores ran low count against wellbeing; a helped rain wish often prevents them.
+    if(this.population>20&&this.food<this.population*.6)this.hungryYears=(this.hungryYears||0)+1;
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);

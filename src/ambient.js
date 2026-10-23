@@ -18,8 +18,24 @@ export function drawSeasonal(r){
    r.enqueueActor(p.y+1,()=>{r.ellipse(p.x+4,p.y-26,3.2,4,'#6b5640');r.ellipse(p.x+2.8,p.y-27,1,1,'#ffd36a');r.ellipse(p.x+5.2,p.y-27,1,1,'#ffd36a');});
   }
  }
+  // Summer: picnics in the parks and sunflowers in the gardens.
+  if(L.summer>.5&&!L.night&&!L.darkness){
+   for(const tile of r.visibleTiles||[]){
+    if(tile.kind!=='land')continue;const p=r.p(tile.x,tile.y),h=ambHash(tile.x*3,tile.y*7);
+    if(tile.building==='park'&&h<.45)r.enqueueActor(p.y+4,()=>{r.poly([[p.x+2,p.y+3],[p.x+9,p.y+.5],[p.x+14,p.y+3],[p.x+7,p.y+5.5]],h<.2?'#d9534a':'#5c8fc0');r.poly([[p.x+5,p.y+3],[p.x+9,p.y+1.5],[p.x+11,p.y+3],[p.x+7,p.y+4.4]],'rgba(255,255,255,.35)');r.person(p.x+5,p.y+2,'#c9a14f',h*9);r.person(p.x+12,p.y+2.5,'#7fa3a8',h*7);r.ellipse(p.x+9,p.y+3,1.4,1,'#a77c4f');});
+    else if(tile.building==='garden'&&h<.6)r.enqueueActor(p.y+3,()=>{for(let i=0;i<3;i++){const x=p.x-10+i*5,y=p.y+2-i;r.line([[x,y],[x,y-9]],'#6f8f4f',.8);r.ellipse(x,y-9.5,2,2,'#e8c040');r.ellipse(x,y-9.5,.9,.9,'#7a5a30');}});
+   }
+  }
  // Winter evenings: strings of lights across the square.
  if(L.winter>.5&&L.darkness>.3&&r.sim.square?.builtYear){const a=r.p(0,1),b=r.p(1,2);for(let i=0;i<10;i++){const u=i/9,x=a.x+(b.x-a.x)*u,y=a.y-26+(b.y-a.y)*u+Math.sin(u*Math.PI)*6;r.ellipse(x,y,1.2,1.2,['#ffd36a','#f19a8a','#9fd6e8','#b7e39a'][i%4]);}}
+}
+// Summer days feel warm: a soft golden wash and a sun in the corner.
+export function drawSummerSun(r){
+ const L=r.light||{},s=L.summer||0;if(s<.3||L.darkness>.15||r.sim.storm||r.sim.ending)return;
+ const c=r.ctx,W=r.width,H=r.height,k=(s-.3)/.7*(1-(L.darkness||0)*4);c.save();c.setTransform(r.dpr,0,0,r.dpr,0,0);
+ c.fillStyle=`rgba(255,214,140,${(.06*k).toFixed(3)})`;c.fillRect(0,0,W,H);
+ const g=c.createRadialGradient(W*.88,H*.08,0,W*.88,H*.08,H*.5);g.addColorStop(0,`rgba(255,240,190,${(.45*k).toFixed(3)})`);g.addColorStop(.25,`rgba(255,226,160,${(.16*k).toFixed(3)})`);g.addColorStop(1,'rgba(255,226,160,0)');c.fillStyle=g;c.fillRect(0,0,W,H);
+ c.restore();
 }
 // Screen-space night life: stars reflected in the sea, fireflies, and now and then a shooting star.
 export function drawNightLife(r){

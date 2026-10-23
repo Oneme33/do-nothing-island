@@ -521,7 +521,7 @@ const dutchText={
  "Fields": "Akkers",
  "Then &amp; now": "Toen en nu",
  "Compare a historic coastline": "Vergelijk een vroegere kustlijn",
- "Read the ending ↗": "Lees het naschrift ↗",
+ "Read the ending ↗": "Naschrift ↗",
  "Ochre: earlier coastline · Blue: flooded districts · Gold/blue marks: your visits · Old embankments remain in the city.": "Oker: vroegere kust · Blauw: overstroomde wijken · Goud/blauw: jouw bezoeken · Oude dijken blijven in de stad zichtbaar.",
  "Island status and controls": "Eilandstatus en bediening",
  "A LITTLE ROOM TO GROW": "EEN BEETJE RUIMTE OM TE GROEIEN",

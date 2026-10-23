@@ -40,7 +40,7 @@ const LOW_FRONT=new Set(['castle-garden','farm','beach','park','garden','campfir
 const TALL=new Set(['tower','townhouse','palace','manor','factory','powerplant','science-center','church','lighthouse']);
 const coversLight=t=>!!t&&t.kind==='land'&&(!!t.landform||!!t.buildSite||!!t.building&&!LOW_FRONT.has(t.building));
 // Rough visible heights of what may stand in front, in tile units, to decide which windows are covered.
-const FRONT_HEIGHT={warehouse:34,hut:28,house:38,townhouse:52,tower:72,manor:52,palace:110,'royal-palace':140,factory:52,powerplant:55,church:62,lighthouse:75,windmill:56,museum:32,station:26,observatory:36,carillon:56,watchtower:50,'science-center':40,school:34,library:34,workshop:40,tree:42,forest:36};
+const FRONT_HEIGHT={cathedral:70,monastery:34,warehouse:34,hut:28,house:38,townhouse:52,tower:72,manor:52,palace:110,'royal-palace':140,factory:52,powerplant:55,church:62,lighthouse:75,windmill:56,museum:32,station:26,observatory:36,carillon:56,watchtower:50,'science-center':40,school:34,library:34,workshop:40,tree:42,forest:36};
 export function windowHidden(sim,w){
  const lowest=Math.max(...w.points.map(p=>p[1]));
  for(const [dx,dy,rows] of [[1,1,1],[2,2,2]]){
@@ -79,6 +79,8 @@ export function drawDaylight(r,light){
   c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='source-over';
   for(const w of r.litWindows||[]){if(!w.grand&&windowHidden(r.sim,w))continue;c.beginPath();w.points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=`rgba(255,214,130,${(.85*d).toFixed(3)})`;c.fill();}
   c.globalCompositeOperation='lighter';
+  // Glowing lava stays bright in the dark.
+  for(const l of r.litLava||[]){glow(l.x,l.y,16*l.scale,8*l.scale,`rgba(255,110,40,${(.32*d).toFixed(3)})`);glow(l.x,l.y,5*l.scale,2.6*l.scale,`rgba(255,190,90,${(.75*d).toFixed(3)})`);}
   for(const l of r.litLamps||[]){if(l.tile&&lightHidden(r.sim,l.tile))continue;glow(l.x,l.y,9*l.scale,6*l.scale,`rgba(255,215,150,${(.16*d).toFixed(3)})`);glow(l.x,l.y,2.2*l.scale,2*l.scale,`rgba(255,236,180,${(.7*d).toFixed(3)})`);}
  }
  c.restore();

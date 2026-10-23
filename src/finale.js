@@ -29,7 +29,9 @@ export const ISLAND_CHECKLIST=[
  {id:'finds',label:'Vier opgravingen',done:s=>(s.digs?.finds?.length||0)>=4},
  {id:'treasure',label:'Een gevonden schat',done:s=>(s.coast?.treasures?.length||0)>=1},
  {id:'green',label:'Een groene gordel',done:s=>greenShare(s)>=.1},
- {id:'commission',label:'Een cadeau voor jou',done:s=>(s.commissions?.built?.length||0)>=1}
+ {id:'commission',label:'Een cadeau voor jou',done:s=>(s.commissions?.built?.length||0)>=1},
+ {id:'gifts',label:'Twee cadeaus voor jou',done:s=>(s.commissions?.built?.length||0)>=2},
+ {id:'hand',label:'Een standbeeld voor jou',done:s=>(s.monuments||[]).some(m=>m.kind==='hand')}
 ];
 const GREEN=new Set(['park','forest','tree','original-tree','garden','castle-garden','royal-garden','rose-garden']);
 export function greenShare(s){return s.land.length?s.land.filter(t=>GREEN.has(t.building)).length/s.land.length:0;}
@@ -37,7 +39,7 @@ export function scoreInputs(s){
  const helped=wishTally(s,'helped'),missed=wishTally(s,'expired')+wishTally(s,'independent'),ledger=s.interventionLedger||[];
  return{helped,missed,helpShare:helped+missed?helped/(helped+missed):0,unrequested:Math.max(0,(s.interferences||0)-helped),
   tests:ledger.filter(e=>!e.asked&&(e.type==='fire'||e.type==='rumble')).length,
-  lost:s.lostBuildings||0,rescued:s.rescuedFires||0,rebuilt:s.rebuiltFires||0,abandoned:s.storyStats?.abandoned||0,ruins:s.land.filter(t=>t.building==='ruins').length,green:greenShare(s)};
+  hungry:s.hungryYears||0,lost:s.lostBuildings||0,rescued:s.rescuedFires||0,rebuilt:s.rebuiltFires||0,abandoned:s.storyStats?.abandoned||0,ruins:s.land.filter(t=>t.building==='ruins').length,green:greenShare(s)};
 }
 // Six parts that pull against each other: helping makes them grateful but dependent, a few trials make them strong
 // but too many break them. The sweet spot is roughly half the wishes and a handful of trials.
@@ -55,8 +57,9 @@ export function islandScores(s){
  const k=scoreInputs(s),checklist=ISLAND_CHECKLIST.map(item=>({id:item.id,label:item.label,done:!!item.done(s)}));
  const done=checklist.filter(i=>i.done).length;
  const complete=20*done/checklist.length;
- const wellbeing=15*(.4*scoreCap(s.prosperity/65)+.3*scoreCap(s.freshwater/75)+.3*scoreCap(1-(s.unrest||0)/50));
- const nature=15*(.5*scoreCap(s.environment/90)+.25*scoreCap((100-s.pollution)/75)+.25*scoreCap(k.green/.1));
+ // Wellbeing is mostly about hard times: years with too little food weigh heaviest.
+ const wellbeing=15*(.3*scoreCap(s.prosperity/62)+.2*scoreCap(s.freshwater/75)+.5*scoreCap(1-k.hungry/18)-.1*scoreCap((s.unrest||0)/50));
+ const nature=15*(.5*scoreCap((s.environment-55)/30)+.25*scoreCap((100-s.pollution)/72)+.25*scoreCap(k.green/.12));
  // Recovering well is ten points; being put to the test by you a few times is five more, too often costs them again.
  const recovery=10*scoreCap(1-Math.max(0,k.lost-k.rebuilt*.75-4)*.03-Math.min(.3,k.abandoned*.012)-(k.ruins?.15:0));
  const trial=k.tests<IDEAL_TESTS[0]?0:k.tests<=IDEAL_TESTS[1]?5:Math.max(-5,5-(k.tests-IDEAL_TESTS[1])*1.5);
@@ -74,7 +77,7 @@ export function islandScores(s){
 // What each part means, in plain words, with a short verdict for the value out of twenty.
 const SCORE_MEANING={
  compleet:['Alles erop en eraan: speciale gebouwen, vondsten, beroemdheden en meer',['Er ontbrak nog veel.','Het meeste staat er.','Werkelijk alles erop en eraan.']],
- welzijn:['Welvaart, schoon water en rust onder de bewoners',['Het was vaak krap of onrustig.','De meeste mensen kwamen goed rond.','Iedereen had het goed.']],
+ welzijn:['Genoeg eten in alle jaren, welvaart en schoon water',['Het was vaak krap of onrustig.','De meeste mensen kwamen goed rond.','Iedereen had het goed.']],
  natuur:['Schone lucht, een levend landschap en genoeg groen tussen de huizen',['Er bleef weinig natuur over.','Een redelijk groen eiland.','Een levend, schoon en groen eiland.']],
  veerkracht:['Herstel na rampen, plus een paar beproevingen door jou (te veel breekt ze)',['Rampen lieten diepe sporen na, of ze werden nooit echt op de proef gesteld.','Ze herstelden op eigen tempo.','Beproefd en sterker opgestaan.']],
  hulp:['Hoeveel wensen je hielp; de helft is genoeg',['Ze vroegen vaak om hulp en kregen die zelden.','Je hielp soms een handje.','Je was er wanneer het ertoe deed.']],

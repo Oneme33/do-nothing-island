@@ -70,6 +70,10 @@ function particles(c,id,w,h,t,reduced){
 function drawKeur(c,w,h,s,u,reduced){
  if(u<.42)return;
  const keur=currentScores(s,s.outcome?.scores),k=reduced?1:Math.min(1,(u-.42)/.06),drop=1+(1-k)*1.6,panel=Math.min(360,w*.52),cx=Math.max(110,(w-panel-18)/2),cy=h*.42;
+ if((keur.level.id==='perfect'||keur.level.id==='gold')&&!reduced){
+  const tt=u*60;for(let k=0;k<5;k++){const cyc=(tt*.35+k*.21)%1,cx2=w*(.08+((k*37)%60)/100),cy2=h*(.12+((k*23)%30)/100),col=['#d4644f','#e2c26a','#7fa3a8','#c98fb0','#8cc07a'][k];if(cyc>.2){const open=(cyc-.2)/.8;c.save();c.globalAlpha=1-open;c.fillStyle=col;for(let i=0;i<18;i++){const a=i/18*Math.PI*2;c.beginPath();c.ellipse(cx2+Math.cos(a)*open*46,cy2+Math.sin(a)*open*36+open*14,2,2,0,0,Math.PI*2);c.fill();}c.restore();}}
+  for(let i=0;i<40;i++){const fall=(tt*.05+((i*53)%100)/100)%1;c.fillStyle=['#d4644f','#e2c26a','#7fa3a8','#c98fb0','#8cc07a'][i%5];c.save();c.translate(((i*71)%100)/100*(w-360),fall*h);c.rotate(tt*2+i);c.fillRect(-2.5,-1.2,5,2.4);c.restore();}
+ }
  if(keur.level.id==='perfect'&&!reduced){c.save();c.globalAlpha=.45*Math.min(1,(u-.42)/.1);c.lineWidth=12;['#e46b5d','#eda04f','#efd36a','#8cc07a','#6fa8d6','#8f7fc4'].forEach((col,i)=>{c.strokeStyle=col;c.beginPath();c.ellipse(cx,h*.95,Math.min(w,h)*.62-i*12,Math.min(w,h)*.62-i*12,0,Math.PI*1.05,Math.PI*1.95);c.stroke();});c.restore();}
  c.save();c.translate(cx,cy);c.scale(drop,drop);c.rotate(-.08*(1-k)-.05);c.globalAlpha=k;
  c.fillStyle='rgba(20,34,28,.35)';c.beginPath();c.ellipse(4,6,74,74,0,0,Math.PI*2);c.fill();
@@ -80,6 +84,7 @@ function drawKeur(c,w,h,s,u,reduced){
  c.font='44px Georgia, serif';c.fillText(String(keur.total),0,12);c.font='10px sans-serif';c.fillText('VAN 100',0,28);
  c.restore();
  c.save();c.globalAlpha=k;c.textAlign='center';c.fillStyle='#fbf8ee';c.font='22px Georgia, serif';c.fillText(keur.level.title,cx,cy+104);
+ if(keur.level.id==='perfect'){c.save();c.translate(cx,cy-104);c.rotate(-.04);c.fillStyle='#c98fb0';c.fillRect(-120,-16,240,30);c.fillStyle='#fbf8ee';c.font='600 13px sans-serif';c.fillText('HET PERFECTE EILAND',0,4);c.restore();}
  // One tick per item, appearing one after another.
  const shown=reduced?keur.items:Math.floor(Math.min(1,(u-.48)/.2)*keur.items),cols=12,size=14;
  keur.checklist.forEach((item,i)=>{if(i>=Math.max(0,shown))return;const x=cx+((i%cols)-(cols-1)/2)*size*1.3,y=cy+124+Math.floor(i/cols)*size*1.3;c.fillStyle=item.done?'#8cc07a':'rgba(251,248,238,.25)';c.beginPath();c.ellipse(x,y,size/2,size/2,0,0,Math.PI*2);c.fill();if(item.done){c.strokeStyle='#22372c';c.lineWidth=2;c.beginPath();c.moveTo(x-3.5,y);c.lineTo(x-1,y+3);c.lineTo(x+4,y-3);c.stroke();}});

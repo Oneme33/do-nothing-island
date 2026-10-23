@@ -55,12 +55,14 @@ function houseCat(r,x,y,color){
  r.ellipse(x-.1,y-4.7,.25,.3,'#d8e07a');r.ellipse(x+1,y-4.7,.25,.3,'#d8e07a');
  r.ctx.beginPath();r.ctx.moveTo(x-1.6,y-.6);r.ctx.quadraticCurveTo(x-4.4,y-1,x-3.4,y-4.2);r.ctx.strokeStyle=color;r.ctx.lineWidth=.9;r.ctx.lineCap='round';r.ctx.stroke();
 }
+// Some farm plots are pasture (grass, a fence and animals), the others are crop fields; never both on one plot.
+export const isPasture=t=>animalHash(t.x*7+3,t.y*11+5)<.4;
 export function drawAnimals(r){
  const s=r.sim,still=r.reduced,t=still?0:r.activityTime,winter=(r.light?.winter||0)>.6,night=r.light?.night;
  let cats=0;
  for(const tile of r.visibleTiles||[]){
   if(tile.kind!=='land')continue;const p=r.p(tile.x,tile.y),h=animalHash(tile.x,tile.y);
-  if(tile.building==='farm'&&!tile.fire&&!winter&&!night){
+  if(tile.building==='farm'&&isPasture(tile)&&!tile.fire&&!winter&&!night){
    const kind=h<.45?'sheep':h<.75?'cow':s.year>=600?'horse':'sheep',n=kind==='sheep'?3:kind==='cow'?2:1;
    for(let i=0;i<n;i++){const drift=still?0:Math.sin(t*.12+i*2+h*9)*5,x=p.x-10+i*9+drift,y=p.y+(i%2?3:-2),phase=still?0:Math.sin(t*2+i);
     r.enqueueActor(y+1,()=>kind==='sheep'?sheep(r,x,y,h>.2?'#f4f1e6':'#5c5752',phase):kind==='cow'?cow(r,x,y,phase):grazingHorse(r,x,y,phase));}

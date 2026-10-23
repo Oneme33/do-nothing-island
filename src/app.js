@@ -306,8 +306,11 @@ function renderTimeline(){
   const moments=sim.history.filter(e=>TIMELINE_KINDS[e.type]&&(e.priority||0)>=78).slice(-10).map(e=>{const dot=document.createElement('span');dot.className='moment';dot.dataset.kind=TIMELINE_KINDS[e.type];dot.style.left=`${(timelinePosition(e.year)*100).toFixed(2)}%`;dot.title=`Jaar ${e.year}: ${nl(e.text)}`;return dot;});
   const marker=document.createElement('span');marker.className='marker';marker.style.left=`${(timelinePosition(sim.year)*100).toFixed(2)}%`;
   $('timeline-track').replaceChildren(...ages,...moments,marker);
-  const next=ERAS[sim.era+1];
-  $('timeline-now').textContent=sim.ending?'Het verhaal is af':sim.endgameStarted?`Jaar ${sim.year} · het laatste hoofdstuk`:next?`Jaar ${sim.year} · ${TIMELINE_AGES[sim.era+1].toLowerCase()} vanaf ongeveer ${next.year}`:`Jaar ${sim.year} · nog even tot het laatste hoofdstuk`;
+  // Now in words (on phones that is all you see), and what comes next on larger screens.
+  const next=ERAS[sim.era+1],now=document.createElement('b'),later=document.createElement('span');later.className='timeline-next';
+  now.textContent=sim.ending?'Het verhaal is af':`Jaar ${sim.year} · ${sim.endgameStarted?'het laatste hoofdstuk':TIMELINE_AGES[sim.era]}`;
+  later.textContent=sim.ending||sim.endgameStarted?'':next?` · ${TIMELINE_AGES[sim.era+1].toLowerCase()} vanaf ongeveer ${next.year}`:' · nog even tot het laatste hoofdstuk';
+  $('timeline-now').replaceChildren(now,later);
 }
 function updateUI(){
   renderTimeline();
@@ -480,8 +483,9 @@ function frame(now){
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;
-  // A paused island only needs half the frames.
-  drawTick=(drawTick+1)%2;if(!renderer.paused||tour||drawTick===0)renderer.draw(now);
+  // A paused island only needs half the frames, and so does a device that struggles to keep up.
+  drawTick=(drawTick+1)%2;const slow=(renderer.drawCost||0)>22;
+  if((!renderer.paused&&!slow)||tour||drawTick===0){const t0=performance.now();renderer.draw(now);renderer.drawCost=(renderer.drawCost||0)*.9+(performance.now()-t0)*.1;}
   const night=renderer.light.darkness>.3;if(night!==nightShown){nightShown=night;$('island-window').classList.toggle('is-night',night);updateUI();}
   if(cinemaActive()){
     const stage=$('finale-canvas'),box=stage.getBoundingClientRect(),w=Math.max(300,Math.round(box.width)),h=Math.max(200,Math.round(box.height));
@@ -624,6 +628,7 @@ function newIsland(){
   undoTimer=setTimeout(()=>{previousIsland=null;$('undo-reset').hidden=true;},10000);
 }
 $('new-island').addEventListener('click',newIsland);
+try{const id=islandIdentity(sim);$('title-island').textContent=sim.year>1?`${id.name} · jaar ${sim.year}`:`${id.name} · een nieuw begin`;}catch{}
 // Minimal interface: the few buttons that used to live around the island join the bar at the bottom.
 $('island-toolbar').append($('new-island'),$('undo-reset'),$('open-ending'));
 $('confirm-restart').addEventListener('click',newIsland);

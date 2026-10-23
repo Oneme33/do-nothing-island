@@ -233,6 +233,41 @@ body>main{padding:0;margin:0;max-width:none}
 .island-window canvas[data-mode=look]{cursor:default}
 .interference-buttons button{display:flex!important;align-items:center!important;justify-content:center!important;gap:0!important;width:34px!important;height:34px!important;min-height:0!important;min-width:0!important;padding:0!important;line-height:0!important}
 .interference-buttons button>span{width:auto!important;height:auto!important}
+
+/* A title card over the living island when you arrive; it fades away by itself and never blocks a click. */
+.title-card{position:absolute;inset:0;z-index:25;display:grid;place-content:center;justify-items:center;gap:10px;pointer-events:none;background:radial-gradient(ellipse at center,rgba(250,249,240,.82),rgba(250,249,240,0) 62%);animation:title-fade 5.2s ease forwards}
+.title-logo svg{width:88px;height:88px;filter:drop-shadow(0 6px 14px #3d4a3a22)}
+.title-card strong{font-family:var(--serif);font-weight:400;font-size:clamp(30px,5vw,54px);letter-spacing:.06em;color:#2f4a2a}
+.title-card strong span{color:#c98a3e}
+.title-card small{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#5f735f}
+@keyframes title-fade{0%{opacity:0;transform:scale(.98)}12%{opacity:1;transform:none}70%{opacity:1}100%{opacity:0;visibility:hidden}}
+@media (prefers-reduced-motion:reduce){.title-card{animation:title-fade 2.5s linear forwards}}
+
+/* Phones: fewer and smaller things, and a timeline you can actually read. */
+@media(max-width:700px){
+ .site-header .brand>span:not(.brand-icon){display:none!important}
+ .site-header .brand .brand-icon,.site-header .brand svg{width:26px!important;height:26px!important}
+ .header-actions .icon-button{width:28px!important;height:28px!important}
+ .population-card{top:10px!important;left:44px!important;padding:3px 8px!important}
+ .population-card .eyebrow{display:none!important}
+ .population-count{font-size:17px!important;margin:0!important}
+ .population-count svg{width:14px!important}
+ .timeline{top:46px!important;width:calc(100% - 24px)!important}
+ .timeline-track{height:12px!important}
+ .timeline-track .age{font-size:0!important;padding-bottom:0!important}
+ .timeline-track .age[data-state=now]{font-size:10px!important}
+ .timeline-track .moment{display:none!important}
+ .timeline-now{display:inline-block!important;margin-top:6px!important;font-size:11px!important;color:#3f4a36!important;background:rgba(250,249,240,.88);padding:2px 8px;border-radius:9px}
+ .interference-buttons button{width:30px!important;height:30px!important}
+ .interference-buttons .tool-icon{width:17px;height:17px}
+ #photo-mode,.island-toolbar [data-speed="3"]{display:none!important}
+ .island-toolbar button,.island-toolbar .new-island-button{font-size:10px!important;padding:4px 7px!important;height:26px}
+ .island-window:not(.show-details) .project-overlay{display:none!important}
+ .wish-bubble{width:200px!important;font-size:11px!important;bottom:96px!important}
+}
+
+.timeline-now b{font-weight:600}
+@media(max-width:700px){.timeline-track{display:none!important}.timeline-next{display:none}.timeline{top:12px!important;left:auto!important;right:110px!important;transform:none!important;width:auto!important;text-align:right}.timeline-now{margin-top:0!important}}
 </style>
 </head>
 <body>
@@ -259,7 +294,7 @@ body>main{padding:0;margin:0;max-width:none}
     <section class="interference-tools" aria-label="Jouw invloed"><div class="tools-caption"><span class="eyebrow">JOUW INVLOED</span><small>Ja, jij deed dat.</small></div><div class="interference-buttons" role="group" aria-label="Kies een ingreep"><button data-interference="nudge" aria-label="Bouw" class="active" aria-pressed="true" data-tip="Bouw · Geef ze een duwtje. Op een huis: een aanbouw. Op een akker: irrigatie. Op lege grond: bouwers."><span><svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v9H4z"/><path d="M12 11v6M9 14h6"/></svg></span> Bouw</button><button data-interference="rain" aria-label="Regen" aria-pressed="false" data-tip="Regen · Een bui op die plek. Goed voor de oogst en blust brand. Te vaak, en ze gaan erop rekenen."><span><svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 14a4 4 0 0 1 .6-8 5 5 0 0 1 9.4 1.6A3.3 3.3 0 0 1 17 14H7z"/><path d="M8.5 17.5 7.5 20M12.5 17.5l-1 2.5M16.5 17.5l-1 2.5"/></svg></span> Regen</button><button data-interference="rumble" aria-label="Beving" aria-pressed="false" data-tip="Beving · De grond schudt. Huizen kunnen instorten, maar ze bouwen daarna sterker. Soms komt er een schat boven."><span><svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12h3.5l2-5 3 10 3-8 2 3h5.5"/></svg></span> Beving</button><button data-interference="fire" aria-label="Vuur" aria-pressed="false" data-tip="Vuur · Steek iets aan. Er brandt wat af, maar ze herbouwen in steen en krijgen een brandweer."><span><svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.8 3 5 5.2 5 10.2A5 5 0 0 1 7 13.2c0-2.6 1.8-3.8 2-6 1.2 1 1.6 2.2 1.6 3.2C11.8 8.6 12.4 6 12 3z"/></svg></span> Vuur</button><button data-interference="help" aria-label="Help" aria-pressed="false" data-tip="Help · Grijp nergens in: kijk rond, lees het hele verhaal van een plek en help bij een wens."><span><svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9.5L5 19.5V16H4z"/><path d="M12 13.4s-3-1.7-3-3.5a1.6 1.6 0 0 1 3-.8 1.6 1.6 0 0 1 3 .8c0 1.8-3 3.5-3 3.5z"/></svg></span> Help</button></div><p id="interaction-hint">Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.</p><div class="pace-readout"><i></i><span id="pace-readout">Een rustig begin. Het komt op gang.</span></div></section>
 
     <section id="island-window" class="island-window" aria-label="Een levend eiland">
-      <canvas id="island" tabindex="0" aria-label="Jouw levende eiland. Klik voor een ingreep, scroll om te zoomen en sleep om rond te kijken. Pijltjes verplaatsen de kaart; plus en min zoomen."></canvas>
+      <div id="title-card" class="title-card" aria-hidden="true"><div class="title-logo"><svg viewBox="0 0 40 40"><path d="M6 27 20 20 34 27 20 34Z" fill="#7a9464"/><path d="m6 27 14 7 14-7v4l-14 7-14-7" fill="#b0a17a"/><path d="M20 27V12m0 7-6-4m6 1 5-5" stroke="#536b47" stroke-width="2"/><path d="M11 14c-4-8 6-12 10-9 8-3 12 8 5 11-3 5-12 4-15-2" fill="#6d8659"/></svg></div><strong>DO NOTHING ISLAND<span>.</span></strong><small id="title-island"></small></div><canvas id="island" tabindex="0" aria-label="Jouw levende eiland. Klik voor een ingreep, scroll om te zoomen en sleep om rond te kijken. Pijltjes verplaatsen de kaart; plus en min zoomen."></canvas>
       <div class="island-heading"><span class="status-dot"></span><span id="island-mood">Een behoorlijk rustig begin</span></div>
       <div id="timeline" class="timeline" aria-label="Tijdlijn van het eiland"><div id="timeline-track" class="timeline-track"></div><span id="timeline-now" class="timeline-now"></span></div><div class="weather" id="weather"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/></svg><span>Kalme zee. Kleine ambities.</span></div>
       <div class="civic-overview"><span id="energy-source">Nog geen stroomnet</span><span id="civic-life">Een huisje en een kleine akker.</span><span id="places-status">Strand · Bos</span><span id="district-status">Eén kleine akker</span><span id="mobility-status">Te voet over het eiland</span><span id="chapter-status" title="Het laatste tijdperk begint rond 2100. Jouw ingrepen veranderen de timing en de uitkomst.">Laatste tijdperk rond 2100</span></div>
@@ -286,7 +321,7 @@ body>main{padding:0;margin:0;max-width:none}
     <section class="island-story" aria-label="Verken het eiland en zijn geschiedenis">
       <aside id="away-summary" class="away-summary" hidden><button id="away-dismiss" class="card-close" aria-label="Verberg de terugkomsamenvatting">×</button><div><strong id="away-heading">Terwijl je weg was…</strong><small id="away-range"></small><p id="away-text"></p></div><button id="away-show">Laat zien ↗</button></aside>
       <div class="story-health"><span id="water-status">Zoetwater · 82%</span><span id="environment-status">Levend landschap · 100%</span><span id="legacy-status">Een zelfstandig begin</span><span id="council-status">Een paar mensen. Genoeg ruimte.</span></div>
-      <div class="explore-controls"><button id="find-palace">♜ Eerste huis</button><button id="find-knowledge">✧ Kennis</button><button id="find-fields">♧ Akkers</button><button id="find-fun">♬ Feest</button><label><input type="checkbox" id="history-layer"> Toen en nu</label><select id="history-snapshot" aria-label="Vergelijk een vroegere kustlijn" hidden></select><button id="open-ending" hidden>Lees het naschrift ↗</button></div>
+      <div class="explore-controls"><button id="find-palace">♜ Eerste huis</button><button id="find-knowledge">✧ Kennis</button><button id="find-fields">♧ Akkers</button><button id="find-fun">♬ Feest</button><label><input type="checkbox" id="history-layer"> Toen en nu</label><select id="history-snapshot" aria-label="Vergelijk een vroegere kustlijn" hidden></select><button id="open-ending" hidden>Naschrift ↗</button></div>
       <p id="history-legend" hidden>Oker: vroegere kust · Blauw: overstroomde wijken · Goud/blauw: jouw bezoeken · Oude dijken blijven in de stad zichtbaar.</p>
     </section>
 
@@ -833,7 +868,7 @@ const dutchText={
  "Fields": "Akkers",
  "Then &amp; now": "Toen en nu",
  "Compare a historic coastline": "Vergelijk een vroegere kustlijn",
- "Read the ending ↗": "Lees het naschrift ↗",
+ "Read the ending ↗": "Naschrift ↗",
  "Ochre: earlier coastline · Blue: flooded districts · Gold/blue marks: your visits · Old embankments remain in the city.": "Oker: vroegere kust · Blauw: overstroomde wijken · Goud/blauw: jouw bezoeken · Oude dijken blijven in de stad zichtbaar.",
  "Island status and controls": "Eilandstatus en bediening",
  "A LITTLE ROOM TO GROW": "EEN BEETJE RUIMTE OM TE GROEIEN",
@@ -1251,7 +1286,9 @@ const ISLAND_CHECKLIST=[
  {id:'finds',label:'Vier opgravingen',done:s=>(s.digs?.finds?.length||0)>=4},
  {id:'treasure',label:'Een gevonden schat',done:s=>(s.coast?.treasures?.length||0)>=1},
  {id:'green',label:'Een groene gordel',done:s=>greenShare(s)>=.1},
- {id:'commission',label:'Een cadeau voor jou',done:s=>(s.commissions?.built?.length||0)>=1}
+ {id:'commission',label:'Een cadeau voor jou',done:s=>(s.commissions?.built?.length||0)>=1},
+ {id:'gifts',label:'Twee cadeaus voor jou',done:s=>(s.commissions?.built?.length||0)>=2},
+ {id:'hand',label:'Een standbeeld voor jou',done:s=>(s.monuments||[]).some(m=>m.kind==='hand')}
 ];
 const GREEN=new Set(['park','forest','tree','original-tree','garden','castle-garden','royal-garden','rose-garden']);
 function greenShare(s){return s.land.length?s.land.filter(t=>GREEN.has(t.building)).length/s.land.length:0;}
@@ -1259,7 +1296,7 @@ function scoreInputs(s){
  const helped=wishTally(s,'helped'),missed=wishTally(s,'expired')+wishTally(s,'independent'),ledger=s.interventionLedger||[];
  return{helped,missed,helpShare:helped+missed?helped/(helped+missed):0,unrequested:Math.max(0,(s.interferences||0)-helped),
   tests:ledger.filter(e=>!e.asked&&(e.type==='fire'||e.type==='rumble')).length,
-  lost:s.lostBuildings||0,rescued:s.rescuedFires||0,rebuilt:s.rebuiltFires||0,abandoned:s.storyStats?.abandoned||0,ruins:s.land.filter(t=>t.building==='ruins').length,green:greenShare(s)};
+  hungry:s.hungryYears||0,lost:s.lostBuildings||0,rescued:s.rescuedFires||0,rebuilt:s.rebuiltFires||0,abandoned:s.storyStats?.abandoned||0,ruins:s.land.filter(t=>t.building==='ruins').length,green:greenShare(s)};
 }
 // Six parts that pull against each other: helping makes them grateful but dependent, a few trials make them strong
 // but too many break them. The sweet spot is roughly half the wishes and a handful of trials.
@@ -1277,8 +1314,9 @@ function islandScores(s){
  const k=scoreInputs(s),checklist=ISLAND_CHECKLIST.map(item=>({id:item.id,label:item.label,done:!!item.done(s)}));
  const done=checklist.filter(i=>i.done).length;
  const complete=20*done/checklist.length;
- const wellbeing=15*(.4*scoreCap(s.prosperity/65)+.3*scoreCap(s.freshwater/75)+.3*scoreCap(1-(s.unrest||0)/50));
- const nature=15*(.5*scoreCap(s.environment/90)+.25*scoreCap((100-s.pollution)/75)+.25*scoreCap(k.green/.1));
+ // Wellbeing is mostly about hard times: years with too little food weigh heaviest.
+ const wellbeing=15*(.3*scoreCap(s.prosperity/62)+.2*scoreCap(s.freshwater/75)+.5*scoreCap(1-k.hungry/18)-.1*scoreCap((s.unrest||0)/50));
+ const nature=15*(.5*scoreCap((s.environment-55)/30)+.25*scoreCap((100-s.pollution)/72)+.25*scoreCap(k.green/.12));
  // Recovering well is ten points; being put to the test by you a few times is five more, too often costs them again.
  const recovery=10*scoreCap(1-Math.max(0,k.lost-k.rebuilt*.75-4)*.03-Math.min(.3,k.abandoned*.012)-(k.ruins?.15:0));
  const trial=k.tests<IDEAL_TESTS[0]?0:k.tests<=IDEAL_TESTS[1]?5:Math.max(-5,5-(k.tests-IDEAL_TESTS[1])*1.5);
@@ -1296,7 +1334,7 @@ function islandScores(s){
 // What each part means, in plain words, with a short verdict for the value out of twenty.
 const SCORE_MEANING={
  compleet:['Alles erop en eraan: speciale gebouwen, vondsten, beroemdheden en meer',['Er ontbrak nog veel.','Het meeste staat er.','Werkelijk alles erop en eraan.']],
- welzijn:['Welvaart, schoon water en rust onder de bewoners',['Het was vaak krap of onrustig.','De meeste mensen kwamen goed rond.','Iedereen had het goed.']],
+ welzijn:['Genoeg eten in alle jaren, welvaart en schoon water',['Het was vaak krap of onrustig.','De meeste mensen kwamen goed rond.','Iedereen had het goed.']],
  natuur:['Schone lucht, een levend landschap en genoeg groen tussen de huizen',['Er bleef weinig natuur over.','Een redelijk groen eiland.','Een levend, schoon en groen eiland.']],
  veerkracht:['Herstel na rampen, plus een paar beproevingen door jou (te veel breekt ze)',['Rampen lieten diepe sporen na, of ze werden nooit echt op de proef gesteld.','Ze herstelden op eigen tempo.','Beproefd en sterker opgestaan.']],
  hulp:['Hoeveel wensen je hielp; de helft is genoeg',['Ze vroegen vaak om hulp en kregen die zelden.','Je hielp soms een handje.','Je was er wanneer het ertoe deed.']],
@@ -1332,7 +1370,7 @@ function drawFinale(c,w,h,s,m,reduced=false){
  c.restore();
 }
 
-const PLACE_NAMES={warehouse:'Pakhuis',hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',lighthouse:'Vuurtoren','town-square':'Dorpsplein','petting-farm':'Kinderboerderij',museum:'Eilandmuseum',monument:'Standbeeld','royal-palace':'Het nieuwe paleis','castle-garden':'Kasteeltuin',zoo:'Dierentuin',watermill:'Watermolen',watchtower:'Uitkijktoren','rose-garden':'Rozentuin','grand-fountain':'Grote fontein',carillon:'Klokkentoren','theme-park':'Pretpark',circus:'Circustent',station:'Treinstation',pool:'Openluchtzwembad',spaceport:'Ruimtehaven',observatory:'Sterrenwacht','ice-cream':'IJssalon',greenhouse:'Kas',ruins:'Ruïne'};
+const PLACE_NAMES={monastery:'Klooster',cathedral:'Kathedraal',warehouse:'Pakhuis',hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',lighthouse:'Vuurtoren','town-square':'Dorpsplein','petting-farm':'Kinderboerderij',museum:'Eilandmuseum',monument:'Standbeeld','royal-palace':'Het nieuwe paleis','castle-garden':'Kasteeltuin',zoo:'Dierentuin',watermill:'Watermolen',watchtower:'Uitkijktoren','rose-garden':'Rozentuin','grand-fountain':'Grote fontein',carillon:'Klokkentoren','theme-park':'Pretpark',circus:'Circustent',station:'Treinstation',pool:'Openluchtzwembad',spaceport:'Ruimtehaven',observatory:'Sterrenwacht','ice-cream':'IJssalon',greenhouse:'Kas',ruins:'Ruïne'};
 const names=['Noor','Sam','Bo','Mila','Daan','Lou','Iris','Mo','Tess','Finn','Ada','Jip'];
 const surnames=['de Vries','van de Kust','Bos','van Dijk','de Boer','Steen','van de Berg','Visser'];
 function describePlot(s,t){
@@ -2702,6 +2740,76 @@ function drawFamous(r){
  }
 }
 
+// The long middle of the story gets a moment per century: monks, markets, knights, a dragon (a kite), a cathedral, tulips.
+const medHash=(seed,a,b=0)=>{let x=(seed^Math.imul(a+41,0x2545f491)^Math.imul(b+9,0x9e3779b1))>>>0;x=Math.imul(x^(x>>>15),0x85ebca6b);x^=x>>>13;return(x>>>0)/4294967296;};
+const MEDIEVAL=[
+ {year:537,kind:'monastery',years:0,label:'Een klooster!',sound:'chime',text:'Monniken stichten een klooster aan de rand van het eiland. Ze brouwen bier, kweken kruiden en zwijgen over allebei.'},
+ {year:637,kind:'market',years:6,label:'Jaarmarkt!',sound:'fanfare',text:'De eerste jaarmarkt op het plein. Er is een kraam met kaas, een met kazen en een met twijfelachtig mooie kazen.'},
+ {year:737,kind:'dragon',years:5,label:'Een draak!',sound:'whoosh',text:'Iemand ziet een draak boven de berg. Het blijkt een vlieger van de bakkersdochter. De vlieger krijgt een naam en een eigen feestdag.'},
+ {year:837,kind:'tournament',years:6,label:'Een toernooi!',sound:'fanfare',text:'Een riddertoernooi! Twee ridders stormen op elkaar af, missen elkaar allebei en worden samen uitgeroepen tot winnaar.'},
+ {year:937,kind:'pilgrims',years:4,label:'Pelgrims',sound:'chime',text:'Pelgrims trekken over het eiland, op weg naar de oude boom. Ze vinden hem prachtig en blijven een week.'},
+ {year:1137,kind:'cathedral',years:0,label:'Een kathedraal',sound:'fanfare',text:'De bouw van een kathedraal begint. De bouwmeester zegt dat het zeventig jaar duurt. Hij zegt het met een heel rustig gezicht.'},
+ {year:1237,kind:'market',years:6,label:'Gildenfeest',sound:'fanfare',text:'De gilden houden hun grote feest: bakkers, smeden en mandenmakers paraderen over het plein, elk iets te trots.'},
+ {year:1337,kind:'tournament',years:5,label:'Troubadours',sound:'chime',text:'Troubadours zingen op het toernooiveld over de daden van de ridders. De meeste daden zijn verzonnen, alle liedjes zijn goed.'},
+ {year:1457,kind:'printing',years:0,label:'Een drukpers!',sound:'chime',text:'Er komt een drukpers. Het eerste boek is een kookboek. Het tweede ook.'},
+ {year:1537,kind:'market',years:6,label:'Kermis!',sound:'fanfare',text:'Kermis op het plein, met een draaimolen die met de hand wordt rondgeduwd door drie zeer sterke neven.'},
+ {year:1637,kind:'tulips',years:20,label:'Tulpenmanie',sound:'chime',text:'Tulpenmanie! Iedereen wil tulpen, een bol kost meer dan een koe. De akkers kleuren rood, geel en roze.'}
+];
+const CATHEDRAL_YEARS=70;
+function ensureMedieval(s){s.medieval??={done:[],active:null};return s.medieval;}
+function placeMonastery(s){
+ const spots=s.land.filter(t=>!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.road&&!t.river&&!t.foundingHome&&Math.hypot(t.x,t.y)>=6);
+ return spots.sort((a,b)=>Math.hypot(b.x,b.y)-Math.hypot(a.x,a.y))[Math.floor(medHash(s.seed,5)*Math.min(6,spots.length))]||null;
+}
+function placeCathedral(s){
+ const ok=t=>t&&t.kind==='land'&&!t.landform&&!t.buildSite&&!t.reservedFor&&!t.foundingHome&&!t.river&&!t.castle&&!t.plaque&&(!t.building||['hut','house','tree','garden','park','farm'].includes(t.building));
+ return s.land.filter(t=>ok(t)&&Math.hypot(t.x-.5,t.y-2)<=5&&Math.hypot(t.x-.5,t.y-2)>=2).sort((a,b)=>Number(!!a.building)-Number(!!b.building)||Math.hypot(a.x,a.y-2)-Math.hypot(b.x,b.y-2))[0]||null;
+}
+function advanceMedieval(s){
+ const m=ensureMedieval(s);if(s.ending)return;
+ if(m.active&&s.year>m.active.until)m.active=null;
+ const event=MEDIEVAL.find(e=>s.year===e.year&&!m.done.includes(e.year));if(!event)return;
+ m.done.push(event.year);
+ let at=s.tile(0,2)||s.tile(0,0);
+ if(event.kind==='monastery'){const t=placeMonastery(s);if(!t)return;t.building='monastery';t.builtYear=s.year;at=t;s.rebuildRoads();}
+ else if(event.kind==='cathedral'){const t=placeCathedral(s);if(!t)return;t.building='cathedral';t.builtYear=s.year;t.cathedralFrom=s.year;t.landmark=true;at=t;s.rebuildRoads();}
+ else if(event.kind==='tournament'){const c=s.court&&s.tile(s.court.x+2,s.court.y+2);at=c?.kind==='land'?c:s.tile(1,1)||at;}
+ else if(event.kind==='dragon')at=s.land.filter(t=>t.landform).sort((a,b)=>(b.relief||0)-(a.relief||0))[0]||at;
+ if(event.years)m.active={kind:event.kind,year:s.year,until:s.year+event.years,x:at.x,y:at.y};
+ if(event.kind==='printing')s.printingPress=s.year;
+ s.prosperity=Math.min(94,s.prosperity+1.5);
+ s.log(event.text,'culture',{x:at.x,y:at.y});
+ s.signal('celebrate',at,event.label,{sound:event.sound,text:event.text.split('. ')[0]+'.'});
+}
+const tulipTime=s=>s.medieval?.active?.kind==='tulips';
+// Drawing the temporary scenes: market stalls, a tournament, pilgrims and the dragon kite over the mountain.
+function drawMedieval(r){
+ const s=r.sim,a=s.medieval?.active;if(!a||s.ending)return;
+ const t=r.reduced?0:r.time,p=r.p(a.x,a.y),c=r.ctx;
+ if(a.kind==='market'){
+  const stalls=[[-14,-2,'#d4644f'],[2,-8,'#5c8fc0'],[12,2,'#e2c26a'],[-4,6,'#8cc07a']];
+  for(const [dx,dy,col] of stalls)r.enqueueActor(p.y+dy+6,()=>{const x=p.x+dx,y=p.y+dy;r.rect(x-5,y-6,10,6,'#c9a77a');r.poly([[x-7,y-6],[x,y-12],[x+7,y-6]],col);for(let k=0;k<3;k++)r.poly([[x-7+k*4.6,y-6],[x-4.7+k*4.6,y-9.5],[x-2.4+k*4.6,y-6]],'#f6f2e6');for(let k=0;k<3;k++)r.ellipse(x-3+k*3,y-6.5,1.1,.8,['#e8c040','#d9822b','#a05a3a'][k]);r.person(x+7,y+3,'#a07a5a',dx);});
+ }else if(a.kind==='tournament'){
+  r.enqueueActor(p.y+8,()=>{
+   for(const [dx,dy,col] of [[-18,-6,'#d4644f'],[18,-8,'#5c8fc0']]){const x=p.x+dx,y=p.y+dy;r.ellipse(x,y+1,6,2.5,'rgba(40,50,35,.15)');for(let k=0;k<6;k++){const a0=Math.PI+k*Math.PI/6,a1=a0+Math.PI/6;r.poly([[x+Math.cos(a0)*6,y+Math.sin(a0)*-2.6],[x+Math.cos(a1)*6,y+Math.sin(a1)*-2.6],[x,y-14]],k%2?'#f6f2e6':col);}r.line([[x,y-14],[x,y-19]],'#6e5a44',.6);r.poly([[x,y-19],[x+4,y-18],[x,y-17]],col);}
+   r.line([[p.x-12,p.y+2],[p.x+12,p.y+8]],'#8a6a4c',1.2);
+   const u=(t*.35)%1,k=u<.5?u*2:2-u*2;
+   for(const [side,col] of [[-1,'#d4644f'],[1,'#5c8fc0']]){const x=p.x+side*(14-k*11),y=p.y+5+side*(-3+k*1.8)+ (side>0?3:0);c.save();c.translate(x,y);if(side>0)c.scale(-1,1);r.ellipse(0,-4,4.6,2.4,'#8a6a4c');r.poly([[3,-5],[6,-9],[7.4,-8],[4.4,-4]],'#8a6a4c');for(const lx of [-2.6,2.6])r.line([[lx,-2.6],[lx+Math.sin(t*9)*.8,1]],'#6c5038',.9);r.rect(-1.6,-10,3.2,5,col);r.ellipse(0,-11,1.6,1.6,'#b8bcc0');r.line([[1,-8],[11,-10]],'#d8cfb8',.9);c.restore();}
+  });
+ }else if(a.kind==='pilgrims'){
+  for(let i=0;i<5;i++){const u=((t*.03)+i*.12)%1,x=p.x-60+u*120,y=p.y+20-u*40+i*2;r.enqueueActor(y,()=>{r.person(x,y,'#8a7a62',i);r.line([[x+2.6,y-9],[x+3,y+1]],'#6e5a44',.6);});}
+ }else if(a.kind==='dragon'){
+  // A red dragon kite on a long string, dancing above the mountain.
+  const z=r.zoom,base=r.point(a.x,a.y),x=base.x+40*z+Math.sin(t*.6)*14*z,y=base.y-150*z+Math.cos(t*.8)*8*z;
+  c.save();c.setTransform(r.dpr,0,0,r.dpr,0,0);c.strokeStyle='rgba(90,80,70,.5)';c.lineWidth=.8;c.beginPath();c.moveTo(base.x+60*z,base.y-20*z);c.quadraticCurveTo(base.x+70*z,base.y-80*z,x,y);c.stroke();
+  c.translate(x,y);c.scale(z,z);c.rotate(Math.sin(t*1.3)*.15);
+  c.fillStyle='#c64a42';c.beginPath();c.moveTo(0,-9);c.lineTo(7,0);c.lineTo(0,9);c.lineTo(-7,0);c.closePath();c.fill();c.fillStyle='#e2c26a';c.beginPath();c.ellipse(-1,-2,1.4,1.4,0,0,Math.PI*2);c.ellipse(2,-2,1.4,1.4,0,0,Math.PI*2);c.fill();
+  c.strokeStyle='#c64a42';c.lineWidth=2;c.beginPath();c.moveTo(0,9);for(let k=1;k<=6;k++)c.lineTo(Math.sin(t*3+k)*4,9+k*5);c.stroke();
+  for(let k=1;k<=6;k+=2){c.fillStyle=k%4===1?'#e2c26a':'#5c8fc0';c.beginPath();c.ellipse(Math.sin(t*3+k)*4,9+k*5,1.8,1,0,0,Math.PI*2);c.fill();}
+  c.restore();
+ }
+}
+
 const SAVE_VERSION = 1;
 // New islands sit in a 29×29 sea; the natural island stays within the original 25×25, so the extra sea is room for polders.
 const WORLD_RADIUS = 14;
@@ -3091,7 +3199,9 @@ class Civilization {
     if(this.year%9===4&&!this.storm)planDelight(this);
     if(this.year>=200&&this.year%10===7)reserveDelightGrounds(this);
     advanceMonuments(this);advanceWeather(this);advanceCommissions(this);
-    advanceVisitors(this);advanceIslets(this);advanceFamous(this);advanceDigs(this);
+    advanceVisitors(this);advanceIslets(this);advanceFamous(this);advanceDigs(this);advanceMedieval(this);
+    // Years in which the stores ran low count against wellbeing; a helped rain wish often prevents them.
+    if(this.population>20&&this.food<this.population*.6)this.hungryYears=(this.hungryYears||0)+1;
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);
@@ -3728,6 +3838,7 @@ function museumExhibits(s){
  for(const f of s.famous||[]){const d=FAMOUS.find(x=>x.id===f.id);if(d)items.push({year:f.year,kind:'Beroemde eilander',title:`${d.exhibit} van ${f.name}`,text:`${f.name}, ${d.role}, ${d.deed}`});}
  for(const f of s.digs?.finds||[])items.push({year:f.year,kind:'Opgraving',title:findTitle(s,f),text:findText(f)});
  for(const v of s.visitors?.history||[]){const d=VISITORS.find(x=>x.kind===v.kind);if(d)items.push({year:v.year,kind:'Bezoek',title:`Een souvenir: ${d.label.replace('!','').toLowerCase()}`,text:d.leave});}
+ if(s.printingPress)items.push({year:s.printingPress,kind:'Uitvinding',title:'Het eerste gedrukte boek',text:'Een kookboek. Op bladzijde één: hoe je een kookboek drukt.'});
  if(s.coast?.lighthouse?.year)items.push({year:s.coast.lighthouse.since||s.coast.lighthouse.year,kind:'Gebouw',title:'De eerste vuurtoren',text:'Een maquette met een heel klein katje op de trap.'});
  if(s.square?.builtYear)items.push({year:s.square.builtYear,kind:'Gebouw',title:'Het dorpsplein',text:'Een foto van de eerste bank. Er zit al iemand op.'});
  return items.sort((a,b)=>a.year-b.year);
@@ -3825,6 +3936,10 @@ function particles(c,id,w,h,t,reduced){
 function drawKeur(c,w,h,s,u,reduced){
  if(u<.42)return;
  const keur=currentScores(s,s.outcome?.scores),k=reduced?1:Math.min(1,(u-.42)/.06),drop=1+(1-k)*1.6,panel=Math.min(360,w*.52),cx=Math.max(110,(w-panel-18)/2),cy=h*.42;
+ if((keur.level.id==='perfect'||keur.level.id==='gold')&&!reduced){
+  const tt=u*60;for(let k=0;k<5;k++){const cyc=(tt*.35+k*.21)%1,cx2=w*(.08+((k*37)%60)/100),cy2=h*(.12+((k*23)%30)/100),col=['#d4644f','#e2c26a','#7fa3a8','#c98fb0','#8cc07a'][k];if(cyc>.2){const open=(cyc-.2)/.8;c.save();c.globalAlpha=1-open;c.fillStyle=col;for(let i=0;i<18;i++){const a=i/18*Math.PI*2;c.beginPath();c.ellipse(cx2+Math.cos(a)*open*46,cy2+Math.sin(a)*open*36+open*14,2,2,0,0,Math.PI*2);c.fill();}c.restore();}}
+  for(let i=0;i<40;i++){const fall=(tt*.05+((i*53)%100)/100)%1;c.fillStyle=['#d4644f','#e2c26a','#7fa3a8','#c98fb0','#8cc07a'][i%5];c.save();c.translate(((i*71)%100)/100*(w-360),fall*h);c.rotate(tt*2+i);c.fillRect(-2.5,-1.2,5,2.4);c.restore();}
+ }
  if(keur.level.id==='perfect'&&!reduced){c.save();c.globalAlpha=.45*Math.min(1,(u-.42)/.1);c.lineWidth=12;['#e46b5d','#eda04f','#efd36a','#8cc07a','#6fa8d6','#8f7fc4'].forEach((col,i)=>{c.strokeStyle=col;c.beginPath();c.ellipse(cx,h*.95,Math.min(w,h)*.62-i*12,Math.min(w,h)*.62-i*12,0,Math.PI*1.05,Math.PI*1.95);c.stroke();});c.restore();}
  c.save();c.translate(cx,cy);c.scale(drop,drop);c.rotate(-.08*(1-k)-.05);c.globalAlpha=k;
  c.fillStyle='rgba(20,34,28,.35)';c.beginPath();c.ellipse(4,6,74,74,0,0,Math.PI*2);c.fill();
@@ -3835,6 +3950,7 @@ function drawKeur(c,w,h,s,u,reduced){
  c.font='44px Georgia, serif';c.fillText(String(keur.total),0,12);c.font='10px sans-serif';c.fillText('VAN 100',0,28);
  c.restore();
  c.save();c.globalAlpha=k;c.textAlign='center';c.fillStyle='#fbf8ee';c.font='22px Georgia, serif';c.fillText(keur.level.title,cx,cy+104);
+ if(keur.level.id==='perfect'){c.save();c.translate(cx,cy-104);c.rotate(-.04);c.fillStyle='#c98fb0';c.fillRect(-120,-16,240,30);c.fillStyle='#fbf8ee';c.font='600 13px sans-serif';c.fillText('HET PERFECTE EILAND',0,4);c.restore();}
  // One tick per item, appearing one after another.
  const shown=reduced?keur.items:Math.floor(Math.min(1,(u-.48)/.2)*keur.items),cols=12,size=14;
  keur.checklist.forEach((item,i)=>{if(i>=Math.max(0,shown))return;const x=cx+((i%cols)-(cols-1)/2)*size*1.3,y=cy+124+Math.floor(i/cols)*size*1.3;c.fillStyle=item.done?'#8cc07a':'rgba(251,248,238,.25)';c.beginPath();c.ellipse(x,y,size/2,size/2,0,0,Math.PI*2);c.fill();if(item.done){c.strokeStyle='#22372c';c.lineWidth=2;c.beginPath();c.moveTo(x-3.5,y);c.lineTo(x-1,y+3);c.lineTo(x+4,y-3);c.stroke();}});
@@ -4043,7 +4159,7 @@ const LOW_FRONT=new Set(['castle-garden','farm','beach','park','garden','campfir
 const TALL=new Set(['tower','townhouse','palace','manor','factory','powerplant','science-center','church','lighthouse']);
 const coversLight=t=>!!t&&t.kind==='land'&&(!!t.landform||!!t.buildSite||!!t.building&&!LOW_FRONT.has(t.building));
 // Rough visible heights of what may stand in front, in tile units, to decide which windows are covered.
-const FRONT_HEIGHT={warehouse:34,hut:28,house:38,townhouse:52,tower:72,manor:52,palace:110,'royal-palace':140,factory:52,powerplant:55,church:62,lighthouse:75,windmill:56,museum:32,station:26,observatory:36,carillon:56,watchtower:50,'science-center':40,school:34,library:34,workshop:40,tree:42,forest:36};
+const FRONT_HEIGHT={cathedral:70,monastery:34,warehouse:34,hut:28,house:38,townhouse:52,tower:72,manor:52,palace:110,'royal-palace':140,factory:52,powerplant:55,church:62,lighthouse:75,windmill:56,museum:32,station:26,observatory:36,carillon:56,watchtower:50,'science-center':40,school:34,library:34,workshop:40,tree:42,forest:36};
 function windowHidden(sim,w){
  const lowest=Math.max(...w.points.map(p=>p[1]));
  for(const [dx,dy,rows] of [[1,1,1],[2,2,2]]){
@@ -4082,6 +4198,8 @@ function drawDaylight(r,light){
   c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='source-over';
   for(const w of r.litWindows||[]){if(!w.grand&&windowHidden(r.sim,w))continue;c.beginPath();w.points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=`rgba(255,214,130,${(.85*d).toFixed(3)})`;c.fill();}
   c.globalCompositeOperation='lighter';
+  // Glowing lava stays bright in the dark.
+  for(const l of r.litLava||[]){glow(l.x,l.y,16*l.scale,8*l.scale,`rgba(255,110,40,${(.32*d).toFixed(3)})`);glow(l.x,l.y,5*l.scale,2.6*l.scale,`rgba(255,190,90,${(.75*d).toFixed(3)})`);}
   for(const l of r.litLamps||[]){if(l.tile&&lightHidden(r.sim,l.tile))continue;glow(l.x,l.y,9*l.scale,6*l.scale,`rgba(255,215,150,${(.16*d).toFixed(3)})`);glow(l.x,l.y,2.2*l.scale,2*l.scale,`rgba(255,236,180,${(.7*d).toFixed(3)})`);}
  }
  c.restore();
@@ -4245,12 +4363,14 @@ function houseCat(r,x,y,color){
  r.ellipse(x-.1,y-4.7,.25,.3,'#d8e07a');r.ellipse(x+1,y-4.7,.25,.3,'#d8e07a');
  r.ctx.beginPath();r.ctx.moveTo(x-1.6,y-.6);r.ctx.quadraticCurveTo(x-4.4,y-1,x-3.4,y-4.2);r.ctx.strokeStyle=color;r.ctx.lineWidth=.9;r.ctx.lineCap='round';r.ctx.stroke();
 }
+// Some farm plots are pasture (grass, a fence and animals), the others are crop fields; never both on one plot.
+const isPasture=t=>animalHash(t.x*7+3,t.y*11+5)<.4;
 function drawAnimals(r){
  const s=r.sim,still=r.reduced,t=still?0:r.activityTime,winter=(r.light?.winter||0)>.6,night=r.light?.night;
  let cats=0;
  for(const tile of r.visibleTiles||[]){
   if(tile.kind!=='land')continue;const p=r.p(tile.x,tile.y),h=animalHash(tile.x,tile.y);
-  if(tile.building==='farm'&&!tile.fire&&!winter&&!night){
+  if(tile.building==='farm'&&isPasture(tile)&&!tile.fire&&!winter&&!night){
    const kind=h<.45?'sheep':h<.75?'cow':s.year>=600?'horse':'sheep',n=kind==='sheep'?3:kind==='cow'?2:1;
    for(let i=0;i<n;i++){const drift=still?0:Math.sin(t*.12+i*2+h*9)*5,x=p.x-10+i*9+drift,y=p.y+(i%2?3:-2),phase=still?0:Math.sin(t*2+i);
     r.enqueueActor(y+1,()=>kind==='sheep'?sheep(r,x,y,h>.2?'#f4f1e6':'#5c5752',phase):kind==='cow'?cow(r,x,y,phase):grazingHorse(r,x,y,phase));}
@@ -4290,8 +4410,24 @@ function drawSeasonal(r){
    r.enqueueActor(p.y+1,()=>{r.ellipse(p.x+4,p.y-26,3.2,4,'#6b5640');r.ellipse(p.x+2.8,p.y-27,1,1,'#ffd36a');r.ellipse(p.x+5.2,p.y-27,1,1,'#ffd36a');});
   }
  }
+  // Summer: picnics in the parks and sunflowers in the gardens.
+  if(L.summer>.5&&!L.night&&!L.darkness){
+   for(const tile of r.visibleTiles||[]){
+    if(tile.kind!=='land')continue;const p=r.p(tile.x,tile.y),h=ambHash(tile.x*3,tile.y*7);
+    if(tile.building==='park'&&h<.45)r.enqueueActor(p.y+4,()=>{r.poly([[p.x+2,p.y+3],[p.x+9,p.y+.5],[p.x+14,p.y+3],[p.x+7,p.y+5.5]],h<.2?'#d9534a':'#5c8fc0');r.poly([[p.x+5,p.y+3],[p.x+9,p.y+1.5],[p.x+11,p.y+3],[p.x+7,p.y+4.4]],'rgba(255,255,255,.35)');r.person(p.x+5,p.y+2,'#c9a14f',h*9);r.person(p.x+12,p.y+2.5,'#7fa3a8',h*7);r.ellipse(p.x+9,p.y+3,1.4,1,'#a77c4f');});
+    else if(tile.building==='garden'&&h<.6)r.enqueueActor(p.y+3,()=>{for(let i=0;i<3;i++){const x=p.x-10+i*5,y=p.y+2-i;r.line([[x,y],[x,y-9]],'#6f8f4f',.8);r.ellipse(x,y-9.5,2,2,'#e8c040');r.ellipse(x,y-9.5,.9,.9,'#7a5a30');}});
+   }
+  }
  // Winter evenings: strings of lights across the square.
  if(L.winter>.5&&L.darkness>.3&&r.sim.square?.builtYear){const a=r.p(0,1),b=r.p(1,2);for(let i=0;i<10;i++){const u=i/9,x=a.x+(b.x-a.x)*u,y=a.y-26+(b.y-a.y)*u+Math.sin(u*Math.PI)*6;r.ellipse(x,y,1.2,1.2,['#ffd36a','#f19a8a','#9fd6e8','#b7e39a'][i%4]);}}
+}
+// Summer days feel warm: a soft golden wash and a sun in the corner.
+function drawSummerSun(r){
+ const L=r.light||{},s=L.summer||0;if(s<.3||L.darkness>.15||r.sim.storm||r.sim.ending)return;
+ const c=r.ctx,W=r.width,H=r.height,k=(s-.3)/.7*(1-(L.darkness||0)*4);c.save();c.setTransform(r.dpr,0,0,r.dpr,0,0);
+ c.fillStyle=`rgba(255,214,140,${(.06*k).toFixed(3)})`;c.fillRect(0,0,W,H);
+ const g=c.createRadialGradient(W*.88,H*.08,0,W*.88,H*.08,H*.5);g.addColorStop(0,`rgba(255,240,190,${(.45*k).toFixed(3)})`);g.addColorStop(.25,`rgba(255,226,160,${(.16*k).toFixed(3)})`);g.addColorStop(1,'rgba(255,226,160,0)');c.fillStyle=g;c.fillRect(0,0,W,H);
+ c.restore();
 }
 // Screen-space night life: stars reflected in the sea, fireflies, and now and then a shooting star.
 function drawNightLife(r){
@@ -4525,7 +4661,7 @@ const HOUSE_ROOFS=['#9c5a4c','#6f7c86','#5c6468','#7f8a62','#6a8a86','#a8704f','
 const THATCH=['#c9b27a','#b89a5c','#d1bd84','#a98d5a','#9a957a','#8a6a4c'];
 const HOUSE_SHUTTERS=['#6c806c','#7b8c79','#8a6f5c','#6f7f95','#9a7a56','#7d6b84','#5f7d7a'];
 const shadeColor=(hex,f)=>'#'+[1,3,5].map(i=>Math.round(Math.max(0,Math.min(255,parseInt(hex.slice(i,i+2),16)*f))).toString(16).padStart(2,'0')).join('');
-const SPECIAL_BIG=new Set(['museum','circus','station','pool','spaceport','zoo','theme-park','petting-farm','observatory','ice-cream','greenhouse','watermill','watchtower','rose-garden','grand-fountain','carillon','monument','lighthouse']);
+const SPECIAL_BIG=new Set(['cathedral','museum','circus','station','pool','spaceport','zoo','theme-park','petting-farm','observatory','ice-cream','greenhouse','watermill','watchtower','rose-garden','grand-fountain','carillon','monument','lighthouse']);
 const DEFAULT_LOOK={wall:'#d7cdb0',side:'#b9b99b',roof:null,gable:null,shutter:'#6c806c',shutterSide:'#7b8c79',sx:1,sy:1,extra:0,flowers:null,chimney:null};
 function houseLook(t){
  const a=hash(t.x,t.y),b=hash(t.y+31,t.x-17),c=hash(t.x*3+7,t.y*5-2);
@@ -4553,7 +4689,8 @@ class IslandRenderer {
   resize(){
     const r=this.canvas.getBoundingClientRect();
     this.width=r.width;this.height=r.height;
-    const dpr=Math.min(2,window.devicePixelRatio||1);
+    // Phones draw with a little fewer pixels: barely visible, much faster.
+    const dpr=Math.min(r.width<700?1.5:2,window.devicePixelRatio||1);
     this.canvas.width=Math.round(r.width*dpr);this.canvas.height=Math.round(r.height*dpr);
     this.dpr=dpr;
   }
@@ -4608,7 +4745,7 @@ class IslandRenderer {
   rect(x,y,w,h,color){this.ctx.fillStyle=color;this.ctx.fillRect(x,y,w,h);}
   diamond(x,y,w,h,color,stroke=null){this.poly([[x,y-h],[x+w,y],[x,y+h],[x-w,y]],color,stroke,.5);}
   draw(now){
-    this.labelBoxes=[];this.litWindows=[];this.litLamps=[];
+    this.labelBoxes=[];this.litWindows=[];this.litLamps=[];this.litLava=[];
     // Daylight follows the wall clock, so a slow frame rate never stretches the day.
     const clockDt=Math.max(0,Math.min(.5,(now-this.lastFrame)/1000||.016));
     const dt=Math.max(0,Math.min(.08,(now-this.lastFrame)/1000||.016));this.lastFrame=now;
@@ -4687,7 +4824,7 @@ class IslandRenderer {
     drawAnimals(this);
     drawSeasonal(this);
     drawFestive(this);
-    drawOverseas(this);drawFamous(this);
+    drawOverseas(this);drawFamous(this);drawMedieval(this);
     this.drawVisitors();drawLifeWorld(this);
     this.scene.sort((a,b)=>a.depth-b.depth);
     for(const item of this.scene)item.draw();
@@ -4706,6 +4843,7 @@ class IslandRenderer {
     this.drawRipples();
     if(this.sim.storm)this.drawRain();
     drawWeather(this);
+    drawSummerSun(this);
     drawDaylight(this,this.light);
     drawNightLife(this);
     this.drawEffectLabels();
@@ -4776,19 +4914,26 @@ class IslandRenderer {
       this.poly([[-30,2],[-8,-h],[4,-h*.78],[30,0],[7,10]],'#9aab97');
       this.poly([[-8,-h],[4,-h*.78],[30,0],[7,10],[-2,-h*.43]],'#bac0a6');
       this.poly([[-8,-h],[-17,-h*.6],[-9,-h*.67],[-6,-h*.51],[-1,-h*.67],[8,-h*.54],[4,-h*.78]],'#ecead4');
-      this.line([[-18,-4],[-9,-h*.42],[-13,-h*.48]],'#839780',1);
-      this.line([[17,-5],[5,-h*.36],[3,-h*.5]],'#9cae91',1);
+      // A soft ridge from the summit and a few gullies, instead of hard lines.
+      this.line([[-8,-h*.86],[-2,-h*.43],[7,10]],'rgba(255,255,250,.18)',1.2);
+      for(const [x0,y0,x1,y1] of [[-14,-h*.5,-17,-h*.22],[-9,-h*.45,-10,-h*.15],[10,-h*.42,15,-h*.16]])this.line([[x0,y0],[x1,y1]],'rgba(70,90,72,.16)',1);
     }else{
-      const active=this.sim.volcanoActiveUntil>this.sim.year;
-      this.poly([[-33,2],[-12,-h+8],[-4,-h],[10,-h+5],[33,0],[9,11]],'#8a9481');
-      this.poly([[-4,-h],[10,-h+5],[33,0],[9,11],[0,-h*.4]],'#a6aa90');
-      this.ellipse(-1,-h+6,12,5,'#b1ac8c');this.ellipse(-1,-h+6,8,3,'#696e5c');
-      this.ellipse(-1,-h+7,5,1.7,active?'#dc9a5c':'#b29267');
-      if(active){
-        this.line([[3,-h+9],[8,-h*.7],[5,-h*.5],[16,-h*.2]],'#c28b53',2.4);
-        this.line([[3,-h+9],[8,-h*.7],[5,-h*.5],[16,-h*.2]],'#e2b36e',.8);
+      // A real volcano: a steep cone of dark lava rock with a ragged crater, glowing inside, and a plume of smoke.
+      const active=this.sim.volcanoActiveUntil>this.sim.year,t=this.reduced?0:this.time,glow=active?.85+Math.sin(t*3)*.15:.35;
+      this.poly([[-36,3],[-22,-h*.34],[-11,-h+5],[-6,-h+1],[-1,-h+3],[4,-h],[10,-h+4],[21,-h*.38],[36,1],[10,12]],'#6b5f58');
+      this.poly([[4,-h],[10,-h+4],[21,-h*.38],[36,1],[10,12],[1,-h*.32]],'#86776a');
+      for(const [a,b] of [[[-7,-h+4],[-17,-h*.35]],[[-2,-h+5],[-5,-h*.3]],[[7,-h+5],[13,-h*.32]],[[11,-h+6],[24,-h*.2]]])this.line([a,b],'#564a44',1);
+      this.poly([[-36,3],[-27,-5],[-16,-2],[-6,-6],[6,-3],[18,-7],[30,-4],[36,1],[10,12]],'#8aa070');
+      this.poly([[-36,3],[-24,-1],[-12,1],[0,-1],[10,12]],'#7a9262');
+      this.ellipse(0,-h+3,9.5,3.4,'#3f3530');this.ellipse(0,-h+3.6,6.4,2.1,`rgba(255,${active?120:90},50,${glow.toFixed(3)})`);
+      // Lava traces down the flanks: faint and dark when quiet, bright flows when it erupts.
+      this.lavaLight(0,-h+3.6,active?1.6:.9);
+      for(const path of [[[2,-h+5],[6,-h*.72],[3,-h*.5],[12,-h*.22],[15,-2]],[[-3,-h+5],[-8,-h*.66],[-6,-h*.42],[-14,-h*.15]]]){if(active)for(const [x,y] of path.slice(1))this.lavaLight(x,y,.7);
+        this.line(path,active?'#c8502a':'#6e3a2c',active?2.6:1.4);if(active)this.line(path,'#ffcf6a',.9);
       }
-      for(let i=0;i<(active?5:2);i++){const f=(this.time*(active?.35:.13)+i*.23)%1;this.ellipse(-2+f*13,-h-2-f*(active?39:18),3+f*(active?10:4),2+f*5,`rgba(181,185,164,${(1-f)*(active?.65:.25)})`);}
+      if(active){const c=this.ctx;c.save();c.globalCompositeOperation='lighter';this.ellipse(0,-h+2,18,9,'rgba(255,120,60,.18)');c.restore();for(let i=0;i<4;i++){const f=(t*.9+i*.25)%1;this.ellipse(-3+i*2+Math.sin(i+t)*4,-h-f*16,1.2,1.2,`rgba(255,${150+i*20},80,${(1-f).toFixed(3)})`);}}
+      if(!active&&this.light.winter>0)this.poly([[-11,-h+5],[-6,-h+1],[-1,-h+3],[4,-h],[10,-h+4],[8,-h*.8],[2,-h*.85],[-4,-h*.78],[-9,-h*.82]],`rgba(246,248,249,${(this.light.winter*.85).toFixed(3)})`);
+      for(let i=0;i<(active?7:3);i++){const f=(t*(active?.32:.1)+i*.17)%1,sh=active?92:150;this.ellipse(-2+f*16+Math.sin(f*5+i)*3,-h-3-f*(active?48:22),3+f*(active?13:6),2.4+f*(active?8:4),`rgba(${sh},${sh-4},${sh-10},${((1-f)*(active?.7:.3)).toFixed(3)})`);}
     }
     this.ellipse(-21,4,4,2,'#a7ae8a');this.ellipse(18,6,3,1.7,'#b5b896');c.restore();
   }
@@ -5058,7 +5203,7 @@ class IslandRenderer {
     else if(b==='royal-garden')this.formalGarden();
     else if(b==='campus-square'){this.diamond(0,0,22,11,'#d6d6bc');this.line([[-17,0],[0,8],[17,0]],'#aab7a0',2);this.ellipse(0,-3,6,2.5,'#b6c5af');this.poly([[-4,-4],[0,-9],[4,-4],[0,-2]],'#eee9c8');}
     else if(b==='palace-square'){this.diamond(0,0,22,11,'#d4d0b0');this.ellipse(0,-3,7,3,'#a7beb3');this.line([[0,-3],[0,-16]],'#b9cbbd',1.5);this.ellipse(0,-17,2,1,'#d8e3cf');}
-    else if(b==='farm')this.farm(t.variant);
+    else if(b==='farm'){if(isPasture(t))this.pasture(t);else this.farm(t.variant);}
     else if(b==='workshop')this.workshop();
     else if(b==='factory')this.factory();
     else if(b==='campfire'){this.campfire();drawFlames(this,0,-4,.95);}
@@ -5082,6 +5227,8 @@ class IslandRenderer {
     else if(b==='shrine'||b==='church'){if(b==='church'&&this.archStyle==='classical')this.library();else this.church(b==='church');}
     else if(b==='dock'||b==='harbor')this.dock(b==='harbor'&&this.sim.era>=2);
     else if(b==='warehouse')this.warehouse(t);
+    else if(b==='monastery')this.monastery(t);
+    else if(b==='cathedral')this.cathedral(t);
     else if(b==='pump')this.pump(t);
     else if(b==='bridge')this.bridge(t);
     else if(b==='castle-garden')this.castleGarden(t);
@@ -5249,7 +5396,7 @@ class IslandRenderer {
     const tower=(x,y,r,h,flag=false)=>{
       this.ellipse(x,y,r,r*.5,stoneDark);this.rect(x-r,y-h,r,h,stone);this.rect(x,y-h,r,h,stoneDark);this.ellipse(x,y-h,r,r*.5,'#cfc8b2');
       this.window([[x-r*.45,y-h*.55],[x-r*.05,y-h*.55],[x-r*.05,y-h*.55-3.4],[x-r*.45,y-h*.55-3.4]],'#6d7a72');
-      this.poly([[x-r-1.2,y-h],[x,y-h-r*2.8],[x,y-h+r*.5]],roof);this.poly([[x,y-h-r*2.8],[x+r+1.2,y-h],[x,y-h+r*.5]],roofDark);
+      this.poly([[x-r-1.2,y-h],[x,y-h-r*2.8],[x,y-h+r*.5]],roof);this.poly([[x,y-h-r*2.8],[x+r+1.2,y-h],[x,y-h+r*.5]],roofDark);this.snow([[x-r-1.2,y-h],[x,y-h-r*2.8],[x+r+1.2,y-h],[x,y-h+r*.5]]);
       if(flag)this.islandFlag(x,y-h-r*2.8,.55);
     };
     this.diamond(0,1,24,12,'#b9b39b');
@@ -5259,12 +5406,12 @@ class IslandRenderer {
     // The keep.
     const kh=26+stage*4;
     this.poly([[-9,-3],[0,1.5],[0,1.5-kh],[-9,-3-kh]],stone);this.poly([[0,1.5],[9,-3],[9,-3-kh],[0,1.5-kh]],stoneDark);
-    this.poly([[-11,-3-kh],[0,-14-kh],[11,-3-kh],[0,3-kh]],roof);this.poly([[0,-14-kh],[11,-3-kh],[0,3-kh]],roofDark);
+    this.poly([[-11,-3-kh],[0,-14-kh],[11,-3-kh],[0,3-kh]],roof);this.poly([[0,-14-kh],[11,-3-kh],[0,3-kh]],roofDark);this.snow([[-11,-3-kh],[0,-14-kh],[11,-3-kh],[0,3-kh]]);
     for(let i=0;i<2+Math.min(stage,1);i++){this.window([[-7,-9-i*8],[-4,-7.5-i*8],[-4,-12-i*8],[-7,-13.5-i*8]],'#6d7a72');this.window([[3,-7.5-i*8],[6,-9-i*8],[6,-13.5-i*8],[3,-12-i*8]],'#5f6c65');}
     this.islandFlag(0,-14-kh,.8);
     if(stage>=2){
       // A light palace wing with tall windows in front of the keep.
-      this.poly([[-14,2],[-2,8],[-2,-8],[-14,-14]],'#ece4cf');this.poly([[-16,-14],[-8,-19],[0,-14],[-2,-8]],'#8f6f5a');
+      this.poly([[-14,2],[-2,8],[-2,-8],[-14,-14]],'#ece4cf');this.poly([[-16,-14],[-8,-19],[0,-14],[-2,-8]],'#8f6f5a');this.snow([[-16,-14],[-8,-19],[0,-14],[-2,-8]]);
       for(let i=0;i<3;i++)this.window([[-12+i*3.6,0+i*1.8],[-10+i*3.6,1+i*1.8],[-10+i*3.6,-6+i*1.8],[-12+i*3.6,-7+i*1.8]],'#7d8f88');
     }
     wall([-19,-1],[0,8.5],8,stone);wall([0,8.5],[19,-1],8,stoneDark);
@@ -5276,7 +5423,6 @@ class IslandRenderer {
     for(const [x,y] of [[-13,-6],[-6,-2],[-19,-20-stage*3],[19,-20-stage*3]]){this.line([[x,y+3],[x,y]],'#6f5a40',1);this.ellipse(x,y-1,1.2,1.6,this.light.darkness>.2?'#ffcf6a':'#d9a24e');this.lampLight(x,y-1,this.currentTile);}
     if(stage>=1)tower(0,9,4.4,13+stage*2,stage>=3);
     if(stage>=3){this.ellipse(-24,8,6,2.4,'#a8c4bd');this.ellipse(24,8,6,2.4,'#a8c4bd');}
-    if(level>=1){const o=[[-30,2],[0,17],[30,2]];for(let i=0;i<2;i++){const a=o[i],b=o[i+1];this.poly([a,b,[b[0],b[1]-5],[a[0],a[1]-5]],i?'#c4bca4':'#d3ccb6');merlons(a,b,5);}tower(-30,2,3,9);tower(30,2,3,9);tower(0,17,3,9,level>=2);}
     if(level>=3){tower(-8,-16,3.6,34,true);}
     if(level>=5){const colors=['#d4644f','#e2c26a','#5c8fc0','#8cc07a','#c98fb0'];for(let i=0;i<5;i++){const x=-17+i*8.5,y=-12+Math.abs(i-2)*-1.2,sway=this.reduced?0:Math.sin(this.time*2+i)*1;this.line([[x,y],[x,y-7]],'#6f5a40',.6);this.poly([[x,y-7],[x+4+sway,y-6],[x,y-4.6]],colors[i]);}}
     if(level>=6){const kh=26+stage*4,dy=-14-kh;this.ellipse(0,dy-1,6,4.6,'rgba(190,225,235,.85)');this.ellipse(-1.6,dy-2.6,2,1.4,'rgba(255,255,255,.7)');if(this.light.darkness>.2)this.lampLight(0,dy-1,this.currentTile);}
@@ -5387,6 +5533,10 @@ class IslandRenderer {
     for(let i=0;i<4;i++){c.rotate(Math.PI/2);this.line([[0,0],[0,-20]],'#a59066',1.2);this.poly([[0,-7],[5,-7],[5,-20],[0,-20]],'#d9cc9c');this.line([[1,-12],[5,-12]],'#b6a980',.7);}this.ellipse(0,0,2,2,'#978766');c.restore();
   }
   statue(variant=0){
+    this.ellipse(3,4,16,5,'rgba(40,55,40,.12)');this.diamond(0,1,14,7,'#c3bba3');this.poly([[-14,1],[0,8],[0,10],[-14,3]],'#a8a089');this.poly([[0,8],[14,1],[14,3],[0,10]],'#958d77');
+    this.ctx.save();this.ctx.translate(0,-2);this.ctx.scale(1.35,1.35);this.statueFigure(variant);this.ctx.restore();
+  }
+  statueFigure(variant=0){
     this.diamond(0,0,12,6,'#c7c5a7');this.poly([[-6,-1],[0,2],[6,-1],[6,-10],[0,-13],[-6,-10]],'#b6b79c');
     const style=Math.floor((variant*100+this.sim.seed)%3);
     if(style===0){this.poly([[-4,-11],[-3,-22],[0,-29],[4,-21],[4,-11]],'#8a9c85');this.ellipse(0,-30,3,4,'#a0ad91');}
@@ -5439,6 +5589,15 @@ class IslandRenderer {
     this.line([[0,0],[-1,-23],[-8,-35]],'#756b45',4);
     this.line([[-1,-15],[7,-29],[12,-36]],'#80764b',2.7);
     this.line([[-1,-21],[-10,-28]],'#756b45',2.2);
+    // Late autumn strips most trees; in winter they stand bare with snow on the branches.
+    const Lt=this.light||{},bare=!original&&(Lt.winter>.5||Lt.autumn>.62&&v>.42);
+    if(bare){
+      for(const [a,b,w] of [[[-8,-35],[-13,-44],1.6],[[-8,-35],[-3,-47],1.4],[[12,-36],[17,-45],1.4],[[12,-36],[8,-48],1.2],[[-1,-23],[3,-41],1.6],[[3,-41],[-1,-52],1],[[3,-41],[9,-51],1],[[-10,-28],[-17,-33],1.2]])this.line([a,b],'#6e6444',w);
+      if(Lt.winter>.5){for(const [x,y] of [[-13,-44],[-3,-47],[17,-45],[8,-48],[-1,-52],[9,-51],[-17,-33]])this.ellipse(x,y+.6,2.4,1,'#f6f8fa');this.ellipse(4,2,10,3,'rgba(246,248,250,.8)');}
+      else{for(const [x,y] of [[-12,-42],[9,-49],[16,-43]].filter((_,i)=>(v*10+i)%3<2))this.ellipse(x,y,2.2,1.6,this.leaf('#c98a3e'));for(let i=0;i<5;i++)this.ellipse(-8+i*4,2+(i%2),2,.8,['#c98a3e','#b5652e','#d9a24e'][i%3]);
+        if(!this.reduced)for(let i=0;i<2;i++){const f=(this.time*.15+v*3+i*.5)%1;this.ellipse(-10+i*16+Math.sin(f*8+i)*4,-42+f*44,1.3,.8,'#c98a3e');}}
+      c.restore();return;
+    }
     c.translate(sway,0);
     this.ellipse(0,-40,19,15,this.leaf('#6f8752'));
     this.ellipse(-12,-35,12,12,this.leaf('#7e965c'));
@@ -5449,7 +5608,8 @@ class IslandRenderer {
     this.ellipse(16,-42,8,8,this.leaf('#91a763'));
     this.ellipse(1,-37,10,9,this.leaf('#819856'));
     this.ellipse(-5,-48,4,2,this.leaf('#a7b97755'));
-    if(this.light.spring>.2&&!bloom)for(const [x,y] of [[-12,-40],[-4,-50],[8,-47],[14,-38],[2,-36],[-15,-33]].filter((_,i)=>(v*7+i)%3<2))this.ellipse(x,y,1.7,1.4,`rgba(241,206,212,${(this.light.spring*.9).toFixed(3)})`);
+    // Spring blossom: little clusters of pink and white all over the crown.
+    if(this.light.spring>.2&&!bloom){const a=Math.min(1,this.light.spring*1.2);for(const [i,[x,y]] of [[-12,-40],[-4,-50],[8,-47],[14,-38],[2,-36],[-15,-33],[-7,-43],[5,-53],[16,-45],[-2,-41],[10,-40],[-17,-40]].entries()){if((v*13+i)%5<1.2)continue;const col=(i+Math.floor(v*4))%3?`rgba(244,200,210,${a.toFixed(3)})`:`rgba(250,244,240,${a.toFixed(3)})`;for(let k=0;k<3;k++)this.ellipse(x+[0,1.6,-1.4][k],y+[0,1,1.2][k],1.5,1.2,col);}}
     if(original&&bloom){
       for(const [i,[x,y]] of [[-14,-40],[-7,-49],[3,-53],[13,-46],[17,-36],[5,-38],[-5,-32],[-17,-32],[9,-29]].entries()){
         const color=i%2?'#f3d6c5':'#f7e7d1';
@@ -5472,6 +5632,7 @@ class IslandRenderer {
     if(!grand&&habit>.62-late)return;
     const mapped=points.map(([x,y])=>this.screenPoint(x,y)),base=this.screenPoint(0,0);if(mapped.every(Boolean)&&base)this.litWindows.push({tile:t,points:mapped,baseY:base[1],unit:this.zoom*this.dpr,grand});
   }
+  lavaLight(x,y,size=1){if(this.light.darkness<.1)return;const p=this.screenPoint(x,y);if(!p)return;const m=this.ctx.getTransform();this.litLava.push({x:p[0],y:p[1],scale:Math.hypot(m.a,m.b)*size});}
   lampLight(x,y,tile=null){
     if(this.light.darkness<.15)return;const p=this.screenPoint(x,y);if(!p)return;const m=this.ctx.getTransform();
     this.litLamps.push({x:p[0],y:p[1],scale:Math.hypot(m.a,m.b),tile});
@@ -5544,7 +5705,19 @@ class IslandRenderer {
     else{c.scale(.55,.55);this.tree(false,v);}
     c.restore();
   }
+  // Statues stand tall: a stepped plinth, a little fence with chains, flower boxes and a name plate, and a figure half again as big.
   monumentStatue(kind){
+    const L=this.light||{},flower=L.winter>.6?'#eef1f3':L.autumn>.5?'#d9822b':'#d4644f';
+    this.ellipse(4,5,22,7,'rgba(40,55,40,.12)');
+    this.diamond(0,1,17,8.5,'#c3bba3');this.poly([[-17,1],[0,9.5],[0,12],[-17,3.5]],'#a8a089');this.poly([[0,9.5],[17,1],[17,3.5],[0,12]],'#958d77');
+    this.diamond(0,-1.5,12,6,'#d3ccb6');this.poly([[-12,-1.5],[0,4.5],[0,6.5],[-12,.5]],'#b5ad96');this.poly([[0,4.5],[12,-1.5],[12,.5],[0,6.5]],'#a39b84');
+    for(const [x,y] of [[-15,1],[0,8.5],[15,1],[0,-6.5]]){this.line([[x,y],[x,y-4]],'#5a554c',1);this.ellipse(x,y-4,.9,.5,'#7a7468');}
+    for(const [a,b] of [[[-15,-3],[0,4.5]],[[0,4.5],[15,-3]]]){const m=[(a[0]+b[0])/2,(a[1]+b[1])/2+1.5];this.ctx.beginPath();this.ctx.moveTo(a[0],a[1]);this.ctx.quadraticCurveTo(m[0],m[1],b[0],b[1]);this.ctx.strokeStyle='#6f6a60';this.ctx.lineWidth=.5;this.ctx.stroke();}
+    for(const [x,y] of [[-11,4],[11,4]]){this.rect(x-3,y-2,6,2.4,'#8a6a4c');for(let i=0;i<3;i++)this.ellipse(x-2+i*2,y-2.6,1.1,1,i%2?flower:'#f2e6b8');}
+    this.poly([[1,3],[5,1],[5,-1],[1,1]],'#b89a5e');
+    this.ctx.save();this.ctx.translate(0,-4);this.ctx.scale(1.55,1.55);this.monumentFigure(kind);this.ctx.restore();
+  }
+  monumentFigure(kind){
     const stone='#cfc8b3',dark='#aaa38e',bronze='#8a7350';
     this.ellipse(3,3,13,4,'#58654414');this.poly([[-7,0],[0,3.5],[7,0],[0,-3.5]],'#bdb59d');this.poly([[-5,-1],[0,1.5],[0,-8],[-5,-10.5]],stone);this.poly([[0,1.5],[5,-1],[5,-10.5],[0,-8]],dark);this.poly([[-5,-10.5],[0,-8],[5,-10.5],[0,-13]],'#ddd6c2');
     if(kind==='hand'){this.ellipse(0,-34,11,6,'#eef0ea');this.ellipse(-6,-35,6,4.5,'#f6f7f2');this.poly([[-3,-12],[3,-12],[4,-24],[-4,-24]],stone);for(let i=0;i<4;i++)this.poly([[-4+i*2.3,-24],[-2.6+i*2.3,-24],[-2.8+i*2.3,-31+Math.abs(i-1.5)],[-4.2+i*2.3,-31+Math.abs(i-1.5)]],stone);this.poly([[4,-22],[6.5,-26],[5.4,-27],[3.4,-24]],stone);}
@@ -5603,22 +5776,58 @@ class IslandRenderer {
     this.poly([at(-L/2-1,-W/2-1.5,H-1),at(L/2+1,-W/2-1.5,H-1),ridgeB,ridgeA],shadeColor(roof,.82));
     this.poly([at(L/2,-W/2,H),at(L/2,W/2,H),at(L/2,0,H+R)],shadeColor(wall,.8));
     const loft=at(L/2,0,H+R*.4);this.rect(loft[0]-1.2,loft[1]-2.4,2.4,2.4,'#6f5a40');
-    this.poly([at(-L/2-1,W/2+1.5,H-1),at(L/2+1,W/2+1.5,H-1),ridgeB,ridgeA],roof);
+    this.poly([at(-L/2-1,W/2+1.5,H-1),at(L/2+1,W/2+1.5,H-1),ridgeB,ridgeA],roof);this.snow([at(-L/2-1,W/2+1.5,H-1),at(L/2+1,W/2+1.5,H-1),ridgeB,ridgeA]);
     this.line([ridgeA,ridgeB],shadeColor(roof,.7),.8);
     this.poly([at(2,W/2,0),at(7,W/2,0),at(7,W/2,5.4),at(2,W/2,5.4)],'#6f5a40');this.line([at(4.5,W/2,0),at(4.5,W/2,5.4)],'#5a4632',.5);
     for(const u of [-9,-4])this.window([at(u,W/2,2),at(u+2.4,W/2,2),at(u+2.4,W/2,4.4),at(u,W/2,4.4)],'#7d8f8a');
     const chimney=at(-L/3,0,H+R*.72);this.rect(chimney[0]-1,chimney[1]-5,2,5,'#8a6a5a');
     if(this.sim.year>=1900&&h>.82){const sx=20,sy=-2;this.rect(sx-3,sy-20,6,20,'#c9cfd0');this.rect(sx,sy-20,3,20,'#aeb5b7');this.ellipse(sx,sy-20,3,1.4,'#8f9a9c');}
   }
+  // A walled monastery: a small church with a bell tower around a green cloister, and a monk tending herbs.
+  monastery(t){
+    const stone='#d8cfb8',dark=shadeColor(stone,.82);
+    this.ellipse(5,5,20,6,'rgba(40,55,40,.12)');
+    this.diamond(0,0,19,9.5,'#a9bf86');this.diamond(0,1,11,5.5,'#8fae6a');
+    for(const [a,b,f] of [[[-19,0],[0,-9.5],stone],[[0,-9.5],[19,0],dark]])this.poly([a,b,[b[0],b[1]-5],[a[0],a[1]-5]],f);
+    const box=this.isoBox(14,8,11,0,stone,dark,shadeColor(stone,.72),[-11,3,4]),at=box.at;
+    this.poly([at(-11,-4,11),at(3,-4,11),at(3,0,17),at(-11,0,17)],'#8a6a5a');this.poly([at(-11,4,11),at(3,4,11),at(3,0,17),at(-11,0,17)],'#9b7a68');this.snow([at(-11,4,11),at(3,4,11),at(3,0,17),at(-11,0,17)]);
+    this.poly([at(3,-4,11),at(3,4,11),at(3,0,17)],shadeColor(stone,.72));this.window([at(3,-1,5),at(3,1,5),at(3,1,9),at(3,-1,9)],'#7d8f8a');
+    const tw=at(-9,0,17);this.rect(tw[0]-2.5,tw[1]-10,5,10,stone);this.rect(tw[0],tw[1]-10,2.5,10,dark);this.poly([[tw[0]-3.4,tw[1]-10],[tw[0],tw[1]-17],[tw[0]+3.4,tw[1]-10]],'#7a6a5a');this.ellipse(tw[0],tw[1]-7,1,1.2,'#5f4a3c');
+    for(const [x,y] of [[7,4],[10,2],[12,5]])this.ellipse(x,y,1.6,1.1,'#6f8f4f');this.person(9,6,'#6e5a44',3);
+  }
+  // A gothic cathedral near the square; for seventy years it grows inside its scaffolding.
+  cathedral(t){
+    const stone='#d9d1bd',dark=shadeColor(stone,.82),since=this.sim.year-(t.cathedralFrom??t.builtYear??this.sim.year),k=Math.max(.18,Math.min(1,since/CATHEDRAL_YEARS)),L=30,W=13,H=22*k,R=12*k;
+    this.ellipse(6,6,26,8,'rgba(40,55,40,.12)');
+    const box=this.isoBox(L,W,H,0,stone,dark,shadeColor(stone,.72)),at=box.at;
+    if(k>.5){this.poly([at(-L/2,-W/2,H),at(L/2-4,-W/2,H),at(L/2-4,0,H+R),at(-L/2,0,H+R)],'#6f7f8a');this.poly([at(-L/2,W/2,H),at(L/2-4,W/2,H),at(L/2-4,0,H+R),at(-L/2,0,H+R)],'#7d8e99');this.snow([at(-L/2,W/2,H),at(L/2-4,W/2,H),at(L/2-4,0,H+R),at(-L/2,0,H+R)]);}
+    for(let i=0;i<5;i++){const u=-L/2+3+i*5;this.window([at(u,W/2,H*.25),at(u+2,W/2,H*.25),at(u+2,W/2,H*.75),at(u+1,W/2,H*.85),at(u,W/2,H*.75)],'#8fa6b8');}
+    // Two west towers with spires and a rose window between them.
+    for(const v of [-W/2+2.5,W/2-2.5]){const b=at(L/2-1,v,0),th=(28+12*k)*k;this.rect(b[0]-3,b[1]-th,6,th,stone);this.rect(b[0],b[1]-th,3,th,dark);if(k>.85){this.poly([[b[0]-3.4,b[1]-th],[b[0],b[1]-th-16],[b[0]+3.4,b[1]-th]],'#6f7f8a');this.snow([[b[0]-3.4,b[1]-th],[b[0],b[1]-th-16],[b[0]+3.4,b[1]-th]]);}}
+    const rose=at(L/2,0,H*.7);this.ellipse(rose[0],rose[1],2.6,3,'#c98fb0');this.ellipse(rose[0],rose[1],1.2,1.4,'#e2c26a');
+    if(k<1){
+      // Scaffolding around the unfinished walls and a wooden treadwheel crane.
+      for(let i=0;i<6;i++){const u=-L/2+i*6;this.line([at(u,W/2+1.5,0),at(u,W/2+1.5,H+8)],'#a08a64',.7);}for(let j=1;j<4;j++)this.line([at(-L/2,W/2+1.5,j*(H+8)/4),at(L/2,W/2+1.5,j*(H+8)/4)],'#a08a64',.6);
+      const cr=at(-L/2+2,-W/2,0);this.line([[cr[0],cr[1]],[cr[0]+2,cr[1]-H-22]],'#6e5a40',1.4);this.line([[cr[0]+2,cr[1]-H-22],[cr[0]+18,cr[1]-H-16]],'#6e5a40',1.2);this.line([[cr[0]+18,cr[1]-H-16],[cr[0]+18,cr[1]-H-6]],'#6e6a62',.5);
+    }
+  }
   // A tall brick warehouse with a stepped gable, loading doors and a hoist beam; from 1900 a crane stands beside it.
   warehouse(t){
-    const brick=['#a8664f','#9a5d4a','#b2745a'][Math.floor(hash(t.x,t.y)*3)],side=shadeColor(brick,.8),h=22;
-    this.poly([[-16,-2],[0,6],[0,6-h],[-16,-2-h]],brick);this.poly([[0,6],[16,-2],[16,-2-h],[0,6-h]],side);
-    this.poly([[-16,-2-h],[-12,-6-h],[-8,-6-h],[-8,-10-h],[-4,-10-h],[-4,-14-h],[0,-14-h+8],[0,6-h]],brick);
-    this.poly([[0,6-h],[16,-2-h],[12,-6-h],[4,-6-h+4],[0,-14-h+8]],shadeColor(brick,.68));
-    for(let k=0;k<2;k++){const y=-6-k*9;this.poly([[-10,y-1],[-6,y+1],[-6,y-5],[-10,y-7]],'#5f4a3c');this.window([[4,y+2],[7,y+.5],[7,y-3],[4,y-1.5]],'#7d8f8a');this.window([[10,y-1],[13,y-2.5],[13,y-6],[10,y-4.5]],'#7d8f8a');}
-    this.line([[-8,-23],[-12,-26]],'#4f3b2e',1.4);this.line([[-12,-26],[-12,-18]],'#6e6a62',.5);this.rect(-13,-18,2,2,'#8a6a4c');
-    if(this.sim.year>=1900&&hash(t.y,t.x)<.6){const sw=this.reduced?0:Math.sin(this.time*.3+t.x)*.25;this.line([[20,6],[20,-36]],'#c95b4c',1.8);this.line([[17,6],[23,6]],'#6e6a62',1.4);this.ctx.save();this.ctx.translate(20,-36);this.ctx.rotate(-.35+sw);this.line([[-4,0],[22,0]],'#c95b4c',1.6);this.line([[20,0],[20,14]],'#6e6a62',.5);this.rect(18,14,4,3,'#5c8fc0');this.ctx.restore();}
+    const brick=['#a8664f','#9a5d4a','#b2745a'][Math.floor(hash(t.x,t.y)*3)],L=20,W=16,H=20,R=11;
+    this.ellipse(5,5,20,6,'rgba(40,55,40,.12)');
+    const box=this.isoBox(L,W,H,0,brick,shadeColor(brick,.86),shadeColor(brick,.74)),at=box.at,ridgeBack=at(-L/2,0,H+R),ridgeFront=at(L/2,0,H+R);
+    this.poly([at(-L/2,-W/2,H),at(L/2,-W/2,H),ridgeFront,ridgeBack],shadeColor(brick,.62));
+    this.poly([at(-L/2,W/2,H),at(L/2,W/2,H),ridgeFront,ridgeBack],shadeColor(brick,.7));
+    // The stepped gable on the front: four steps up each side and a small cap.
+    const steps=[];for(let k=0;k<=3;k++){const v=-W/2+k*W/8,hk=H+R*(k+1)/4.4;steps.push(at(L/2,v,H+R*k/4.4),at(L/2,v,hk));}
+    steps.push(at(L/2,-W/16,H+R),at(L/2,W/16,H+R));for(let k=3;k>=0;k--){const v=W/2-k*W/8,hk=H+R*(k+1)/4.4;steps.push(at(L/2,v,hk),at(L/2,v,H+R*k/4.4));}
+    this.poly([at(L/2,-W/2,H),...steps,at(L/2,W/2,H)],shadeColor(brick,.74));
+    // Loading doors stacked on the front, a hoist beam at the top, and windows on the long side.
+    for(let k=0;k<3;k++){const h0=2+k*6.5;this.poly([at(L/2,-2,h0),at(L/2,2,h0),at(L/2,2,h0+4.6),at(L/2,-2,h0+4.6)],'#5f4a3c');}
+    const beam=at(L/2,0,H+R*.75),beamEnd=at(L/2+5,0,H+R*.75);this.line([beam,beamEnd],'#4f3b2e',1.4);this.line([beamEnd,[beamEnd[0],beamEnd[1]+8]],'#6e6a62',.5);this.rect(beamEnd[0]-1,beamEnd[1]+8,2,2,'#8a6a4c');
+    for(const u of [-6,-1,4])for(const h0 of [4,11])this.window([at(u,W/2,h0),at(u+2.6,W/2,h0),at(u+2.6,W/2,h0+3.6),at(u,W/2,h0+3.6)],'#7d8f8a');
+    this.snow([at(-L/2,W/2,H),at(L/2,W/2,H),ridgeFront,ridgeBack]);
+    if(this.sim.year>=1900&&hash(t.y,t.x)<.6){const sw=this.reduced?0:Math.sin(this.time*.3+t.x)*.25;this.line([[22,8],[22,-36]],'#c95b4c',1.8);this.line([[19,8],[25,8]],'#6e6a62',1.4);this.ctx.save();this.ctx.translate(22,-36);this.ctx.rotate(-.35+sw);this.line([[-4,0],[22,0]],'#c95b4c',1.6);this.line([[20,0],[20,14]],'#6e6a62',.5);this.rect(18,14,4,3,'#5c8fc0');this.ctx.restore();}
   }
   delightYard(t){
     const p=this.p(t.x,t.y),c=this.ctx,time=this.reduced?0:this.time,{type,i}=t.yardOf,fence=(color='#8a7552')=>{for(const [a,b] of [[[-21,0],[0,-10.5]],[[0,-10.5],[21,0]],[[21,0],[0,10.5]],[[0,10.5],[-21,0]]])this.line([a,b],color,.9);for(const [x,y] of [[-21,0],[0,-10.5],[21,0],[0,10.5],[-10.5,-5.25],[10.5,-5.25],[10.5,5.25],[-10.5,5.25]])this.line([[x,y],[x,y-3]],color,.8);};
@@ -5716,8 +5925,8 @@ class IslandRenderer {
     this.diamond(0,0,22,11,'#b9bdb4');this.diamond(0,0,10,5,'#9da39b');this.line([[-12,0],[12,0]],'#e2c26a',1);
     this.line([[12,2],[12,-34]],'#7d8580',1.4);this.line([[12,-30],[4,-30]],'#7d8580',1);
     // Every so often the rocket lifts off with a plume, then a new one stands ready.
-    const cycle=this.reduced?0:(this.time*.05+t.x*.13)%1,lift=cycle>.85?Math.pow((cycle-.85)/.15,2)*160:0;
-    if(lift<150){const y=-lift;this.poly([[-3,y-2],[3,y-2],[3,y-24],[0,y-31],[-3,y-24]],'#eeeeea');this.poly([[-3,y-6],[-6,y],[-3,y-1]],'#c95b4c');this.poly([[3,y-6],[6,y],[3,y-1]],'#c95b4c');this.ellipse(0,y-17,1.4,1.4,'#7fa3a8');
+    const cycle=this.reduced?0:(this.time*.04+t.x*.13)%1,lift=cycle>.8?Math.pow((cycle-.8)/.2,2.2)*2400:0;
+    if(lift<2300){const y=-lift;if(lift>0)for(let i=0;i<10;i++){const f=i/10,len=Math.min(lift,260);this.ellipse((Math.sin(i*1.7+this.time*6))*(2+f*4),y+4+f*len,2.5+f*7,2+f*5,`rgba(235,232,224,${((1-f)*.5).toFixed(3)})`);}this.poly([[-3,y-2],[3,y-2],[3,y-24],[0,y-31],[-3,y-24]],'#eeeeea');this.poly([[-3,y-6],[-6,y],[-3,y-1]],'#c95b4c');this.poly([[3,y-6],[6,y],[3,y-1]],'#c95b4c');this.ellipse(0,y-17,1.4,1.4,'#7fa3a8');
       if(lift>0)for(let i=0;i<6;i++){const f=i/6;this.ellipse((Math.random()-.5)*4,y+2+f*18,3+f*6,2+f*4,`rgba(${f<.3?'255,210,140':'230,228,220'},${(1-f)*.85})`);}}
   }
   museum(){
@@ -5775,23 +5984,39 @@ class IslandRenderer {
     c.save();c.globalAlpha=.5+this.light.darkness*.5;this.ellipse(0,-60,3,3,'#fff6cf');c.restore();
   }
   // The first huts come in three shapes with their own thatch, so a young village never looks copied.
+  // Snow settles on roofs in winter: a white layer over the roof plane.
+  snow(points){
+    const w=this.light?.winter||0;if(w<=.25)return;const k=Math.min(1,(w-.25)*1.6);
+    // Solid snow: a cool white layer that leaves a thin edge of roof showing, brighter towards the top for some volume.
+    const cx=points.reduce((a,p)=>a+p[0],0)/points.length,cy=points.reduce((a,p)=>a+p[1],0)/points.length,inset=points.map(([x,y])=>[x+(cx-x)*.08,y+(cy-y)*.08]);
+    this.poly(inset,`rgba(226,233,238,${(.95*k).toFixed(3)})`);
+    const top=points.reduce((a,p)=>p[1]<a[1]?p:a,points[0]),upper=inset.map(([x,y])=>[x+(top[0]-x)*.45,y+(top[1]-y)*.45]);
+    this.poly(upper,`rgba(246,249,250,${(.9*k).toFixed(3)})`);
+  }
+  // A brick chimney with a cap, and smoke that curls away.
+  chimney(x,y,smoke=true){
+    this.poly([[x-2.6,y],[x,y+1.3],[x,y-6.5],[x-2.6,y-7.8]],'#a8664f');this.poly([[x,y+1.3],[x+2.6,y],[x+2.6,y-7.8],[x,y-6.5]],'#8a5242');
+    this.poly([[x-3.2,y-7.9],[x,y-6.4],[x+3.2,y-7.9],[x,y-9.4]],'#6e5a52');
+    if((this.light?.winter||0)>.4)this.poly([[x-2.8,y-8.6],[x,y-7.4],[x+2.8,y-8.6],[x,y-9.8]],'#f6f8fa');
+    if(smoke)for(let i=0;i<3;i++){const t=this.reduced?.3+i*.2:(this.time*.3+i*.32)%1;this.ellipse(x+Math.sin(t*3)*4,y-11-t*17,1.8+t*3,1.6+t*2,`rgba(244,244,232,${((1-t)*.36).toFixed(3)})`);}
+  }
   hut(v){
     const L=this.look||DEFAULT_LOOK,h=hash(this.currentTile?.x??1,this.currentTile?.y??2),thatch=THATCH[Math.floor(h*THATCH.length)],shade=shadeColor(thatch,.82),shape=Math.floor(hash((this.currentTile?.y??3)*3,(this.currentTile?.x??4)*7)*3);
     this.ellipse(5,4,17,5.5,'#58654413');
     if(shape===0){
       // A round hut with a conical straw roof.
       this.ellipse(0,-3,12,6,shadeColor(L.wall,.92));this.poly([[-12,-3],[-12,-12],[12,-12],[12,-3]],L.wall);this.ellipse(0,-12,12,6,L.side);this.ellipse(0,-3,12,6,'#00000000');
-      this.poly([[-15,-12],[0,-32],[15,-12],[0,-6]],thatch);this.poly([[0,-32],[15,-12],[0,-6]],shade);for(let i=0;i<4;i++)this.line([[-12+i*6,-11+Math.abs(i-1.5)],[-1+i*.4,-30]],'#00000014',.6);
+      this.poly([[-15,-12],[0,-32],[15,-12],[0,-6]],thatch);this.poly([[0,-32],[15,-12],[0,-6]],shade);this.snow([[-15,-12],[0,-32],[15,-12],[0,-9]]);for(let i=0;i<4;i++)this.line([[-12+i*6,-11+Math.abs(i-1.5)],[-1+i*.4,-30]],'#00000014',.6);
       this.poly([[3,-3],[7,-4.5],[7,-10],[3,-8.5]],'#6f5a40');
     }else if(shape===1){
       // A long farmhouse, low and wide, with the roof nearly to the ground.
       this.poly([[-17,-4],[0,4],[0,-6],[-17,-14]],L.wall);this.poly([[0,4],[10,-1],[10,-11],[0,-6]],L.side);
-      this.poly([[-20,-12],[-6,-26],[13,-12],[0,-3]],thatch);this.poly([[-6,-26],[13,-12],[0,-3]],shade);this.poly([[-20,-12],[-6,-26],[-5,-23],[-17,-11]],shadeColor(thatch,1.08));
+      this.poly([[-20,-12],[-6,-26],[13,-12],[0,-3]],thatch);this.poly([[-6,-26],[13,-12],[0,-3]],shade);this.poly([[-20,-12],[-6,-26],[-5,-23],[-17,-11]],shadeColor(thatch,1.08));this.snow([[-20,-12],[-6,-26],[13,-12],[0,-5]]);
       this.window([[-12,-6],[-8,-4],[-8,-8],[-12,-10]],L.shutter);this.poly([[3,-2],[6,-3.5],[6,-9],[3,-7.5]],'#6f5a40');
     }else{
       // A timber cabin with a steep gable.
       this.poly([[-12,-4],[0,2],[0,-10],[-12,-16]],shadeColor(L.wall,.95));this.poly([[0,2],[12,-4],[12,-16],[0,-10]],L.side);
-      this.poly([[-15,-15],[-2,-30],[15,-16],[1,-8]],thatch);this.poly([[-2,-30],[15,-16],[1,-8]],shade);
+      this.poly([[-15,-15],[-2,-30],[15,-16],[1,-8]],thatch);this.poly([[-2,-30],[15,-16],[1,-8]],shade);this.snow([[-15,-15],[-2,-30],[15,-16],[1,-10]]);
       for(let i=0;i<3;i++)this.line([[-12,-6-i*3.5],[0,0-i*3.5]],'#00000012',.6);
       this.window([[4,-5],[8,-7],[8,-11],[4,-9]],L.shutter);
     }
@@ -5813,21 +6038,14 @@ class IslandRenderer {
     // Visible gable and two sloped roof planes.
     this.poly([[-17,-h-3],[-2,-h-17],[12,-h-10],[-2,-h+4]],L.gable||(v>.5?'#bd8b69':'#af805e'));
     this.poly([[-2,-h-17],[17,-h-7],[2,-h+5],[-2,-h+4]],roof);
-    for(let i=0;i<3;i++)this.line([[-13+i*5,-h-4-i*4],[-1+i*5,-h+2-i*4]],'#e0b78a45',.6);
+    this.snow([[-17,-h-3],[-2,-h-20],[17,-h-11],[2,-h-1]]);this.snow([[-2,-h-17],[17,-h-7],[2,-h+3],[-2,-h+2]]);
     this.poly([[-8,-2],[-3,0],[-3,-8],[-8,-10]],'#897957');
     this.window([[5,-7],[9,-9],[9,-14],[5,-12]],L.shutter);
     if(L.flowers){this.poly([[4,-6],[10,-9],[10,-7],[4,-4]],'#8d7a5a');for(let i=0;i<3;i++)this.ellipse(5.5+i*2,-6.6-i,1.2,1,L.flowers);}
     this.line([[7,-8],[7,-13]],'#b7c0a0',.6);
     if(level>0){this.window([[-9,-14],[-5,-12],[-5,-17],[-9,-19]],L.shutterSide);this.window([[5,-19],[9,-21],[9,-25],[5,-23]],L.shutter);}
     if(level>1){this.window([[-9,-24],[-5,-22],[-5,-27],[-9,-29]],L.shutterSide);this.window([[5,-29],[9,-31],[9,-35],[5,-33]],L.shutter);}
-    if(L.chimney!==false&&(v>.4 || level>0)){
-      this.poly([[7,-h-15],[11,-h-17],[11,-h-25],[7,-h-23]],'#a7a18a');
-      this.poly([[4,-h-17],[7,-h-15],[7,-h-23],[4,-h-25]],'#c7bca0');
-      for(let i=0;i<3;i++){
-        const t=(this.time*.3+i*.32)%1;
-        this.ellipse(8+Math.sin(t*3)*5,-h-27-t*19,2+t*3,1.8+t*2,`rgba(244,244,225,${(1-t)*.38})`);
-      }
-    }
+    if(L.chimney!==false&&(v>.4 || level>0))this.chimney(8,-h-14);
     if(level===0){this.rect(-16,-2,3,4,'#d4c39b');this.ellipse(-15,-3,2.3,1.3,'#aaa980');}
   }
   historicalHouse(v,style){
@@ -5837,7 +6055,7 @@ class IslandRenderer {
       this.poly([[-16,-4],[0,4],[16,-4],[16,-20],[0,-28],[-16,-20]],this.look?Lc.wall:'#ded3b2');
       this.poly([[0,4],[16,-4],[16,-20],[0,-12]],this.look?Lc.side:'#bcc3a1');
       this.poly([[-20,-21],[0,-34],[20,-21],[0,-11]],croof);
-      this.poly([[-20,-21],[0,-34],[0,-11]],shadeColor(croof,1.1));
+      this.poly([[-20,-21],[0,-34],[0,-11]],shadeColor(croof,1.1));this.snow([[-20,-21],[0,-34],[20,-21],[0,-13]]);
       for(let i=0;i<4;i++)this.line([[-13+i*4,-5+i*2],[-13+i*4,-18+i*2]],'#eee3c3',2.3);
       this.window([[5,-5],[10,-8],[10,-17],[5,-14]],this.look?Lc.shutter:'#84977e');
       this.diamond(-3,5,10,5,'#c8bd98');this.ellipse(12,2,2.5,1.5,'#a7ad75');return;
@@ -5845,19 +6063,32 @@ class IslandRenderer {
     const L=this.look||DEFAULT_LOOK,medieval=style==='medieval',h=(medieval?22:27)+L.extra,roof=L.roof?(medieval?shadeColor(L.roof,.95):L.roof):medieval?'#958663':v>.5?'#ae7e65':'#8c9879';
     this.poly([[-14,-4],[0,4],[14,-4],[14,-4-h],[0,4-h],[-14,-4-h]],this.look?L.wall:medieval?'#d4c3a1':'#d6b498');
     this.poly([[0,4],[14,-4],[14,-4-h],[0,4-h]],this.look?L.side:medieval?'#bcc0a0':'#b6b69a');
-    this.poly([[-18,-h-3],[-4,-h-24],[18,-h-11],[3,-h+5]],roof);
-    this.poly([[-18,-h-3],[-4,-h-24],[3,-h+5]],this.look?L.gable:medieval?'#b0a078':'#c29879');
+    // A straight pyramid roof: the top right above the middle, the eaves just outside the walls.
+    const rl=[-17,-h-4],rf=[0,-h+6],rr=[17,-h-4],ra=[0,-h-26];
+    this.poly([rl,ra,rr,rf],roof);
+    this.poly([rl,ra,rf],this.look?L.gable:medieval?'#b0a078':'#c29879');
+    this.poly([rf,ra,rr],shadeColor(roof,.9));
+    this.snow([rl,ra,rr,rf]);
     this.poly([[-8,-1],[-3,2],[-3,-9],[-8,-12]],'#8c7958');
     if(medieval){
       for(const x of [-12,-2])this.line([[x,-3+(x+12)*.5],[x,-25+(x+12)*.5]],'#8e7857',1.4);
       this.line([[-13,-15],[-1,-9]],'#8e7857',1.4);this.line([[-12,-24],[-2,-10]],'#8e7857',1.1);this.line([[-12,-6],[-2,-19]],'#8e7857',1.1);
     }else{
       for(let i=0;i<2;i++){const x=-11+i*7;this.poly([[x,-18+i*3],[x+3,-16+i*3],[x+3,-23+i*3],[x,-25+i*3]],'#849580');}
-      this.line([[-15,-26],[0,-18],[15,-26]],'#e4cba7',1.8);this.poly([[-4,-45],[0,-40],[4,-35],[-1,-34]],'#dcc09b');
+      this.chimney(9,-h-12);
     }
     for(let i=0;i<2;i++)this.window([[5,-10-i*12],[9,-12-i*12],[9,-17-i*12],[5,-15-i*12]],this.look?L.shutter:'#7d937c');
     if(L.flowers)for(let i=0;i<3;i++)this.ellipse(6+i*1.5,-9.5-i*.8,1.1,.9,L.flowers);
     this.ellipse(-15,3,2,1.2,'#b7a37a');
+  }
+  // A pasture: grass, a wooden fence round the edge and a water trough.
+  pasture(t){
+    const L=this.light||{},grass=L.winter>.6?'#e4e9e4':L.autumn>.5?'#a9b06e':'#9fbb73';
+    this.diamond(0,-1,21,10,grass);
+    for(let i=0;i<7;i++){const x=(hash(i,t.x)-.5)*30,y=(hash(t.y,i)-.5)*13-1;this.line([[x,y],[x-1,y-2.4]],shadeColor(grass,.8),.8);this.line([[x+1,y],[x+1.6,y-2]],shadeColor(grass,.85),.7);}
+    const corners=[[-21,-1],[0,-11],[21,-1],[0,9]];
+    for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4];for(let k=0;k<=4;k++){const f=k/4,x=mix(a[0],b[0],f),y=mix(a[1],b[1],f);this.line([[x,y],[x,y-4]],'#8a6a4c',.9);}this.line([[a[0],a[1]-3],[b[0],b[1]-3]],'#a08260',.7);this.line([[a[0],a[1]-1.6],[b[0],b[1]-1.6]],'#a08260',.6);}
+    this.poly([[6,2],[12,5],[12,3.5],[6,.5]],'#7f6a52');this.poly([[6,.5],[12,3.5],[13,3],[7,0]],'#9fc4cf');
   }
   farm(v){
     this.diamond(0,-1,21,10,'#b0a575');
@@ -5869,18 +6100,39 @@ class IslandRenderer {
         const xx=x-6+j*3.8,yy=-4+j*1.9;
         this.line([[xx,yy],[xx,yy-3.5-Math.sin(this.time*.7+j)*.3]],v>.4?'#889d55':'#c8bd72',1.5);
         this.line([[xx,yy-2],[xx+1.5,yy-3]],'#b3bb70',1);
+        if(tulipTime(this.sim))this.ellipse(xx,yy-4,1.3,1.5,['#d9534a','#e8c040','#f1a5c0','#f6f2e6','#c64a42'][(i+2)%5]);
       }
     }
     if(v>.5){this.line([[-19,-5],[-19,-11]],'#a08c60',1.3);this.line([[-19,-10],[-14,-8]],'#bca575',1.4);}
     if(v>.76){this.rect(12,-8,4,4,'#b99e71');this.line([[14,-8],[14,-18]],'#9b8760',1.1);this.line([[10,-16],[18,-13]],'#a18f62',2);}
   }
+  // The harbour grows with the ages: a wooden jetty, a pier on piles, a stone quay with a treadwheel crane,
+  // bollards, lamps and a steamer, a concrete quay with containers and a tug, and finally a marina.
   dock(harbor){
-    const length=harbor?42:31;
-    this.poly([[-8,-7],[7,-1],[-1,length-4],[-14,length-10]],harbor?'#aba78c':'#b7a17a');
-    for(let i=0;i<7;i++)this.line([[-8-i*.8,-5+i*length/8],[6-i*.8,1+i*length/8]],'#d5c59c',.8);
-    for(const p of [[-8,-5],[6,2],[-12,length-10],[0,length-5]]){this.line([[p[0],p[1]+3],[p[0],p[1]-5]],'#897d5c',2);this.ellipse(p[0],p[1]-5,1.5,.7,'#cebe94');}
-    if(harbor){this.line([[5,0],[5,-32],[22,-25]],'#7e8d7b',2);this.line([[22,-25],[22,-12]],'#899785',1);}
-    this.ctx.save();this.ctx.translate(12,13+Math.sin(this.time*1.1)*.6);this.smallBoat(false);this.ctx.restore();
+    const y=this.sim.year,stage=y<600?0:y<1300?1:y<1750?2:y<1950?3:y<2040?4:5,length=[24,30,34,38,40,40][stage],t=this.reduced?0:this.time;
+    const deck=['#a78a5f','#9c7f56','#b3ad9a','#b8b2a0','#c4c4bc','#d6d2c4'][stage],edge=shadeColor(deck,.72),half=[4,5,7,8,9,8][stage];
+    // The pier starts at the shared edge with the land (up and to the right) and runs out along the iso axis.
+    const S=[11.5,-5.75],u=[-.894,.447],v=[.894,.447],P=(a,c)=>[S[0]+u[0]*a+v[0]*c,S[1]+u[1]*a+v[1]*c];
+    const A=P(0,-half),B=P(0,half),C=P(length,half),D=P(length,-half),drop=stage<=1?2:4,down=p=>[p[0],p[1]+drop];
+    if(stage<=1)for(let i=0;i<5;i++){const [x,yy]=P(length*i/4,half);this.line([[x,yy],[x,yy+5]],'#6e5a40',1.4);}
+    this.poly([B,C,down(C),down(B)],edge);this.poly([D,C,down(C),down(D)],shadeColor(edge,.9));
+    this.poly([A,B,C,D],deck);
+    for(let i=1;i<(stage<=1?8:5);i++){const f=length*i/(stage<=1?8:5);this.line([P(f,-half),P(f,half)],shadeColor(deck,stage<=1?.85:.9),stage<=1?.6:.5);}
+    if(stage>=2)for(let i=0;i<4;i++){const [x,yy]=P(length*(.15+i*.25),half-1.2);this.rect(x-1,yy-3,2,3,'#4f4a44');this.ellipse(x,yy-3,1.2,.6,'#6a645c');}
+    if(stage===2){// A wooden treadwheel crane at the end of the quay, and a few barrels.
+      const [cx,cy]=P(length*.8,-half+2);this.line([[cx-3,cy+2],[cx,cy-22]],'#6e5a40',1.6);this.line([[cx+3,cy+3],[cx,cy-22]],'#6e5a40',1.6);this.line([[cx,cy-22],[cx-15,cy-15]],'#6e5a40',1.4);this.line([[cx-15,cy-15],[cx-15,cy-6]],'#6e6a62',.5);
+      this.ctx.beginPath();this.ctx.ellipse(cx,cy-2,4.5,5.5,0,0,Math.PI*2);this.ctx.strokeStyle='#8a6a4c';this.ctx.lineWidth=1.2;this.ctx.stroke();
+      for(const f of [.25,.4]){const [x,yy]=P(length*f,-half+3);this.rect(x-2,yy-3,4,3,'#9a7a55');this.ellipse(x,yy-3,2,1,'#b08a5e');}
+    }
+    if(stage===3||stage===4)for(const f of [.25,.75]){const [x,yy]=P(length*f,-half+1);this.line([[x,yy],[x,yy-12]],'#4f5a52',.8);this.ellipse(x,yy-12.5,1.3,1.3,'#f2e6b8');this.lampLight(x,yy-12.5,this.currentTile);}
+    if(stage===4)for(const [f,c,col] of [[.45,-2,'#c95b4c'],[.55,1,'#5c8fc0'],[.62,-3,'#e2c26a']]){const [x,yy]=P(length*f,c);this.poly([[x-3,yy],[x+3,yy+1.5],[x+3,yy-2.5],[x-3,yy-4]],col);this.poly([[x+3,yy+1.5],[x+5,yy+.5],[x+5,yy-3.5],[x+3,yy-2.5]],shadeColor(col,.75));this.poly([[x-3,yy-4],[x+3,yy-2.5],[x+5,yy-3.5],[x-1,yy-5]],shadeColor(col,1.12));}
+    // Boats moored alongside, in the style of the age.
+    const [bx,by]=P(length*.6,half+9),bob=Math.sin(t*1.1)*.6;this.ctx.save();this.ctx.translate(bx,by+bob);
+    if(stage<=2)this.smallBoat(false);
+    else if(stage===3){this.poly([[-12,0],[12,-3],[9,3],[-9,4]],'#3f4a52');this.poly([[-7,-2],[6,-4],[6,-8],[-6,-6]],'#e8e2d2');this.rect(0,-14,3,7,'#2f3438');this.rect(0,-14,3,2,'#c95b4c');if(!this.reduced)this.ellipse(2-Math.sin(t)*2,-17-((t*3)%5),2,1.6,'rgba(90,90,90,.35)');}
+    else if(stage===4){this.poly([[-8,0],[8,-2],[6,3],[-6,4]],'#c95b4c');this.poly([[-4,-2],[3,-3],[3,-7],[-4,-6]],'#f1ede2');this.line([[0,-7],[0,-11]],'#2f3438',1);}
+    else for(let k=0;k<3;k++){const x=-9+k*9,yy=-k*4;this.poly([[x-6,yy],[x+6,yy-1.5],[x+4,yy+2],[x-4,yy+2.5]],'#f6f6f2');this.line([[x,yy-1],[x,yy-16]],'#8a8478',.6);this.poly([[x+.4,yy-15],[x+6,yy-3],[x+.4,yy-2.5]],'#ffffff');}
+    this.ctx.restore();
   }
   pump(tile){
     const broken=tile?.pumpBrokenUntil>this.sim.year||(!this.sim.brokenPump&&this.sim.pumpBroken);
@@ -6180,7 +6432,13 @@ class IslandRenderer {
     }
   }
   drawBirds(){
-    const c=this.ctx;c.strokeStyle='#7d978579';c.lineWidth=1;
+    const c=this.ctx;
+    // A few birds of prey soaring in slow circles around the highest peak.
+    const key=`${this.sim.seed}|${this.sim.land.length}`;if(this.peakKey!==key){this.peakKey=key;this.peak=this.sim.land.filter(t=>t.landform==='mountain'||t.landform==='volcano').sort((a,b)=>(b.relief||0)-(a.relief||0))[0]||null;}
+    if(this.peak&&!this.sim.storm){const base=this.point(this.peak.x,this.peak.y),h=(this.peak.relief||55)*1.9*this.zoom,z=this.zoom;c.strokeStyle='#4f5a52aa';c.lineWidth=1.2;
+      for(let i=0;i<3;i++){const a=(this.reduced?i*2:this.time*.18+i*2.1),rx=(34+i*12)*z,ry=rx*.38,x=base.x+Math.cos(a)*rx,y=base.y-h*(.7+i*.12)+Math.sin(a)*ry,wing=(1.6+Math.sin(this.time*1.2+i)*.6)*z,span=6*z;
+        c.beginPath();c.moveTo(x-span,y-wing*.4);c.quadraticCurveTo(x-span*.45,y-wing,x,y);c.quadraticCurveTo(x+span*.45,y-wing,x+span,y-wing*.4);c.stroke();}}
+    c.strokeStyle='#7d978579';c.lineWidth=1;
     for(let i=0;i<5;i++){
       const x=this.width*(.66+hash(i,7)*.2)+Math.sin(this.time*.12+i)*17;
       const y=this.height*(.2+hash(i,6)*.14)+Math.cos(this.time*.2+i)*7;
@@ -6517,8 +6775,11 @@ function renderTimeline(){
   const moments=sim.history.filter(e=>TIMELINE_KINDS[e.type]&&(e.priority||0)>=78).slice(-10).map(e=>{const dot=document.createElement('span');dot.className='moment';dot.dataset.kind=TIMELINE_KINDS[e.type];dot.style.left=`${(timelinePosition(e.year)*100).toFixed(2)}%`;dot.title=`Jaar ${e.year}: ${nl(e.text)}`;return dot;});
   const marker=document.createElement('span');marker.className='marker';marker.style.left=`${(timelinePosition(sim.year)*100).toFixed(2)}%`;
   $('timeline-track').replaceChildren(...ages,...moments,marker);
-  const next=ERAS[sim.era+1];
-  $('timeline-now').textContent=sim.ending?'Het verhaal is af':sim.endgameStarted?`Jaar ${sim.year} · het laatste hoofdstuk`:next?`Jaar ${sim.year} · ${TIMELINE_AGES[sim.era+1].toLowerCase()} vanaf ongeveer ${next.year}`:`Jaar ${sim.year} · nog even tot het laatste hoofdstuk`;
+  // Now in words (on phones that is all you see), and what comes next on larger screens.
+  const next=ERAS[sim.era+1],now=document.createElement('b'),later=document.createElement('span');later.className='timeline-next';
+  now.textContent=sim.ending?'Het verhaal is af':`Jaar ${sim.year} · ${sim.endgameStarted?'het laatste hoofdstuk':TIMELINE_AGES[sim.era]}`;
+  later.textContent=sim.ending||sim.endgameStarted?'':next?` · ${TIMELINE_AGES[sim.era+1].toLowerCase()} vanaf ongeveer ${next.year}`:' · nog even tot het laatste hoofdstuk';
+  $('timeline-now').replaceChildren(now,later);
 }
 function updateUI(){
   renderTimeline();
@@ -6691,8 +6952,9 @@ function frame(now){
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;
-  // A paused island only needs half the frames.
-  drawTick=(drawTick+1)%2;if(!renderer.paused||tour||drawTick===0)renderer.draw(now);
+  // A paused island only needs half the frames, and so does a device that struggles to keep up.
+  drawTick=(drawTick+1)%2;const slow=(renderer.drawCost||0)>22;
+  if((!renderer.paused&&!slow)||tour||drawTick===0){const t0=performance.now();renderer.draw(now);renderer.drawCost=(renderer.drawCost||0)*.9+(performance.now()-t0)*.1;}
   const night=renderer.light.darkness>.3;if(night!==nightShown){nightShown=night;$('island-window').classList.toggle('is-night',night);updateUI();}
   if(cinemaActive()){
     const stage=$('finale-canvas'),box=stage.getBoundingClientRect(),w=Math.max(300,Math.round(box.width)),h=Math.max(200,Math.round(box.height));
@@ -6835,6 +7097,7 @@ function newIsland(){
   undoTimer=setTimeout(()=>{previousIsland=null;$('undo-reset').hidden=true;},10000);
 }
 $('new-island').addEventListener('click',newIsland);
+try{const id=islandIdentity(sim);$('title-island').textContent=sim.year>1?`${id.name} · jaar ${sim.year}`:`${id.name} · een nieuw begin`;}catch{}
 // Minimal interface: the few buttons that used to live around the island join the bar at the bottom.
 $('island-toolbar').append($('new-island'),$('undo-reset'),$('open-ending'));
 $('confirm-restart').addEventListener('click',newIsland);

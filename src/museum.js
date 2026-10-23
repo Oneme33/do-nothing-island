@@ -14,6 +14,7 @@ export function museumExhibits(s){
  for(const f of s.famous||[]){const d=FAMOUS.find(x=>x.id===f.id);if(d)items.push({year:f.year,kind:'Beroemde eilander',title:`${d.exhibit} van ${f.name}`,text:`${f.name}, ${d.role}, ${d.deed}`});}
  for(const f of s.digs?.finds||[])items.push({year:f.year,kind:'Opgraving',title:findTitle(s,f),text:findText(f)});
  for(const v of s.visitors?.history||[]){const d=VISITORS.find(x=>x.kind===v.kind);if(d)items.push({year:v.year,kind:'Bezoek',title:`Een souvenir: ${d.label.replace('!','').toLowerCase()}`,text:d.leave});}
+ if(s.printingPress)items.push({year:s.printingPress,kind:'Uitvinding',title:'Het eerste gedrukte boek',text:'Een kookboek. Op bladzijde één: hoe je een kookboek drukt.'});
  if(s.coast?.lighthouse?.year)items.push({year:s.coast.lighthouse.since||s.coast.lighthouse.year,kind:'Gebouw',title:'De eerste vuurtoren',text:'Een maquette met een heel klein katje op de trap.'});
  if(s.square?.builtYear)items.push({year:s.square.builtYear,kind:'Gebouw',title:'Het dorpsplein',text:'Een foto van de eerste bank. Er zit al iemand op.'});
  return items.sort((a,b)=>a.year-b.year);
