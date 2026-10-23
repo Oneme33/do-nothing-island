@@ -254,9 +254,11 @@ export class Civilization {
     this.skyline={x:best.x,y:best.y};return this.skyline;
   }
   inOldTown(tile){return Math.hypot(tile.x+1,tile.y-1)<=3.2;}
+  // Homes among the fields stay farmhouses rather than turning into townhouses.
+  nearFarms(tile){let n=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(this.tile(tile.x+dx,tile.y+dy)?.building==='farm')n++;return n>=2;}
   homeTypeFor(tile) {
     if(this.era<3)return this.era===0?'hut':'house';
-    if(this.inOldTown(tile)||this.isCoast(tile))return'house';
+    if(this.inOldTown(tile)||this.isCoast(tile)||this.nearFarms(tile))return'house';
     if(this.year>=1960){
       const c=this.skylineCentre(),near=Math.hypot(tile.x-c.x,tile.y-c.y)<=TOWER_RADIUS;
       if(near&&(tile.building==='tower'||this.houses.filter(t=>t.building==='tower').length<TOWER_CAP))return'tower';
@@ -359,6 +361,8 @@ export class Civilization {
       this.prosperity=Math.min(99,this.prosperity+5);this.log(['The village holds a festival. The music is better than the planning.','A sculptor unveils new work. The pigeons are the first patrons.','A tiny parade celebrates something. Nobody quite agrees what.'][Math.floor(this.random()*3)],'culture');this.signal('celebrate',this.buildings.find(t=>t.building==='statue'),'A very local festival!');
     }
     if(this.era>=1 && this.year%43===0)this.buildBridge();
+    if(this.year%11===5)this.tidyBridges();
+    if(this.year%20===13)this.growHarborQuarter();
     if(this.year===16 || (this.year%51===0 && this.era>=1)) this.buildDock();
     if(this.year%18===0 && this.era>=1) this.upgradeDistricts();
     if(this.year%12===0 && this.farms.length){
@@ -582,10 +586,14 @@ export class Civilization {
       if(room){room.building=null;this.planBuilding(room,'park');this.wealth-=20;this.log('After the protests, the council makes room for another public park. A bench is unveiled.','culture');}
     }
   }
+  // A bridge only makes sense with land on two opposite sides.
+  spansWater(t){const land=(x,y)=>this.tile(x,y)?.kind==='land';return land(t.x-1,t.y)&&land(t.x+1,t.y)||land(t.x,t.y-1)&&land(t.x,t.y+1);}
+  // Bridges whose water turned into land, or whose banks are gone, are taken down.
+  tidyBridges(){let changed=false;for(const t of this.tiles.values())if(t.building==='bridge'&&(t.kind!=='water'||!this.spansWater(t))&&!t.rift){t.building=null;changed=true;}if(changed)this.rebuildRoads();}
   buildBridge() {
     const bridges=[...this.tiles.values()].filter(t=>t.building==='bridge');
-    if(bridges.length>=Math.min(5,this.era+1)||this.wood<12)return;
-    const gap=[...this.tiles.values()].filter(t=>t.kind==='water'&&!t.building&&neighbors(t).filter(([x,y])=>this.tile(x,y)?.kind==='land').length>=2).sort((a,b)=>Number(!!b.rift)-Number(!!a.rift))[0];
+    if(bridges.length>=Math.min(3,this.era+1)||this.wood<12)return;
+    const gap=[...this.tiles.values()].filter(t=>t.kind==='water'&&!t.building&&this.spansWater(t)).sort((a,b)=>Number(!!b.rift)-Number(!!a.rift))[0];
     if(!gap)return;
     gap.building='bridge';gap.builtYear=this.year;this.wood-=12;
     this.rebuildRoads();this.log('A bridge cuts across the inlet. The scenic route is now a choice.','bridge');this.signal('built',gap,'A shortcut over the sea');
@@ -693,6 +701,20 @@ export class Civilization {
     if(upgrade){upgrade.architecture=this.age.id;upgrade.builtYear=this.year;this.signal('built',upgrade,'A home for a new age');}
     this.rebuildRoads();
   }
+  // The water around a harbour stays open, so the harbour never ends up landlocked by a polder.
+  inHarborBasin(t){for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++){const n=this.tile(t.x+dx,t.y+dy);if(n&&(n.building==='harbor'||n.building==='dock'))return true;}return false;}
+  // From the age of steam the main harbour gets a quarter of its own: warehouses on the quay, and cranes later on.
+  growHarborQuarter(){
+    if(this.era<2||this.ending)return;
+    const dock=[...this.tiles.values()].find(t=>t.building==='harbor'||t.building==='dock');if(!dock)return;
+    const quay=this.land.filter(t=>Math.max(Math.abs(t.x-dock.x),Math.abs(t.y-dock.y))<=2&&!t.landform&&!t.foundingHome&&!t.castle&&!t.reservedFor&&!t.buildSite&&t.district!=='heritage'&&!t.plaque&&(!t.building||['hut','house','townhouse','farm','tree','park','garden'].includes(t.building))).sort((a,b)=>Math.hypot(a.x-dock.x,a.y-dock.y)-Math.hypot(b.x-dock.x,b.y-dock.y));
+    const have=this.land.filter(t=>t.building==='warehouse').length,want=Math.min(this.year>=1900?4:3,have+1);
+    for(const t of quay.slice(0,Math.max(0,want-have))){
+      t.building='warehouse';t.builtYear=this.year;t.district='harbor';t.reservedFor='harbor';t.architecture=this.age.id;
+      if(!have)this.log('Aan de kade verrijst het eerste pakhuis. Het havenkwartier ruikt meteen naar koffie, touw en een beetje vis.','trade',{x:t.x,y:t.y});
+      this.signal('built',t,'Een pakhuis aan de kade');
+    }
+  }
   buildDock() {
     const docks=[...this.tiles.values()].filter(t=>t.building==='dock' || t.building==='harbor');
     if(docks.length>=Math.min(4,this.era+1)) return;
@@ -728,7 +750,7 @@ export class Civilization {
     const batch=Math.min(maxBatch,limit-total);
     const costs={wood:batch*(this.era===1?5:2),stone:batch*(this.era===1?1:3),wealth:batch*(this.era===1?3:5)};
     if(this.wood<costs.wood || this.stone<costs.stone || this.wealth<costs.wealth) return false;
-    const frontier=[...this.tiles.values()].filter(t=>t.kind==='water' && !t.building && neighbors(t).some(([x,y])=>this.tile(x,y)?.kind==='land') && (ambition||!neighbors(t).some(([x,y])=>this.tile(x,y)?.protectedCoast)));
+    const frontier=[...this.tiles.values()].filter(t=>t.kind==='water' && !t.building && !this.inHarborBasin(t) && !t.naturalBay && neighbors(t).some(([x,y])=>this.tile(x,y)?.kind==='land') && (ambition||!neighbors(t).some(([x,y])=>this.tile(x,y)?.protectedCoast)));
     if(!frontier.length) return false;
     // Follow one connected coast; each additional tile touches this project or existing land.
     const angle=this.random()*Math.PI*2;
@@ -736,7 +758,7 @@ export class Civilization {
     const picked=[frontier[0]];
     let isArtificial=this.era===4 && this.projectCount%4===3 && batch>=3;
     while(picked.length<batch) {
-      const candidate=[...this.tiles.values()].filter(t=>t.kind==='water' && !t.building && !picked.includes(t) && (ambition||!neighbors(t).some(([x,y])=>this.tile(x,y)?.protectedCoast)) && neighbors(t).some(([x,y])=>picked.includes(this.tile(x,y))) && (!isArtificial || !neighbors(t).some(([x,y])=>this.tile(x,y)?.kind==='land'))).sort((a,b)=>{
+      const candidate=[...this.tiles.values()].filter(t=>t.kind==='water' && !t.building && !this.inHarborBasin(t) && !t.naturalBay && !picked.includes(t) && (ambition||!neighbors(t).some(([x,y])=>this.tile(x,y)?.protectedCoast)) && neighbors(t).some(([x,y])=>picked.includes(this.tile(x,y))) && (!isArtificial || !neighbors(t).some(([x,y])=>this.tile(x,y)?.kind==='land'))).sort((a,b)=>{
         const distance=t=>Math.abs(t.x-picked[0].x)+Math.abs(t.y-picked[0].y)+Math.hypot(t.x,t.y)*.5;
         return distance(a)-distance(b);
       })[0];

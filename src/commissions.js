@@ -12,17 +12,19 @@ export function earnCommission(s){
  const c=ensureCommissions(s),helped=wishTally(s,'helped');
  if(helped%3!==0)return false;
  c.available++;c.earned++;
- s.log('De bewoners willen iets voor je bouwen, als dank voor alle hulp. Kies in het Eilandboek bij Wensen wat het wordt.','wish');
+ s.log('De bewoners willen iets voor je bouwen, als dank voor alle hulp. Kies meteen wat het wordt en waar het komt.','wish');
  return true;
 }
-export function canCommission(s,tile){return !!tile&&tile.kind==='land'&&(!tile.building||['tree','forest','park','garden','farm'].includes(tile.building))&&!tile.buildSite&&!tile.landform&&!tile.reservedFor&&!tile.foundingHome;}
+// A gift may go almost anywhere: on open ground, a park or field, or on a home whose residents happily move a street over.
+const GIFT_GROUND=['tree','forest','park','garden','farm','hut','house','townhouse'];
+export function canCommission(s,tile){return !!tile&&tile.kind==='land'&&(!tile.building||GIFT_GROUND.includes(tile.building))&&!tile.buildSite&&!tile.landform&&!tile.reservedFor&&!tile.foundingHome&&!tile.plaque&&tile.district!=='heritage';}
 export function placeCommission(s,type,x,y){
  const c=ensureCommissions(s),tile=s.tile(x,y),def=COMMISSIONS[type];
  if(!def||c.available<1||s.ending||!canCommission(s,tile))return false;
- if(['tree','forest','park','garden','farm'].includes(tile.building))tile.building=null;
+ const moved=['hut','house','townhouse'].includes(tile.building);if(GIFT_GROUND.includes(tile.building))tile.building=null;
  if(!s.planBuilding(tile,type,true))return false;
  tile.commissioned=true;c.available--;c.built.push({type,x,y,year:s.year});
- s.log(def.log,'delight',{x,y});s.signal('celebrate',tile,`${def.name}, voor jou`);
+ s.log(moved?`${def.log} De bewoners van het huisje dat er stond verhuizen graag een straatje verder.`:def.log,'delight',{x,y});s.signal('celebrate',tile,`${def.name}, voor jou`);
  return true;
 }
 // Lasting effects while the commissioned works stand.

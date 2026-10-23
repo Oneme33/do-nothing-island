@@ -20,7 +20,8 @@ export const DELIGHT_LABELS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.label])
 export const DELIGHT_OPENINGS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.opening]));
 // The zoo and the theme park need a whole block, so from year 200 the island keeps one free for each of them.
 const BIG_DELIGHTS=['zoo','theme-park'];
-const DELIGHT_RING=[[-1,0],[0,-1],[-1,-1],[1,1],[1,0],[0,1],[1,-1],[-1,1]],DELIGHT_ROLES=[0,1,2,3,4,4,6,6];
+// Rides stand at the back (they are tall); the zoo's low enclosures sit in front of its gate, with giraffes on the sides.
+const DELIGHT_RING=[[-1,0],[0,-1],[-1,-1],[1,1],[1,0],[0,1],[1,-1],[-1,1]],DELIGHT_ROLES={'theme-park':[0,1,2,3,4,4,6,6],zoo:[3,4,4,0,1,2,5,5]};
 export function reserveDelightGrounds(s){
  s.delightGrounds??={};
  for(const type of BIG_DELIGHTS){
@@ -34,8 +35,23 @@ export function reserveDelightGrounds(s){
   const spot=spots[(s.seed+type.length*31)%spots.length];
   spot.reservedFor=`delight:${type}`;s.delightGrounds[type]={x:spot.x,y:spot.y};
   const claim=(dx,dy,i)=>{const yard=s.tile(spot.x+dx,spot.y+dy);if(!free(yard))return;yard.reservedFor='delight';yard.yardOf={type,x:spot.x,y:spot.y,i};};
-  DELIGHT_RING.forEach(([dx,dy],k)=>claim(dx,dy,DELIGHT_ROLES[k]));for(const [dx,dy] of ring2)claim(dx,dy,6);
+  DELIGHT_RING.forEach(([dx,dy],k)=>claim(dx,dy,DELIGHT_ROLES[type][k]));for(const [dx,dy] of ring2)claim(dx,dy,type==='zoo'?7:6);
  }
+}
+// When the zoo or the theme park opens, the strip in front of it is cleared (the residents move a street over),
+// so you can actually see the animals and the rides.
+const FRONT_STRIP=[[2,0],[2,1],[2,2],[1,2],[0,2],[2,-1],[-1,2]];
+function openFront(s,spot,type){
+ let moved=0;
+ for(const [dx,dy] of FRONT_STRIP){
+  const t=s.tile(spot.x+dx,spot.y+dy);
+  if(!t||t.kind!=='land'||t.landform||t.foundingHome||t.plaque||t.castle||t.buildSite||t.district==='heritage'||t.reservedFor&&t.reservedFor!=='delight'||t.yardOf&&t.yardOf.type!==type)continue;
+  if(t.building&&!['hut','house','townhouse','farm','tree','park','garden'].includes(t.building))continue;
+  if(['hut','house','townhouse'].includes(t.building))moved++;
+  t.building=null;t.reservedFor='delight';t.yardOf={type,x:spot.x,y:spot.y,i:type==='zoo'?7:6};
+ }
+ if(moved)s.rebuildRoads();
+ return moved;
 }
 // Plans at most one delight at a time; returns true when something was planned.
 export function planDelight(s){
@@ -43,7 +59,7 @@ export function planDelight(s){
  for(const d of DELIGHTS){
   if(s.year<d.since||s.population<d.population||[...s.tiles.values()].some(t=>t.building===d.type||t.rebuildFrom===d.type||t.buildSite?.type===d.type))continue;
   const ground=s.delightGrounds?.[d.type]&&s.tile(s.delightGrounds[d.type].x,s.delightGrounds[d.type].y);
-  if(ground?.reservedFor===`delight:${d.type}`){ground.reservedFor=null;if(['tree','garden','park'].includes(ground.building))ground.building=null;if(!ground.building&&s.planBuilding(ground,d.type))return true;ground.reservedFor=`delight:${d.type}`;}
+  if(ground?.reservedFor===`delight:${d.type}`){ground.reservedFor=null;if(['tree','garden','park'].includes(ground.building))ground.building=null;if(!ground.building&&s.planBuilding(ground,d.type)){openFront(s,ground,d.type);return true;}ground.reservedFor=`delight:${d.type}`;}
   // A lone tree may make way; homes, farms and reserved plots never do.
   const near=(t,r)=>delightAround(t).some(p=>r(s.tile(p.x,p.y)))||[[1,1],[-1,-1],[1,-1],[-1,1],[2,0],[-2,0],[0,2],[0,-2]].some(([dx,dy])=>r(s.tile(t.x+dx,t.y+dy)));
   const spots=s.land.filter(t=>(!t.building||['tree','garden','park'].includes(t.building)||d.type==='observatory'&&t.building==='forest')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;

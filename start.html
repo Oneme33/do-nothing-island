@@ -1257,7 +1257,7 @@ function drawFinale(c,w,h,s,m,reduced=false){
  c.restore();
 }
 
-const PLACE_NAMES={hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',lighthouse:'Vuurtoren','town-square':'Dorpsplein','petting-farm':'Kinderboerderij',museum:'Eilandmuseum',monument:'Standbeeld','royal-palace':'Het nieuwe paleis','castle-garden':'Kasteeltuin',zoo:'Dierentuin',watermill:'Watermolen',watchtower:'Uitkijktoren','rose-garden':'Rozentuin','grand-fountain':'Grote fontein',carillon:'Klokkentoren','theme-park':'Pretpark',circus:'Circustent',station:'Treinstation',pool:'Openluchtzwembad',spaceport:'Ruimtehaven',observatory:'Sterrenwacht','ice-cream':'IJssalon',greenhouse:'Kas',ruins:'Ruïne'};
+const PLACE_NAMES={warehouse:'Pakhuis',hut:'Huisje',house:'Woonhuis',townhouse:'Herenhuis',tower:'Appartementen',manor:'Landhuis',palace:'Paleis',farm:'Akker',forest:'Bos',beach:'Strand',park:'Park',garden:'Tuin',tree:'Boom','original-tree':'De oorspronkelijke boom',well:'Waterput',market:'Markt',library:'Bibliotheek',school:'School','science-center':'Wetenschapscentrum',factory:'Fabriek',workshop:'Werkplaats',powerplant:'Elektriciteitscentrale',solar:'Zonnepanelen',turbine:'Windturbine',windmill:'Molen',statue:'Standbeeld',theater:'Theater',shrine:'Heiligdom',church:'Kerk',dock:'Aanlegsteiger',harbor:'Haven',bridge:'Brug',pump:'Gemaal',shop:'Winkel',bakery:'Bakkerij',cafe:'Café',playground:'Speeltuin',fairground:'Kermis',campfire:'Kampvuur',bonfire:'Vuurplaats','festival-ground':'Feestterrein','palace-wing':'Paleisvleugel','royal-garden':'Paleistuin','palace-square':'Paleisplein','campus-square':'Kennisplein','fire-station':'Brandweerkazerne',quarry:'Steengroeve',lighthouse:'Vuurtoren','town-square':'Dorpsplein','petting-farm':'Kinderboerderij',museum:'Eilandmuseum',monument:'Standbeeld','royal-palace':'Het nieuwe paleis','castle-garden':'Kasteeltuin',zoo:'Dierentuin',watermill:'Watermolen',watchtower:'Uitkijktoren','rose-garden':'Rozentuin','grand-fountain':'Grote fontein',carillon:'Klokkentoren','theme-park':'Pretpark',circus:'Circustent',station:'Treinstation',pool:'Openluchtzwembad',spaceport:'Ruimtehaven',observatory:'Sterrenwacht','ice-cream':'IJssalon',greenhouse:'Kas',ruins:'Ruïne'};
 const names=['Noor','Sam','Bo','Mila','Daan','Lou','Iris','Mo','Tess','Finn','Ada','Jip'];
 const surnames=['de Vries','van de Kust','Bos','van Dijk','de Boer','Steen','van de Berg','Visser'];
 function describePlot(s,t){
@@ -1841,13 +1841,14 @@ function placeLighthouse(s){
 }
 // New beaches appear where the coast is free and far from the existing sand.
 const BEACH_NAMES=['Noorderstrand','Oosterstrand','Zuiderstrand','Westerduin'];
-function beachTarget(year){return 1+(year>=60)+(year>=600)+(year>=1250);}
+function beachTarget(year){return 1+(year>=60)+(year>=600)+(year>=1250)+(year>=1950)+(year>=2030);}
 function beachName(t){const a=Math.atan2(t.y-t.x,t.x+t.y);return BEACH_NAMES[((Math.round(a/(Math.PI/2))%4)+4)%4];}
 function growBeach(s){
  const coast=ensureCoast(s);coast.nextBeachAt=s.year+41;
  if(s.storm||s.ending||coast.beaches.length+1>=beachTarget(s.year))return null;
  const sand=s.land.filter(t=>t.building==='beach');
- const free=t=>s.isCoast(t)&&!t.landform&&!t.reservedFor&&!t.buildSite&&!t.foundingHome&&(!t.building||t.building==='tree');
+ // Later on, coastal polder fields may turn back into sand.
+ const free=t=>s.isCoast(t)&&!t.landform&&!t.reservedFor&&!t.buildSite&&!t.foundingHome&&(!t.building||t.building==='tree'||s.year>=1950&&t.reclaimed&&t.building==='farm');
  const far=t=>sand.every(b=>Math.hypot(b.x-t.x,b.y-t.y)>=6);
  const seeds=s.land.filter(t=>free(t)&&far(t)).sort((a,b)=>coastAround(b).filter(p=>s.tile(p.x,p.y)?.kind==='water').length-coastAround(a).filter(p=>s.tile(p.x,p.y)?.kind==='water').length||a.x-b.x||a.y-b.y);
  const first=seeds[0];if(!first)return null;
@@ -1860,8 +1861,19 @@ function growBeach(s){
  s.signal('celebrate',first,`${name}!`);s.rebuildRoads();
  return cluster;
 }
+// From 1980 the island softens its straight polder edges: a jutting corner is given back to the sea as a little bay.
+function naturalizeCoast(s){
+ if(s.year<1980||s.ending||s.storm)return null;
+ const water=(x,y)=>{const n=s.tile(x,y);return !n||n.kind==='water';};
+ const corner=s.land.filter(t=>t.reclaimed&&!t.landform&&!t.foundingHome&&!t.reservedFor&&!t.buildSite&&(!t.building||['farm','tree','park','garden'].includes(t.building))&&[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].filter(([dx,dy])=>water(t.x+dx,t.y+dy)).length>=5)[0];
+ if(!corner)return null;
+ corner.kind='water';corner.building=null;corner.reclaimed=false;corner.abandonedYear=s.year;corner.naturalBay=true;
+ s.log('Een strakke polderhoek wordt teruggegeven aan de zee. Er ontstaat een kleine inham; de vogels nemen hem meteen in gebruik.','beach',{x:corner.x,y:corner.y});
+ s.rebuildRoads();return corner;
+}
 function advanceCoast(s){
  ensureCoast(s);
+ if(s.year%15===8||s.year%15===1)naturalizeCoast(s);
  if(s.year%7===0||s.year%7===3)placeLighthouse(s);
  if(s.year>=s.coast.nextBeachAt)growBeach(s);
  seasonalFinds(s);
@@ -2099,17 +2111,19 @@ function earnCommission(s){
  const c=ensureCommissions(s),helped=wishTally(s,'helped');
  if(helped%3!==0)return false;
  c.available++;c.earned++;
- s.log('De bewoners willen iets voor je bouwen, als dank voor alle hulp. Kies in het Eilandboek bij Wensen wat het wordt.','wish');
+ s.log('De bewoners willen iets voor je bouwen, als dank voor alle hulp. Kies meteen wat het wordt en waar het komt.','wish');
  return true;
 }
-function canCommission(s,tile){return !!tile&&tile.kind==='land'&&(!tile.building||['tree','forest','park','garden','farm'].includes(tile.building))&&!tile.buildSite&&!tile.landform&&!tile.reservedFor&&!tile.foundingHome;}
+// A gift may go almost anywhere: on open ground, a park or field, or on a home whose residents happily move a street over.
+const GIFT_GROUND=['tree','forest','park','garden','farm','hut','house','townhouse'];
+function canCommission(s,tile){return !!tile&&tile.kind==='land'&&(!tile.building||GIFT_GROUND.includes(tile.building))&&!tile.buildSite&&!tile.landform&&!tile.reservedFor&&!tile.foundingHome&&!tile.plaque&&tile.district!=='heritage';}
 function placeCommission(s,type,x,y){
  const c=ensureCommissions(s),tile=s.tile(x,y),def=COMMISSIONS[type];
  if(!def||c.available<1||s.ending||!canCommission(s,tile))return false;
- if(['tree','forest','park','garden','farm'].includes(tile.building))tile.building=null;
+ const moved=['hut','house','townhouse'].includes(tile.building);if(GIFT_GROUND.includes(tile.building))tile.building=null;
  if(!s.planBuilding(tile,type,true))return false;
  tile.commissioned=true;c.available--;c.built.push({type,x,y,year:s.year});
- s.log(def.log,'delight',{x,y});s.signal('celebrate',tile,`${def.name}, voor jou`);
+ s.log(moved?`${def.log} De bewoners van het huisje dat er stond verhuizen graag een straatje verder.`:def.log,'delight',{x,y});s.signal('celebrate',tile,`${def.name}, voor jou`);
  return true;
 }
 // Lasting effects while the commissioned works stand.
@@ -2144,7 +2158,8 @@ const DELIGHT_LABELS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.label]));
 const DELIGHT_OPENINGS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.opening]));
 // The zoo and the theme park need a whole block, so from year 200 the island keeps one free for each of them.
 const BIG_DELIGHTS=['zoo','theme-park'];
-const DELIGHT_RING=[[-1,0],[0,-1],[-1,-1],[1,1],[1,0],[0,1],[1,-1],[-1,1]],DELIGHT_ROLES=[0,1,2,3,4,4,6,6];
+// Rides stand at the back (they are tall); the zoo's low enclosures sit in front of its gate, with giraffes on the sides.
+const DELIGHT_RING=[[-1,0],[0,-1],[-1,-1],[1,1],[1,0],[0,1],[1,-1],[-1,1]],DELIGHT_ROLES={'theme-park':[0,1,2,3,4,4,6,6],zoo:[3,4,4,0,1,2,5,5]};
 function reserveDelightGrounds(s){
  s.delightGrounds??={};
  for(const type of BIG_DELIGHTS){
@@ -2158,8 +2173,23 @@ function reserveDelightGrounds(s){
   const spot=spots[(s.seed+type.length*31)%spots.length];
   spot.reservedFor=`delight:${type}`;s.delightGrounds[type]={x:spot.x,y:spot.y};
   const claim=(dx,dy,i)=>{const yard=s.tile(spot.x+dx,spot.y+dy);if(!free(yard))return;yard.reservedFor='delight';yard.yardOf={type,x:spot.x,y:spot.y,i};};
-  DELIGHT_RING.forEach(([dx,dy],k)=>claim(dx,dy,DELIGHT_ROLES[k]));for(const [dx,dy] of ring2)claim(dx,dy,6);
+  DELIGHT_RING.forEach(([dx,dy],k)=>claim(dx,dy,DELIGHT_ROLES[type][k]));for(const [dx,dy] of ring2)claim(dx,dy,type==='zoo'?7:6);
  }
+}
+// When the zoo or the theme park opens, the strip in front of it is cleared (the residents move a street over),
+// so you can actually see the animals and the rides.
+const FRONT_STRIP=[[2,0],[2,1],[2,2],[1,2],[0,2],[2,-1],[-1,2]];
+function openFront(s,spot,type){
+ let moved=0;
+ for(const [dx,dy] of FRONT_STRIP){
+  const t=s.tile(spot.x+dx,spot.y+dy);
+  if(!t||t.kind!=='land'||t.landform||t.foundingHome||t.plaque||t.castle||t.buildSite||t.district==='heritage'||t.reservedFor&&t.reservedFor!=='delight'||t.yardOf&&t.yardOf.type!==type)continue;
+  if(t.building&&!['hut','house','townhouse','farm','tree','park','garden'].includes(t.building))continue;
+  if(['hut','house','townhouse'].includes(t.building))moved++;
+  t.building=null;t.reservedFor='delight';t.yardOf={type,x:spot.x,y:spot.y,i:type==='zoo'?7:6};
+ }
+ if(moved)s.rebuildRoads();
+ return moved;
 }
 // Plans at most one delight at a time; returns true when something was planned.
 function planDelight(s){
@@ -2167,7 +2197,7 @@ function planDelight(s){
  for(const d of DELIGHTS){
   if(s.year<d.since||s.population<d.population||[...s.tiles.values()].some(t=>t.building===d.type||t.rebuildFrom===d.type||t.buildSite?.type===d.type))continue;
   const ground=s.delightGrounds?.[d.type]&&s.tile(s.delightGrounds[d.type].x,s.delightGrounds[d.type].y);
-  if(ground?.reservedFor===`delight:${d.type}`){ground.reservedFor=null;if(['tree','garden','park'].includes(ground.building))ground.building=null;if(!ground.building&&s.planBuilding(ground,d.type))return true;ground.reservedFor=`delight:${d.type}`;}
+  if(ground?.reservedFor===`delight:${d.type}`){ground.reservedFor=null;if(['tree','garden','park'].includes(ground.building))ground.building=null;if(!ground.building&&s.planBuilding(ground,d.type)){openFront(s,ground,d.type);return true;}ground.reservedFor=`delight:${d.type}`;}
   // A lone tree may make way; homes, farms and reserved plots never do.
   const near=(t,r)=>delightAround(t).some(p=>r(s.tile(p.x,p.y)))||[[1,1],[-1,-1],[1,-1],[-1,1],[2,0],[-2,0],[0,2],[0,-2]].some(([dx,dy])=>r(s.tile(t.x+dx,t.y+dy)));
   const spots=s.land.filter(t=>(!t.building||['tree','garden','park'].includes(t.building)||d.type==='observatory'&&t.building==='forest')&&!t.buildSite&&!t.landform&&!t.reservedFor&&!t.road&&!t.foundingHome&&d.where(s,t,near));if(!spots.length)continue;
@@ -2791,9 +2821,11 @@ class Civilization {
     this.skyline={x:best.x,y:best.y};return this.skyline;
   }
   inOldTown(tile){return Math.hypot(tile.x+1,tile.y-1)<=3.2;}
+  // Homes among the fields stay farmhouses rather than turning into townhouses.
+  nearFarms(tile){let n=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(this.tile(tile.x+dx,tile.y+dy)?.building==='farm')n++;return n>=2;}
   homeTypeFor(tile) {
     if(this.era<3)return this.era===0?'hut':'house';
-    if(this.inOldTown(tile)||this.isCoast(tile))return'house';
+    if(this.inOldTown(tile)||this.isCoast(tile)||this.nearFarms(tile))return'house';
     if(this.year>=1960){
       const c=this.skylineCentre(),near=Math.hypot(tile.x-c.x,tile.y-c.y)<=TOWER_RADIUS;
       if(near&&(tile.building==='tower'||this.houses.filter(t=>t.building==='tower').length<TOWER_CAP))return'tower';
@@ -2896,6 +2928,8 @@ class Civilization {
       this.prosperity=Math.min(99,this.prosperity+5);this.log(['The village holds a festival. The music is better than the planning.','A sculptor unveils new work. The pigeons are the first patrons.','A tiny parade celebrates something. Nobody quite agrees what.'][Math.floor(this.random()*3)],'culture');this.signal('celebrate',this.buildings.find(t=>t.building==='statue'),'A very local festival!');
     }
     if(this.era>=1 && this.year%43===0)this.buildBridge();
+    if(this.year%11===5)this.tidyBridges();
+    if(this.year%20===13)this.growHarborQuarter();
     if(this.year===16 || (this.year%51===0 && this.era>=1)) this.buildDock();
     if(this.year%18===0 && this.era>=1) this.upgradeDistricts();
     if(this.year%12===0 && this.farms.length){
@@ -3119,10 +3153,14 @@ class Civilization {
       if(room){room.building=null;this.planBuilding(room,'park');this.wealth-=20;this.log('After the protests, the council makes room for another public park. A bench is unveiled.','culture');}
     }
   }
+  // A bridge only makes sense with land on two opposite sides.
+  spansWater(t){const land=(x,y)=>this.tile(x,y)?.kind==='land';return land(t.x-1,t.y)&&land(t.x+1,t.y)||land(t.x,t.y-1)&&land(t.x,t.y+1);}
+  // Bridges whose water turned into land, or whose banks are gone, are taken down.
+  tidyBridges(){let changed=false;for(const t of this.tiles.values())if(t.building==='bridge'&&(t.kind!=='water'||!this.spansWater(t))&&!t.rift){t.building=null;changed=true;}if(changed)this.rebuildRoads();}
   buildBridge() {
     const bridges=[...this.tiles.values()].filter(t=>t.building==='bridge');
-    if(bridges.length>=Math.min(5,this.era+1)||this.wood<12)return;
-    const gap=[...this.tiles.values()].filter(t=>t.kind==='water'&&!t.building&&neighbors(t).filter(([x,y])=>this.tile(x,y)?.kind==='land').length>=2).sort((a,b)=>Number(!!b.rift)-Number(!!a.rift))[0];
+    if(bridges.length>=Math.min(3,this.era+1)||this.wood<12)return;
+    const gap=[...this.tiles.values()].filter(t=>t.kind==='water'&&!t.building&&this.spansWater(t)).sort((a,b)=>Number(!!b.rift)-Number(!!a.rift))[0];
     if(!gap)return;
     gap.building='bridge';gap.builtYear=this.year;this.wood-=12;
     this.rebuildRoads();this.log('A bridge cuts across the inlet. The scenic route is now a choice.','bridge');this.signal('built',gap,'A shortcut over the sea');
@@ -3230,6 +3268,20 @@ class Civilization {
     if(upgrade){upgrade.architecture=this.age.id;upgrade.builtYear=this.year;this.signal('built',upgrade,'A home for a new age');}
     this.rebuildRoads();
   }
+  // The water around a harbour stays open, so the harbour never ends up landlocked by a polder.
+  inHarborBasin(t){for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++){const n=this.tile(t.x+dx,t.y+dy);if(n&&(n.building==='harbor'||n.building==='dock'))return true;}return false;}
+  // From the age of steam the main harbour gets a quarter of its own: warehouses on the quay, and cranes later on.
+  growHarborQuarter(){
+    if(this.era<2||this.ending)return;
+    const dock=[...this.tiles.values()].find(t=>t.building==='harbor'||t.building==='dock');if(!dock)return;
+    const quay=this.land.filter(t=>Math.max(Math.abs(t.x-dock.x),Math.abs(t.y-dock.y))<=2&&!t.landform&&!t.foundingHome&&!t.castle&&!t.reservedFor&&!t.buildSite&&t.district!=='heritage'&&!t.plaque&&(!t.building||['hut','house','townhouse','farm','tree','park','garden'].includes(t.building))).sort((a,b)=>Math.hypot(a.x-dock.x,a.y-dock.y)-Math.hypot(b.x-dock.x,b.y-dock.y));
+    const have=this.land.filter(t=>t.building==='warehouse').length,want=Math.min(this.year>=1900?4:3,have+1);
+    for(const t of quay.slice(0,Math.max(0,want-have))){
+      t.building='warehouse';t.builtYear=this.year;t.district='harbor';t.reservedFor='harbor';t.architecture=this.age.id;
+      if(!have)this.log('Aan de kade verrijst het eerste pakhuis. Het havenkwartier ruikt meteen naar koffie, touw en een beetje vis.','trade',{x:t.x,y:t.y});
+      this.signal('built',t,'Een pakhuis aan de kade');
+    }
+  }
   buildDock() {
     const docks=[...this.tiles.values()].filter(t=>t.building==='dock' || t.building==='harbor');
     if(docks.length>=Math.min(4,this.era+1)) return;
@@ -3265,7 +3317,7 @@ class Civilization {
     const batch=Math.min(maxBatch,limit-total);
     const costs={wood:batch*(this.era===1?5:2),stone:batch*(this.era===1?1:3),wealth:batch*(this.era===1?3:5)};
     if(this.wood<costs.wood || this.stone<costs.stone || this.wealth<costs.wealth) return false;
-    const frontier=[...this.tiles.values()].filter(t=>t.kind==='water' && !t.building && neighbors(t).some(([x,y])=>this.tile(x,y)?.kind==='land') && (ambition||!neighbors(t).some(([x,y])=>this.tile(x,y)?.protectedCoast)));
+    const frontier=[...this.tiles.values()].filter(t=>t.kind==='water' && !t.building && !this.inHarborBasin(t) && !t.naturalBay && neighbors(t).some(([x,y])=>this.tile(x,y)?.kind==='land') && (ambition||!neighbors(t).some(([x,y])=>this.tile(x,y)?.protectedCoast)));
     if(!frontier.length) return false;
     // Follow one connected coast; each additional tile touches this project or existing land.
     const angle=this.random()*Math.PI*2;
@@ -3273,7 +3325,7 @@ class Civilization {
     const picked=[frontier[0]];
     let isArtificial=this.era===4 && this.projectCount%4===3 && batch>=3;
     while(picked.length<batch) {
-      const candidate=[...this.tiles.values()].filter(t=>t.kind==='water' && !t.building && !picked.includes(t) && (ambition||!neighbors(t).some(([x,y])=>this.tile(x,y)?.protectedCoast)) && neighbors(t).some(([x,y])=>picked.includes(this.tile(x,y))) && (!isArtificial || !neighbors(t).some(([x,y])=>this.tile(x,y)?.kind==='land'))).sort((a,b)=>{
+      const candidate=[...this.tiles.values()].filter(t=>t.kind==='water' && !t.building && !this.inHarborBasin(t) && !t.naturalBay && !picked.includes(t) && (ambition||!neighbors(t).some(([x,y])=>this.tile(x,y)?.protectedCoast)) && neighbors(t).some(([x,y])=>picked.includes(this.tile(x,y))) && (!isArtificial || !neighbors(t).some(([x,y])=>this.tile(x,y)?.kind==='land'))).sort((a,b)=>{
         const distance=t=>Math.abs(t.x-picked[0].x)+Math.abs(t.y-picked[0].y)+Math.hypot(t.x,t.y)*.5;
         return distance(a)-distance(b);
       })[0];
@@ -3871,7 +3923,7 @@ const LOW_FRONT=new Set(['castle-garden','farm','beach','park','garden','campfir
 const TALL=new Set(['tower','townhouse','palace','manor','factory','powerplant','science-center','church','lighthouse']);
 const coversLight=t=>!!t&&t.kind==='land'&&(!!t.landform||!!t.buildSite||!!t.building&&!LOW_FRONT.has(t.building));
 // Rough visible heights of what may stand in front, in tile units, to decide which windows are covered.
-const FRONT_HEIGHT={hut:28,house:38,townhouse:52,tower:72,manor:52,palace:110,'royal-palace':140,factory:52,powerplant:55,church:62,lighthouse:75,windmill:56,museum:32,station:26,observatory:36,carillon:56,watchtower:50,'science-center':40,school:34,library:34,workshop:40,tree:42,forest:36};
+const FRONT_HEIGHT={warehouse:34,hut:28,house:38,townhouse:52,tower:72,manor:52,palace:110,'royal-palace':140,factory:52,powerplant:55,church:62,lighthouse:75,windmill:56,museum:32,station:26,observatory:36,carillon:56,watchtower:50,'science-center':40,school:34,library:34,workshop:40,tree:42,forest:36};
 function windowHidden(sim,w){
  const lowest=Math.max(...w.points.map(p=>p[1]));
  for(const [dx,dy,rows] of [[1,1,1],[2,2,2]]){
@@ -4018,14 +4070,61 @@ function drawInterventionFx(r){
 
 // Animals make the island feel lived in. They are drawn only and never change the simulation.
 const animalHash=(a,b)=>{const n=Math.sin(a*41.3+b*289.1)*24634.6;return n-Math.floor(n);};
-function sheep(r,x,y,wool,phase){r.ellipse(x,y-3,4.2,2.8,wool);r.ellipse(x+3.6,y-4.2,1.7,1.5,'#4d4a44');r.line([[x-2,y-1],[x-2,y+1]],'#5d584f',.9);r.line([[x+2,y-1],[x+2+phase*.6,y+1]],'#5d584f',.9);}
-function cow(r,x,y,phase){r.ellipse(x,y-4,5.4,3,'#f2efe6');r.ellipse(x-1.5,y-4.5,1.8,1.3,'#3f3a36');r.ellipse(x+2,y-3.4,1.4,1,'#3f3a36');r.ellipse(x+5,y-5,1.8,1.6,'#e9e3d6');for(const lx of [-3,3])r.line([[x+lx,y-1.5],[x+lx+phase*.5,y+1]],'#5d584f',1);}
-function grazingHorse(r,x,y,phase){r.ellipse(x,y-5,5,2.6,'#8a6a4c');r.poly([[x+4,y-6],[x+7,y-10],[x+8.5,y-8.5],[x+5,y-4.5]],'#8a6a4c');for(const lx of [-3,3])r.line([[x+lx,y-3],[x+lx+phase*.6,y+1]],'#6c5038',1);r.line([[x-5,y-6],[x-7,y-2.5]],'#4f3a2a',1);}
-function deer(r,x,y,phase){r.ellipse(x,y-5,3.8,2,'#a87b52');r.line([[x+3,y-6],[x+5,y-10]],'#a87b52',1.4);r.ellipse(x+5.4,y-10.4,1.4,1.1,'#a87b52');r.line([[x+5,y-11],[x+4,y-14]],'#6e5a44',.7);r.line([[x+6,y-11],[x+7,y-14]],'#6e5a44',.7);for(const lx of [-2,2])r.line([[x+lx,y-3.5],[x+lx+phase*.4,y+1]],'#6e5a44',.8);}
-function rabbit(r,x,y,hop){r.ellipse(x,y-1.6-hop,2,1.4,'#b5a58c');r.ellipse(x+1.6,y-2.8-hop,.9,.8,'#b5a58c');r.line([[x+1.6,y-3.4-hop],[x+1.4,y-5.4-hop]],'#b5a58c',.7);r.ellipse(x-1.8,y-1.7-hop,.6,.6,'#f4f1e8');}
-function seaDuck(r,x,y){r.ellipse(x,y,2.2,1.2,'#f2efe4');r.ellipse(x+1.8,y-1,1,.9,'#3f6b4c');r.ellipse(x+2.8,y-.9,.6,.3,'#d9a24e');}
-function beachGull(r,x,y){r.ellipse(x,y-1.5,2,1.2,'#f6f6f2');r.ellipse(x+1.6,y-2.4,.9,.8,'#f6f6f2');r.line([[x-1.5,y-1.6],[x-3,y-1.2]],'#9aa3a3',.8);r.line([[x+2.4,y-2.4],[x+3.3,y-2.2]],'#d9a24e',.5);}
-function houseCat(r,x,y,color){r.ellipse(x,y-1.8,2,1.5,color);r.ellipse(x+1.8,y-3.2,1.2,1.1,color);r.poly([[x+1,y-4],[x+1.4,y-5.2],[x+1.8,y-4]],color);r.poly([[x+2,y-4],[x+2.5,y-5.2],[x+2.8,y-4]],color);r.line([[x-2,y-1.5],[x-3.4,y-4]],color,.8);}
+// Each animal faces right and is a little larger than life, so it reads at a glance.
+const leg=(r,x,y,len,phase,color,w=1)=>r.line([[x,y],[x+phase,y+len]],color,w);
+function sheep(r,x,y,wool,phase){
+ r.ellipse(x,y+.6,5.4,1.6,'rgba(40,50,35,.18)');
+ for(const lx of [-2.8,-1.2,1.6,3])leg(r,x+lx,y-1.6,2.4,lx<0?phase*.5:-phase*.5,'#3f3b36',.9);
+ for(const [dx,dy,rr] of [[-2.6,-3.6,2.4],[0,-4.4,2.7],[2.4,-3.8,2.4],[-1,-2.6,2.5],[1.6,-2.7,2.3]])r.ellipse(x+dx,y+dy,rr,rr*.85,wool);
+ r.ellipse(x-.6,y-5.4,2.4,1.2,'rgba(255,255,255,.35)');
+ r.ellipse(x+4.6,y-4.6,1.5,1.9,'#3f3b36');r.ellipse(x+4,y-6.1,.9,.45,'#3f3b36');r.ellipse(x+5.3,y-4.3,.3,.3,'#f4f1e8');
+}
+function cow(r,x,y,phase){
+ r.ellipse(x,y+.8,7,2,'rgba(40,50,35,.18)');
+ for(const lx of [-4,-2.4,2.6,4])leg(r,x+lx,y-2.2,3.2,lx<0?phase*.5:-phase*.5,'#4a4540',1.2);
+ r.ellipse(x,y-4.4,6,3.2,'#f4f1ea');r.ellipse(x-2.4,y-5.2,2.2,1.6,'#2f2b28');r.ellipse(x+1.6,y-3.6,1.7,1.2,'#2f2b28');r.ellipse(x-4.6,y-3.6,1.1,1.3,'#2f2b28');
+ r.ellipse(x+.6,y-1.4,1.4,.8,'#e8b4b0');r.line([[x-6,y-5],[x-7.4,y-1.6]],'#8a8278',.7);r.ellipse(x-7.5,y-1.4,.6,.8,'#2f2b28');
+ r.ellipse(x+6.8,y-5.6,2.3,2,'#f4f1ea');r.ellipse(x+8.2,y-5,1.4,1.1,'#e8b4b0');r.ellipse(x+6.2,y-6.4,.6,.6,'#2f2b28');
+ r.line([[x+5.8,y-7.2],[x+5.2,y-8.8]],'#d8cfb8',.7);r.line([[x+7.4,y-7.3],[x+8.2,y-8.8]],'#d8cfb8',.7);
+}
+function grazingHorse(r,x,y,phase){
+ r.ellipse(x,y+.8,6.6,1.8,'rgba(40,50,35,.18)');
+ for(const lx of [-3.8,-2.2,2.4,3.8])leg(r,x+lx,y-3.2,4.2,lx<0?phase*.6:-phase*.6,'#5e4430',1.1);
+ r.ellipse(x,y-5.6,5.6,2.8,'#8a6a4c');r.ellipse(x-1,y-6.6,4,1.2,'rgba(255,255,255,.12)');
+ r.poly([[x+3.6,y-7],[x+6.4,y-12.6],[x+8.4,y-12],[x+5.8,y-5.2]],'#8a6a4c');r.ellipse(x+8.2,y-11.6,2.4,1.4,'#7a5c42');r.ellipse(x+9.6,y-11.2,.6,.5,'#3a2a20');
+ r.line([[x+4,y-8],[x+6.6,y-12.8]],'#3f2c1f',1.4);r.poly([[x+6.4,y-13],[x+6.8,y-14.6],[x+7.4,y-13]],'#7a5c42');
+ r.line([[x-5.4,y-6.4],[x-7.4,y-2.6+phase*.3]],'#3f2c1f',1.5);
+}
+function deer(r,x,y,phase){
+ r.ellipse(x,y+.6,5,1.4,'rgba(40,50,35,.16)');
+ for(const lx of [-3,-1.8,1.8,3])leg(r,x+lx,y-3.4,4.2,lx<0?phase*.4:-phase*.4,'#6e5a44',.8);
+ r.ellipse(x,y-5.4,4.4,2.3,'#b0825a');r.ellipse(x-4,y-5.8,1.1,1,'#f4efe4');
+ r.poly([[x+3,y-6.4],[x+5,y-10.6],[x+6.4,y-10],[x+4.6,y-5]],'#b0825a');r.ellipse(x+6.4,y-10.8,1.9,1.2,'#a8774f');r.ellipse(x+7.9,y-10.6,.5,.4,'#3a2a20');
+ r.line([[x+5.6,y-11.6],[x+4.4,y-15]],'#6e5a44',.7);r.line([[x+4.8,y-13.6],[x+3.4,y-14.4]],'#6e5a44',.6);r.line([[x+6.6,y-11.6],[x+7.6,y-15]],'#6e5a44',.7);r.line([[x+7.2,y-13.6],[x+8.6,y-14.2]],'#6e5a44',.6);
+}
+function rabbit(r,x,y,hop){
+ r.ellipse(x,y+.4,2.6,.8,'rgba(40,50,35,.16)');
+ r.ellipse(x,y-2-hop,2.6,1.9,'#b7a68b');r.ellipse(x+2.2,y-3.4-hop,1.4,1.2,'#b7a68b');
+ r.poly([[x+1.8,y-4.2-hop],[x+1.2,y-7.6-hop],[x+2.2,y-4.4-hop]],'#a8977b');r.poly([[x+2.6,y-4.2-hop],[x+2.8,y-7.4-hop],[x+3.2,y-4.2-hop]],'#b7a68b');
+ r.ellipse(x-2.6,y-2.4-hop,.9,.9,'#fbf9f2');r.ellipse(x+3,y-3.4-hop,.3,.3,'#2b2b2b');
+}
+function seaDuck(r,x,y){
+ r.ellipse(x,y+.4,3.4,.9,'rgba(255,255,255,.35)');
+ r.ellipse(x,y-.6,3,1.6,'#8b6f55');r.ellipse(x-.4,y-1.2,2,.9,'#a98b6c');r.ellipse(x-3,y-1.2,1,.6,'#2f3236');
+ r.ellipse(x+2.4,y-2.6,1.3,1.2,'#2f6b4a');r.ellipse(x+3.8,y-2.4,.9,.35,'#e0a040');r.line([[x+1.6,y-1.7],[x+3,y-1.7]],'#f4f1e8',.4);
+}
+function beachGull(r,x,y){
+ r.line([[x-.4,y-1],[x-.6,y+.8]],'#e0a040',.5);r.line([[x+.8,y-1],[x+1,y+.8]],'#e0a040',.5);
+ r.ellipse(x,y-2.2,2.6,1.5,'#f8f8f4');r.poly([[x-2.6,y-2.6],[x+1.4,y-3.2],[x+1,y-1.8],[x-3.6,y-1.6]],'#a9b2b4');r.poly([[x-3.6,y-1.6],[x-4.6,y-1.2],[x-3,y-2]],'#3a3f42');
+ r.ellipse(x+2.2,y-3.6,1.2,1.1,'#f8f8f4');r.ellipse(x+2.6,y-3.8,.25,.25,'#2b2b2b');r.poly([[x+3.2,y-3.6],[x+4.6,y-3.3],[x+3.2,y-3.1]],'#e8c040');
+}
+function houseCat(r,x,y,color){
+ r.ellipse(x,y+.3,2.4,.7,'rgba(40,50,35,.16)');
+ r.ellipse(x,y-1.8,2,2.2,color);r.ellipse(x+.4,y-4.6,1.5,1.4,color);
+ r.poly([[x-.6,y-5.4],[x-.4,y-7],[x+.4,y-5.8]],color);r.poly([[x+.6,y-5.8],[x+1.4,y-7],[x+1.6,y-5.2]],color);
+ r.ellipse(x-.1,y-4.7,.25,.3,'#d8e07a');r.ellipse(x+1,y-4.7,.25,.3,'#d8e07a');
+ r.ctx.beginPath();r.ctx.moveTo(x-1.6,y-.6);r.ctx.quadraticCurveTo(x-4.4,y-1,x-3.4,y-4.2);r.ctx.strokeStyle=color;r.ctx.lineWidth=.9;r.ctx.lineCap='round';r.ctx.stroke();
+}
 function drawAnimals(r){
  const s=r.sim,still=r.reduced,t=still?0:r.activityTime,winter=(r.light?.winter||0)>.6,night=r.light?.night;
  let cats=0;
@@ -4471,6 +4570,8 @@ class IslandRenderer {
     const steps=route.length-1,doorTime=1.6,insideTime=3,cycle=steps*2+doorTime*2+insideTime;
     const phase=this.reduced?((hash(index,79)*cycle)%cycle):(time*.9+hash(index,79)*cycle)%cycle;
     const target=this.sim.tiles.get(route.at(-1)),street=this.walkingPoint(target),door=this.entrancePoint(target);
+    // Nobody wanders onto a building site: the builders have it to themselves.
+    if(target.buildSite&&phase>=steps)return null;
     const outdoors=!target.building||['forest','beach','park','garden','farm','bonfire','campfire','playground','royal-garden','palace-square','town-square','campus-square'].includes(target.building);
     if(outdoors&&phase>=steps&&phase<steps+doorTime*2+insideTime)return{...street,stage:'visiting',alpha:1,target};
     if(phase>=steps&&phase<steps+doorTime){const t=(phase-steps)/doorTime;return{x:mix(street.x,door.x,t),y:mix(street.y,door.y,t),stage:'entering',alpha:1-Math.max(0,(t-.6)/.4),target};}
@@ -4478,7 +4579,7 @@ class IslandRenderer {
     if(phase>=steps+doorTime+insideTime&&phase<steps+doorTime*2+insideTime){const t=(phase-steps-doorTime-insideTime)/doorTime;return{x:mix(door.x,street.x,t),y:mix(door.y,street.y,t),stage:'leaving',alpha:Math.min(1,t/.4),target};}
     const distance=phase<steps?phase:steps-(phase-steps-doorTime*2-insideTime);
     const segment=Math.min(steps-1,Math.max(0,Math.floor(distance))),a=this.sim.tiles.get(route[segment]),b=this.sim.tiles.get(route[segment+1]);
-    if(!a||!b||a.kind==='flooded'||b.kind==='flooded')return null;
+    if(!a||!b||a.kind==='flooded'||b.kind==='flooded'||a.buildSite||b.buildSite)return null;
     const road=a.roadLinks?.includes(key(b.x,b.y));
     return{...this.walkingPosition(a,b,distance-segment,(hash(index,9)-.5)*1.8),stage:road?'road':'walking',alpha:1,a,b,t:distance-segment,target};
   }
@@ -4520,6 +4621,8 @@ class IslandRenderer {
     if(river.sea){const q=this.p(river.sea.x,river.sea.y),last=pts.at(-1);pts.push({x:(last.x+q.x)/2,y:(last.y+q.y)/2+4});}
     // Bend the line sideways along its course.
     const bent=pts.map((p,i)=>{const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)],dx=b.x-a.x,dy=(b.y-a.y)*2,len=Math.hypot(dx,dy)||1,sway=i===0||i===pts.length-1?0:Math.sin(i*1.35+seed)*7;return{x:p.x-dy/len*sway,y:p.y+dx/len*sway*.5};});
+    // Remember where the water really runs, so footbridges sit on it.
+    this.riverPoints=new Map(tiles.map(([x,y],i)=>{const a=bent[Math.max(0,i-1)],b=bent[Math.min(bent.length-1,i+1)];return[key(x,y),{x:bent[i].x,y:bent[i].y,alongX:(b.x-a.x)*(b.y-a.y)>0,i}];}));this.riverBridges=[];
     const n=bent.length,stroke=(width,color)=>{for(let i=0;i<n-1;i++){const a=bent[i],b=bent[i+1],m0=i?{x:(bent[i-1].x+a.x)/2,y:(bent[i-1].y+a.y)/2}:a,m1={x:(a.x+b.x)/2,y:(a.y+b.y)/2};c.beginPath();c.moveTo(m0.x,m0.y);c.quadraticCurveTo(a.x,a.y,m1.x,m1.y);if(i===n-2)c.lineTo(b.x,b.y);c.strokeStyle=color;c.lineWidth=width(i/(n-1));c.lineCap='round';c.lineJoin='round';c.stroke();}};
     stroke(u=>6+u*9,'#cdbd8e');stroke(u=>3+u*7,'#7fb2bd');stroke(u=>1.2+u*2.4,'#a9d4dc');
     // A small spring and waterfall at the source.
@@ -4558,6 +4661,12 @@ class IslandRenderer {
         const a=corners[i],b=corners[(i+1)%4];
         this.line([[p.x+a[0]*1.12,p.y+a[1]*1.12+3],[p.x+b[0]*1.12,p.y+b[1]*1.12+3]],'#eaf2dc',5);
         if(t.natural)this.line([[p.x+a[0],p.y+a[1]+2],[p.x+b[0],p.y+b[1]+2]],t.landform?'#a9b198':'#e0d8a7',7);
+        // From 1980 the polder edges soften into sand and dunes, so the coast stops looking ruled with a pencil.
+        if(t.reclaimed&&this.sim.year>=1980&&!['harbor','dock'].includes(n.building)){
+          const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,len=Math.hypot(mx,my*2)||1,nx=mx/len,ny=my/len;
+          for(let k=0;k<5;k++){const f=(k+.5)/5,h=hash(t.x*7+i*3+k,t.y*5-k),ex=p.x+a[0]+(b[0]-a[0])*f+nx*(2+h*6),ey=p.y+a[1]+(b[1]-a[1])*f+ny*(2+h*6)+2;this.ellipse(ex,ey,4+h*5,(4+h*5)*.48,'#e2d5a6');}
+          for(let k=0;k<3;k++){const f=.2+k*.3,h=hash(t.y+k,t.x*3+i),gx=p.x+a[0]+(b[0]-a[0])*f,gy=p.y+a[1]+(b[1]-a[1])*f;if(h<.6)for(let g=0;g<3;g++)this.line([[gx+g*1.4-1.4,gy+1],[gx+g*1.8-2,gy-3]],'#8ea06a',.7);}
+        }
       }
     }
   }
@@ -4600,7 +4709,9 @@ class IslandRenderer {
     if(t.river){
       // The river: a ribbon of water towards each river neighbour and to the sea at the mouth.
       // A wooden footbridge where a road crosses the river.
-      if(t.road){const alongX=(t.roadLinks||[]).some(k=>k===key(t.x+1,t.y)||k===key(t.x-1,t.y));this.ctx.save();this.ctx.translate(x,y+11.5);this.deck(alongX,.3,.12,3,['#a08a64','#7f6a4f','#6f5a40']);this.ctx.restore();}
+      // Only where a road actually crosses (it leads to dry land on both sides), on the water itself, and not every few metres.
+      const at=this.riverPoints?.get(key(t.x,t.y)),dry=(t.roadLinks||[]).filter(k=>!this.sim.tiles.get(k)?.river).length;
+      if(t.road&&at&&dry>=2&&!this.riverBridges.some(i=>Math.abs(i-at.i)<3)){this.riverBridges.push(at.i);this.ctx.save();this.ctx.translate(at.x,at.y+2);this.deck(!at.alongX,.3,.12,3,['#a08a64','#7f6a4f','#6f5a40']);this.ctx.restore();}
       const mouth=this.sim.river?.mouth;
       if(mouth&&mouth.x===t.x&&mouth.y===t.y&&this.sim.year>=1250&&this.sim.reclaimed.some(r=>Math.hypot(r.x-t.x,r.y-t.y)<=4)){this.rect(x-6,y-9,12,6,'#8a8f94');this.rect(x-5,y-12,2,3,'#6d7278');this.rect(x+3,y-12,2,3,'#6d7278');}
     }
@@ -4738,6 +4849,7 @@ class IslandRenderer {
     else if(['shop','bakery','cafe'].includes(b))this.commercial(b,t.variant);
     else if(b==='playground')this.playground();
     else if(b==='fairground')this.fairground();
+    else if((b==='hut'||b==='house')&&this.sim.year>=150&&this.nearFields(t))this.farmhouse(t);
     else if(b==='hut')this.house(t.variant,t.material==='stone'?1:0);
     else if(b==='house')this.house(t.variant,1);
     else if(b==='townhouse')this.house(t.variant,2);
@@ -4790,6 +4902,7 @@ class IslandRenderer {
     else if(b==='theater')this.theater();
     else if(b==='shrine'||b==='church'){if(b==='church'&&this.archStyle==='classical')this.library();else this.church(b==='church');}
     else if(b==='dock'||b==='harbor')this.dock(b==='harbor'&&this.sim.era>=2);
+    else if(b==='warehouse')this.warehouse(t);
     else if(b==='pump')this.pump(t);
     else if(b==='bridge')this.bridge(t);
     else if(b==='castle-garden')this.castleGarden(t);
@@ -5288,10 +5401,37 @@ class IslandRenderer {
     this.ellipse(1,6,7,3,'#8fbcc8');for(let i=0;i<3;i++){const px=-3+i*3,hop=this.reduced?0:Math.abs(Math.sin(t*3+i))*1.5;this.ellipse(px,4-hop,1,1.6,'#2f3236');this.ellipse(px,4.4-hop,.6,1,'#f2f0ea');}
   }
   // The grounds next to a special building: enclosures for the zoo, big rides for the theme park, a plaza for the rest.
+  nearFields(t){let n=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(this.sim.tile(t.x+dx,t.y+dy)?.building==='farm')n++;return n>=2;}
+  // Among the fields people live in farmhouses: long and low under one big roof, with a barn door and a haystack.
+  farmhouse(t){
+    const L=26,W=12,H=7,R=9,h=hash(t.x,t.y),wall=['#efe4cc','#e6d6b8','#d9c6a6'][Math.floor(h*3)],roof=this.sim.year<1400?'#bda46c':['#9b4f3f','#7a4b3a','#5e6b63','#8a6a4c'][Math.floor(h*11)%4];
+    this.ellipse(4,4,20,6,'rgba(40,55,40,.12)');
+    if(h<.7){const hx=-18,hy=4;this.ellipse(hx,hy,5,2,'#5a5a3d22');this.poly([[hx-5,hy],[hx,hy-10],[hx+5,hy]],'#d8b45c');this.line([[hx-2.6,hy-4],[hx+2.6,hy-4]],'#b8943c',.7);}
+    const box=this.isoBox(L,W,H,0,wall,shadeColor(wall,.92),shadeColor(wall,.8)),at=box.at,ridgeA=at(-L/2-1,0,H+R),ridgeB=at(L/2+1,0,H+R);
+    this.poly([at(-L/2-1,-W/2-1.5,H-1),at(L/2+1,-W/2-1.5,H-1),ridgeB,ridgeA],shadeColor(roof,.82));
+    this.poly([at(L/2,-W/2,H),at(L/2,W/2,H),at(L/2,0,H+R)],shadeColor(wall,.8));
+    const loft=at(L/2,0,H+R*.4);this.rect(loft[0]-1.2,loft[1]-2.4,2.4,2.4,'#6f5a40');
+    this.poly([at(-L/2-1,W/2+1.5,H-1),at(L/2+1,W/2+1.5,H-1),ridgeB,ridgeA],roof);
+    this.line([ridgeA,ridgeB],shadeColor(roof,.7),.8);
+    this.poly([at(2,W/2,0),at(7,W/2,0),at(7,W/2,5.4),at(2,W/2,5.4)],'#6f5a40');this.line([at(4.5,W/2,0),at(4.5,W/2,5.4)],'#5a4632',.5);
+    for(const u of [-9,-4])this.window([at(u,W/2,2),at(u+2.4,W/2,2),at(u+2.4,W/2,4.4),at(u,W/2,4.4)],'#7d8f8a');
+    const chimney=at(-L/3,0,H+R*.72);this.rect(chimney[0]-1,chimney[1]-5,2,5,'#8a6a5a');
+    if(this.sim.year>=1900&&h>.55){const sx=20,sy=-2;this.rect(sx-3,sy-20,6,20,'#c9cfd0');this.rect(sx,sy-20,3,20,'#aeb5b7');this.ellipse(sx,sy-20,3,1.4,'#8f9a9c');}
+  }
+  // A tall brick warehouse with a stepped gable, loading doors and a hoist beam; from 1900 a crane stands beside it.
+  warehouse(t){
+    const brick=['#a8664f','#9a5d4a','#b2745a'][Math.floor(hash(t.x,t.y)*3)],side=shadeColor(brick,.8),h=22;
+    this.poly([[-16,-2],[0,6],[0,6-h],[-16,-2-h]],brick);this.poly([[0,6],[16,-2],[16,-2-h],[0,6-h]],side);
+    this.poly([[-16,-2-h],[-12,-6-h],[-8,-6-h],[-8,-10-h],[-4,-10-h],[-4,-14-h],[0,-14-h+8],[0,6-h]],brick);
+    this.poly([[0,6-h],[16,-2-h],[12,-6-h],[4,-6-h+4],[0,-14-h+8]],shadeColor(brick,.68));
+    for(let k=0;k<2;k++){const y=-6-k*9;this.poly([[-10,y-1],[-6,y+1],[-6,y-5],[-10,y-7]],'#5f4a3c');this.window([[4,y+2],[7,y+.5],[7,y-3],[4,y-1.5]],'#7d8f8a');this.window([[10,y-1],[13,y-2.5],[13,y-6],[10,y-4.5]],'#7d8f8a');}
+    this.line([[-8,-23],[-12,-26]],'#4f3b2e',1.4);this.line([[-12,-26],[-12,-18]],'#6e6a62',.5);this.rect(-13,-18,2,2,'#8a6a4c');
+    if(this.sim.year>=1900&&hash(t.y,t.x)<.6){const sw=this.reduced?0:Math.sin(this.time*.3+t.x)*.25;this.line([[20,6],[20,-36]],'#c95b4c',1.8);this.line([[17,6],[23,6]],'#6e6a62',1.4);this.ctx.save();this.ctx.translate(20,-36);this.ctx.rotate(-.35+sw);this.line([[-4,0],[22,0]],'#c95b4c',1.6);this.line([[20,0],[20,14]],'#6e6a62',.5);this.rect(18,14,4,3,'#5c8fc0');this.ctx.restore();}
+  }
   delightYard(t){
     const p=this.p(t.x,t.y),c=this.ctx,time=this.reduced?0:this.time,{type,i}=t.yardOf,fence=(color='#8a7552')=>{for(const [a,b] of [[[-21,0],[0,-10.5]],[[0,-10.5],[21,0]],[[21,0],[0,10.5]],[[0,10.5],[-21,0]]])this.line([a,b],color,.9);for(const [x,y] of [[-21,0],[0,-10.5],[21,0],[0,10.5],[-10.5,-5.25],[10.5,-5.25],[10.5,5.25],[-10.5,5.25]])this.line([[x,y],[x,y-3]],color,.8);};
     c.save();c.translate(p.x,p.y-1);
-    if(type==='zoo'&&i<3){
+    if(type==='zoo'&&(i<3||i===5)){
       this.diamond(0,0,22,11,i===1?'#c7d8d2':'#b9c58f');
       if(i===0){// Elephants by a muddy pool.
         this.ellipse(4,3,9,3.4,'#9cb7ae');for(const [x,ph] of [[-7,0],[8,2]]){const ex=x+Math.sin(time*.25+ph)*1.5;this.ellipse(ex,-4,6,4.4,'#9a9c98');this.ellipse(ex+5.4,-5.6,2.8,2.8,'#9a9c98');this.ellipse(ex+3,-6.4,2,2.6,'#888a86');this.line([[ex+7.6,-4.6],[ex+8.6,-.6+Math.sin(time*1.3+ph)]],'#9a9c98',1.7);for(const lx of [-3.5,2.5])this.line([[ex+lx,-1.2],[ex+lx,1.8]],'#858782',2.2);}
@@ -5299,6 +5439,11 @@ class IslandRenderer {
         this.ellipse(0,1,14,5.5,'#8fbcc8');this.poly([[-12,-1],[-4,-5],[4,-3],[2,1],[-9,2]],'#f2f5f6');
         for(let k=0;k<5;k++){const px=-9+k*3,hop=this.reduced?0:Math.max(0,Math.sin(time*3+k))*1.8;this.ellipse(px,-3-hop,1.1,1.8,'#2f3236');this.ellipse(px,-2.6-hop,.7,1.1,'#f2f0ea');this.ellipse(px+.6,-4.4-hop,.4,.25,'#e0a040');}
         const dive=(time*.5)%1;if(!this.reduced&&dive<.3)this.ellipse(8,2-Math.sin(dive/.3*Math.PI)*5,1,1.7,'#2f3236');
+      }else if(i===5){// Giraffes nibbling at a tall feeder.
+        this.line([[8,4],[8,-24]],'#8a7552',1.2);this.ellipse(8,-25,4,2,'#7f9f62');
+        for(const [gx,ph] of [[-6,0],[2,1.7]]){const sway=this.reduced?0:Math.sin(time*.4+ph)*1.2;this.ellipse(gx,-6,4.4,2.6,'#d9a858');for(const lx of [-2.6,-1,1.6,3])this.line([[gx+lx,-4],[gx+lx,1.5]],'#b88a45',1);
+          this.line([[gx+3,-7.4],[gx+5+sway,-21]],'#d9a858',2.4);this.ellipse(gx+6+sway,-21.6,2.4,1.4,'#d9a858');this.line([[gx+5.2+sway,-22.8],[gx+5+sway,-24.4]],'#9c6d36',.6);
+          for(const [sx,sy] of [[-2,-6.6],[0,-5.4],[1.8,-6.8],[gx>0?0:-1,-8]])this.ellipse(gx+sx,sy,.9,.7,'#9c6d36');}
       }else{// A rock with lions and a monkey tree.
         this.poly([[-14,2],[-8,-8],[0,-6],[3,2]],'#b3a68a');this.poly([[0,-6],[3,2],[-2,3]],'#9d917a');
         const lion=(x,y)=>{this.ellipse(x,y,4,2.2,'#d1a35c');this.ellipse(x+3.6,y-1.4,2.4,2.2,'#a8743a');this.ellipse(x+3.9,y-1.2,1.5,1.4,'#d1a35c');};lion(-9,-8.5);lion(-2,1.5);
@@ -5322,8 +5467,12 @@ class IslandRenderer {
       }
       this.person(-14,6,'#b18d6b',1);this.person(14,5,'#879c76',2);
     }else if(i===6){
-      // The green ring around the zoo and the theme park, drawn like the castle park.
+      // The green ring around the theme park, drawn like the castle park.
       this.castleGarden({x:t.x,y:t.y,gardenStyle:'park'});
+    }else if(i===7){
+      // Around the zoo the ring stays low: lawn, a hedge and flowers, so nothing blocks the view of the animals.
+      const L=this.light||{},flower=L.autumn>.5?'#d9822b':L.winter>.6?'#eef1f3':'#f1c6d0';this.diamond(0,0,20,10,'#a9c482');this.line([[-20,0],[0,10],[20,0]],'#6f8f4f',1.6);
+      for(let k=0;k<6;k++)this.ellipse((hash(k,t.x)-.5)*28,(hash(t.y,k)-.5)*10,1.1,.9,k%2?flower:'#f2e6b8');
     }else{
       // A small paved plaza with benches, flower tubs and a lamp.
       this.diamond(0,0,20,10,'#ddd3bd');this.diamond(0,0,15,7.5,'#e8e0cc');
@@ -6102,7 +6251,14 @@ function openBook(name=bookPage){
 }
 function openWishes(){openBook('wishes');}
 // Commissions: choose in the book, then point at a free plot on the island.
-let commissionChoice=null;
+let commissionChoice=null,giftsOffered=null;
+// The moment the residents want to build you something, the choice opens by itself.
+function offerGift(){
+  const c=ensureCommissions(sim);if(giftsOffered===null||giftsOffered>c.earned){giftsOffered=c.earned;return;}
+  if(c.earned<=giftsOffered||c.available<1||sim.ending||tour)return;
+  const book=$('book-dialog').open;if(!book&&otherDialogOpen())return;
+  giftsOffered=c.earned;openBook('wishes');showToast('De bewoners willen iets voor je bouwen. Kies wat het wordt en klik daarna op een plek.',5200);
+}
 function renderCommissions(){
   const c=ensureCommissions(sim);$('commission-box').hidden=c.available<1;
   $('commission-note').textContent=`Je mag ${c.available===1?'één bouwwerk':`${c.available} bouwwerken`} kiezen. Daarna klik je op een vrije plek op het eiland.`;
@@ -6309,7 +6465,7 @@ function frame(now){
       updateUI();
     }
   }
-  advanceTour(now);
+  advanceTour(now);offerGift();
   if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite),close:Math.max(0,Math.min(1,(renderer.zoom/Math.max(.3,renderer.fitZoom||1)-1)/1.1))});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
   if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');if(signal.moment){maybeDive(signal.x,signal.y,true);soundscape?.play(signal.moment.sound);showToast(signal.moment.text,5200);}}sim.signals=[];}

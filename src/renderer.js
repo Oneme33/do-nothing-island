@@ -249,6 +249,8 @@ export class IslandRenderer {
     const steps=route.length-1,doorTime=1.6,insideTime=3,cycle=steps*2+doorTime*2+insideTime;
     const phase=this.reduced?((hash(index,79)*cycle)%cycle):(time*.9+hash(index,79)*cycle)%cycle;
     const target=this.sim.tiles.get(route.at(-1)),street=this.walkingPoint(target),door=this.entrancePoint(target);
+    // Nobody wanders onto a building site: the builders have it to themselves.
+    if(target.buildSite&&phase>=steps)return null;
     const outdoors=!target.building||['forest','beach','park','garden','farm','bonfire','campfire','playground','royal-garden','palace-square','town-square','campus-square'].includes(target.building);
     if(outdoors&&phase>=steps&&phase<steps+doorTime*2+insideTime)return{...street,stage:'visiting',alpha:1,target};
     if(phase>=steps&&phase<steps+doorTime){const t=(phase-steps)/doorTime;return{x:mix(street.x,door.x,t),y:mix(street.y,door.y,t),stage:'entering',alpha:1-Math.max(0,(t-.6)/.4),target};}
@@ -256,7 +258,7 @@ export class IslandRenderer {
     if(phase>=steps+doorTime+insideTime&&phase<steps+doorTime*2+insideTime){const t=(phase-steps-doorTime-insideTime)/doorTime;return{x:mix(door.x,street.x,t),y:mix(door.y,street.y,t),stage:'leaving',alpha:Math.min(1,t/.4),target};}
     const distance=phase<steps?phase:steps-(phase-steps-doorTime*2-insideTime);
     const segment=Math.min(steps-1,Math.max(0,Math.floor(distance))),a=this.sim.tiles.get(route[segment]),b=this.sim.tiles.get(route[segment+1]);
-    if(!a||!b||a.kind==='flooded'||b.kind==='flooded')return null;
+    if(!a||!b||a.kind==='flooded'||b.kind==='flooded'||a.buildSite||b.buildSite)return null;
     const road=a.roadLinks?.includes(key(b.x,b.y));
     return{...this.walkingPosition(a,b,distance-segment,(hash(index,9)-.5)*1.8),stage:road?'road':'walking',alpha:1,a,b,t:distance-segment,target};
   }
@@ -298,6 +300,8 @@ export class IslandRenderer {
     if(river.sea){const q=this.p(river.sea.x,river.sea.y),last=pts.at(-1);pts.push({x:(last.x+q.x)/2,y:(last.y+q.y)/2+4});}
     // Bend the line sideways along its course.
     const bent=pts.map((p,i)=>{const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)],dx=b.x-a.x,dy=(b.y-a.y)*2,len=Math.hypot(dx,dy)||1,sway=i===0||i===pts.length-1?0:Math.sin(i*1.35+seed)*7;return{x:p.x-dy/len*sway,y:p.y+dx/len*sway*.5};});
+    // Remember where the water really runs, so footbridges sit on it.
+    this.riverPoints=new Map(tiles.map(([x,y],i)=>{const a=bent[Math.max(0,i-1)],b=bent[Math.min(bent.length-1,i+1)];return[key(x,y),{x:bent[i].x,y:bent[i].y,alongX:(b.x-a.x)*(b.y-a.y)>0,i}];}));this.riverBridges=[];
     const n=bent.length,stroke=(width,color)=>{for(let i=0;i<n-1;i++){const a=bent[i],b=bent[i+1],m0=i?{x:(bent[i-1].x+a.x)/2,y:(bent[i-1].y+a.y)/2}:a,m1={x:(a.x+b.x)/2,y:(a.y+b.y)/2};c.beginPath();c.moveTo(m0.x,m0.y);c.quadraticCurveTo(a.x,a.y,m1.x,m1.y);if(i===n-2)c.lineTo(b.x,b.y);c.strokeStyle=color;c.lineWidth=width(i/(n-1));c.lineCap='round';c.lineJoin='round';c.stroke();}};
     stroke(u=>6+u*9,'#cdbd8e');stroke(u=>3+u*7,'#7fb2bd');stroke(u=>1.2+u*2.4,'#a9d4dc');
     // A small spring and waterfall at the source.
@@ -336,6 +340,12 @@ export class IslandRenderer {
         const a=corners[i],b=corners[(i+1)%4];
         this.line([[p.x+a[0]*1.12,p.y+a[1]*1.12+3],[p.x+b[0]*1.12,p.y+b[1]*1.12+3]],'#eaf2dc',5);
         if(t.natural)this.line([[p.x+a[0],p.y+a[1]+2],[p.x+b[0],p.y+b[1]+2]],t.landform?'#a9b198':'#e0d8a7',7);
+        // From 1980 the polder edges soften into sand and dunes, so the coast stops looking ruled with a pencil.
+        if(t.reclaimed&&this.sim.year>=1980&&!['harbor','dock'].includes(n.building)){
+          const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,len=Math.hypot(mx,my*2)||1,nx=mx/len,ny=my/len;
+          for(let k=0;k<5;k++){const f=(k+.5)/5,h=hash(t.x*7+i*3+k,t.y*5-k),ex=p.x+a[0]+(b[0]-a[0])*f+nx*(2+h*6),ey=p.y+a[1]+(b[1]-a[1])*f+ny*(2+h*6)+2;this.ellipse(ex,ey,4+h*5,(4+h*5)*.48,'#e2d5a6');}
+          for(let k=0;k<3;k++){const f=.2+k*.3,h=hash(t.y+k,t.x*3+i),gx=p.x+a[0]+(b[0]-a[0])*f,gy=p.y+a[1]+(b[1]-a[1])*f;if(h<.6)for(let g=0;g<3;g++)this.line([[gx+g*1.4-1.4,gy+1],[gx+g*1.8-2,gy-3]],'#8ea06a',.7);}
+        }
       }
     }
   }
@@ -378,7 +388,9 @@ export class IslandRenderer {
     if(t.river){
       // The river: a ribbon of water towards each river neighbour and to the sea at the mouth.
       // A wooden footbridge where a road crosses the river.
-      if(t.road){const alongX=(t.roadLinks||[]).some(k=>k===key(t.x+1,t.y)||k===key(t.x-1,t.y));this.ctx.save();this.ctx.translate(x,y+11.5);this.deck(alongX,.3,.12,3,['#a08a64','#7f6a4f','#6f5a40']);this.ctx.restore();}
+      // Only where a road actually crosses (it leads to dry land on both sides), on the water itself, and not every few metres.
+      const at=this.riverPoints?.get(key(t.x,t.y)),dry=(t.roadLinks||[]).filter(k=>!this.sim.tiles.get(k)?.river).length;
+      if(t.road&&at&&dry>=2&&!this.riverBridges.some(i=>Math.abs(i-at.i)<3)){this.riverBridges.push(at.i);this.ctx.save();this.ctx.translate(at.x,at.y+2);this.deck(!at.alongX,.3,.12,3,['#a08a64','#7f6a4f','#6f5a40']);this.ctx.restore();}
       const mouth=this.sim.river?.mouth;
       if(mouth&&mouth.x===t.x&&mouth.y===t.y&&this.sim.year>=1250&&this.sim.reclaimed.some(r=>Math.hypot(r.x-t.x,r.y-t.y)<=4)){this.rect(x-6,y-9,12,6,'#8a8f94');this.rect(x-5,y-12,2,3,'#6d7278');this.rect(x+3,y-12,2,3,'#6d7278');}
     }
@@ -516,6 +528,7 @@ export class IslandRenderer {
     else if(['shop','bakery','cafe'].includes(b))this.commercial(b,t.variant);
     else if(b==='playground')this.playground();
     else if(b==='fairground')this.fairground();
+    else if((b==='hut'||b==='house')&&this.sim.year>=150&&this.nearFields(t))this.farmhouse(t);
     else if(b==='hut')this.house(t.variant,t.material==='stone'?1:0);
     else if(b==='house')this.house(t.variant,1);
     else if(b==='townhouse')this.house(t.variant,2);
@@ -568,6 +581,7 @@ export class IslandRenderer {
     else if(b==='theater')this.theater();
     else if(b==='shrine'||b==='church'){if(b==='church'&&this.archStyle==='classical')this.library();else this.church(b==='church');}
     else if(b==='dock'||b==='harbor')this.dock(b==='harbor'&&this.sim.era>=2);
+    else if(b==='warehouse')this.warehouse(t);
     else if(b==='pump')this.pump(t);
     else if(b==='bridge')this.bridge(t);
     else if(b==='castle-garden')this.castleGarden(t);
@@ -1066,10 +1080,37 @@ export class IslandRenderer {
     this.ellipse(1,6,7,3,'#8fbcc8');for(let i=0;i<3;i++){const px=-3+i*3,hop=this.reduced?0:Math.abs(Math.sin(t*3+i))*1.5;this.ellipse(px,4-hop,1,1.6,'#2f3236');this.ellipse(px,4.4-hop,.6,1,'#f2f0ea');}
   }
   // The grounds next to a special building: enclosures for the zoo, big rides for the theme park, a plaza for the rest.
+  nearFields(t){let n=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(this.sim.tile(t.x+dx,t.y+dy)?.building==='farm')n++;return n>=2;}
+  // Among the fields people live in farmhouses: long and low under one big roof, with a barn door and a haystack.
+  farmhouse(t){
+    const L=26,W=12,H=7,R=9,h=hash(t.x,t.y),wall=['#efe4cc','#e6d6b8','#d9c6a6'][Math.floor(h*3)],roof=this.sim.year<1400?'#bda46c':['#9b4f3f','#7a4b3a','#5e6b63','#8a6a4c'][Math.floor(h*11)%4];
+    this.ellipse(4,4,20,6,'rgba(40,55,40,.12)');
+    if(h<.7){const hx=-18,hy=4;this.ellipse(hx,hy,5,2,'#5a5a3d22');this.poly([[hx-5,hy],[hx,hy-10],[hx+5,hy]],'#d8b45c');this.line([[hx-2.6,hy-4],[hx+2.6,hy-4]],'#b8943c',.7);}
+    const box=this.isoBox(L,W,H,0,wall,shadeColor(wall,.92),shadeColor(wall,.8)),at=box.at,ridgeA=at(-L/2-1,0,H+R),ridgeB=at(L/2+1,0,H+R);
+    this.poly([at(-L/2-1,-W/2-1.5,H-1),at(L/2+1,-W/2-1.5,H-1),ridgeB,ridgeA],shadeColor(roof,.82));
+    this.poly([at(L/2,-W/2,H),at(L/2,W/2,H),at(L/2,0,H+R)],shadeColor(wall,.8));
+    const loft=at(L/2,0,H+R*.4);this.rect(loft[0]-1.2,loft[1]-2.4,2.4,2.4,'#6f5a40');
+    this.poly([at(-L/2-1,W/2+1.5,H-1),at(L/2+1,W/2+1.5,H-1),ridgeB,ridgeA],roof);
+    this.line([ridgeA,ridgeB],shadeColor(roof,.7),.8);
+    this.poly([at(2,W/2,0),at(7,W/2,0),at(7,W/2,5.4),at(2,W/2,5.4)],'#6f5a40');this.line([at(4.5,W/2,0),at(4.5,W/2,5.4)],'#5a4632',.5);
+    for(const u of [-9,-4])this.window([at(u,W/2,2),at(u+2.4,W/2,2),at(u+2.4,W/2,4.4),at(u,W/2,4.4)],'#7d8f8a');
+    const chimney=at(-L/3,0,H+R*.72);this.rect(chimney[0]-1,chimney[1]-5,2,5,'#8a6a5a');
+    if(this.sim.year>=1900&&h>.55){const sx=20,sy=-2;this.rect(sx-3,sy-20,6,20,'#c9cfd0');this.rect(sx,sy-20,3,20,'#aeb5b7');this.ellipse(sx,sy-20,3,1.4,'#8f9a9c');}
+  }
+  // A tall brick warehouse with a stepped gable, loading doors and a hoist beam; from 1900 a crane stands beside it.
+  warehouse(t){
+    const brick=['#a8664f','#9a5d4a','#b2745a'][Math.floor(hash(t.x,t.y)*3)],side=shadeColor(brick,.8),h=22;
+    this.poly([[-16,-2],[0,6],[0,6-h],[-16,-2-h]],brick);this.poly([[0,6],[16,-2],[16,-2-h],[0,6-h]],side);
+    this.poly([[-16,-2-h],[-12,-6-h],[-8,-6-h],[-8,-10-h],[-4,-10-h],[-4,-14-h],[0,-14-h+8],[0,6-h]],brick);
+    this.poly([[0,6-h],[16,-2-h],[12,-6-h],[4,-6-h+4],[0,-14-h+8]],shadeColor(brick,.68));
+    for(let k=0;k<2;k++){const y=-6-k*9;this.poly([[-10,y-1],[-6,y+1],[-6,y-5],[-10,y-7]],'#5f4a3c');this.window([[4,y+2],[7,y+.5],[7,y-3],[4,y-1.5]],'#7d8f8a');this.window([[10,y-1],[13,y-2.5],[13,y-6],[10,y-4.5]],'#7d8f8a');}
+    this.line([[-8,-23],[-12,-26]],'#4f3b2e',1.4);this.line([[-12,-26],[-12,-18]],'#6e6a62',.5);this.rect(-13,-18,2,2,'#8a6a4c');
+    if(this.sim.year>=1900&&hash(t.y,t.x)<.6){const sw=this.reduced?0:Math.sin(this.time*.3+t.x)*.25;this.line([[20,6],[20,-36]],'#c95b4c',1.8);this.line([[17,6],[23,6]],'#6e6a62',1.4);this.ctx.save();this.ctx.translate(20,-36);this.ctx.rotate(-.35+sw);this.line([[-4,0],[22,0]],'#c95b4c',1.6);this.line([[20,0],[20,14]],'#6e6a62',.5);this.rect(18,14,4,3,'#5c8fc0');this.ctx.restore();}
+  }
   delightYard(t){
     const p=this.p(t.x,t.y),c=this.ctx,time=this.reduced?0:this.time,{type,i}=t.yardOf,fence=(color='#8a7552')=>{for(const [a,b] of [[[-21,0],[0,-10.5]],[[0,-10.5],[21,0]],[[21,0],[0,10.5]],[[0,10.5],[-21,0]]])this.line([a,b],color,.9);for(const [x,y] of [[-21,0],[0,-10.5],[21,0],[0,10.5],[-10.5,-5.25],[10.5,-5.25],[10.5,5.25],[-10.5,5.25]])this.line([[x,y],[x,y-3]],color,.8);};
     c.save();c.translate(p.x,p.y-1);
-    if(type==='zoo'&&i<3){
+    if(type==='zoo'&&(i<3||i===5)){
       this.diamond(0,0,22,11,i===1?'#c7d8d2':'#b9c58f');
       if(i===0){// Elephants by a muddy pool.
         this.ellipse(4,3,9,3.4,'#9cb7ae');for(const [x,ph] of [[-7,0],[8,2]]){const ex=x+Math.sin(time*.25+ph)*1.5;this.ellipse(ex,-4,6,4.4,'#9a9c98');this.ellipse(ex+5.4,-5.6,2.8,2.8,'#9a9c98');this.ellipse(ex+3,-6.4,2,2.6,'#888a86');this.line([[ex+7.6,-4.6],[ex+8.6,-.6+Math.sin(time*1.3+ph)]],'#9a9c98',1.7);for(const lx of [-3.5,2.5])this.line([[ex+lx,-1.2],[ex+lx,1.8]],'#858782',2.2);}
@@ -1077,6 +1118,11 @@ export class IslandRenderer {
         this.ellipse(0,1,14,5.5,'#8fbcc8');this.poly([[-12,-1],[-4,-5],[4,-3],[2,1],[-9,2]],'#f2f5f6');
         for(let k=0;k<5;k++){const px=-9+k*3,hop=this.reduced?0:Math.max(0,Math.sin(time*3+k))*1.8;this.ellipse(px,-3-hop,1.1,1.8,'#2f3236');this.ellipse(px,-2.6-hop,.7,1.1,'#f2f0ea');this.ellipse(px+.6,-4.4-hop,.4,.25,'#e0a040');}
         const dive=(time*.5)%1;if(!this.reduced&&dive<.3)this.ellipse(8,2-Math.sin(dive/.3*Math.PI)*5,1,1.7,'#2f3236');
+      }else if(i===5){// Giraffes nibbling at a tall feeder.
+        this.line([[8,4],[8,-24]],'#8a7552',1.2);this.ellipse(8,-25,4,2,'#7f9f62');
+        for(const [gx,ph] of [[-6,0],[2,1.7]]){const sway=this.reduced?0:Math.sin(time*.4+ph)*1.2;this.ellipse(gx,-6,4.4,2.6,'#d9a858');for(const lx of [-2.6,-1,1.6,3])this.line([[gx+lx,-4],[gx+lx,1.5]],'#b88a45',1);
+          this.line([[gx+3,-7.4],[gx+5+sway,-21]],'#d9a858',2.4);this.ellipse(gx+6+sway,-21.6,2.4,1.4,'#d9a858');this.line([[gx+5.2+sway,-22.8],[gx+5+sway,-24.4]],'#9c6d36',.6);
+          for(const [sx,sy] of [[-2,-6.6],[0,-5.4],[1.8,-6.8],[gx>0?0:-1,-8]])this.ellipse(gx+sx,sy,.9,.7,'#9c6d36');}
       }else{// A rock with lions and a monkey tree.
         this.poly([[-14,2],[-8,-8],[0,-6],[3,2]],'#b3a68a');this.poly([[0,-6],[3,2],[-2,3]],'#9d917a');
         const lion=(x,y)=>{this.ellipse(x,y,4,2.2,'#d1a35c');this.ellipse(x+3.6,y-1.4,2.4,2.2,'#a8743a');this.ellipse(x+3.9,y-1.2,1.5,1.4,'#d1a35c');};lion(-9,-8.5);lion(-2,1.5);
@@ -1100,8 +1146,12 @@ export class IslandRenderer {
       }
       this.person(-14,6,'#b18d6b',1);this.person(14,5,'#879c76',2);
     }else if(i===6){
-      // The green ring around the zoo and the theme park, drawn like the castle park.
+      // The green ring around the theme park, drawn like the castle park.
       this.castleGarden({x:t.x,y:t.y,gardenStyle:'park'});
+    }else if(i===7){
+      // Around the zoo the ring stays low: lawn, a hedge and flowers, so nothing blocks the view of the animals.
+      const L=this.light||{},flower=L.autumn>.5?'#d9822b':L.winter>.6?'#eef1f3':'#f1c6d0';this.diamond(0,0,20,10,'#a9c482');this.line([[-20,0],[0,10],[20,0]],'#6f8f4f',1.6);
+      for(let k=0;k<6;k++)this.ellipse((hash(k,t.x)-.5)*28,(hash(t.y,k)-.5)*10,1.1,.9,k%2?flower:'#f2e6b8');
     }else{
       // A small paved plaza with benches, flower tubs and a lamp.
       this.diamond(0,0,20,10,'#ddd3bd');this.diamond(0,0,15,7.5,'#e8e0cc');

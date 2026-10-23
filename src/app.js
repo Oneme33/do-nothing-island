@@ -237,7 +237,14 @@ function openBook(name=bookPage){
 }
 function openWishes(){openBook('wishes');}
 // Commissions: choose in the book, then point at a free plot on the island.
-let commissionChoice=null;
+let commissionChoice=null,giftsOffered=null;
+// The moment the residents want to build you something, the choice opens by itself.
+function offerGift(){
+  const c=ensureCommissions(sim);if(giftsOffered===null||giftsOffered>c.earned){giftsOffered=c.earned;return;}
+  if(c.earned<=giftsOffered||c.available<1||sim.ending||tour)return;
+  const book=$('book-dialog').open;if(!book&&otherDialogOpen())return;
+  giftsOffered=c.earned;openBook('wishes');showToast('De bewoners willen iets voor je bouwen. Kies wat het wordt en klik daarna op een plek.',5200);
+}
 function renderCommissions(){
   const c=ensureCommissions(sim);$('commission-box').hidden=c.available<1;
   $('commission-note').textContent=`Je mag ${c.available===1?'één bouwwerk':`${c.available} bouwwerken`} kiezen. Daarna klik je op een vrije plek op het eiland.`;
@@ -444,7 +451,7 @@ function frame(now){
       updateUI();
     }
   }
-  advanceTour(now);
+  advanceTour(now);offerGift();
   if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite),close:Math.max(0,Math.min(1,(renderer.zoom/Math.max(.3,renderer.fitZoom||1)-1)/1.1))});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
   if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');if(signal.moment){maybeDive(signal.x,signal.y,true);soundscape?.play(signal.moment.sound);showToast(signal.moment.text,5200);}}sim.signals=[];}

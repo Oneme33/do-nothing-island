@@ -28,13 +28,14 @@ export function placeLighthouse(s){
 }
 // New beaches appear where the coast is free and far from the existing sand.
 const BEACH_NAMES=['Noorderstrand','Oosterstrand','Zuiderstrand','Westerduin'];
-export function beachTarget(year){return 1+(year>=60)+(year>=600)+(year>=1250);}
+export function beachTarget(year){return 1+(year>=60)+(year>=600)+(year>=1250)+(year>=1950)+(year>=2030);}
 function beachName(t){const a=Math.atan2(t.y-t.x,t.x+t.y);return BEACH_NAMES[((Math.round(a/(Math.PI/2))%4)+4)%4];}
 export function growBeach(s){
  const coast=ensureCoast(s);coast.nextBeachAt=s.year+41;
  if(s.storm||s.ending||coast.beaches.length+1>=beachTarget(s.year))return null;
  const sand=s.land.filter(t=>t.building==='beach');
- const free=t=>s.isCoast(t)&&!t.landform&&!t.reservedFor&&!t.buildSite&&!t.foundingHome&&(!t.building||t.building==='tree');
+ // Later on, coastal polder fields may turn back into sand.
+ const free=t=>s.isCoast(t)&&!t.landform&&!t.reservedFor&&!t.buildSite&&!t.foundingHome&&(!t.building||t.building==='tree'||s.year>=1950&&t.reclaimed&&t.building==='farm');
  const far=t=>sand.every(b=>Math.hypot(b.x-t.x,b.y-t.y)>=6);
  const seeds=s.land.filter(t=>free(t)&&far(t)).sort((a,b)=>coastAround(b).filter(p=>s.tile(p.x,p.y)?.kind==='water').length-coastAround(a).filter(p=>s.tile(p.x,p.y)?.kind==='water').length||a.x-b.x||a.y-b.y);
  const first=seeds[0];if(!first)return null;
@@ -47,8 +48,19 @@ export function growBeach(s){
  s.signal('celebrate',first,`${name}!`);s.rebuildRoads();
  return cluster;
 }
+// From 1980 the island softens its straight polder edges: a jutting corner is given back to the sea as a little bay.
+export function naturalizeCoast(s){
+ if(s.year<1980||s.ending||s.storm)return null;
+ const water=(x,y)=>{const n=s.tile(x,y);return !n||n.kind==='water';};
+ const corner=s.land.filter(t=>t.reclaimed&&!t.landform&&!t.foundingHome&&!t.reservedFor&&!t.buildSite&&(!t.building||['farm','tree','park','garden'].includes(t.building))&&[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].filter(([dx,dy])=>water(t.x+dx,t.y+dy)).length>=5)[0];
+ if(!corner)return null;
+ corner.kind='water';corner.building=null;corner.reclaimed=false;corner.abandonedYear=s.year;corner.naturalBay=true;
+ s.log('Een strakke polderhoek wordt teruggegeven aan de zee. Er ontstaat een kleine inham; de vogels nemen hem meteen in gebruik.','beach',{x:corner.x,y:corner.y});
+ s.rebuildRoads();return corner;
+}
 export function advanceCoast(s){
  ensureCoast(s);
+ if(s.year%15===8||s.year%15===1)naturalizeCoast(s);
  if(s.year%7===0||s.year%7===3)placeLighthouse(s);
  if(s.year>=s.coast.nextBeachAt)growBeach(s);
  seasonalFinds(s);

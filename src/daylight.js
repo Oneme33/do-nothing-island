@@ -40,7 +40,7 @@ const LOW_FRONT=new Set(['castle-garden','farm','beach','park','garden','campfir
 const TALL=new Set(['tower','townhouse','palace','manor','factory','powerplant','science-center','church','lighthouse']);
 const coversLight=t=>!!t&&t.kind==='land'&&(!!t.landform||!!t.buildSite||!!t.building&&!LOW_FRONT.has(t.building));
 // Rough visible heights of what may stand in front, in tile units, to decide which windows are covered.
-const FRONT_HEIGHT={hut:28,house:38,townhouse:52,tower:72,manor:52,palace:110,'royal-palace':140,factory:52,powerplant:55,church:62,lighthouse:75,windmill:56,museum:32,station:26,observatory:36,carillon:56,watchtower:50,'science-center':40,school:34,library:34,workshop:40,tree:42,forest:36};
+const FRONT_HEIGHT={warehouse:34,hut:28,house:38,townhouse:52,tower:72,manor:52,palace:110,'royal-palace':140,factory:52,powerplant:55,church:62,lighthouse:75,windmill:56,museum:32,station:26,observatory:36,carillon:56,watchtower:50,'science-center':40,school:34,library:34,workshop:40,tree:42,forest:36};
 export function windowHidden(sim,w){
  const lowest=Math.max(...w.points.map(p=>p[1]));
  for(const [dx,dy,rows] of [[1,1,1],[2,2,2]]){
