@@ -38,8 +38,8 @@ test('Help allows looking around without interference; deliberately choosing rai
  assert.equal(c.dataset.mode,'nudge');a.modes.find(b=>b.dataset.interference==='help').handlers.click();
  const tap=()=>{c.handlers.pointerdown({button:0,clientX:600,clientY:300,pointerId:1});c.handlers.pointerup({clientX:600,clientY:300,pointerId:1});};
  tap();assert.equal(a.saved().interferences,0);
- a.modes.find(b=>b.dataset.interference==='help').handlers.click();e.get('find-palace').handlers.click();assert.match(e.get('tile-inspector').textContent,/allereerste huis/);assert.match(e.get('tile-inspector').textContent,/familie/);
- a.modes.find(b=>b.dataset.interference==='rain').handlers.click();tap();assert.equal(a.saved().interferences,1);assert.equal(a.saved().influence.rain,1);assert.equal(e.get('intervention-result').hidden,true);assert.ok(e.get('toast-text').textContent);
+ e.get('find-palace').handlers.click();assert.match(e.get('tile-inspector').textContent,/allereerste huis/);assert.match(e.get('tile-inspector').textContent,/familie/);
+ a.modes.find(b=>b.dataset.interference==='rain').handlers.click();tap();assert.equal(a.saved().interferences,1);assert.equal(a.saved().influence.rain,1);a.modes.find(b=>b.dataset.interference==='rain').handlers.click();assert.equal(c.dataset.mode,'look','clicking the active tool again puts it away');tap();assert.equal(a.saved().interferences,1,'just looking changes nothing');a.modes.find(b=>b.dataset.interference==='rain').handlers.click();assert.equal(e.get('intervention-result').hidden,true);assert.ok(e.get('toast-text').textContent);
  e.get('history-layer').handlers.change({target:{checked:true}});assert.equal(e.get('history-snapshot').hidden,false);assert.equal(e.get('history-legend').hidden,false);
  assert.ok(e.get('history-snapshot').children.length>0);
 });

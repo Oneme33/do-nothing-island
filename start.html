@@ -228,6 +228,11 @@ body>main{padding:0;margin:0;max-width:none}
 .interference-buttons button::after{content:attr(data-tip);position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);width:210px;padding:7px 10px;font-size:11px!important;line-height:1.45;letter-spacing:0;font-weight:400;text-align:left;color:#3f4a36;background:rgba(250,249,240,.97);border:1px solid #dfe4d4;border-radius:8px;box-shadow:0 3px 12px #3d4a3a1f;opacity:0;pointer-events:none;transition:opacity .12s;z-index:30;white-space:normal}
 .interference-buttons button:hover::after,.interference-buttons button:focus-visible::after{opacity:1}
 @media(max-width:700px){.interference-buttons button::after{left:50%;top:auto;bottom:calc(100% + 10px);transform:translateX(-50%);width:200px}}
+
+.interference-buttons button>span{display:grid!important;place-items:center;width:100%;height:100%;line-height:0!important;margin:0!important}
+.island-window canvas[data-mode=look]{cursor:default}
+.interference-buttons button{display:flex!important;align-items:center!important;justify-content:center!important;gap:0!important;width:34px!important;height:34px!important;min-height:0!important;min-width:0!important;padding:0!important;line-height:0!important}
+.interference-buttons button>span{width:auto!important;height:auto!important}
 </style>
 </head>
 <body>
@@ -2258,9 +2263,9 @@ const DELIGHT_NAMES=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.name]));
 const DELIGHT_LABELS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.label]));
 const DELIGHT_OPENINGS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.opening]));
 // The zoo and the theme park need a whole block, so from year 200 the island keeps one free for each of them.
-const BIG_DELIGHTS=['zoo','theme-park','spaceport'];
+const BIG_DELIGHTS=['zoo','theme-park','spaceport','circus'];
 // Rides stand at the back (they are tall); the zoo's low enclosures sit in front of its gate, with giraffes on the sides.
-const DELIGHT_RING=[[-1,0],[0,-1],[-1,-1],[1,1],[1,0],[0,1],[1,-1],[-1,1]],DELIGHT_ROLES={'theme-park':[0,1,2,3,4,4,6,6],zoo:[3,4,4,0,1,2,5,5],spaceport:[9,10,8,8,8,8,8,8]};
+const DELIGHT_RING=[[-1,0],[0,-1],[-1,-1],[1,1],[1,0],[0,1],[1,-1],[-1,1]],DELIGHT_ROLES={'theme-park':[0,1,2,3,4,4,6,6],zoo:[3,4,4,0,1,2,5,5],spaceport:[9,10,8,8,8,8,8,8],circus:[7,7,7,3,4,4,7,7]};
 function reserveDelightGrounds(s){
  s.delightGrounds??={};
  for(const type of BIG_DELIGHTS){
@@ -2270,14 +2275,14 @@ function reserveDelightGrounds(s){
   // and a ring of park around it so no houses crowd in and hide it.
   const ring2=[];for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)if(Math.max(Math.abs(dx),Math.abs(dy))===2)ring2.push([dx,dy]);
   // The spaceport only needs its concrete apron, but it must be by the sea, well away from the homes.
-  const rocket=type==='spaceport',seaward=t=>[[2,0],[-2,0],[0,2],[0,-2],[2,2],[-2,-2],[2,-2],[-2,2],[3,0],[0,3],[-3,0],[0,-3]].some(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return !n||n.kind==='water';});
+  const small=type==='spaceport'||type==='circus',rocket=type==='spaceport',seaward=t=>[[2,0],[-2,0],[0,2],[0,-2],[2,2],[-2,-2],[2,-2],[-2,2],[3,0],[0,3],[-3,0],[0,-3]].some(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return !n||n.kind==='water';});
   const dry=t=>{for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)if(s.tile(t.x+dx,t.y+dy)?.river)return false;return true;};
-  const spots=s.land.filter(t=>free(t)&&dry(t)&&Math.hypot(t.x,t.y)>=3&&DELIGHT_RING.every(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy)))&&(rocket?seaward(t):ring2.filter(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy))).length>=7));
+  const spots=s.land.filter(t=>free(t)&&dry(t)&&Math.hypot(t.x,t.y)>=3&&DELIGHT_RING.every(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy)))&&(rocket?seaward(t):small||ring2.filter(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy))).length>=7));
   if(!spots.length)continue;
   const spot=spots[(s.seed+type.length*31)%spots.length];
   spot.reservedFor=`delight:${type}`;s.delightGrounds[type]={x:spot.x,y:spot.y};
   const claim=(dx,dy,i)=>{const yard=s.tile(spot.x+dx,spot.y+dy);if(!free(yard))return;yard.reservedFor='delight';yard.yardOf={type,x:spot.x,y:spot.y,i};};
-  DELIGHT_RING.forEach(([dx,dy],k)=>claim(dx,dy,DELIGHT_ROLES[type][k]));if(!rocket)for(const [dx,dy] of ring2)claim(dx,dy,type==='zoo'?7:6);
+  DELIGHT_RING.forEach(([dx,dy],k)=>claim(dx,dy,DELIGHT_ROLES[type][k]));if(!small)for(const [dx,dy] of ring2)claim(dx,dy,type==='zoo'?7:6);
  }
 }
 // When the zoo or the theme park opens, the strip in front of it is cleared (the residents move a street over),
@@ -2290,7 +2295,7 @@ function openFront(s,spot,type){
   if(!t||t.kind!=='land'||t.landform||t.foundingHome||t.plaque||t.castle||t.buildSite||t.district==='heritage'||t.reservedFor&&t.reservedFor!=='delight'||t.yardOf&&t.yardOf.type!==type)continue;
   if(t.building&&!['hut','house','townhouse','farm','tree','park','garden'].includes(t.building))continue;
   if(['hut','house','townhouse'].includes(t.building))moved++;
-  t.building=null;t.reservedFor='delight';t.yardOf={type,x:spot.x,y:spot.y,i:type==='zoo'?7:6};
+  t.building=null;t.reservedFor='delight';t.yardOf={type,x:spot.x,y:spot.y,i:type==='zoo'||type==='circus'?7:6};
  }
  if(moved)s.rebuildRoads();
  return moved;
@@ -6837,8 +6842,10 @@ $('undo-reset').addEventListener('click',()=>{
   const previous=previousIsland&&Civilization.restore(previousIsland);if(!previous)return;
   clearTimeout(undoTimer);previousIsland=null;$('undo-reset').hidden=true;switchIsland(previous,"Je vorige eiland is terug. Niemand heeft de omweg gemerkt.");
 });
-const modeHints={help:'Klik op een vraagteken om te lezen wat iemand vraagt. Kies zelf of je helpt.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
+const modeHints={look:'Je kijkt alleen. Kies links een ingreep als je toch iets wilt doen.',help:'Klik op een vraagteken om te lezen wat iemand vraagt. Kies zelf of je helpt.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
+// Clicking the active tool again puts it away: back to the ordinary cursor, just looking.
 function chooseMode(mode){
+  if(mode===interferenceMode&&mode!=='look')mode='look';
   interferenceMode=mode;renderer.mode=interferenceMode;inspectionPinned=false;
   for(const b of document.querySelectorAll('[data-interference]')){const selected=b.dataset.interference===mode;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected));}
   $('interaction-hint').textContent=modeHints[interferenceMode];canvas.dataset.mode=interferenceMode;
@@ -6865,7 +6872,7 @@ $('wish-help').addEventListener('click',()=>{
 let drag=null,keyCursor=null;
 function actOnTile(tile){
   if(cinemaActive()||sim.ending)return;
-  if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}return;}
+  if(interferenceMode==='help'||interferenceMode==='look'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}return;}
   sim.interfere(tile.x,tile.y,interferenceMode);const point=renderer.point(tile.x,tile.y);showIntervention(point.x,point.y);inspectTile(sim.tile(tile.x,tile.y));
 }
 // Two fingers pinch to zoom; one finger keeps dragging and tapping as before.
@@ -6896,7 +6903,7 @@ canvas.addEventListener('pointerup',e=>{
     if(cinemaActive()){cheerCinema();renderer.ripple(x,y);drag=null;return;}
     if(commissionChoice){const t=sim.tile(tile.x,tile.y);if(canCommission(sim,t)&&placeCommission(sim,commissionChoice,tile.x,tile.y)){showToast(`De bouwers beginnen aan je ${COMMISSIONS[commissionChoice].name.toLowerCase()}.`,3200);commissionChoice=null;chooseMode('nudge');dirtyHistory=true;updateUI();save();}else showToast('Daar kan het niet. Kies een vrije plek, of een boom, bos, park, tuin of akker.',2800);drag=null;return;}
     if(renderer.pickWishResident(x,y)){openWishes();drag=null;return;}
-    if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}drag=null;return;}
+    if(interferenceMode==='help'||interferenceMode==='look'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}drag=null;return;}
     if(sim.ending){showToast("Hun verhaal is klaar. Open het naschrift om vrij verder te spelen.");drag=null;return;}
     sim.interfere(tile.x,tile.y,interferenceMode);
     showIntervention(x,y);

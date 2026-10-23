@@ -19,9 +19,9 @@ export const DELIGHT_NAMES=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.name]));
 export const DELIGHT_LABELS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.label]));
 export const DELIGHT_OPENINGS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.opening]));
 // The zoo and the theme park need a whole block, so from year 200 the island keeps one free for each of them.
-const BIG_DELIGHTS=['zoo','theme-park','spaceport'];
+const BIG_DELIGHTS=['zoo','theme-park','spaceport','circus'];
 // Rides stand at the back (they are tall); the zoo's low enclosures sit in front of its gate, with giraffes on the sides.
-const DELIGHT_RING=[[-1,0],[0,-1],[-1,-1],[1,1],[1,0],[0,1],[1,-1],[-1,1]],DELIGHT_ROLES={'theme-park':[0,1,2,3,4,4,6,6],zoo:[3,4,4,0,1,2,5,5],spaceport:[9,10,8,8,8,8,8,8]};
+const DELIGHT_RING=[[-1,0],[0,-1],[-1,-1],[1,1],[1,0],[0,1],[1,-1],[-1,1]],DELIGHT_ROLES={'theme-park':[0,1,2,3,4,4,6,6],zoo:[3,4,4,0,1,2,5,5],spaceport:[9,10,8,8,8,8,8,8],circus:[7,7,7,3,4,4,7,7]};
 export function reserveDelightGrounds(s){
  s.delightGrounds??={};
  for(const type of BIG_DELIGHTS){
@@ -31,14 +31,14 @@ export function reserveDelightGrounds(s){
   // and a ring of park around it so no houses crowd in and hide it.
   const ring2=[];for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)if(Math.max(Math.abs(dx),Math.abs(dy))===2)ring2.push([dx,dy]);
   // The spaceport only needs its concrete apron, but it must be by the sea, well away from the homes.
-  const rocket=type==='spaceport',seaward=t=>[[2,0],[-2,0],[0,2],[0,-2],[2,2],[-2,-2],[2,-2],[-2,2],[3,0],[0,3],[-3,0],[0,-3]].some(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return !n||n.kind==='water';});
+  const small=type==='spaceport'||type==='circus',rocket=type==='spaceport',seaward=t=>[[2,0],[-2,0],[0,2],[0,-2],[2,2],[-2,-2],[2,-2],[-2,2],[3,0],[0,3],[-3,0],[0,-3]].some(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return !n||n.kind==='water';});
   const dry=t=>{for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)if(s.tile(t.x+dx,t.y+dy)?.river)return false;return true;};
-  const spots=s.land.filter(t=>free(t)&&dry(t)&&Math.hypot(t.x,t.y)>=3&&DELIGHT_RING.every(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy)))&&(rocket?seaward(t):ring2.filter(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy))).length>=7));
+  const spots=s.land.filter(t=>free(t)&&dry(t)&&Math.hypot(t.x,t.y)>=3&&DELIGHT_RING.every(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy)))&&(rocket?seaward(t):small||ring2.filter(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy))).length>=7));
   if(!spots.length)continue;
   const spot=spots[(s.seed+type.length*31)%spots.length];
   spot.reservedFor=`delight:${type}`;s.delightGrounds[type]={x:spot.x,y:spot.y};
   const claim=(dx,dy,i)=>{const yard=s.tile(spot.x+dx,spot.y+dy);if(!free(yard))return;yard.reservedFor='delight';yard.yardOf={type,x:spot.x,y:spot.y,i};};
-  DELIGHT_RING.forEach(([dx,dy],k)=>claim(dx,dy,DELIGHT_ROLES[type][k]));if(!rocket)for(const [dx,dy] of ring2)claim(dx,dy,type==='zoo'?7:6);
+  DELIGHT_RING.forEach(([dx,dy],k)=>claim(dx,dy,DELIGHT_ROLES[type][k]));if(!small)for(const [dx,dy] of ring2)claim(dx,dy,type==='zoo'?7:6);
  }
 }
 // When the zoo or the theme park opens, the strip in front of it is cleared (the residents move a street over),
@@ -51,7 +51,7 @@ function openFront(s,spot,type){
   if(!t||t.kind!=='land'||t.landform||t.foundingHome||t.plaque||t.castle||t.buildSite||t.district==='heritage'||t.reservedFor&&t.reservedFor!=='delight'||t.yardOf&&t.yardOf.type!==type)continue;
   if(t.building&&!['hut','house','townhouse','farm','tree','park','garden'].includes(t.building))continue;
   if(['hut','house','townhouse'].includes(t.building))moved++;
-  t.building=null;t.reservedFor='delight';t.yardOf={type,x:spot.x,y:spot.y,i:type==='zoo'?7:6};
+  t.building=null;t.reservedFor='delight';t.yardOf={type,x:spot.x,y:spot.y,i:type==='zoo'||type==='circus'?7:6};
  }
  if(moved)s.rebuildRoads();
  return moved;

@@ -631,8 +631,10 @@ $('undo-reset').addEventListener('click',()=>{
   const previous=previousIsland&&Civilization.restore(previousIsland);if(!previous)return;
   clearTimeout(undoTimer);previousIsland=null;$('undo-reset').hidden=true;switchIsland(previous,"Je vorige eiland is terug. Niemand heeft de omweg gemerkt.");
 });
-const modeHints={help:'Klik op een vraagteken om te lezen wat iemand vraagt. Kies zelf of je helpt.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
+const modeHints={look:'Je kijkt alleen. Kies links een ingreep als je toch iets wilt doen.',help:'Klik op een vraagteken om te lezen wat iemand vraagt. Kies zelf of je helpt.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
+// Clicking the active tool again puts it away: back to the ordinary cursor, just looking.
 function chooseMode(mode){
+  if(mode===interferenceMode&&mode!=='look')mode='look';
   interferenceMode=mode;renderer.mode=interferenceMode;inspectionPinned=false;
   for(const b of document.querySelectorAll('[data-interference]')){const selected=b.dataset.interference===mode;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected));}
   $('interaction-hint').textContent=modeHints[interferenceMode];canvas.dataset.mode=interferenceMode;
@@ -659,7 +661,7 @@ $('wish-help').addEventListener('click',()=>{
 let drag=null,keyCursor=null;
 function actOnTile(tile){
   if(cinemaActive()||sim.ending)return;
-  if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}return;}
+  if(interferenceMode==='help'||interferenceMode==='look'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}return;}
   sim.interfere(tile.x,tile.y,interferenceMode);const point=renderer.point(tile.x,tile.y);showIntervention(point.x,point.y);inspectTile(sim.tile(tile.x,tile.y));
 }
 // Two fingers pinch to zoom; one finger keeps dragging and tapping as before.
@@ -690,7 +692,7 @@ canvas.addEventListener('pointerup',e=>{
     if(cinemaActive()){cheerCinema();renderer.ripple(x,y);drag=null;return;}
     if(commissionChoice){const t=sim.tile(tile.x,tile.y);if(canCommission(sim,t)&&placeCommission(sim,commissionChoice,tile.x,tile.y)){showToast(`De bouwers beginnen aan je ${COMMISSIONS[commissionChoice].name.toLowerCase()}.`,3200);commissionChoice=null;chooseMode('nudge');dirtyHistory=true;updateUI();save();}else showToast('Daar kan het niet. Kies een vrije plek, of een boom, bos, park, tuin of akker.',2800);drag=null;return;}
     if(renderer.pickWishResident(x,y)){openWishes();drag=null;return;}
-    if(interferenceMode==='help'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}drag=null;return;}
+    if(interferenceMode==='help'||interferenceMode==='look'){const wish=ensureWishes(sim).active;if(wish&&tile.x===wish.x&&tile.y===wish.y)openWishes();else{inspectionPinned=true;inspectTile(sim.tile(tile.x,tile.y));}drag=null;return;}
     if(sim.ending){showToast("Hun verhaal is klaar. Open het naschrift om vrij verder te spelen.");drag=null;return;}
     sim.interfere(tile.x,tile.y,interferenceMode);
     showIntervention(x,y);
