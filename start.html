@@ -1509,7 +1509,7 @@ function finishBlaze(s,t,rescued=false){
   t.building=null;t.burntForest=true;t.clearingYear=s.year;s.environment=Math.max(10,s.environment-4);
   s.log('Het bos brandt uit. De open plek en vruchtbare as blijven; hier kan later een wijk groeien.','fire',{x:t.x,y:t.y});
  }else if(!rescued&&burned!=='farm'){
-  t.rebuildFrom=burned;t.rebuildAt=s.year+18;t.building='ruins';t.buildSite=null;s.lostBuildings=(s.lostBuildings||0)+1;
+  t.rebuildFrom=burned;t.rebuildAt=s.year+40;t.building='ruins';t.buildSite=null;s.lostBuildings=(s.lostBuildings||0)+1;
   if(dwelling.includes(burned))s.population=Math.max(4,s.population*.985);
   s.log('De brand laat een ruïne achter. De bewoners beginnen aan een sterker huis.','fire',{x:t.x,y:t.y});
  }else{if(rescued)s.rescuedFires=(s.rescuedFires||0)+1;s.log('De brand is geblust. De schade en vruchtbare as blijven zichtbaar.','reform',{x:t.x,y:t.y});}
@@ -2688,7 +2688,7 @@ function drawIslets(r){
   if(!isles.ferry)continue;
   const shore=isleShore(r,islet);if(!shore)continue;
   // A linked islet gets a causeway with a road instead of the ferry.
-  if(isles.linked===n){const a=r.p(shore.x,shore.y),b={x:p.x,y:p.y+4},dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;for(const [w,col] of [[8,'#b9a57c'],[6,'#c9b98e'],[3,'#8f9792']])r.poly([[a.x+nx*w,a.y+ny*w*.5],[b.x+nx*w,b.y+ny*w*.5],[b.x-nx*w,b.y-ny*w*.5],[a.x-nx*w,a.y-ny*w*.5]],col);for(let k=1;k<6;k++){const f=k/6;r.line([[a.x+dx*f,a.y+dy*f],[a.x+dx*(f+.06),a.y+dy*(f+.06)]],'#eee8d2',.6);}continue;}
+  if(isles.linked===n)continue;
   const from=r.p(shore.x+(islet.x-shore.x)*.06,shore.y+(islet.y-shore.y)*.06),to={x:p.x+(from.x-p.x)*.16,y:p.y+(from.y-p.y)*.16+6};
   r.line([[to.x,to.y],[to.x+(from.x-to.x)*.06,to.y+(from.y-to.y)*.06]],'#8f7457',2.2);
   // Each crossing lasts a while, with a short wait at either side.
@@ -2701,6 +2701,14 @@ function drawIslets(r){
   else{r.line([[0,-5.5],[0,-14]],'#6e5a44',.7);r.poly([[.4,-13.5],[5,-7],[.4,-6.5]],'#efe6cc');}
   c.restore();
  }
+}
+
+// A causeway with a road from the nearest shore to a linked islet, drawn over the shore water so it meets the land.
+function drawCauseway(r){
+ const s=r.sim,isles=s.islets;if(!isles||isles.linked==null)return;const islet=isles.list[isles.linked],shore=islet&&isleShore(r,islet);if(!shore)return;
+ const a=r.p(shore.x,shore.y),q=r.p(islet.x,islet.y),b={x:q.x,y:q.y+4},dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;
+ for(const [w,col] of [[8,'#b9a57c'],[6,'#c9b98e'],[3,'#8f9792']])r.poly([[a.x+nx*w,a.y+ny*w*.5],[b.x+nx*w,b.y+ny*w*.5],[b.x-nx*w,b.y-ny*w*.5],[a.x-nx*w,a.y-ny*w*.5]],col);
+ for(let k=1;k<6;k++){const f=k/6;r.line([[a.x+dx*f,a.y+dy*f],[a.x+dx*(f+.06),a.y+dy*(f+.06)]],'#eee8d2',.6);}
 }
 
 // Famous residents and archaeologists: the island remembers its own people and digs up its own past.
@@ -2861,7 +2869,7 @@ function drawMedieval(r){
 // They follow the slope outward, damage what stands in the way, and the island takes years to rebuild.
 const hzHash=(seed,a,b=0)=>{let x=(seed^Math.imul(a+17,0x2545f491)^Math.imul(b+3,0x9e3779b1))>>>0;x=Math.imul(x^(x>>>15),0x85ebca6b);x^=x>>>13;return(x>>>0)/4294967296;};
 const HAZARD_HOMES=new Set(['hut','house','townhouse','tower']);
-const REBUILD={lava:35,flood:20,avalanche:25};
+const REBUILD={lava:60,flood:35,avalanche:45};
 function ensureHazards(s){s.hazards??={events:[],hits:[],falls:null,lastFlood:-999};return s.hazards;}
 // A path from a landform outward: each step moves to the neighbour farthest from the peak.
 function downhill(s,from,len){
@@ -2912,8 +2920,8 @@ function waterfallSite(s){
  const hill=s.land.filter(t=>t.landform==='hill').sort((a,b)=>(b.relief||0)-(a.relief||0))[0];
  h.falls=hill?{x:hill.x,y:hill.y}:null;return h.falls;
 }
-function overflow(s){
- const h=ensureHazards(s),falls=waterfallSite(s);if(!falls||s.year-h.lastFlood<60)return null;
+function overflow(s,byHand=false){
+ const h=ensureHazards(s),falls=waterfallSite(s);if(!falls||s.year-h.lastFlood<(byHand?12:60))return null;
  const hill=s.tile(falls.x,falls.y),path=downhill(s,hill,3);if(!path.length)return null;
  h.lastFlood=s.year;const ruined=hazardStrike(s,'flood',path,{ruinUpTo:1});hazardRecord(s,'flood',hill,path,12);
  s.log(ruined?'Na alle regen loopt de waterval over. Het water stroomt de heuvels af en een huis onderaan spoelt weg.':'Na alle regen loopt de waterval over. Kelders lopen onder en de akkers worden een meertje.','flood',{x:path.at(-1).x,y:path.at(-1).y});
@@ -2925,7 +2933,7 @@ function registerHit(s,mode,spot){
  const h=ensureHazards(s);h.hits.push({mode,year:s.year});h.hits=h.hits.filter(x=>s.year-x.year<=15);
  const same=h.hits.filter(x=>x.mode===mode).length;
  if(mode==='rumble'&&spot)avalanche(s,spot);
- if(mode==='rain'&&spot){const falls=waterfallSite(s);if(falls&&Math.hypot(spot.x-falls.x,spot.y-falls.y)<=3&&same>=2)overflow(s);}
+ if(mode==='rain'&&spot){const falls=waterfallSite(s);if(falls&&Math.hypot(spot.x-falls.x,spot.y-falls.y)<=2.5)overflow(s,true);}
  if(same<5)return 0;
  // Carnage: the island cannot keep up any more.
  const near=s.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=2.5&&!t.foundingHome&&!t.castle&&!t.landform);
@@ -3878,7 +3886,7 @@ class Civilization {
       // Close to the epicentre ordinary buildings collapse into ruins; reinforced ones only crack.
       const fragile=t=>t.building&&!t.foundingHome&&!t.reservedFor&&t.district!=='heritage'&&!t.landform&&!['farm','beach','forest','tree','original-tree','ruins','town-square','lighthouse','bridge','dock','harbor','quarry','royal-palace','castle-garden'].includes(t.building)&&!t.retrofitted&&t.builtYear!==this.year;
       const collapsed=this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=1.5&&fragile(t)).slice(0,3);
-      for(const t of collapsed){t.rebuildFrom=t.building;t.rebuildAt=this.year+18;t.building='ruins';t.buildSite=null;t.quakeHistory=(t.quakeHistory||0)+1;this.signal('rumble',t,'Ingestort');}
+      for(const t of collapsed){t.rebuildFrom=t.building;t.rebuildAt=this.year+35;t.building='ruins';t.buildSite=null;t.quakeHistory=(t.quakeHistory||0)+1;this.signal('rumble',t,'Ingestort');}
       if(collapsed.length){this.lostBuildings=(this.lostBuildings||0)+collapsed.length;this.population=Math.max(4,this.population*(1-.012*collapsed.length));this.rebuildRoads();}
       this.food=Math.max(0,this.food*.9);this.wood=Math.max(0,this.wood*.9);
       const affected=this.houses.filter(h=>Math.abs(h.x-spot.x)+Math.abs(h.y-spot.y)<=3).slice(0,6);
@@ -4995,6 +5003,7 @@ class IslandRenderer {
       const near=coast||neighbors(t).some(([x,y])=>neighbors({x,y}).some(([a,b])=>this.sim.tile(a,b)?.kind==='land'));
       if(near){const p=this.p(t.x,t.y);this.diamond(p.x,p.y,23.8,12,t.rift?'#708c87':coast?'#c0d9ca':'#d0e3d8');if(t.rift)this.line([[p.x-15,p.y],[p.x,p.y+7],[p.x+15,p.y]],'#716e5e',2);}
     }
+    drawCauseway(this);
     // Waterline rings softly break up the tile silhouette.
     for(const t of land.filter(t=>t.kind==='land'))this.drawShore(t);
     const sorted=land.sort((a,b)=>a.x+a.y-b.x-b.y||a.x-b.x);
@@ -6676,17 +6685,19 @@ class IslandRenderer {
   }
   // Soft cloud shadows drift across the island, which makes the landscape feel alive.
   drawCloudShadows(){
-    if(this.reduced)return;const c=this.ctx;c.save();c.fillStyle='rgba(40,60,50,.07)';
-    for(let i=0;i<3;i++){const x=((hash(i,55)*this.width+this.time*(i%2?.8:1.3))%(this.width+300))-150,y=hash(i,22)*this.height*.65+120;c.beginPath();c.ellipse(x+40,y,90,34,0,0,TAU);c.fill();}
+    if(this.reduced)return;const c=this.ctx,through=Math.max(0,Math.min(1,1-(this.zoom/Math.max(.3,this.fitZoom||1)-1)/.7));if(through<=.02)return;c.save();c.fillStyle=`rgba(40,60,50,${(.07*through).toFixed(3)})`;
+    for(let i=0;i<3;i++){const span=1700,wx=((hash(i,55)*span+this.time*(i%2?.8:1.3))%span)-span/2,wy=hash(i,22)*560-355,x=this.origin.x+wx*this.zoom,y=this.origin.y+wy*this.zoom;c.beginPath();c.ellipse(x+40*this.zoom,y,90*this.zoom,34*this.zoom,0,0,TAU);c.fill();}
     c.restore();
   }
   drawClouds(){
     const c=this.ctx;
     for(let i=0;i<4;i++){
-      const x=((hash(i,55)*this.width+this.time*(i%2?.8:1.3))%(this.width+180))-70;
-      const y=hash(i,22)*this.height*.65+45;
-      const s=.6+hash(i,5)*.55;
-      c.save();c.translate(x,y);c.scale(s,s);c.globalAlpha=.34;
+      // In world space, so zooming and panning move the clouds too.
+      const span=1700,wx=((hash(i,55)*span+this.time*(i%2?.8:1.3))%span)-span/2,wy=hash(i,22)*560-430;
+      const x=this.origin.x+wx*this.zoom,y=this.origin.y+wy*this.zoom,s=(.6+hash(i,5)*.55)*this.zoom;
+      // Zooming in takes you through the clouds: they thin out and are gone when you are close.
+      const through=Math.max(0,Math.min(1,1-(this.zoom/Math.max(.3,this.fitZoom||1)-1)/.7));if(through<=.02)continue;
+      c.save();c.translate(x,y);c.scale(s,s);c.globalAlpha=.34*through;
       this.ellipse(15,40,44,13,'#86a58b13');
       this.ellipse(-18,0,23,10,'#f7f9e9');this.ellipse(0,-6,22,15,'#f7f9e9');this.ellipse(22,-1,23,11,'#f7f9e9');this.ellipse(6,5,34,9,'#f7f9e9');c.restore();
     }

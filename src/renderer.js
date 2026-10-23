@@ -8,7 +8,7 @@ import {drawFestive} from './festive.js';
 import {drawSeasonal,drawNightLife,drawSummerSun,drawFestivities,drawIdleEvent} from './ambient.js';
 import {drawWeather} from './weatherfx.js';
 import {drawOverseas} from './visitors.js';
-import {drawIslets} from './islets.js';
+import {drawIslets,drawCauseway} from './islets.js';
 import {drawFamous} from './famous.js';
 import {drawMedieval,tulipTime,CATHEDRAL_YEARS} from './medieval.js';
 import {drawHazards} from './hazards.js';
@@ -171,6 +171,7 @@ export class IslandRenderer {
       const near=coast||neighbors(t).some(([x,y])=>neighbors({x,y}).some(([a,b])=>this.sim.tile(a,b)?.kind==='land'));
       if(near){const p=this.p(t.x,t.y);this.diamond(p.x,p.y,23.8,12,t.rift?'#708c87':coast?'#c0d9ca':'#d0e3d8');if(t.rift)this.line([[p.x-15,p.y],[p.x,p.y+7],[p.x+15,p.y]],'#716e5e',2);}
     }
+    drawCauseway(this);
     // Waterline rings softly break up the tile silhouette.
     for(const t of land.filter(t=>t.kind==='land'))this.drawShore(t);
     const sorted=land.sort((a,b)=>a.x+a.y-b.x-b.y||a.x-b.x);
@@ -1852,17 +1853,19 @@ export class IslandRenderer {
   }
   // Soft cloud shadows drift across the island, which makes the landscape feel alive.
   drawCloudShadows(){
-    if(this.reduced)return;const c=this.ctx;c.save();c.fillStyle='rgba(40,60,50,.07)';
-    for(let i=0;i<3;i++){const x=((hash(i,55)*this.width+this.time*(i%2?.8:1.3))%(this.width+300))-150,y=hash(i,22)*this.height*.65+120;c.beginPath();c.ellipse(x+40,y,90,34,0,0,TAU);c.fill();}
+    if(this.reduced)return;const c=this.ctx,through=Math.max(0,Math.min(1,1-(this.zoom/Math.max(.3,this.fitZoom||1)-1)/.7));if(through<=.02)return;c.save();c.fillStyle=`rgba(40,60,50,${(.07*through).toFixed(3)})`;
+    for(let i=0;i<3;i++){const span=1700,wx=((hash(i,55)*span+this.time*(i%2?.8:1.3))%span)-span/2,wy=hash(i,22)*560-355,x=this.origin.x+wx*this.zoom,y=this.origin.y+wy*this.zoom;c.beginPath();c.ellipse(x+40*this.zoom,y,90*this.zoom,34*this.zoom,0,0,TAU);c.fill();}
     c.restore();
   }
   drawClouds(){
     const c=this.ctx;
     for(let i=0;i<4;i++){
-      const x=((hash(i,55)*this.width+this.time*(i%2?.8:1.3))%(this.width+180))-70;
-      const y=hash(i,22)*this.height*.65+45;
-      const s=.6+hash(i,5)*.55;
-      c.save();c.translate(x,y);c.scale(s,s);c.globalAlpha=.34;
+      // In world space, so zooming and panning move the clouds too.
+      const span=1700,wx=((hash(i,55)*span+this.time*(i%2?.8:1.3))%span)-span/2,wy=hash(i,22)*560-430;
+      const x=this.origin.x+wx*this.zoom,y=this.origin.y+wy*this.zoom,s=(.6+hash(i,5)*.55)*this.zoom;
+      // Zooming in takes you through the clouds: they thin out and are gone when you are close.
+      const through=Math.max(0,Math.min(1,1-(this.zoom/Math.max(.3,this.fitZoom||1)-1)/.7));if(through<=.02)continue;
+      c.save();c.translate(x,y);c.scale(s,s);c.globalAlpha=.34*through;
       this.ellipse(15,40,44,13,'#86a58b13');
       this.ellipse(-18,0,23,10,'#f7f9e9');this.ellipse(0,-6,22,15,'#f7f9e9');this.ellipse(22,-1,23,11,'#f7f9e9');this.ellipse(6,5,34,9,'#f7f9e9');c.restore();
     }

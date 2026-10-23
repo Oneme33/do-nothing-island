@@ -63,7 +63,7 @@ export function drawIslets(r){
   if(!isles.ferry)continue;
   const shore=isleShore(r,islet);if(!shore)continue;
   // A linked islet gets a causeway with a road instead of the ferry.
-  if(isles.linked===n){const a=r.p(shore.x,shore.y),b={x:p.x,y:p.y+4},dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;for(const [w,col] of [[8,'#b9a57c'],[6,'#c9b98e'],[3,'#8f9792']])r.poly([[a.x+nx*w,a.y+ny*w*.5],[b.x+nx*w,b.y+ny*w*.5],[b.x-nx*w,b.y-ny*w*.5],[a.x-nx*w,a.y-ny*w*.5]],col);for(let k=1;k<6;k++){const f=k/6;r.line([[a.x+dx*f,a.y+dy*f],[a.x+dx*(f+.06),a.y+dy*(f+.06)]],'#eee8d2',.6);}continue;}
+  if(isles.linked===n)continue;
   const from=r.p(shore.x+(islet.x-shore.x)*.06,shore.y+(islet.y-shore.y)*.06),to={x:p.x+(from.x-p.x)*.16,y:p.y+(from.y-p.y)*.16+6};
   r.line([[to.x,to.y],[to.x+(from.x-to.x)*.06,to.y+(from.y-to.y)*.06]],'#8f7457',2.2);
   // Each crossing lasts a while, with a short wait at either side.
@@ -76,4 +76,12 @@ export function drawIslets(r){
   else{r.line([[0,-5.5],[0,-14]],'#6e5a44',.7);r.poly([[.4,-13.5],[5,-7],[.4,-6.5]],'#efe6cc');}
   c.restore();
  }
+}
+
+// A causeway with a road from the nearest shore to a linked islet, drawn over the shore water so it meets the land.
+export function drawCauseway(r){
+ const s=r.sim,isles=s.islets;if(!isles||isles.linked==null)return;const islet=isles.list[isles.linked],shore=islet&&isleShore(r,islet);if(!shore)return;
+ const a=r.p(shore.x,shore.y),q=r.p(islet.x,islet.y),b={x:q.x,y:q.y+4},dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;
+ for(const [w,col] of [[8,'#b9a57c'],[6,'#c9b98e'],[3,'#8f9792']])r.poly([[a.x+nx*w,a.y+ny*w*.5],[b.x+nx*w,b.y+ny*w*.5],[b.x-nx*w,b.y-ny*w*.5],[a.x-nx*w,a.y-ny*w*.5]],col);
+ for(let k=1;k<6;k++){const f=k/6;r.line([[a.x+dx*f,a.y+dy*f],[a.x+dx*(f+.06),a.y+dy*(f+.06)]],'#eee8d2',.6);}
 }

@@ -3,7 +3,7 @@ import {startBlaze} from './consequences.js';
 // They follow the slope outward, damage what stands in the way, and the island takes years to rebuild.
 const hzHash=(seed,a,b=0)=>{let x=(seed^Math.imul(a+17,0x2545f491)^Math.imul(b+3,0x9e3779b1))>>>0;x=Math.imul(x^(x>>>15),0x85ebca6b);x^=x>>>13;return(x>>>0)/4294967296;};
 const HAZARD_HOMES=new Set(['hut','house','townhouse','tower']);
-export const REBUILD={lava:35,flood:20,avalanche:25};
+export const REBUILD={lava:60,flood:35,avalanche:45};
 export function ensureHazards(s){s.hazards??={events:[],hits:[],falls:null,lastFlood:-999};return s.hazards;}
 // A path from a landform outward: each step moves to the neighbour farthest from the peak.
 export function downhill(s,from,len){
@@ -54,8 +54,8 @@ export function waterfallSite(s){
  const hill=s.land.filter(t=>t.landform==='hill').sort((a,b)=>(b.relief||0)-(a.relief||0))[0];
  h.falls=hill?{x:hill.x,y:hill.y}:null;return h.falls;
 }
-export function overflow(s){
- const h=ensureHazards(s),falls=waterfallSite(s);if(!falls||s.year-h.lastFlood<60)return null;
+export function overflow(s,byHand=false){
+ const h=ensureHazards(s),falls=waterfallSite(s);if(!falls||s.year-h.lastFlood<(byHand?12:60))return null;
  const hill=s.tile(falls.x,falls.y),path=downhill(s,hill,3);if(!path.length)return null;
  h.lastFlood=s.year;const ruined=hazardStrike(s,'flood',path,{ruinUpTo:1});hazardRecord(s,'flood',hill,path,12);
  s.log(ruined?'Na alle regen loopt de waterval over. Het water stroomt de heuvels af en een huis onderaan spoelt weg.':'Na alle regen loopt de waterval over. Kelders lopen onder en de akkers worden een meertje.','flood',{x:path.at(-1).x,y:path.at(-1).y});
@@ -67,7 +67,7 @@ export function registerHit(s,mode,spot){
  const h=ensureHazards(s);h.hits.push({mode,year:s.year});h.hits=h.hits.filter(x=>s.year-x.year<=15);
  const same=h.hits.filter(x=>x.mode===mode).length;
  if(mode==='rumble'&&spot)avalanche(s,spot);
- if(mode==='rain'&&spot){const falls=waterfallSite(s);if(falls&&Math.hypot(spot.x-falls.x,spot.y-falls.y)<=3&&same>=2)overflow(s);}
+ if(mode==='rain'&&spot){const falls=waterfallSite(s);if(falls&&Math.hypot(spot.x-falls.x,spot.y-falls.y)<=2.5)overflow(s,true);}
  if(same<5)return 0;
  // Carnage: the island cannot keep up any more.
  const near=s.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=2.5&&!t.foundingHome&&!t.castle&&!t.landform);
