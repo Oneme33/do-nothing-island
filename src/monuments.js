@@ -1,5 +1,6 @@
 import {startParty} from './spectacle.js';
 import {wishTally} from './wishes.js';
+import {rerouteRiver} from './river.js';
 // Statues the island raises by itself: for you, for its founder, and for the odd things it loves.
 const helpedWishes=s=>wishTally(s,'helped');
 export const MONUMENTS=[
@@ -18,7 +19,8 @@ const castleOpen=n=>n?.kind==='land'&&!n.landform&&(!n.building||['tree','forest
 function reserveCastleSite(s){
  if(s.court||s.castleSite||s.year<400)return;
  const room=t=>CASTLE_RING.filter(([dx,dy])=>castleOpen(s.tile(t.x+dx,t.y+dy))).length;
- const spots=s.land.filter(t=>!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.foundingHome&&!t.river&&Math.hypot(t.x,t.y)>=4&&room(t)>=17).sort((a,b)=>room(b)-room(a)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
+ const dry=t=>CASTLE_RING.every(([dx,dy])=>!s.tile(t.x+dx,t.y+dy)?.river);
+ const spots=s.land.filter(t=>!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.foundingHome&&!t.river&&Math.hypot(t.x,t.y)>=4&&room(t)>=17&&dry(t)).sort((a,b)=>room(b)-room(a)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
  const site=spots[(s.seed>>>5)%Math.max(1,spots.length)];if(!site)return;
  s.castleSite={x:site.x,y:site.y};site.reservedFor='castle';
  for(const [dx,dy] of CASTLE_RING){const n=s.tile(site.x+dx,site.y+dy);if(castleOpen(n))n.reservedFor='castle';}
@@ -62,7 +64,7 @@ export function buildCastle(s){
  const style=styles[(s.seed>>>0)%styles.length],spots=reserved?[reserved]:s.land.filter(t=>free(t)&&room(t)>=12).sort((a,b)=>style(a)-style(b)||room(b)-room(a)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
  const tile=spots[((s.seed>>>3)+s.year)%Math.max(1,spots.length)];if(!tile)return null;
  tile.reservedFor=null;tile.building='palace';tile.builtYear=s.year;tile.architecture=s.age.id;tile.district='heritage';tile.landmark=true;tile.castle=true;
- s.court={x:tile.x,y:tile.y,year:s.year};claimCastleGrounds(s);
+ s.court={x:tile.x,y:tile.y,year:s.year};claimCastleGrounds(s);rerouteRiver(s);
  s.log('Het eiland bouwt een kasteel, op een plek die het zelf heeft uitgekozen. Het eerste huis blijft het huis van de familie.','palace',{x:tile.x,y:tile.y});
  startParty(s,tile,'Inhuldiging van het kasteel',['De trap is zo lang dat de koning onderweg pauzeert.','Er zijn meer kamers dan mensen.','De lakeien oefenen buigen. Twee vallen om.'],4);s.rebuildRoads();
  return tile;

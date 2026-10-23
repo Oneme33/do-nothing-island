@@ -6,7 +6,7 @@ import {ensureChallenges,advanceChallenges} from './challenges.js';
 import {advanceCollection} from './collection.js';
 import {advanceCoast,coastNotice} from './coast.js';
 import {ensureSquare,advanceSquare} from './square.js';
-import {carveRiver} from './river.js';
+import {carveRiver,rerouteRiver} from './river.js';
 import {planDelight,reserveDelightGrounds,DELIGHT_LABELS,DELIGHT_OPENINGS} from './delights.js';
 import {advanceMonuments,buildCastle} from './monuments.js';
 import {advanceWeather} from './weather.js';
@@ -989,7 +989,7 @@ export class Civilization {
       if(!parsed.character && sim.year>=32)sim.character=CHARACTERS[sim.seed%CHARACTERS.length].id;
       if(!Array.isArray(parsed.routes) || !parsed.tiles.every(([,tile])=>typeof tile.road==='boolean'))sim.rebuildRoads();
       if(!parsed.storyVersion){sim.storyVersion=0;sim.snapshots=[];}
-      ensureStory(sim,true);if(!parsed.square)delete sim.square;if(!parsed.river)sim.river={tiles:[],mouth:null};ensureSquare(sim,{restoring:true});
+      ensureStory(sim,true);if(!parsed.square)delete sim.square;if(!parsed.river)sim.river={tiles:[],mouth:null};else rerouteRiver(sim);ensureSquare(sim,{restoring:true});
       ensureSpectacle(sim);
       if(!parsed.family)delete sim.family;
       ensureFamily(sim,{restoring:true});

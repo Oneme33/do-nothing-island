@@ -2056,14 +2056,13 @@ function advanceSquare(s){
 
 // A river runs from the high ground to the sea. Its tiles stay free of buildings; roads cross it on little bridges.
 const riverAround=t=>[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:t.x+dx,y:t.y+dy}));
-function carveRiver(s){
- if(s.river)return s.river;
+// Finds a meandering course from a peak to a far coast over the tiles that ok() allows; extra() adds cost per tile.
+function findCourse(s,ok,extra=()=>0){
  const high=s.land.filter(t=>t.landform).sort((a,b)=>(b.relief||0)-(a.relief||0));
- const ok=t=>t&&t.kind==='land'&&!t.landform&&!t.building&&!t.reservedFor&&!t.foundingHome&&Math.hypot(t.x,t.y)>2.5;
  for(const peak of high){
   const start=riverAround(peak).map(p=>s.tile(p.x,p.y)).find(ok);if(!start)continue;
   // Search the island with uneven costs, so the river meanders instead of running in straight lines like a canal.
-  const cost=t=>1+((Math.sin(t.x*12.9898+t.y*78.233+(s.seed%997))*43758.5453)%1+1)%1*2.6;
+  const cost=t=>1+((Math.sin(t.x*12.9898+t.y*78.233+(s.seed%997))*43758.5453)%1+1)%1*2.6+extra(t);
   const key=t=>`${t.x},${t.y}`,prev=new Map([[key(start),null]]),dist=new Map([[key(start),0]]),steps=new Map([[key(start),0]]),open=[start];let end=null,best=-1;
   while(open.length){
    open.sort((a,b)=>dist.get(key(a))-dist.get(key(b)));const cur=open.shift(),n=steps.get(key(cur));
@@ -2073,13 +2072,45 @@ function carveRiver(s){
   }
   if(!end)continue;
   const path=[];for(let cur=end;cur;cur=prev.get(`${cur.x},${cur.y}`))path.unshift(cur);
-  const cur=end;
-  for(const t of path){t.river=true;t.reservedFor='river';}
-  const sea=riverAround(cur).map(p=>s.tile(p.x,p.y)).find(t=>t?.kind==='water');
-  s.river={tiles:path.map(t=>`${t.x},${t.y}`),mouth:{x:cur.x,y:cur.y},sea:sea?{x:sea.x,y:sea.y}:null,source:{x:peak.x,y:peak.y}};
-  return s.river;
+  const sea=riverAround(end).map(p=>s.tile(p.x,p.y)).find(t=>t?.kind==='water');
+  return{path,peak,end,sea};
  }
+ return null;
+}
+function layRiver(s,course){
+ for(const t of course.path){t.river=true;t.reservedFor='river';}
+ s.river={tiles:course.path.map(t=>`${t.x},${t.y}`),mouth:{x:course.end.x,y:course.end.y},sea:course.sea?{x:course.sea.x,y:course.sea.y}:null,source:{x:course.peak.x,y:course.peak.y}};
+ return s.river;
+}
+function carveRiver(s){
+ if(s.river)return s.river;
+ const course=findCourse(s,t=>t&&t.kind==='land'&&!t.landform&&!t.building&&!t.reservedFor&&!t.foundingHome&&Math.hypot(t.x,t.y)>2.5);
+ if(course)return layRiver(s,course);
  s.river={tiles:[],mouth:null};return s.river;
+}
+// Grounds that must keep their distance from the river: the castle, the zoo, the theme park and the spaceport.
+function riverGrounds(s){
+ const centres=[];if(s.court)centres.push({x:s.court.x,y:s.court.y,r:2});
+ for(const [type,g] of Object.entries(s.delightGrounds||{}))if(g)centres.push({x:g.x,y:g.y,r:type==='spaceport'?1:2});
+ return centres;
+}
+const nearGrounds=(s,t,centres=riverGrounds(s))=>centres.some(c=>Math.max(Math.abs(t.x-c.x),Math.abs(t.y-c.y))<=c.r);
+// When an old island has its river running under the castle or another big ground, the river finds a new course
+// around it. Homes and fields on the new course make way; the old bed becomes ordinary land again.
+function rerouteRiver(s){
+ const river=s.river;if(!river?.tiles?.length)return false;
+ const centres=riverGrounds(s);if(!centres.length)return false;
+ const clash=river.tiles.some(k=>{const [x,y]=k.split(',').map(Number);return nearGrounds(s,{x,y},centres);});if(!clash)return false;
+ const movable=['farm','tree','forest','park','garden','hut','house','townhouse'];
+ const ok=t=>t&&t.kind==='land'&&!t.landform&&!t.foundingHome&&!t.buildSite&&!t.plaque&&Math.hypot(t.x,t.y)>2.5&&!nearGrounds(s,t,centres)&&(t.river||!t.reservedFor)&&(!t.building||movable.includes(t.building));
+ const course=findCourse(s,ok,t=>t.river?-.5:t.building?(['hut','house','townhouse'].includes(t.building)?5:1.5):0);
+ if(!course)return false;
+ for(const k of river.tiles){const t=s.tiles.get(k);if(t){t.river=false;if(t.reservedFor==='river')t.reservedFor=null;}}
+ for(const t of course.path)if(t.building)t.building=null;
+ layRiver(s,course);
+ s.log('De rivier zoekt een nieuwe weg, om het kasteel en de grote terreinen heen. Waar ze vroeger stroomde, groeit nu gras.','land',{x:course.end.x,y:course.end.y});
+ s.rebuildRoads();
+ return true;
 }
 
 // Every island earns a name and a flag from its seed and, once it has one, its character.
@@ -2182,7 +2213,8 @@ function reserveDelightGrounds(s){
   const ring2=[];for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)if(Math.max(Math.abs(dx),Math.abs(dy))===2)ring2.push([dx,dy]);
   // The spaceport only needs its concrete apron, but it must be by the sea, well away from the homes.
   const rocket=type==='spaceport',seaward=t=>[[2,0],[-2,0],[0,2],[0,-2],[2,2],[-2,-2],[2,-2],[-2,2],[3,0],[0,3],[-3,0],[0,-3]].some(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return !n||n.kind==='water';});
-  const spots=s.land.filter(t=>free(t)&&Math.hypot(t.x,t.y)>=3&&DELIGHT_RING.every(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy)))&&(rocket?seaward(t):ring2.filter(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy))).length>=7));
+  const dry=t=>{for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)if(s.tile(t.x+dx,t.y+dy)?.river)return false;return true;};
+  const spots=s.land.filter(t=>free(t)&&dry(t)&&Math.hypot(t.x,t.y)>=3&&DELIGHT_RING.every(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy)))&&(rocket?seaward(t):ring2.filter(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy))).length>=7));
   if(!spots.length)continue;
   const spot=spots[(s.seed+type.length*31)%spots.length];
   spot.reservedFor=`delight:${type}`;s.delightGrounds[type]={x:spot.x,y:spot.y};
@@ -2245,7 +2277,8 @@ const castleOpen=n=>n?.kind==='land'&&!n.landform&&(!n.building||['tree','forest
 function reserveCastleSite(s){
  if(s.court||s.castleSite||s.year<400)return;
  const room=t=>CASTLE_RING.filter(([dx,dy])=>castleOpen(s.tile(t.x+dx,t.y+dy))).length;
- const spots=s.land.filter(t=>!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.foundingHome&&!t.river&&Math.hypot(t.x,t.y)>=4&&room(t)>=17).sort((a,b)=>room(b)-room(a)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
+ const dry=t=>CASTLE_RING.every(([dx,dy])=>!s.tile(t.x+dx,t.y+dy)?.river);
+ const spots=s.land.filter(t=>!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.foundingHome&&!t.river&&Math.hypot(t.x,t.y)>=4&&room(t)>=17&&dry(t)).sort((a,b)=>room(b)-room(a)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
  const site=spots[(s.seed>>>5)%Math.max(1,spots.length)];if(!site)return;
  s.castleSite={x:site.x,y:site.y};site.reservedFor='castle';
  for(const [dx,dy] of CASTLE_RING){const n=s.tile(site.x+dx,site.y+dy);if(castleOpen(n))n.reservedFor='castle';}
@@ -2289,7 +2322,7 @@ function buildCastle(s){
  const style=styles[(s.seed>>>0)%styles.length],spots=reserved?[reserved]:s.land.filter(t=>free(t)&&room(t)>=12).sort((a,b)=>style(a)-style(b)||room(b)-room(a)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
  const tile=spots[((s.seed>>>3)+s.year)%Math.max(1,spots.length)];if(!tile)return null;
  tile.reservedFor=null;tile.building='palace';tile.builtYear=s.year;tile.architecture=s.age.id;tile.district='heritage';tile.landmark=true;tile.castle=true;
- s.court={x:tile.x,y:tile.y,year:s.year};claimCastleGrounds(s);
+ s.court={x:tile.x,y:tile.y,year:s.year};claimCastleGrounds(s);rerouteRiver(s);
  s.log('Het eiland bouwt een kasteel, op een plek die het zelf heeft uitgekozen. Het eerste huis blijft het huis van de familie.','palace',{x:tile.x,y:tile.y});
  startParty(s,tile,'Inhuldiging van het kasteel',['De trap is zo lang dat de koning onderweg pauzeert.','Er zijn meer kamers dan mensen.','De lakeien oefenen buigen. Twee vallen om.'],4);s.rebuildRoads();
  return tile;
@@ -3580,7 +3613,7 @@ class Civilization {
       if(!parsed.character && sim.year>=32)sim.character=CHARACTERS[sim.seed%CHARACTERS.length].id;
       if(!Array.isArray(parsed.routes) || !parsed.tiles.every(([,tile])=>typeof tile.road==='boolean'))sim.rebuildRoads();
       if(!parsed.storyVersion){sim.storyVersion=0;sim.snapshots=[];}
-      ensureStory(sim,true);if(!parsed.square)delete sim.square;if(!parsed.river)sim.river={tiles:[],mouth:null};ensureSquare(sim,{restoring:true});
+      ensureStory(sim,true);if(!parsed.square)delete sim.square;if(!parsed.river)sim.river={tiles:[],mouth:null};else rerouteRiver(sim);ensureSquare(sim,{restoring:true});
       ensureSpectacle(sim);
       if(!parsed.family)delete sim.family;
       ensureFamily(sim,{restoring:true});

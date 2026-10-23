@@ -32,7 +32,8 @@ export function reserveDelightGrounds(s){
   const ring2=[];for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)if(Math.max(Math.abs(dx),Math.abs(dy))===2)ring2.push([dx,dy]);
   // The spaceport only needs its concrete apron, but it must be by the sea, well away from the homes.
   const rocket=type==='spaceport',seaward=t=>[[2,0],[-2,0],[0,2],[0,-2],[2,2],[-2,-2],[2,-2],[-2,2],[3,0],[0,3],[-3,0],[0,-3]].some(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return !n||n.kind==='water';});
-  const spots=s.land.filter(t=>free(t)&&Math.hypot(t.x,t.y)>=3&&DELIGHT_RING.every(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy)))&&(rocket?seaward(t):ring2.filter(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy))).length>=7));
+  const dry=t=>{for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)if(s.tile(t.x+dx,t.y+dy)?.river)return false;return true;};
+  const spots=s.land.filter(t=>free(t)&&dry(t)&&Math.hypot(t.x,t.y)>=3&&DELIGHT_RING.every(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy)))&&(rocket?seaward(t):ring2.filter(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy))).length>=7));
   if(!spots.length)continue;
   const spot=spots[(s.seed+type.length*31)%spots.length];
   spot.reservedFor=`delight:${type}`;s.delightGrounds[type]={x:spot.x,y:spot.y};
