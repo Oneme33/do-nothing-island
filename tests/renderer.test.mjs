@@ -47,7 +47,7 @@ test('renderer draws every era, completed projects and flooded districts at desk
     assert.ok(calls.includes('ellipse'));assert.ok(calls.includes('fill'));
     assert.ok(renderer.zoom>=.68);assert.ok(renderer.zoom<=1.55);
     assert.ok(sim.buildings.some(t=>t.building==='tower'));
-    assert.equal(canvas.width,width*(width<700?1.5:2),'phones draw with a slightly lower pixel ratio');
+    assert.equal(canvas.width,Math.round(width*(width<700?1.25:2)),'phones draw with a slightly lower pixel ratio');
   }
 });
 test('tile selection remains accurate through adaptive zoom, panning and recentering',()=>{

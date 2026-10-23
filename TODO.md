@@ -105,12 +105,12 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 - **Verstopte verhalen naar voren halen:** het familieverhaal en andere mooie details zitten nu in het Eilandboek. Laat af en toe zo'n moment op het eiland zelf opvallen, met een subtiel, aanklikbaar berichtje, zodat je eerder een band krijgt met de bewoners.
 - **Kortere introductie:** in plaats van drie schermen één korte begroeting, en de uitleg daarna tijdens het ontdekken, op het moment dat je iets voor het eerst ziet of doet.
 
-### Nog te doen: soepeler zoomen op mobiel
+### Gedaan: soepeler zoomen op mobiel (laatste stap, tussenbeeld, nog open)
 - Tijdens knijpen of slepen tijdelijk minder detail tekenen: geen dieren, wandelaars, wolken, vogels, bootjes en seizoensversiering, en minder golfjes. Anderhalve seconde na loslaten komt alles terug.
 - Op telefoons met pixelverhouding 1,25 tekenen in plaats van 1,5.
 - Als dat niet genoeg is: de vaste delen van het eiland (grond, gebouwen) in een tussenbeeld bewaren en alleen opnieuw tekenen als er iets verandert.
 - **Flikkerende hoofdjes (ook op desktop):** de hoofdjes van bewoners flikkeren soms. Vermoedelijk wisselen bewoners en gebouwen met dezelfde diepte steeds van volgorde, of knipperen ze bij het in- en uitlopen van een deur. Uitzoeken en een vaste tekenvolgorde geven.
 
-### Nog te doen: kleine wensen
+### Gedaan: kleine wensen
 - **Cadeau zonder inzoomen:** bij het bouwen van een cadeau door de bewoners niet automatisch inzoomen, maar een duidelijke marker op de plek laten zien (bijvoorbeeld een vlaggetje of een strik boven de bouwplaats, tot het klaar is).
 - **Kerk met kerkhof:** de kerk krijgt een kerkhof ernaast. In het begin een kleine kerk met een paar grafjes; later groeit het kerkhof mee en staat er aan het einde een grote kerk ergens achterin het eiland, met een flink kerkhof. Hoe meer je voor de bewoners doet (geholpen wensen), hoe groter en imposanter de kerk wordt.

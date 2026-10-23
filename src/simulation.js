@@ -409,6 +409,7 @@ export class Civilization {
     advanceVisitors(this);advanceIslets(this);advanceFamous(this);advanceDigs(this);advanceMedieval(this);advanceHazards(this);
     if(this.pendingHit){registerHit(this,this.pendingHit.mode,this.tile(this.pendingHit.x,this.pendingHit.y));this.pendingHit=null;}
     if(this.year>=1955&&this.year%10===3)this.placeAirfield();
+    if(this.year%50===21)for(const ch of this.land.filter(t=>t.building==='church'))this.claimGraveyard(ch);
     // Years in which the stores ran low count against wellbeing; a helped rain wish often prevents them.
     if(this.population>20&&this.food<this.population*.6)this.hungryYears=(this.hungryYears||0)+1;
     advanceCivicStory(this);
@@ -622,6 +623,7 @@ export class Civilization {
       Object.assign(openings,{park:'A public park opens. Doing nothing is now an approved land use.',forest:'A woodland is planted. The squirrels establish a rival economy.',beach:'A beach opens on the new shore. The sea asks everyone to take their towels home.',shop:'The first shop opens. Wanting things becomes a local industry.',bakery:'A bakery opens. The village begins scheduling its mornings around bread.',cafe:'A café terrace opens. The gossip now comes with a small cup.',playground:'A playground opens. The children test gravity. Repeatedly.',fairground:'A Ferris wheel begins turning. The island invents a recreational queue.'});
       Object.assign(openings,{school:'A school opens. The children immediately question the entire system.','science-center':'A science center opens. The researchers request more funding before lunch.'});
       Object.assign(openings,DELIGHT_OPENINGS,{watchtower:'De uitkijktoren is klaar. De eerste bezoeker roept naar beneden dat hij zijn huis ziet.','rose-garden':'De rozentuin bloeit. Het ruikt tot aan de haven.','grand-fountain':'De grote fontein spuit voor het eerst. De duiven zijn meteen vaste klant.',carillon:'De klokkentoren slaat voor het eerst. Hij is twee minuten te vroeg, uit enthousiasme.'});
+      if(type==='church')this.claimGraveyard(t);
       if(t.commissioned)this.signal('gift',t,'Je cadeau is klaar!',{sound:'fanfare',text:`Je cadeau is klaar: de bewoners hebben je ${(COMMISSIONS[type]?.name||'bouwwerk').toLowerCase()} afgebouwd.`});
       if(DELIGHT_OPENINGS[type]&&(this.seed+this.year)%3!==0)startParty(this,t,`Opening: ${DELIGHT_LABELS[type]}`,['Er wordt een lint doorgeknipt. Het lint is er niet blij mee.','Gratis koffie! De hele wijk komt kijken.','De fanfare oefent nog. Het klinkt bijna als muziek.'],8);
       if(type==='powerplant'&&this.year>=1980)openings.powerplant='Een regelbare reservecentrale versterkt het stroomnet. De stad kiest voor leveringszekerheid.';
@@ -721,6 +723,12 @@ export class Civilization {
       if(!have)this.log('Aan de kade verrijst het eerste pakhuis. Het havenkwartier ruikt meteen naar koffie, touw en een beetje vis.','trade',{x:t.x,y:t.y});
       this.signal('built',t,'Een pakhuis aan de kade');
     }
+  }
+  // A church keeps one or two plots beside it as its churchyard.
+  claimGraveyard(church){
+    if(this.land.some(t=>t.yardOf?.type==='church'&&t.yardOf.x===church.x&&t.yardOf.y===church.y))return;
+    const free=[[1,0],[0,1],[-1,0],[0,-1]].map(([dx,dy])=>this.tile(church.x+dx,church.y+dy)).filter(t=>t&&t.kind==='land'&&!t.landform&&!t.foundingHome&&!t.reservedFor&&!t.buildSite&&!t.river&&(!t.building||['tree','park','garden'].includes(t.building)));
+    for(const t of free.slice(0,2)){t.building=null;t.reservedFor='delight';t.yardOf={type:'church',x:church.x,y:church.y,i:11};}
   }
   // Late in the story a small airfield appears on the newest polder: three tiles of runway.
   placeAirfield(){

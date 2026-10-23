@@ -58,7 +58,7 @@ export class IslandRenderer {
     if(Math.abs(r.width-this.width)<.5&&Math.abs(r.height-this.height)<.5&&this.canvas.width)return;
     this.width=r.width;this.height=r.height;this.needsDraw=true;
     // Phones draw with a little fewer pixels: barely visible, much faster.
-    const dpr=Math.min(r.width<700?1.5:2,window.devicePixelRatio||1);
+    const dpr=Math.min(r.width<700?1.25:2,window.devicePixelRatio||1);
     this.canvas.width=Math.round(r.width*dpr);this.canvas.height=Math.round(r.height*dpr);
     this.dpr=dpr;
   }
@@ -193,13 +193,12 @@ export class IslandRenderer {
       if(t.treasure&&this.sim.year-t.treasure.year<40)this.scene.push({depth:depth+1,draw:()=>this.treasureChest(t)});
       if(t.landform||t.building||t.buildSite)this.scene.push({depth,draw:()=>{if(t.landform)this.drawLandform(t);if(t.building)this.drawBuilding(t);if(t.buildSite)this.drawBuildingSite(t);}});
     }
-    this.drawWorkers();
+    // While you zoom or drag, the decoration waits: animals, walkers, boats, clouds and birds come back when you let go.
+    if(!this.interacting)this.drawWorkers();
     drawInterventionFx(this);
-    drawAnimals(this);
-    drawSeasonal(this);
-    drawFestive(this);
-    drawOverseas(this);drawFamous(this);drawMedieval(this);drawHazards(this);
-    this.drawVisitors();drawLifeWorld(this);
+    if(!this.interacting){drawAnimals(this);drawSeasonal(this);drawFestive(this);}
+    drawOverseas(this);drawFamous(this);drawMedieval(this);drawHazards(this);this.giftMarkers();
+    if(!this.interacting){this.drawVisitors();drawLifeWorld(this);}
     this.scene.sort((a,b)=>a.depth-b.depth);
     for(const item of this.scene)item.draw();
     this.scene=null;
@@ -208,12 +207,9 @@ export class IslandRenderer {
     if(this.hover){
       for(const t of land){const distance=Math.abs(t.x-this.hover.x)+Math.abs(t.y-this.hover.y);if(distance<=(['rain','rumble'].includes(this.mode)?2:0)){const p=this.p(t.x,t.y);this.diamond(p.x,p.y-1,23,11.5,this.mode==='rumble'?'#d39a6c22':'#ffffff22',this.mode==='rain'?'#e9f4e8aa':'#f9f9dbaa');}}
     }
-    this.drawBoats();
-    drawSeaLife(this);
+    if(!this.interacting){this.drawBoats();drawSeaLife(this);}
     c.restore();
-    this.drawCloudShadows();
-    this.drawClouds();
-    this.drawBirds();
+    if(!this.interacting){this.drawCloudShadows();this.drawClouds();this.drawBirds();}
     this.drawRipples();
     if(this.sim.storm)this.drawRain();
     drawWeather(this);
@@ -348,7 +344,7 @@ export class IslandRenderer {
     const g=c.createRadialGradient(this.width*.55,this.height*.5,40,this.width*.55,this.height*.5,this.width*.7);
     g.addColorStop(0,'#eaf3e6aa');g.addColorStop(.55,'#cfe4df33');g.addColorStop(1,'#9fc4c1aa');c.fillStyle=g;c.fillRect(0,0,this.width,this.height);
     if(!this.reduced)for(let i=0;i<26;i++){const tw=Math.sin(this.time*1.7+i*2.3);if(tw<.7)continue;const x=hash(i,41)*this.width,y=hash(i,43)*this.height;c.fillStyle=`rgba(255,255,250,${(tw-.7)*2})`;c.fillRect(x-2,y,4,.8);c.fillRect(x-.4,y-1.6,.8,4);}
-    for(let i=0;i<115;i++){
+    for(let i=0;i<(this.interacting?24:115);i++){
       const x=hash(i,2)*this.width+Math.sin(this.time*.13+i)*3;
       const y=hash(i,8)*this.height;
       const w=6+hash(i,9)*14;
@@ -609,7 +605,7 @@ export class IslandRenderer {
     else if(b==='statue')this.statue(t.variant);
     else if(b==='garden')this.garden();
     else if(b==='theater')this.theater();
-    else if(b==='shrine'||b==='church'){if(b==='church'&&this.archStyle==='classical')this.library();else this.church(b==='church');}
+    else if(b==='shrine'||b==='church'){if(b==='church'){const g=1+Math.min(.7,(this.sim.wishes?.tally?.helped||0)*.025);c.scale(g,g);}if(b==='church'&&this.archStyle==='classical')this.library();else this.church(b==='church');}
     else if(b==='dock'||b==='harbor')this.dock(b==='harbor'&&this.sim.era>=2);
     else if(b==='warehouse')this.warehouse(t);
     else if(b==='airfield')this.airfield(t);
@@ -1243,6 +1239,11 @@ export class IslandRenderer {
       // The plane: rolls down the runway, lifts off and climbs out of view, then a while later lands again.
       const cyc=this.reduced?.2:((this.time*.02+t.x*.1)%1);if(cyc<.55){const u=cyc/.55,a=-30+u*110,alt=Math.max(0,a-6)*.9,[px,py]=P(a,0);this.enqueueActor(this.p(t.x,t.y).y+30,()=>{const c=this.ctx;c.save();c.translate(this.p(t.x,t.y).x+px,this.p(t.x,t.y).y+py-2-alt);this.ellipse(0,alt?alt+4:3,6,1.6,'rgba(40,50,45,.18)');this.ellipse(0,0,6.5,1.8,'#f4f4f0');this.poly([[-1,-.4],[2,-.4],[-2,6],[-4,6]],'#dfe3e4');this.poly([[-1,.2],[2,.2],[-2,-5.5],[-4,-5.5]],'#cfd4d6');this.poly([[-6,0],[-4.6,0],[-6.6,-3.4]],'#c95b4c');this.ellipse(4.6,-.3,1,.6,'#7fb6d6');c.restore();});}}
   }
+  // While the residents build your gift, a little wrapped present floats over the site.
+  giftMarkers(){
+    for(const t of this.visibleTiles||[]){if(!t.commissioned||!t.buildSite)continue;const p=this.p(t.x,t.y),bob=this.reduced?0:Math.sin(this.time*2+t.x)*2;
+      this.enqueueActor(p.y+40,()=>{const x=p.x,y=p.y-46+bob;this.line([[x,y+8],[x,y+16]],'rgba(80,70,60,.35)',.6);this.rect(x-5,y-4,10,8,'#d4644f');this.rect(x-1,y-4,2,8,'#f2d36b');this.rect(x-5.6,y-5.6,11.2,2.4,'#c64a42');this.rect(x-1,y-5.6,2,2.4,'#f2d36b');this.ellipse(x-2.2,y-7,2.2,1.3,'#f2d36b');this.ellipse(x+2.2,y-7,2.2,1.3,'#f2d36b');});}
+  }
   // A tall brick warehouse with a stepped gable, loading doors and a hoist beam; from 1900 a crane stands beside it.
   warehouse(t){
     const brick=['#a8664f','#9a5d4a','#b2745a'][Math.floor(hash(t.x,t.y)*3)],L=20,W=16,H=20,R=11;
@@ -1306,6 +1307,12 @@ export class IslandRenderer {
         for(let k=0;k<3;k++){const bx=16+k*2,by=-16-k*2+Math.sin(time*2+k)*1;this.line([[15,-6],[bx,by+3]],'#8a8478',.4);this.ellipse(bx,by,1.8,2.2,['#d4644f','#5c8fc0','#e2c26a'][k]);}
       }
       this.person(-14,6,'#b18d6b',1);this.person(14,5,'#879c76',2);
+    }else if(type==='church'){
+      // The churchyard: a low wall, a yew and more headstones with every generation.
+      const owner=this.sim.tile(t.yardOf.x,t.yardOf.y),age=Math.max(0,this.sim.year-(owner?.builtYear??this.sim.year)),graves=Math.min(14,2+Math.floor(age/35));
+      this.diamond(0,0,21,10.5,this.light?.winter>.6?'#e4e9e4':'#9fb47a');for(const [a,b] of [[[-21,0],[0,-10.5]],[[0,-10.5],[21,0]],[[21,0],[0,10.5]],[[0,10.5],[-21,0]]])this.line([a,b],'#b5ad96',1.4);
+      for(let k=0;k<graves;k++){const row=Math.floor(k/5),col=k%5,x=-11+col*5.4+row*2.4,y=-5+row*4.2-col*1.2;if(k%4===3){this.line([[x,y],[x,y-5]],'#8f8a7e',.9);this.line([[x-1.6,y-3.6],[x+1.6,y-3.6]],'#8f8a7e',.9);}else{this.rect(x-1.2,y-3.6,2.4,3.6,'#b9b3a4');this.ellipse(x,y-3.6,1.2,.7,'#c9c3b4');}}
+      this.ctx.save();this.ctx.translate(13,2);this.ctx.scale(.55,.55);this.tree(false,.2);this.ctx.restore();
     }else if(i>=8){
       // The spaceport apron: concrete with markings, fuel tanks or a small control tower.
       this.diamond(0,0,22,11,'#c9c9c2');this.diamond(0,0,18,9,'#d4d4cd');this.line([[-14,0],[14,0]],'#e8c040',.7);this.line([[0,-7],[0,7]],'#e8c040',.7);
@@ -1632,7 +1639,7 @@ export class IslandRenderer {
     const colors=['#a18463','#d4c08a','#7a8d6b','#b89774','#d6d0ae'];
     for(let i=0;i<count;i++){
       const p=this.sampleWalker(i);if(!p||p.stage==='inside')continue;
-      this.enqueueActor(p.y,()=>{
+      this.enqueueActor(Math.round(p.y/5.75)*5.75+3,()=>{
         this.ctx.save();this.ctx.globalAlpha=p.alpha;this.person(p.x,p.y,colors[i%colors.length],i);
         if(i%3===0){this.rect(p.x+1,p.y-5,3,2,'#bd9f69');this.line([[p.x+1,p.y-5],[p.x+4,p.y-5]],'#e0c995',.5);}this.ctx.restore();
       });
