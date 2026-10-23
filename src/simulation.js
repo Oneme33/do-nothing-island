@@ -11,6 +11,9 @@ import {planDelight,DELIGHT_LABELS,DELIGHT_OPENINGS} from './delights.js';
 import {advanceMonuments,buildCastle} from './monuments.js';
 import {advanceWeather} from './weather.js';
 import {advanceCommissions} from './commissions.js';
+import {advanceVisitors} from './visitors.js';
+import {advanceIslets} from './islets.js';
+import {advanceFamous,advanceDigs} from './famous.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 // New islands sit in a 29×29 sea; the natural island stays within the original 25×25, so the extra sea is room for polders.
@@ -382,6 +385,7 @@ export class Civilization {
     // Delights do not wait for a housing lull: they claim a fitting free plot when their time comes.
     if(this.year%9===4&&!this.storm)planDelight(this);
     advanceMonuments(this);advanceWeather(this);advanceCommissions(this);
+    advanceVisitors(this);advanceIslets(this);advanceFamous(this);advanceDigs(this);
     advanceCivicStory(this);
     advanceFamily(this);
     advanceWishes(this);

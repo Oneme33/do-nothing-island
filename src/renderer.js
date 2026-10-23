@@ -7,6 +7,9 @@ import {drawAnimals} from './animals.js';
 import {drawFestive} from './festive.js';
 import {drawSeasonal,drawNightLife} from './ambient.js';
 import {drawWeather} from './weatherfx.js';
+import {drawOverseas} from './visitors.js';
+import {drawIslets} from './islets.js';
+import {drawFamous} from './famous.js';
 import {squareRole} from './square.js';
 import {islandIdentity} from './identity.js';
 import { drawFlames, drawBonfire, drawFestivalGround, drawLifeWorld, drawComicBubbles } from './pageants.js';
@@ -152,6 +155,7 @@ export class IslandRenderer {
     this.origin={x:this.width*(mobile?.54:.55)-this.center.x*this.zoom+this.pan.x+quake,y:this.height*(cinemaVisible(this.sim)?.62:mobile?.54:.52)-this.center.y*this.zoom+this.pan.y};
     this.drawWater();
     c.save();c.translate(this.origin.x,this.origin.y);c.scale(this.zoom,this.zoom);
+    drawIslets(this);
     // Shore water is derived from current geography, so the coast follows every project.
     const tiles=[...this.sim.tiles.values()];
     for(const t of tiles){
@@ -182,6 +186,7 @@ export class IslandRenderer {
     drawAnimals(this);
     drawSeasonal(this);
     drawFestive(this);
+    drawOverseas(this);drawFamous(this);
     this.drawVisitors();drawLifeWorld(this);
     this.scene.sort((a,b)=>a.depth-b.depth);
     for(const item of this.scene)item.draw();

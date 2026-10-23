@@ -9,6 +9,7 @@ import {drawCredits,creditsFor} from './credits.js';
 import {ensureFamily,currentRelative,familyLore,sentenceCase} from './family.js';
 import {tourStops} from './tour.js';
 import {museumExhibits} from './museum.js';
+import {ALBUM_STORAGE_KEY,readAlbum,albumMoment,albumCaption,addPhoto,snapshot} from './album.js';
 import {Soundscape} from './sound.js';
 import {islandIdentity,flagSVG} from './identity.js';
 import {makePostcard,makeEndCard,downloadCanvas} from './postcard.js';
@@ -35,6 +36,7 @@ returnFromAway(sim);
 let collection=readCollection(null),collectionStorageAvailable=true;
 try{collection=readCollection(localStorage.getItem(COLLECTION_STORAGE_KEY));}catch{collectionStorageAvailable=false;}
 const canvas=$('island');
+let album={seed:sim.seed,photos:[]},albumBusy=false;try{album=readAlbum(localStorage.getItem(ALBUM_STORAGE_KEY),sim.seed);}catch{}
 const renderer=new IslandRenderer(canvas,sim);renderer.mode='nudge';canvas.dataset.mode='nudge';
 let paused=false,speed=[1,2,3,10].includes(sim.config.speedMultiplier)?sim.config.speedMultiplier:1,accumulator=0,lastTime=performance.now(),saveTimer=0,toastTimer,dirtyHistory=true;
 let soundscape=null,soundAt=0;
@@ -168,6 +170,22 @@ function renderMuseum(){
   $('museum-note').textContent=open?`${items.length} stukken in de vitrines. De suppoost kent ze allemaal uit het hoofd.`:'Er is nog geen museum. Rond het jaar 900 bouwt het eiland er vanzelf een; tot die tijd liggen de stukken op zolder.';
   $('museum-list').replaceChildren(...items.map(item=>{const li=document.createElement('li'),title=document.createElement('strong'),text=document.createElement('p'),meta=document.createElement('small');title.textContent=item.title;text.textContent=item.text;meta.textContent=`${item.kind}${item.year?` · jaar ${item.year}`:''}`;li.append(title,text,meta);return li;}));
 }
+// A big moment gets a photo a moment later, once the camera has had time to look.
+function takeAlbumPhoto(entries){
+  if(album.seed!==sim.seed)album={seed:sim.seed,photos:[]};
+  const moment=albumBusy?null:albumMoment(album,entries);if(!moment)return;
+  albumBusy=true;const seed=sim.seed;
+  setTimeout(()=>{albumBusy=false;if(seed!==sim.seed)return;
+    try{const src=snapshot(canvas);if(!src)return;addPhoto(album,{year:moment.year,caption:albumCaption(nl(moment.text)),src});}catch{return;}
+    for(let tries=0;tries<3;tries++){try{localStorage.setItem(ALBUM_STORAGE_KEY,JSON.stringify(album));break;}catch{album.photos.splice(1,4);}}
+  },1800);
+}
+function renderAlbum(){
+  if(album.seed!==sim.seed)album={seed:sim.seed,photos:[]};
+  $('album-note').textContent=album.photos.length?`${album.photos.length} foto’s van grote momenten. Iemand op het eiland heeft een heel geduldig fototoestel.`:'Nog geen foto’s. Bij grote momenten maakt het eiland vanzelf een kiekje.';
+  $('album-grid').replaceChildren(...album.photos.map((photo,i)=>{const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption'),year=document.createElement('strong');
+    img.src=photo.src;img.alt=photo.caption;img.loading='lazy';year.textContent=`Jaar ${photo.year}`;caption.append(year,photo.caption);figure.style.setProperty?.('--tilt',`${((i*37)%5-2)*.6}deg`);figure.append(img,caption);return figure;}));
+}
 function renderChallenges(){
   const state=ensureChallenges(sim);
   $('challenge-note').textContent=state.trackingSince>1?`Bijhouden begonnen in jaar ${state.trackingSince}. Voorbijgegane doelen zijn niet achteraf beoordeeld.`:'Deze ideeën horen bij de seed van je eiland. Je hoeft ze niet te volgen.';
@@ -194,7 +212,7 @@ function renderWishes(){
   $('wish-help').hidden=!canHelpWish(sim,wish);$('wish-help').textContent=wish?`Help ${wish.speaker.split(' ')[0]}`:'Help deze inwoner';
   $('wish-history').replaceChildren(...state.history.slice().reverse().map(w=>{const item=document.createElement('li'),name=document.createElement('strong'),text=document.createElement('p');name.textContent=`${WISH_OUTCOMES[w.status]} · jaar ${w.closedAt}`;text.textContent=`${w.speaker}: “${w.text}”`;item.append(name,text);return item;}));
 }
-const bookPages=['journal','family','wishes','challenges','museum','collection'];
+const bookPages=['journal','family','wishes','challenges','museum','album','collection'];
 let bookPage='journal';
 function renderBookPage(name){
   if(name==='journal')renderJournal();
@@ -202,6 +220,7 @@ function renderBookPage(name){
   else if(name==='wishes'){renderWishes();renderCommissions();}
   else if(name==='challenges'){ensureChallenges(sim).revealed=true;renderChallenges();}
   else if(name==='museum')renderMuseum();
+  else if(name==='album')renderAlbum();
   else renderCollection();
 }
 // One book instead of five windows: every page pauses the island the same way.
@@ -336,7 +355,7 @@ function presentMoment(now){
   activeMoment=momentQueue.shift();momentAt=now;
   const priority=activeMoment.priority||eventPriority(activeMoment.type);
   $('moment-card').hidden=false;$('moment-year').textContent=`JAAR ${activeMoment.year} · ${priority>=90?"EEN KEERPUNT":"EILANDGESCHIEDENIS"}`;
-  $('moment-title').textContent=({palace:"Het eerste huis heeft toekomst",age:nl(sim.age.name),endgame:"Het laatste hoofdstuk van het eiland",flood:"De waterkant heeft hulp nodig",reform:"Een discussie wordt een plek",legacy:"Ze herinneren zich jouw bezoek",technology:"Een nieuwe manier van leven",interference:"Jouw hand in hun geschiedenis",crisis:"Een waarschuwing van de zee"})[activeMoment.type]||"Een beetje geschiedenis";
+  $('moment-title').textContent=({palace:"Het eerste huis heeft toekomst",age:nl(sim.age.name),endgame:"Het laatste hoofdstuk van het eiland",flood:"De waterkant heeft hulp nodig",reform:"Een discussie wordt een plek",legacy:"Ze herinneren zich jouw bezoek",visitor:"Bezoek van overzee",famous:"Een beroemde eilander",technology:"Een nieuwe manier van leven",interference:"Jouw hand in hun geschiedenis",crisis:"Een waarschuwing van de zee"})[activeMoment.type]||"Een beetje geschiedenis";
   $('moment-text').textContent=nl(activeMoment.text);
   updateClock();
 }
@@ -416,7 +435,7 @@ function frame(now){
     let updates=0;
     while(accumulator>=sim.yearDuration && updates<12 && !sim.ending){const duration=sim.yearDuration;sim.tick();accumulator-=duration;updates++;}
     if(updates){
-      if(sim.events.length){dirtyHistory=true;queueMoments(sim.events);sim.events=[];}
+      if(sim.events.length){dirtyHistory=true;queueMoments(sim.events);takeAlbumPhoto(sim.events);sim.events=[];}
       updateUI();
     }
   }

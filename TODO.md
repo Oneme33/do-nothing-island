@@ -39,3 +39,5 @@ Aanvullende visuele feedback, na het testen van deze reeks:
 - [ ] **Meer herkenbare mensjes.** Duidelijkere menselijke vormen en wat meer persoonlijkheid in de bewoners; behoud de kleine schaal en rustige uitstraling.
 
 Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
+
+**Ronde 5, gepusht:** bezoekers van overzee (handelsschip, ontdekkingsreiziger, luchtballon op het plein, zeppelin, cruiseschip), twee buureilandjes met een veerboot vanaf 1700 en langzaam groeiende huisjes, beroemde inwoners met een blauw bordje en museumstuk, opgravingen vanaf 1890 met vondsten voor het museum, en een fotoalbum in het Eilandboek.

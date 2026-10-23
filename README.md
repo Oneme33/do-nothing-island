@@ -196,6 +196,8 @@ Deze afbeeldingen controleren de renderer. Ze vervangen geen volledige interacti
 - `consequences.js`: brandverspreiding, herbouw, brandweer, terreingevolgen en ontdekkingen.
 - `spectacle.js` en `pageants.js`: feesten, leven op het eiland en scènes in de wereld.
 - `finale.js`: aparte eindanimaties en scores.
+- `visitors.js`, `islets.js` en `famous.js`: bezoekers van overzee, buureilandjes met veerboot, beroemde inwoners en opgravingen.
+- `album.js`: het fotoalbum met vanzelf gemaakte kiekjes van grote momenten, per eiland op dit apparaat.
 - `inspection.js`: bewoners, bouwjaren en plaatselijke herinneringen.
 - `language.js`: Nederlandse presentatie, ook voor de Engelse geschiedenis in oudere saves.
 - `renderer.js`: isometrisch canvas, camera, bebouwing, bewoners en begrensde labels.

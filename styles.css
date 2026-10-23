@@ -136,3 +136,5 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .civic-overview span,.island-heading,.weather{background:rgba(250,248,238,.78);padding:2px 7px;border-radius:10px;width:fit-content;margin-left:auto}
 .island-heading{margin-left:0}
 .island-window.is-night .civic-overview span,.island-window.is-night .island-heading,.island-window.is-night .weather{background:rgba(30,42,60,.55)}
+
+.album-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:18px}.album-grid figure{margin:0;padding:8px 8px 12px;background:#fbfaf4;border:1px solid #dcd8c6;border-radius:4px;box-shadow:0 2px 6px #4a4a3016;transform:rotate(var(--tilt,0deg))}.album-grid img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:2px;background:#dfe9e2}.album-grid figcaption{font-size:11px;line-height:1.5;margin-top:8px;color:#5d6b50}.album-grid figcaption strong{display:block;font-family:var(--serif);font-weight:400;font-size:15px;color:#3f4a36}
