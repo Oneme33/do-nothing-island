@@ -211,3 +211,11 @@ body>main{padding:0;margin:0;max-width:none}
 .site-header .brand{font-size:11px!important;gap:8px!important;top:12px!important;left:12px!important}
 .site-header .brand .brand-icon,.site-header .brand svg{width:32px!important;height:32px!important}
 .population-card{top:56px!important}
+
+/* Tool icons with a tip that appears right away on hover. */
+.interference-buttons .tool-icon{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;display:block}
+.interference-buttons button{position:relative;color:#4f6145}
+.interference-buttons button.active{color:#2f4a2a}
+.interference-buttons button::after{content:attr(data-tip);position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);width:210px;padding:7px 10px;font-size:11px!important;line-height:1.45;letter-spacing:0;font-weight:400;text-align:left;color:#3f4a36;background:rgba(250,249,240,.97);border:1px solid #dfe4d4;border-radius:8px;box-shadow:0 3px 12px #3d4a3a1f;opacity:0;pointer-events:none;transition:opacity .12s;z-index:30;white-space:normal}
+.interference-buttons button:hover::after,.interference-buttons button:focus-visible::after{opacity:1}
+@media(max-width:700px){.interference-buttons button::after{left:50%;top:auto;bottom:calc(100% + 10px);transform:translateX(-50%);width:200px}}
