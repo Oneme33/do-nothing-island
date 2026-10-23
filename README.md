@@ -42,6 +42,8 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Voertuigen gaan mee met de tijd.** Eerst duwen bewoners handkarren, vanaf 600 rijden er paard en wagen, vanaf 1750 koetsen, vanaf 1900 oldtimers en pas vanaf 1955 moderne auto's. Fietsen komen vanaf 1860.
 
+**Minder huizen, meer eiland.** Woningen nemen hooguit ongeveer een kwart van de grond in (later iets meer); daarna groeit de bevolking via herenhuizen en torenflats, en wordt vrije grond park of tuin. Speciale gebouwen worden groter getekend, zodat ze tussen de huizen opvallen. Niet alle ramen branden 's avonds: elk huis heeft zijn eigen gewoontes, en later op de nacht gaan er meer lichten uit. De regenboog hangt boven het eiland en beweegt mee als je zoomt.
+
 **Altijd ruimte.** Vanaf het molentijdperk wint het eiland land zodra minder dan 30% van de grond vrij is (later 45%), in grotere stukken dan eerst en zonder op woningdruk te wachten. Huizen komen trager en laten altijd een paar plekken vrij, zodat speciale gebouwen, de dierentuin, het pretpark en jouw opdrachten een plek vinden; die mogen ook op een park, tuin of bos (opdrachten ook op een akker). Een regenboog verschijnt alleen af en toe na een bui.
 
 **Polderakkers.** Als de voedselbalans krap is, wordt een derde van nieuw gewonnen land meteen akker, zodat een groeiende bevolking te eten heeft.
@@ -56,7 +58,7 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Bergen en de vulkaan** zijn ruim anderhalf keer zo groot getekend en worden in de loop van de eeuwen nog iets hoger, zodat ze boven de stad uit blijven steken.
 
-**Eén kasteel, elk eiland op een andere plek.** Het eerste huis wordt een landhuis met veranda en vlag en blijft het huis van de familie. Rond het jaar 1000 bouwt het eiland zijn kasteel op een plek die het zelf kiest: bij de bergen, aan de kust met zeezicht of ver van de drukte. Eerst is het een burcht, vanaf 1250 een paleis, vanaf 1500 komen er extra torens, vanaf 1750 zijvleugels en een koperen koepel, en vanaf 1950 banieren, gouden lijsten en een fontein. Bij elk stadium wordt het kasteel groter, tot ruim twee keer de gewone maat, en 's avonds branden de ramen.
+**Eén kasteel, elk eiland op een andere plek.** Rond het jaar 400 merkt het eiland al een plek met ruimte eromheen af; rond 1000 verrijst daar het kasteel. Het heeft ringmuren met kantelen, ronde torens met puntdaken, een donjon met de eilandvlag en fakkels bij de poort, en staat in een slotgracht met ophaalbrug. Eromheen ligt een kasteeltuin die per eiland verschilt: een strakke baroktuin, een rozentuin, een boomgaard of een doolhof, met bloemen die met de seizoenen meekleuren. Het kasteel groeit door: een poorttoren en extra torens vanaf 1250, een lichte paleisvleugel vanaf 1750 en vijvers vanaf 1950. 's Avonds blijven de kasteelramen branden. Het eerste huis blijft het landhuis van de familie.
 
 **De vuurtoren** verschijnt vanaf jaar 400 zodra het eiland een steiger of haven heeft, op het meest blootgestelde vrije punt van de kust. Overdag is het een rood-witte toren; 's nachts zwaait een lichtbundel over het water. Verdwijnt hij door overstroming of verbouwing, dan bouwen de bewoners hem verderop opnieuw op.
 

@@ -402,7 +402,8 @@ export class Civilization {
     // Homes come slowly until windmills and reclaimed land give the island room for a real building boom.
     const boom=this.housingBoom,homeSites=planned.filter(t=>['hut','house','townhouse','tower'].includes(t.buildSite.type)).length;
     // Homes come slowly, and never take the last few free plots: that stays for parks, delights and your gifts.
-    const greenReserve=this.freeLand.length>6;
+    const buildableLand=this.land.filter(t=>!t.landform).length,homeShare=this.houses.length/Math.max(1,buildableLand);
+    const greenReserve=this.freeLand.length>6&&homeShare<.24+this.era*.015;
     const needHome=greenReserve&&this.population/(this.capacity+homeSites*ERAS[this.era].housing)>[.9,.82,.75][boom]&&homeSites<[1,1+this.era,2+this.era][boom];
     if(needHome || needFood) {
       if(needFood && planned.some(t=>t.buildSite.type==='farm'))return;
@@ -416,6 +417,8 @@ export class Civilization {
       else if(this.population>=12 && !has('market'))this.planBuilding(free[0],'market');
       else if(this.era>=1 && this.farms.length>=3 && !has('windmill'))this.planBuilding(free[0],'windmill');
       else if(this.year%30===0 && free.length>12 && this.random()<.3)free.at(-1).building='tree';
+      // Once the homes have their share, spare ground becomes parks and gardens rather than more streets.
+      else if(this.year%8===0&&free.length>14&&this.houses.length>=this.land.filter(t=>!t.landform).length*.22){const spot=free[(this.year*7+this.seed)%free.length];if(spot&&!spot.road&&!spot.reservedFor){spot.building=this.year%16===0?'garden':'park';spot.builtYear=this.year;}}
       // Groves keep the island green: a tree on the quiet edge every so often, chosen without randomness.
       else if(this.year%11===0&&free.length>20){const edge=free.filter(t=>!t.road&&!this.isCoast(t)&&Math.hypot(t.x,t.y)>4);const t=edge[(this.year*7+this.seed)%Math.max(1,edge.length)];if(t)t.building=this.forests.some(f=>Math.hypot(f.x-t.x,f.y-t.y)<2)?'forest':'tree';}
     }

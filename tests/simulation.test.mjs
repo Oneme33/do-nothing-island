@@ -65,7 +65,7 @@ test('storms and broken pumps stop drainage, and completed districts add capacit
   sim.pumpBroken=2;sim.advanceProject();assert.equal(sim.project.elapsed,elapsed);
   sim.pumpBroken=0;sim.storm=3;sim.advanceProject();assert.equal(sim.project.elapsed,elapsed);
   sim.storm=0;for(let i=0;i<30;i++)sim.advanceProject();
-  for(const t of sim.houses.slice(0,Math.ceil(sim.houses.length/2)))t.building='farm';
+  for(const t of sim.houses.filter(t=>!t.foundingHome).slice(0,Math.ceil(sim.houses.length*.85)))t.building='farm';
   const capacity=sim.capacity;sim.food=4000;sim.population=capacity;
   sim.develop();assert.ok(sim.reclaimed.some(t=>t.buildSite?.type==='house'));
   for(let i=0;i<8;i++)sim.advanceBuildings();assert.ok(sim.capacity>capacity);

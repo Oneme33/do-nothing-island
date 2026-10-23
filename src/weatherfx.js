@@ -29,8 +29,9 @@ export function drawWeather(r){
  const since=(Date.now()-(r._rainbowStart||0))/1000,day=1-Math.min(1,(r.light?.darkness||0)*3);
  const rainbow=r._rainbowStart&&!active&&since<18?Math.min(1,since/2.5,(18-since)/3)*day:0;
  if(rainbow>0){
-  const cx=W*.5,cy=H*.95,colours=['#e46b5d','#eda04f','#efd36a','#8cc07a','#6fa8d6','#8f7fc4'];c.globalAlpha=.3*rainbow;c.lineWidth=7;
-  colours.forEach((col,i)=>{c.strokeStyle=col;const rad=H*.85-i*7;c.beginPath();c.ellipse(cx,cy,rad,rad,0,Math.PI*1.08,Math.PI*1.92);c.stroke();});
+  // Anchored to the island: it moves and scales with the camera instead of hanging on the screen.
+  const anchor=r.point(0,0),z=r.zoom||1,cx=anchor.x,cy=anchor.y+60*z,colours=['#e46b5d','#eda04f','#efd36a','#8cc07a','#6fa8d6','#8f7fc4'];c.globalAlpha=.3*rainbow;c.lineWidth=7*z;
+  colours.forEach((col,i)=>{c.strokeStyle=col;const rad=320*z-i*7*z;c.beginPath();c.ellipse(cx,cy,rad,rad,0,Math.PI*1.08,Math.PI*1.92);c.stroke();});
  }
  c.restore();
 }

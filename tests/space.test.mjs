@@ -23,9 +23,9 @@ test('legacy islands keep every existing plot, house and road when loading the l
  const s=new Civilization(31);while(s.year<200)s.tick();const old=JSON.parse(s.serialize());delete old.geographyVersion;old.geography.radiusX=9;old.geography.radiusY=8;
  const restored=Civilization.restore(JSON.stringify(old));assert.ok(restored);assert.equal(restored.geographyVersion,2);assert.deepEqual([...restored.tiles],old.tiles);assert.equal(restored.originalArea,old.originalArea);assert.equal(restored.year,old.year);assert.equal(restored.population,old.population);assert.deepEqual(restored.history,old.history);
 });
-test('homes come slowly at first and faster in the windmill age',()=>{
+test('homes come slowly and never take more than about a quarter of the land',()=>{
  const s=new Civilization(31);while(s.year<1000)s.tick();assert.equal(s.housingBoom,0);
- let before=s.houses.length;while(s.year<1250)s.tick();const slow=s.houses.length-before;
- before=s.houses.length;while(s.year<1500)s.tick();assert.ok(s.housingBoom>=1);const fast=s.houses.length-before;
- assert.ok(fast>slow,`${slow} homes in the 250 years before windmills, ${fast} after`);
+ while(s.year<1500)s.tick();assert.ok(s.housingBoom>=1);
+ const land=s.land.filter(t=>!t.landform).length;assert.ok(s.houses.length<=land*.3,`${s.houses.length} homes on ${land} plots`);
+ assert.ok(s.land.filter(t=>['park','garden'].includes(t.building)).length>=5,'spare ground becomes parks and gardens');
 });

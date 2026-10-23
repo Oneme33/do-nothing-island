@@ -131,3 +131,8 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .commission-box h3{margin:0 0 4px;font-size:13px}
 .commission-choices{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .commission-choices button{font-size:11px;padding:7px 11px;border-radius:16px;border:1px solid #cdd8b4;background:#e2ead0;color:#3f5536;cursor:pointer}
+
+/* Status lines on the island get a soft backing so they stay readable over busy streets. */
+.civic-overview span,.island-heading,.weather{background:rgba(250,248,238,.78);padding:2px 7px;border-radius:10px;width:fit-content;margin-left:auto}
+.island-heading{margin-left:0}
+.island-window.is-night .civic-overview span,.island-window.is-night .island-heading,.island-window.is-night .weather{background:rgba(30,42,60,.55)}

@@ -18,10 +18,11 @@ const mix=(a,b,t)=>a+(b-a)*t;
 const palette=['#9daf78','#a8b981','#a1b47b','#a9bb81','#a6b77e','#afbf87'];
 // Every home gets its own colours and proportions from its plot, so streets never look copied.
 const HOUSE_WALLS=['#d7cdb0','#e2d6bd','#d9c3a5','#cfd3bd','#e0c9b8','#d2c8a8','#e6dcc6','#cbd1c2','#dcc7a0','#e3d2c4'];
-const HOUSE_ROOFS=['#a5483c','#6d7a86','#4f5a5e','#7d8b5c','#5f8a87','#b8643f','#8a6a4c','#c9a14f','#7a5f7e','#9b6a5c','#3f5f7a','#a77c66'];
+const HOUSE_ROOFS=['#9c5a4c','#6f7c86','#5c6468','#7f8a62','#6a8a86','#a8704f','#86705a','#b09862','#7a6a7c','#946f62','#56697a','#a0806c'];
 const THATCH=['#c9b27a','#b89a5c','#d1bd84','#a98d5a','#9a957a','#8a6a4c'];
 const HOUSE_SHUTTERS=['#6c806c','#7b8c79','#8a6f5c','#6f7f95','#9a7a56','#7d6b84','#5f7d7a'];
 const shadeColor=(hex,f)=>'#'+[1,3,5].map(i=>Math.round(Math.max(0,Math.min(255,parseInt(hex.slice(i,i+2),16)*f))).toString(16).padStart(2,'0')).join('');
+const SPECIAL_BIG=new Set(['museum','circus','station','pool','spaceport','zoo','theme-park','petting-farm','observatory','ice-cream','greenhouse','watermill','watchtower','rose-garden','grand-fountain','carillon','monument','lighthouse']);
 const DEFAULT_LOOK={wall:'#d7cdb0',side:'#b9b99b',roof:null,gable:null,shutter:'#6c806c',shutterSide:'#7b8c79',sx:1,sy:1,extra:0,flowers:null,chimney:null};
 function houseLook(t){
  const a=hash(t.x,t.y),b=hash(t.y+31,t.x-17),c=hash(t.x*3+7,t.y*5-2);
@@ -494,6 +495,8 @@ export class IslandRenderer {
     const b=t.building;this.currentTile=t;
     this.look=['hut','house','townhouse'].includes(b)?houseLook(t):null;
     if(this.look)c.scale(this.look.sx,this.look.sy);
+    // Special places are drawn larger so they stand out between the houses.
+    if(SPECIAL_BIG.has(b))c.scale(1.4,1.4);
     if(b==='original-tree')this.tree(true,t.variant,!!t.bloomYear);
     else if(b==='tree')this.tree(false,t.variant);
     else if(b==='forest')this.forest(t.variant);
