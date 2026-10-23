@@ -303,7 +303,7 @@ function timelinePosition(year){
 function renderTimeline(){
   const key=`${sim.year}|${sim.era}|${sim.history.length}`;if(key===timelineKey)return;timelineKey=key;
   const ages=TIMELINE_AGES.map((label,i)=>{const el=document.createElement('span');el.className='age';el.textContent=label;el.dataset.state=i<sim.era?'past':i===sim.era?'now':'future';return el;});
-  const moments=sim.history.filter(e=>TIMELINE_KINDS[e.type]&&(e.priority||0)>=78).slice(-28).map(e=>{const dot=document.createElement('span');dot.className='moment';dot.dataset.kind=TIMELINE_KINDS[e.type];dot.style.left=`${(timelinePosition(e.year)*100).toFixed(2)}%`;dot.title=`Jaar ${e.year}: ${nl(e.text)}`;return dot;});
+  const moments=sim.history.filter(e=>TIMELINE_KINDS[e.type]&&(e.priority||0)>=78).slice(-10).map(e=>{const dot=document.createElement('span');dot.className='moment';dot.dataset.kind=TIMELINE_KINDS[e.type];dot.style.left=`${(timelinePosition(e.year)*100).toFixed(2)}%`;dot.title=`Jaar ${e.year}: ${nl(e.text)}`;return dot;});
   const marker=document.createElement('span');marker.className='marker';marker.style.left=`${(timelinePosition(sim.year)*100).toFixed(2)}%`;
   $('timeline-track').replaceChildren(...ages,...moments,marker);
   const next=ERAS[sim.era+1];
@@ -624,6 +624,8 @@ function newIsland(){
   undoTimer=setTimeout(()=>{previousIsland=null;$('undo-reset').hidden=true;},10000);
 }
 $('new-island').addEventListener('click',newIsland);
+// Minimal interface: the few buttons that used to live around the island join the bar at the bottom.
+$('island-toolbar').append($('new-island'),$('undo-reset'),$('open-ending'));
 $('confirm-restart').addEventListener('click',newIsland);
 $('undo-reset').addEventListener('click',()=>{
   const previous=previousIsland&&Civilization.restore(previousIsland);if(!previous)return;
@@ -673,7 +675,8 @@ canvas.addEventListener('pointerdown',e=>{
 });
 canvas.addEventListener('pointermove',e=>{
   const r=canvas.getBoundingClientRect();renderer.hover=renderer.pick(e.clientX-r.left,e.clientY-r.top);
-  if(!inspectionPinned)inspectTile(sim.tile(renderer.hover.x,renderer.hover.y));
+  inspectionPinned=false;
+  {inspectTile(sim.tile(renderer.hover.x,renderer.hover.y));const panel=$('tile-inspector');panel.style.left=`${Math.min(r.width-230,e.clientX-r.left+16)}px`;panel.style.top=`${Math.min(r.height-60,e.clientY-r.top+18)}px`;}
   if(!drag)return;
   const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
   if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>7)drag.moved=true;

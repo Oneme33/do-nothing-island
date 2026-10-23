@@ -170,6 +170,56 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .timeline-now{display:block;margin-top:5px;font-size:9px;letter-spacing:0;color:#5f735f}
 .island-window.is-night .timeline,.island-window.is-night .timeline-now{color:#e8ecdf}
 @media(max-width:700px){.timeline{top:auto;bottom:118px;width:80%}}
+
+/* Minimal mode: the island fills the screen, the controls are small, and depth comes only on a click. */
+html,body{height:100%;overflow:hidden}
+body>main{padding:0;margin:0;max-width:none}
+.site-header{position:fixed!important;top:10px;right:12px;left:auto;z-index:20;padding:0!important;margin:0;background:none!important;border:0!important;width:auto;height:auto;min-height:0}
+.site-header .brand,.header-tagline,.live-status{display:none!important}
+.header-actions{gap:4px!important}
+.header-actions .icon-button{width:30px;height:30px;background:rgba(250,249,240,.88);border:1px solid #dfe4d4;border-radius:8px}
+.intro,.story-health,.explore-controls,#history-legend,.dashboard,.history-section,body>footer,main>footer,.tools-caption,#interaction-hint,.pace-readout,.island-heading,.instruction,.time-caption,#start-size{display:none!important}
+.island-window{position:fixed!important;inset:0!important;height:auto!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;z-index:1}
+.island-story{position:static!important;margin:0!important;padding:0!important}
+.away-summary{position:fixed!important;left:56px;bottom:60px;z-index:16;max-width:340px;margin:0!important;padding:10px 34px 10px 12px!important;font-size:12px}
+.interference-tools{position:fixed!important;left:10px;top:50%;transform:translateY(-50%);z-index:15;margin:0!important;padding:0!important;background:none!important;border:0!important;width:auto!important;display:block!important}
+.interference-buttons{display:flex!important;flex-direction:column;gap:3px!important;padding:4px!important;background:rgba(250,249,240,.88);border:1px solid #dfe4d4;border-radius:10px;width:auto!important}
+.interference-buttons button{font-size:0!important;width:32px!important;height:32px!important;padding:0!important;min-width:0!important;display:grid!important;place-items:center;border-radius:7px}
+.interference-buttons button span{font-size:15px!important}
+.island-toolbar{bottom:10px!important;padding:3px 6px!important;gap:3px!important;border-radius:10px!important}
+.island-toolbar button,.island-toolbar .new-island-button{font-size:10px!important;padding:5px 8px!important;min-height:0!important;height:28px;border-radius:7px;white-space:nowrap}
+.island-toolbar .speed-buttons button{min-width:26px!important;height:26px!important;padding:0 4px!important}
+.island-toolbar .time-controls{gap:3px!important;padding:0!important}
+#undo-reset[hidden],#open-ending[hidden]{display:none!important}
+.map-controls{bottom:10px!important;right:10px!important;opacity:1!important;display:flex!important}
+.map-controls button{height:28px;min-width:28px;font-size:10px}
+.population-card{top:10px!important;left:10px!important;padding:6px 10px!important;min-width:0!important}
+.population-card .eyebrow{font-size:7px}
+.population-count{font-size:22px!important;margin:2px 0 0!important;gap:6px}
+.population-count svg{width:18px!important}
+.weather{top:48px!important;right:12px!important;font-size:9px!important}
+.timeline{top:12px!important;width:min(42%,460px)!important}
+.project-overlay{transform:scale(.85);transform-origin:left bottom}
+@media(max-width:700px){.timeline{top:auto!important;bottom:52px!important;width:70%!important}.interference-tools{top:auto;bottom:52px;transform:none}.interference-buttons{flex-direction:row}.weather{display:none!important}.away-summary{left:10px;bottom:96px}}
+.island-window:not(.show-details) #project-stage,.island-window:not(.show-details) .project-overlay p{display:none!important}
+.project-overlay{padding:6px 10px!important;min-width:0!important;width:200px!important}
+.interference-buttons button{margin:0!important}
+@media(max-width:700px){.timeline{top:62px!important;bottom:auto!important;width:92%!important}.interference-tools{bottom:56px!important}}
+
+/* The place label follows the pointer: one small line, the full story only in Help mode. */
+.tile-inspector{left:0;top:0;bottom:auto!important;transform:none!important;max-width:220px!important;padding:4px 8px!important;font-size:10px!important;line-height:1.45!important;border-radius:6px!important;text-align:left!important;white-space:pre-line;background:rgba(250,249,240,.94)!important;box-shadow:0 2px 8px #3d4a3a1a!important;z-index:12}
+/* The logo, small in the top left, with the residents just below it. */
+.site-header .brand{display:flex!important;position:fixed;top:12px;left:12px;align-items:center;gap:6px;font-size:8px;line-height:1.1;letter-spacing:.08em;z-index:20}
+.site-header .brand .brand-icon,.site-header .brand svg{width:22px;height:22px}
+.population-card{top:46px!important}
+@media(max-width:700px){.timeline{top:96px!important}}
+
+.timeline-track .moment{width:3px!important;height:3px!important;margin-left:-1.5px!important;bottom:-2px!important;opacity:.45;box-shadow:none!important}
+.tile-inspector{width:max-content!important;max-width:220px!important}
+#inspector-close{display:none!important}
+.site-header .brand{font-size:11px!important;gap:8px!important;top:12px!important;left:12px!important}
+.site-header .brand .brand-icon,.site-header .brand svg{width:32px!important;height:32px!important}
+.population-card{top:56px!important}
 </style>
 </head>
 <body>
@@ -190,10 +240,10 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
   <main>
     <section class="intro" aria-label="Jouw eiland">
       <div><div class="eyebrow"><span class="little-star">✳</span> DE WERELD GAAT HAAR GANG</div><h1>Een klein leven, helemaal vanzelf.</h1><p>Niets te regelen. Nergens naartoe. Kijk gewoon wat er gebeurt.</p></div>
-      <div class="intro-actions"><div class="reset-actions"><button id="new-island" class="new-island-button" title="Begin direct opnieuw met een willekeurig eiland"><span aria-hidden="true">↻</span> Nieuw groot eiland</button><small id="start-size">±350–400 landtegels · 6 inwoners</small><button id="undo-reset" hidden>Herstel vorig eiland</button></div><div class="year-stamp"><span>BEGONNEN IN JAAR 1</span><strong>Jaar <b id="year">1</b><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4v24M4 16h24M7.5 7.5l17 17m-17 0 17-17"/></svg></strong><span id="era-name">HET VROEGE BEGIN</span><span id="age-next">Volgend tijdperk · jaar 120</span></div></div>
+      <div class="intro-actions"><div class="reset-actions"><button id="new-island" class="new-island-button" title="Begin direct opnieuw met een willekeurig groot eiland"><span aria-hidden="true">↻</span> Nieuw</button><small id="start-size">±350–400 landtegels · 6 inwoners</small><button id="undo-reset" hidden>Herstel vorig eiland</button></div><div class="year-stamp"><span>BEGONNEN IN JAAR 1</span><strong>Jaar <b id="year">1</b><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4v24M4 16h24M7.5 7.5l17 17m-17 0 17-17"/></svg></strong><span id="era-name">HET VROEGE BEGIN</span><span id="age-next">Volgend tijdperk · jaar 120</span></div></div>
     </section>
 
-    <section class="interference-tools" aria-label="Jouw invloed"><div class="tools-caption"><span class="eyebrow">JOUW INVLOED</span><small>Ja, jij deed dat.</small></div><div class="interference-buttons" role="group" aria-label="Kies een ingreep"><button data-interference="nudge" class="active" aria-pressed="true"><span>✳</span> Bouw</button><button data-interference="rain" aria-pressed="false"><span>☂</span> Regen</button><button data-interference="rumble" aria-pressed="false"><span>≋</span> Beving</button><button data-interference="fire" aria-pressed="false"><span>♨</span> Vuur</button><button data-interference="help" aria-pressed="false"><span>♡</span> Help</button></div><p id="interaction-hint">Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.</p><div class="pace-readout"><i></i><span id="pace-readout">Een rustig begin. Het komt op gang.</span></div></section>
+    <section class="interference-tools" aria-label="Jouw invloed"><div class="tools-caption"><span class="eyebrow">JOUW INVLOED</span><small>Ja, jij deed dat.</small></div><div class="interference-buttons" role="group" aria-label="Kies een ingreep"><button data-interference="nudge" title="Bouw: klik op een huis voor een aanbouw, op een veld voor irrigatie, op lege grond voor bouwers" aria-label="Bouw" class="active" aria-pressed="true"><span>✳</span> Bouw</button><button data-interference="rain" title="Regen: laat het ergens regenen" aria-label="Regen" aria-pressed="false"><span>☂</span> Regen</button><button data-interference="rumble" title="Beving: laat de grond even schudden" aria-label="Beving" aria-pressed="false"><span>≋</span> Beving</button><button data-interference="fire" title="Vuur: steek iets aan" aria-label="Vuur" aria-pressed="false"><span>♨</span> Vuur</button><button data-interference="help" title="Help: kijk rond en help bij een wens" aria-label="Help" aria-pressed="false"><span>♡</span> Help</button></div><p id="interaction-hint">Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.</p><div class="pace-readout"><i></i><span id="pace-readout">Een rustig begin. Het komt op gang.</span></div></section>
 
     <section id="island-window" class="island-window" aria-label="Een levend eiland">
       <canvas id="island" tabindex="0" aria-label="Jouw levende eiland. Klik voor een ingreep, scroll om te zoomen en sleep om rond te kijken. Pijltjes verplaatsen de kaart; plus en min zoomen."></canvas>
@@ -206,7 +256,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 
       <div class="map-coordinate" id="geography-label">EEN KLEINE PLEK IN EEN GROOT NIETS</div>
       <div class="map-controls"><button id="toggle-details" aria-pressed="false" title="Toon of verberg de details over het eiland">Details</button><button id="find-beach" title="Bekijk het strand">Strand ↗</button><button id="zoom-out" aria-label="Zoom uit">−</button><button id="recenter" aria-label="Zet het eiland in het midden" title="Zet het eiland in het midden"><svg viewBox="0 0 20 20"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4"/></svg></button><button id="zoom-in" aria-label="Zoom in">+</button></div>
-      <div class="island-toolbar"><div class="time-controls"><button id="pause" aria-label="Pauzeer het eiland" title="Pauze (spatie)"><svg id="pause-icon" viewBox="0 0 20 20"><path d="M6 4v12M14 4v12"/></svg></button><div class="speed-buttons" role="group" aria-label="Snelheid van het eiland"><button class="active" data-speed="1" aria-pressed="true">1×</button><button data-speed="2" aria-pressed="false">2×</button><button data-speed="3" aria-pressed="false">3×</button><button data-speed="10" aria-pressed="false">10×</button></div><span class="time-caption" id="time-caption">GEEN BIJZONDERE HAAST</span></div><button id="photo-mode" title="Fotomodus: verberg de knoppen en maak een ansichtkaart" aria-pressed="false">Foto</button><button id="canvas-journal" title="Open het eilandboek: kroniek, familie, wensen, uitdagingen en verzameling" aria-haspopup="dialog">Eilandboek ↗</button></div>
+      <div class="island-toolbar" id="island-toolbar"><div class="time-controls"><button id="pause" aria-label="Pauzeer het eiland" title="Pauze (spatie)"><svg id="pause-icon" viewBox="0 0 20 20"><path d="M6 4v12M14 4v12"/></svg></button><div class="speed-buttons" role="group" aria-label="Snelheid van het eiland"><button class="active" data-speed="1" aria-pressed="true">1×</button><button data-speed="2" aria-pressed="false">2×</button><button data-speed="3" aria-pressed="false">3×</button><button data-speed="10" aria-pressed="false">10×</button></div><span class="time-caption" id="time-caption">GEEN BIJZONDERE HAAST</span></div><button id="photo-mode" title="Fotomodus: verberg de knoppen en maak een ansichtkaart" aria-pressed="false">Foto</button><button id="canvas-journal" title="Open het eilandboek: kroniek, familie, wensen, uitdagingen en verzameling" aria-haspopup="dialog">Eilandboek ↗</button></div>
     <aside class="story-moment" id="moment-card" aria-live="polite" hidden>
       <div><span class="eyebrow" id="moment-year">EILANDGESCHIEDENIS</span><strong id="moment-title">Een beetje geschiedenis</strong><p id="moment-text"></p></div>
       <button id="moment-close" class="card-close" aria-label="Verberg verhaalkaart">×</button><div class="moment-actions"><button id="moment-focus">Laat zien ↗</button><button id="moment-continue">Sluiten</button></div>
@@ -6451,7 +6501,7 @@ function timelinePosition(year){
 function renderTimeline(){
   const key=`${sim.year}|${sim.era}|${sim.history.length}`;if(key===timelineKey)return;timelineKey=key;
   const ages=TIMELINE_AGES.map((label,i)=>{const el=document.createElement('span');el.className='age';el.textContent=label;el.dataset.state=i<sim.era?'past':i===sim.era?'now':'future';return el;});
-  const moments=sim.history.filter(e=>TIMELINE_KINDS[e.type]&&(e.priority||0)>=78).slice(-28).map(e=>{const dot=document.createElement('span');dot.className='moment';dot.dataset.kind=TIMELINE_KINDS[e.type];dot.style.left=`${(timelinePosition(e.year)*100).toFixed(2)}%`;dot.title=`Jaar ${e.year}: ${nl(e.text)}`;return dot;});
+  const moments=sim.history.filter(e=>TIMELINE_KINDS[e.type]&&(e.priority||0)>=78).slice(-10).map(e=>{const dot=document.createElement('span');dot.className='moment';dot.dataset.kind=TIMELINE_KINDS[e.type];dot.style.left=`${(timelinePosition(e.year)*100).toFixed(2)}%`;dot.title=`Jaar ${e.year}: ${nl(e.text)}`;return dot;});
   const marker=document.createElement('span');marker.className='marker';marker.style.left=`${(timelinePosition(sim.year)*100).toFixed(2)}%`;
   $('timeline-track').replaceChildren(...ages,...moments,marker);
   const next=ERAS[sim.era+1];
@@ -6772,6 +6822,8 @@ function newIsland(){
   undoTimer=setTimeout(()=>{previousIsland=null;$('undo-reset').hidden=true;},10000);
 }
 $('new-island').addEventListener('click',newIsland);
+// Minimal interface: the few buttons that used to live around the island join the bar at the bottom.
+$('island-toolbar').append($('new-island'),$('undo-reset'),$('open-ending'));
 $('confirm-restart').addEventListener('click',newIsland);
 $('undo-reset').addEventListener('click',()=>{
   const previous=previousIsland&&Civilization.restore(previousIsland);if(!previous)return;
@@ -6821,7 +6873,8 @@ canvas.addEventListener('pointerdown',e=>{
 });
 canvas.addEventListener('pointermove',e=>{
   const r=canvas.getBoundingClientRect();renderer.hover=renderer.pick(e.clientX-r.left,e.clientY-r.top);
-  if(!inspectionPinned)inspectTile(sim.tile(renderer.hover.x,renderer.hover.y));
+  inspectionPinned=false;
+  {inspectTile(sim.tile(renderer.hover.x,renderer.hover.y));const panel=$('tile-inspector');panel.style.left=`${Math.min(r.width-230,e.clientX-r.left+16)}px`;panel.style.top=`${Math.min(r.height-60,e.clientY-r.top+18)}px`;}
   if(!drag)return;
   const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
   if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>7)drag.moved=true;

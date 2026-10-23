@@ -161,3 +161,53 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 .timeline-now{display:block;margin-top:5px;font-size:9px;letter-spacing:0;color:#5f735f}
 .island-window.is-night .timeline,.island-window.is-night .timeline-now{color:#e8ecdf}
 @media(max-width:700px){.timeline{top:auto;bottom:118px;width:80%}}
+
+/* Minimal mode: the island fills the screen, the controls are small, and depth comes only on a click. */
+html,body{height:100%;overflow:hidden}
+body>main{padding:0;margin:0;max-width:none}
+.site-header{position:fixed!important;top:10px;right:12px;left:auto;z-index:20;padding:0!important;margin:0;background:none!important;border:0!important;width:auto;height:auto;min-height:0}
+.site-header .brand,.header-tagline,.live-status{display:none!important}
+.header-actions{gap:4px!important}
+.header-actions .icon-button{width:30px;height:30px;background:rgba(250,249,240,.88);border:1px solid #dfe4d4;border-radius:8px}
+.intro,.story-health,.explore-controls,#history-legend,.dashboard,.history-section,body>footer,main>footer,.tools-caption,#interaction-hint,.pace-readout,.island-heading,.instruction,.time-caption,#start-size{display:none!important}
+.island-window{position:fixed!important;inset:0!important;height:auto!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;z-index:1}
+.island-story{position:static!important;margin:0!important;padding:0!important}
+.away-summary{position:fixed!important;left:56px;bottom:60px;z-index:16;max-width:340px;margin:0!important;padding:10px 34px 10px 12px!important;font-size:12px}
+.interference-tools{position:fixed!important;left:10px;top:50%;transform:translateY(-50%);z-index:15;margin:0!important;padding:0!important;background:none!important;border:0!important;width:auto!important;display:block!important}
+.interference-buttons{display:flex!important;flex-direction:column;gap:3px!important;padding:4px!important;background:rgba(250,249,240,.88);border:1px solid #dfe4d4;border-radius:10px;width:auto!important}
+.interference-buttons button{font-size:0!important;width:32px!important;height:32px!important;padding:0!important;min-width:0!important;display:grid!important;place-items:center;border-radius:7px}
+.interference-buttons button span{font-size:15px!important}
+.island-toolbar{bottom:10px!important;padding:3px 6px!important;gap:3px!important;border-radius:10px!important}
+.island-toolbar button,.island-toolbar .new-island-button{font-size:10px!important;padding:5px 8px!important;min-height:0!important;height:28px;border-radius:7px;white-space:nowrap}
+.island-toolbar .speed-buttons button{min-width:26px!important;height:26px!important;padding:0 4px!important}
+.island-toolbar .time-controls{gap:3px!important;padding:0!important}
+#undo-reset[hidden],#open-ending[hidden]{display:none!important}
+.map-controls{bottom:10px!important;right:10px!important;opacity:1!important;display:flex!important}
+.map-controls button{height:28px;min-width:28px;font-size:10px}
+.population-card{top:10px!important;left:10px!important;padding:6px 10px!important;min-width:0!important}
+.population-card .eyebrow{font-size:7px}
+.population-count{font-size:22px!important;margin:2px 0 0!important;gap:6px}
+.population-count svg{width:18px!important}
+.weather{top:48px!important;right:12px!important;font-size:9px!important}
+.timeline{top:12px!important;width:min(42%,460px)!important}
+.project-overlay{transform:scale(.85);transform-origin:left bottom}
+@media(max-width:700px){.timeline{top:auto!important;bottom:52px!important;width:70%!important}.interference-tools{top:auto;bottom:52px;transform:none}.interference-buttons{flex-direction:row}.weather{display:none!important}.away-summary{left:10px;bottom:96px}}
+.island-window:not(.show-details) #project-stage,.island-window:not(.show-details) .project-overlay p{display:none!important}
+.project-overlay{padding:6px 10px!important;min-width:0!important;width:200px!important}
+.interference-buttons button{margin:0!important}
+@media(max-width:700px){.timeline{top:62px!important;bottom:auto!important;width:92%!important}.interference-tools{bottom:56px!important}}
+
+/* The place label follows the pointer: one small line, the full story only in Help mode. */
+.tile-inspector{left:0;top:0;bottom:auto!important;transform:none!important;max-width:220px!important;padding:4px 8px!important;font-size:10px!important;line-height:1.45!important;border-radius:6px!important;text-align:left!important;white-space:pre-line;background:rgba(250,249,240,.94)!important;box-shadow:0 2px 8px #3d4a3a1a!important;z-index:12}
+/* The logo, small in the top left, with the residents just below it. */
+.site-header .brand{display:flex!important;position:fixed;top:12px;left:12px;align-items:center;gap:6px;font-size:8px;line-height:1.1;letter-spacing:.08em;z-index:20}
+.site-header .brand .brand-icon,.site-header .brand svg{width:22px;height:22px}
+.population-card{top:46px!important}
+@media(max-width:700px){.timeline{top:96px!important}}
+
+.timeline-track .moment{width:3px!important;height:3px!important;margin-left:-1.5px!important;bottom:-2px!important;opacity:.45;box-shadow:none!important}
+.tile-inspector{width:max-content!important;max-width:220px!important}
+#inspector-close{display:none!important}
+.site-header .brand{font-size:11px!important;gap:8px!important;top:12px!important;left:12px!important}
+.site-header .brand .brand-icon,.site-header .brand svg{width:32px!important;height:32px!important}
+.population-card{top:56px!important}
