@@ -84,7 +84,7 @@ test('standalone distribution contains valid executable JavaScript and no module
   assert.match(html,/Probeer niets aan te raken/);assert.match(html,/DO NOTHING/);
 });
 test('walkers stay on the drawn street geometry, approach entrances, and spend time inside',()=>{
-  const {canvas}=canvasHarness(),sim=new Civilization(31);sim.planBuilding(sim.tile(1,1),'well');for(let i=0;i<5;i++)sim.advanceBuildings();sim.population=100;
+  const {canvas}=canvasHarness(),sim=new Civilization(31);sim.planBuilding(sim.freeLand.filter(t=>!t.reservedFor).sort((a,b)=>Math.hypot(a.x,a.y)-Math.hypot(b.x,b.y))[0],'well');for(let i=0;i<5;i++)sim.advanceBuildings();sim.population=100;
   const renderer=new IslandRenderer(canvas,sim);
   const stages=new Set();
   for(let i=0;i<64;i++)for(let time=0;time<90;time+=.4){

@@ -10,8 +10,17 @@ export const MONUMENTS=[
  {kind:'flame',when:s=>(s.fireCount||0)>=4,title:'Monument voor de Grote Brand',text:'Een stenen vlam met de namen van alle emmerdragers. Het is een lange lijst.'}
 ];
 export const monumentTitle=(s,m)=>typeof m.title==='function'?m.title(s):m.title;
+// Around 400 the island already marks out where its castle will stand, so the grounds stay free.
+function reserveCastleSite(s){
+ if(s.court||s.castleSite||s.year<400)return;
+ const room=t=>[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].filter(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return n?.kind==='land'&&!n.landform&&!n.building&&!n.reservedFor;}).length;
+ const spots=s.land.filter(t=>!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.foundingHome&&Math.hypot(t.x,t.y)>=4&&room(t)>=6).sort((a,b)=>room(b)-room(a)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
+ const site=spots[(s.seed>>>5)%Math.max(1,spots.length)];if(!site)return;
+ s.castleSite={x:site.x,y:site.y};site.reservedFor='castle';
+ for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]){const n=s.tile(site.x+dx,site.y+dy);if(n?.kind==='land'&&!n.landform&&!n.building&&!n.reservedFor&&!n.buildSite)n.reservedFor='castle';}
+}
 export function advanceMonuments(s){
- s.monuments??=[];if(s.ending||s.year%7!==3)return;
+ s.monuments??=[];if(s.year%10===5){reserveCastleSite(s);if(s.court)claimCastleGrounds(s);}if(s.ending||s.year%7!==3)return;
  for(const m of MONUMENTS){
   if(s.monuments.some(x=>x.kind===m.kind)||!m.when(s))continue;
   if(m.square&&s.monuments.some(x=>x.square))continue;
@@ -32,13 +41,30 @@ export function buildCastle(s){
  if(s.court||s.ending)return null;
  const near=t=>[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1]].some(([dx,dy])=>s.tile(t.x+dx,t.y+dy)?.landform);
  const sea=t=>[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>s.tile(t.x+dx,t.y+dy)?.kind==='water');
- const free=t=>(!t.building||['tree','forest','park','garden','farm'].includes(t.building))&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.road&&!t.foundingHome&&Math.hypot(t.x,t.y)>=4;
+ const free=t=>(!t.building||['tree','forest','park','garden','farm'].includes(t.building))&&!t.buildSite&&(!t.reservedFor||t.reservedFor==='castle')&&!t.landform&&!t.road&&!t.foundingHome&&Math.hypot(t.x,t.y)>=4;
  const styles=[t=>near(t)?0:1,t=>sea(t)?0:1,t=>-Math.hypot(t.x,t.y)];
- const style=styles[(s.seed>>>0)%styles.length],spots=s.land.filter(free).sort((a,b)=>style(a)-style(b)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
+ const room=t=>[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].filter(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return n?.kind==='land'&&!n.landform&&(!n.building||['tree','forest','park','garden','farm'].includes(n.building))&&!n.reservedFor;}).length;
+ const reserved=s.castleSite&&s.tile(s.castleSite.x,s.castleSite.y);
+ const style=styles[(s.seed>>>0)%styles.length],spots=reserved?[reserved]:s.land.filter(t=>free(t)&&room(t)>=5).sort((a,b)=>style(a)-style(b)||room(b)-room(a)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
  const tile=spots[((s.seed>>>3)+s.year)%Math.max(1,spots.length)];if(!tile)return null;
- tile.building='palace';tile.builtYear=s.year;tile.architecture=s.age.id;tile.district='heritage';tile.landmark=true;tile.castle=true;
- s.court={x:tile.x,y:tile.y,year:s.year};
+ tile.reservedFor=null;tile.building='palace';tile.builtYear=s.year;tile.architecture=s.age.id;tile.district='heritage';tile.landmark=true;tile.castle=true;
+ s.court={x:tile.x,y:tile.y,year:s.year};claimCastleGrounds(s);
  s.log('Het eiland bouwt een kasteel, op een plek die het zelf heeft uitgekozen. Het eerste huis blijft het huis van de familie.','palace',{x:tile.x,y:tile.y});
  startParty(s,tile,'Inhuldiging van het kasteel',['De trap is zo lang dat de koning onderweg pauzeert.','Er zijn meer kamers dan mensen.','De lakeien oefenen buigen. Twee vallen om.'],4);s.rebuildRoads();
  return tile;
+}
+
+// The castle grounds: a ring of garden around the castle, in a style of the island's own choosing.
+export const GARDEN_STYLES=['formal','roses','orchard','maze'];
+export function claimCastleGrounds(s){
+ if(!s.court)return 0;const castle=s.tile(s.court.x,s.court.y);if(castle?.building!=='palace')return 0;
+ let claimed=0;const style=GARDEN_STYLES[(s.seed>>>0)%GARDEN_STYLES.length];
+ for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]){
+  const t=s.tile(s.court.x+dx,s.court.y+dy);
+  if(!t||t.kind!=='land'||t.landform||t.foundingHome||t.reservedFor&&t.reservedFor!=='castle'||t.buildSite)continue;
+  if(t.building&&!['tree','forest','park','garden','farm','castle-garden'].includes(t.building))continue;
+  if(t.building!=='castle-garden'){t.building='castle-garden';t.gardenStyle=style;t.reservedFor='castle';t.district='heritage';claimed++;}
+ }
+ if(claimed)s.rebuildRoads();
+ return claimed;
 }

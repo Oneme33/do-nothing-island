@@ -36,7 +36,7 @@ export function seasonalLeaf(hex,light){
 }
 const FIRES=new Set(['campfire','bonfire']);
 // Lights are painted after the island, so anything standing right in front must hide them.
-const LOW_FRONT=new Set(['farm','beach','park','garden','campfire','bonfire','playground','campus-square','palace-square','town-square','royal-garden','ruins']);
+const LOW_FRONT=new Set(['castle-garden','farm','beach','park','garden','campfire','bonfire','playground','campus-square','palace-square','town-square','royal-garden','ruins']);
 const TALL=new Set(['tower','townhouse','palace','manor','factory','powerplant','science-center','church','lighthouse']);
 const coversLight=t=>!!t&&t.kind==='land'&&(!!t.landform||!!t.buildSite||!!t.building&&!LOW_FRONT.has(t.building));
 // Rough visible heights of what may stand in front, in tile units, to decide which windows are covered.
@@ -77,7 +77,7 @@ export function drawDaylight(r,light){
   }
   // Only real windows and real lamp posts light up: their shapes were recorded while the island was drawn.
   c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='source-over';
-  for(const w of r.litWindows||[]){if(windowHidden(r.sim,w))continue;c.beginPath();w.points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=`rgba(255,214,130,${(.85*d).toFixed(3)})`;c.fill();}
+  for(const w of r.litWindows||[]){if(!w.grand&&windowHidden(r.sim,w))continue;c.beginPath();w.points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=`rgba(255,214,130,${(.85*d).toFixed(3)})`;c.fill();}
   c.globalCompositeOperation='lighter';
   for(const l of r.litLamps||[]){if(l.tile&&lightHidden(r.sim,l.tile))continue;glow(l.x,l.y,9*l.scale,6*l.scale,`rgba(255,215,150,${(.16*d).toFixed(3)})`);glow(l.x,l.y,2.2*l.scale,2*l.scale,`rgba(255,236,180,${(.7*d).toFixed(3)})`);}
  }

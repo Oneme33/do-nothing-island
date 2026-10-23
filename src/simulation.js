@@ -421,7 +421,7 @@ export class Civilization {
     }
   }
   planBuilding(tile,type,free=false) {
-    if(tile?.reservedFor==='palace'||tile?.reservedFor==='knowledge'&&!['school','library','science-center','campus-square'].includes(type))return false;
+    if(tile?.reservedFor&&tile.reservedFor!=='knowledge'||tile?.reservedFor==='knowledge'&&!['school','library','science-center','campus-square'].includes(type))return false;
     if(!tile || tile.kind!=='land' || tile.building || tile.buildSite || tile.landform || (!free && this.wood<7))return false;
     if(this.year<unlockYear(type))return false;
     delete tile.futureBuilding;
@@ -854,7 +854,7 @@ export class Civilization {
       const landscape=reshapeAfterQuake(this,spot);captureSnapshot(this,'Na de beving');
       for(const tile of this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=2))tile.crackUntil=this.year+60;
       // Close to the epicentre ordinary buildings collapse into ruins; reinforced ones only crack.
-      const fragile=t=>t.building&&!t.foundingHome&&!t.reservedFor&&t.district!=='heritage'&&!t.landform&&!['farm','beach','forest','tree','original-tree','ruins','town-square','lighthouse','bridge','dock','harbor','quarry','royal-palace'].includes(t.building)&&!t.retrofitted&&t.builtYear!==this.year;
+      const fragile=t=>t.building&&!t.foundingHome&&!t.reservedFor&&t.district!=='heritage'&&!t.landform&&!['farm','beach','forest','tree','original-tree','ruins','town-square','lighthouse','bridge','dock','harbor','quarry','royal-palace','castle-garden'].includes(t.building)&&!t.retrofitted&&t.builtYear!==this.year;
       const collapsed=this.land.filter(t=>Math.hypot(t.x-spot.x,t.y-spot.y)<=1.5&&fragile(t)).slice(0,3);
       for(const t of collapsed){t.rebuildFrom=t.building;t.rebuildAt=this.year+18;t.building='ruins';t.buildSite=null;t.quakeHistory=(t.quakeHistory||0)+1;this.signal('rumble',t,'Ingestort');}
       if(collapsed.length){this.population=Math.max(4,this.population*(1-.012*collapsed.length));this.rebuildRoads();}

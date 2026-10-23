@@ -2,7 +2,7 @@
 const nearby=(a,b,r=2)=>Math.hypot(a.x-b.x,a.y-b.y)<=r;
 const adjacentPlots=(s,t)=>[[1,0],[-1,0],[0,1],[0,-1]].map(([x,y])=>s.tile(t.x+x,t.y+y)).filter(Boolean);
 const dwelling=['hut','house','townhouse','tower','manor','palace'];
-const protectedPlot=t=>t.foundingHome||t.reservedFor||['original-tree','palace','palace-wing','royal-garden','palace-square','town-square','royal-palace','bridge'].includes(t.building);
+const protectedPlot=t=>t.foundingHome||t.reservedFor||['original-tree','palace','palace-wing','royal-garden','palace-square','town-square','royal-palace','castle-garden','bridge'].includes(t.building);
 export function ensureConsequences(s){
  s.fireCount??=0;s.rebuiltFires??=0;s.fireTraditions??=0;s.discoveries??=[];s.discoveryRecords??={};s.fireCode??=false;
 }

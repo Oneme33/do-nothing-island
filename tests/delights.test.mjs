@@ -45,3 +45,7 @@ test('every third helped wish earns a commission you can place on a free plot',(
  assert.equal(placeCommission(s,'carillon',plot.x,plot.y),false,'no second commission without earning it');
  for(let i=0;i<20;i++)s.tick();assert.equal(plot.building,'grand-fountain');
 });
+test('the castle stands in its own garden ring, in a style that differs per island',()=>{
+ const styles=new Set();for(const seed of [31,77,5,9,12]){const s=new Civilization(seed);while(s.year<1100&&!s.court)s.tick();const ring=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].map(([dx,dy])=>s.tile(s.court.x+dx,s.court.y+dy)).filter(t=>t?.building==='castle-garden');assert.ok(ring.length>=3,`seed ${seed}: ${ring.length} garden plots`);styles.add(ring[0].gardenStyle);}
+ assert.ok(styles.size>=2,'gardens differ between islands');
+});
