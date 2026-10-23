@@ -54,7 +54,9 @@ export class IslandRenderer {
   }
   resize(){
     const r=this.canvas.getBoundingClientRect();
-    this.width=r.width;this.height=r.height;
+    // Only a real change of size resets the canvas, and then the next frame is drawn straight away (no blank flash).
+    if(Math.abs(r.width-this.width)<.5&&Math.abs(r.height-this.height)<.5&&this.canvas.width)return;
+    this.width=r.width;this.height=r.height;this.needsDraw=true;
     // Phones draw with a little fewer pixels: barely visible, much faster.
     const dpr=Math.min(r.width<700?1.5:2,window.devicePixelRatio||1);
     this.canvas.width=Math.round(r.width*dpr);this.canvas.height=Math.round(r.height*dpr);
@@ -144,7 +146,8 @@ export class IslandRenderer {
     if(this.focus)target=this.focus.zoom?this.focus.zoom*(mobile?.85:1):mobile?1.65:2.05;
     this.fitZoom=target;
     const desiredZoom=mix(this.zoom,target*this.userZoom,Math.min(1,dt*2));
-    this.zoom+=Math.max(-.065,Math.min(.065,desiredZoom-this.zoom));
+    // Your own zoom (pinch, wheel, buttons) follows quickly; the automatic framing glides.
+    const step=this.userZoom!==1?.18:.065;this.zoom+=Math.max(-step,Math.min(step,desiredZoom-this.zoom));
     const focusPoint=this.focus?this.p(this.focus.x,this.focus.y):null;
     const home=this.p(-1,1);
     this.center.x=mix(this.center.x,focusPoint?focusPoint.x:mix(home.x,(minX+maxX)/2,early),Math.min(1,dt*.9));

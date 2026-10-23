@@ -4887,7 +4887,9 @@ class IslandRenderer {
   }
   resize(){
     const r=this.canvas.getBoundingClientRect();
-    this.width=r.width;this.height=r.height;
+    // Only a real change of size resets the canvas, and then the next frame is drawn straight away (no blank flash).
+    if(Math.abs(r.width-this.width)<.5&&Math.abs(r.height-this.height)<.5&&this.canvas.width)return;
+    this.width=r.width;this.height=r.height;this.needsDraw=true;
     // Phones draw with a little fewer pixels: barely visible, much faster.
     const dpr=Math.min(r.width<700?1.5:2,window.devicePixelRatio||1);
     this.canvas.width=Math.round(r.width*dpr);this.canvas.height=Math.round(r.height*dpr);
@@ -4977,7 +4979,8 @@ class IslandRenderer {
     if(this.focus)target=this.focus.zoom?this.focus.zoom*(mobile?.85:1):mobile?1.65:2.05;
     this.fitZoom=target;
     const desiredZoom=mix(this.zoom,target*this.userZoom,Math.min(1,dt*2));
-    this.zoom+=Math.max(-.065,Math.min(.065,desiredZoom-this.zoom));
+    // Your own zoom (pinch, wheel, buttons) follows quickly; the automatic framing glides.
+    const step=this.userZoom!==1?.18:.065;this.zoom+=Math.max(-step,Math.min(step,desiredZoom-this.zoom));
     const focusPoint=this.focus?this.p(this.focus.x,this.focus.y):null;
     const home=this.p(-1,1);
     this.center.x=mix(this.center.x,focusPoint?focusPoint.x:mix(home.x,(minX+maxX)/2,early),Math.min(1,dt*.9));
@@ -7030,6 +7033,7 @@ let shownAge=null,ageTimer;
 // Now and then the camera glides in close to something happening, but never while you are busy yourself.
 let lastUserActivity=-Infinity,lastDive=-Infinity,idleSince=performance.now(),idleShown=false;
 for(const type of ['pointerdown','wheel','keydown'])window.addEventListener(type,()=>{lastUserActivity=performance.now();idleSince=lastUserActivity;idleShown=false;},{capture:true,passive:true});
+window.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch'){lastUserActivity=performance.now();idleSince=lastUserActivity;}},{capture:true,passive:true});
 // Automatic camera dives are off by default on phones; the setting can switch them on.
 const autoZoomOn=()=>sim.config.autoZoom??!(typeof window!=='undefined'&&window.innerWidth<700);
 function maybeDive(x,y,important=false){
@@ -7256,8 +7260,9 @@ function frame(now){
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;
   // A paused island only needs half the frames, and so does a device that struggles to keep up.
-  drawTick=(drawTick+1)%2;const slow=(renderer.drawCost||0)>22;
-  if((!renderer.paused&&!slow)||tour||drawTick===0){const t0=performance.now();renderer.draw(now);renderer.drawCost=(renderer.drawCost||0)*.9+(performance.now()-t0)*.1;}
+  // While you touch, drag or zoom, every frame is drawn.
+  drawTick=(drawTick+1)%2;const slow=(renderer.drawCost||0)>22,interacting=now-lastUserActivity<1500;
+  if((!renderer.paused&&(!slow||interacting))||interacting||tour||drawTick===0||renderer.needsDraw){renderer.needsDraw=false;const t0=performance.now();renderer.draw(now);renderer.drawCost=(renderer.drawCost||0)*.9+(performance.now()-t0)*.1;}
   const night=renderer.light.darkness>.3;if(night!==nightShown){nightShown=night;$('island-window').classList.toggle('is-night',night);updateUI();}
   if(cinemaActive()){
     const stage=$('finale-canvas'),box=stage.getBoundingClientRect(),w=Math.max(300,Math.round(box.width)),h=Math.max(200,Math.round(box.height));
