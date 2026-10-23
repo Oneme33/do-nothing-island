@@ -20,7 +20,7 @@ export function makePostcard(source,{identity,year,line}){
  c.textAlign='right';c.fillText('Do Nothing Island',w-pad,h-64);
  return canvas;
 }
-function miniMap(c,land,x,y,size){
+function cardMiniMap(c,land,x,y,size){
  c.fillStyle='#dbe7da';c.fillRect(x,y,size,size);c.fillStyle='#a8ba85';const cell=size/29;
  for(const id of land||[]){const [a,b]=id.split(',').map(Number);if(Math.abs(a)<=14&&Math.abs(b)<=14)c.fillRect(x+(a+14)*cell,y+(b+14)*cell,cell+.5,cell+.5);}
  c.fillStyle='#546f43';c.beginPath();c.arc(x+size/2,y+size/2,4,0,Math.PI*2);c.fill();
@@ -39,7 +39,7 @@ export function makeEndCard({identity,title,quote,familyName,generations,seed,ye
  drawFlag(c,identity,950,60,64);c.fillStyle='#7b866e';c.font='600 18px sans-serif';c.fillText(`${identity.name.toUpperCase()} · JAAR ${year}`,1030,88);
  c.fillStyle='#293d32';c.font='48px Georgia, serif';wrap(c,title,950,170,500,52);
  c.fillStyle='#5c6c4e';c.font='italic 24px Georgia, serif';wrap(c,`“${quote}”`,950,260,500,32);
- miniMap(c,before,950,360,150);miniMap(c,after,1120,360,150);c.fillStyle='#7b866e';c.font='14px sans-serif';c.fillText('toen',950,530);c.fillText('nu',1120,530);
+ cardMiniMap(c,before,950,360,150);cardMiniMap(c,after,1120,360,150);c.fillStyle='#7b866e';c.font='14px sans-serif';c.fillText('toen',950,530);c.fillText('nu',1120,530);
  // The inspection medal, in the colour of its level.
  c.fillStyle=keur?.level?.color||'#e2c26a';c.beginPath();c.ellipse(1360,445,62,62,0,0,Math.PI*2);c.fill();c.fillStyle='#293d32';c.textAlign='center';c.font='bold 40px Georgia, serif';c.fillText(String(score),1360,452);c.font='13px sans-serif';c.fillText('VAN 100',1360,475);if(keur){c.font='italic 18px Georgia, serif';c.fillText(keur.level.title,1360,535);c.font='13px sans-serif';c.fillText(`${keur.done} van ${keur.items} dingen erop en eraan`,1360,558);}c.textAlign='left';
  c.fillStyle='#293d32';c.font='600 16px sans-serif';c.fillText('PRIJZEN',60,660);

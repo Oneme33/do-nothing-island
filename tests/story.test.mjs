@@ -92,18 +92,19 @@ function playStyle(seed,share,trials=[]){
   if(s.commissions?.available){const spot=s.land.find(t=>canCommission(s,t));if(spot)placeCommission(s,'rose-garden',spot.x,spot.y);}}
  return s;
 }
-test('the island inspection rewards the middle ground: some help, a few trials, not too much of either',()=>{
+test('the island inspection is win-win: helping never costs, a few trials help, a heavy hand costs',()=>{
  const watched=playStyle(7,0),helpful=playStyle(7,1),balanced=playStyle(7,.5,[400,901,1500]);
  const quiet=islandScores(watched),all=islandScores(helpful),middle=islandScores(balanced);
- assert.ok(quiet.total>=60&&quiet.total<88,`watching alone: ${quiet.total}`);assert.equal(quiet.values.hulp,0);assert.equal(quiet.values.zelfstandigheid,20);
- assert.ok(all.values.zelfstandigheid<12,'helping with everything makes them dependent');assert.ok(all.total<90,`helping all: ${all.total}`);
- assert.ok(middle.total>=93,`middle ground: ${JSON.stringify(middle.values)}`);assert.ok(middle.total>all.total&&middle.total>quiet.total);
+ assert.ok(quiet.total>=55&&quiet.total<88,`watching alone: ${quiet.total}`);assert.ok(quiet.values.band>0&&quiet.values.band<35,'wishes they solve themselves count too');
+ assert.equal(all.values.band,35,'helping with everything never costs');assert.ok(all.total>=88,`helping all: ${all.total}`);
+ assert.ok(middle.total>=93,`middle ground: ${JSON.stringify(middle.values)}`);assert.ok(middle.total>=all.total&&middle.total>quiet.total);
  assert.equal(scoreInputs(balanced).tests,3);assert.equal(scoreInputs(helpful).unrequested,0,'asked-for help never counts as meddling');
  assert.ok(scoreInputs(helpful).helped>24,'help is counted beyond the short wish history');
- // Too many trials cost resilience and independence again.
- balanced.interventionLedger.push(...Array.from({length:8},(_,i)=>({type:'fire',asked:false,year:2000+i})));balanced.interferences+=8;
- const harsh=islandScores(balanced);assert.ok(harsh.values.veerkracht<middle.values.veerkracht&&harsh.values.zelfstandigheid<middle.values.zelfstandigheid);
+ // A heavy hand costs resilience and the bond again.
+ balanced.interventionLedger.push(...Array.from({length:10},(_,i)=>({type:'fire',asked:false,year:2000+i})));balanced.interferences+=24;
+ const harsh=islandScores(balanced);assert.ok(harsh.values.veerkracht<middle.values.veerkracht&&harsh.values.band<middle.values.band&&harsh.total<middle.total);
  assert.equal(Object.values(SCORE_MAX).reduce((a,b)=>a+b,0),100);assert.equal(middle.checklist.length,ISLAND_CHECKLIST.length);
  for(const total of [0,49,50,70,85,99,100])assert.ok(scoreLevel(total).min<=total);
 });
+
 

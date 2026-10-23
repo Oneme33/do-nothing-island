@@ -59,7 +59,7 @@ test('inspection gives a stable household, dates and actual plot memories',()=>{
 });
 test('scores reflect choices, stay bounded and freeze in the saved recap',()=>{
  const s=new Civilization(31),before=islandScores(s);s.influence.dependence=60;s.interferences=30;s.pollution=80;s.environment=20;
- const after=islandScores(s);assert.ok(after.values.zelfstandigheid<before.values.zelfstandigheid);assert.ok(after.values.natuur<before.values.natuur);
+ const after=islandScores(s);assert.ok(after.total<before.total);assert.ok(after.values.natuur<before.values.natuur);
  for(const [name,n] of Object.entries(after.values))assert.ok(n>=0&&n<=after.maxes[name]);
  finishStory(s,'independent');const score=structuredClone(s.outcome.scores);resumeSandbox(s);for(let i=0;i<20;i++)s.tick();assert.deepEqual(s.outcome.scores,score);assert.deepEqual(Civilization.restore(s.serialize()).outcome.scores,score);
 });

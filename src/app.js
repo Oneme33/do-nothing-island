@@ -44,9 +44,10 @@ let interferenceMode='nudge',interventionTimer,lastRemarkAt=0,shownRemark='';
 let previousIsland=null,undoTimer;
 let introStep=0,inspectionPinned=false,nightShown=false,drawTick=0;
 const introKey='do-nothing-island-intro-v1';
-const introScreens=[['Dit is jouw eiland.','Eén huisje, een akker en een handvol mensen. Geef ze even de tijd. Er hoeft niets af.'],['Ze redden zich prima.','Ze bouwen, ontdekken en maken er op hun eigen manier iets van. Jij mag gewoon kijken.'],['Probeer niets aan te raken…','Of toch wel. Elke ingreep laat sporen achter. Wat je achter elkaar doet, kan iets onverwachts losmaken.']];
+// One short greeting; the rest is explained the first time you meet it.
+const introScreens=[['Dit is jouw eiland.','Eén huisje, een akker en een handvol mensen. Je hoeft niets te doen: kijk maar wat ze ervan maken.']];
 function otherDialogOpen(){return [...document.querySelectorAll('dialog[open]')].some(d=>d!==$('cinema-dialog'));}
-function updateIntro(){const [title,line]=introScreens[introStep];$('intro-title').textContent=title;$('intro-line').textContent=line;$('intro-step').textContent=`${introStep+1} / 3`;$('intro-next').textContent=introStep===2?'Bekijk mijn eiland →':'Verder →';$('intro-back').hidden=introStep===0;}
+function updateIntro(){const [title,line]=introScreens[introStep];$('intro-title').textContent=title;$('intro-line').textContent=line;$('intro-step').textContent='';$('intro-next').textContent='Bekijk mijn eiland →';$('intro-back').hidden=true;}
 function showIntro(){introStep=0;updateIntro();$('intro-dialog').showModal();accumulator=0;}
 let momentQueue=[],seenMoments=new Set(),momentAt=-Infinity,activeMoment=null,beatHoldUntil=0,snapshotSignature='';
 const motionQuery=matchMedia('(prefers-reduced-motion: reduce)'),reducedPref=typeof sim.config.reducedMotion==='boolean'?sim.config.reducedMotion:motionQuery.matches;
@@ -203,7 +204,7 @@ let wishHeard=null;
 function updateWishBubble(){
   const wish=ensureWishes(sim).active;
   // A soft ping when someone starts asking for something.
-  if(wish&&!wish.hidden&&wish.id!==wishHeard){if(wishHeard!==null)soundscape?.play('wish');wishHeard=wish.id;}else if(!wish&&wishHeard===null)wishHeard='';
+  if(wish&&!wish.hidden&&wish.id!==wishHeard){if(wishHeard!==null)soundscape?.play('wish');wishHeard=wish.id;hintOnce('wish','Iemand heeft een vraag. Klik op het vraagteken of het wolkje als je wilt helpen; het mag ook niet.');}else if(!wish&&wishHeard===null)wishHeard='';
   $('book-tab-wishes').dataset.pending=String(!!wish&&!sim.ending);
   $('wish-bubble').hidden=!wish||wish.hidden||sim.config.wishBubbles===false||!!sim.ending;
   if(wish){$('wish-speaker').textContent=wish.speaker;$('wish-text').textContent=wish.text;}
@@ -252,7 +253,9 @@ function renderCommissions(){
   const c=ensureCommissions(sim);$('commission-box').hidden=c.available<1;
   $('commission-note').textContent=`Je mag ${c.available===1?'één bouwwerk':`${c.available} bouwwerken`} kiezen. Daarna klik je op een vrije plek op het eiland.`;
 }
+function giftSpot(){return sim.land.filter(t=>canCommission(sim,t)).sort((a,b)=>Number(['park','garden','tree'].includes(b.building)||!b.building)-Number(['park','garden','tree'].includes(a.building)||!a.building)||Math.hypot(a.x-.5,a.y-2)-Math.hypot(b.x-.5,b.y-2))[0];}
 for(const type of Object.keys(COMMISSIONS))$(`commission-${type}`).addEventListener('click',()=>{
+  if($('commission-auto').checked){const spot=giftSpot();if(spot&&placeCommission(sim,type,spot.x,spot.y)){$('book-dialog').close();showToast(`De bewoners zetten je ${COMMISSIONS[type].name.toLowerCase()} op een mooie plek.`,3600);maybeDive(spot.x,spot.y,true);renderCommissions();updateUI();save();return;}}
   commissionChoice=type;$('book-dialog').close();chooseMode('nudge');$('interaction-hint').textContent=`Klik op een vrije plek voor je ${COMMISSIONS[type].name.toLowerCase()}. ${COMMISSIONS[type].effect}`;showToast(`Kies een plek voor je ${COMMISSIONS[type].name.toLowerCase()}.`,3600);
 });
 function updateAwayReport(){
@@ -275,8 +278,8 @@ function ambienceLine(){
 const AGE_LINES={classical:'Zuilen. Scholen. Meningen over zuilen.',medieval:'Torens. Kerken. Meningen.',renaissance:'Molens, gevels en een gewaagd idee: de zee wegpompen.',industrial:'Stoom! Iedereen praat ineens wat harder.',modern:'Auto’s. Niemand weet nog waar ze heen moeten.',contemporary:'Zon, wind en een vergadering over de wind.',future:'De toekomst. Hij wacht nog op een bouwvergunning.'};
 let shownAge=null,ageTimer;
 // Now and then the camera glides in close to something happening, but never while you are busy yourself.
-let lastUserActivity=-Infinity,lastDive=-Infinity;
-for(const type of ['pointerdown','wheel','keydown'])window.addEventListener(type,()=>{lastUserActivity=performance.now();},{capture:true,passive:true});
+let lastUserActivity=-Infinity,lastDive=-Infinity,idleSince=performance.now(),idleShown=false;
+for(const type of ['pointerdown','wheel','keydown'])window.addEventListener(type,()=>{lastUserActivity=performance.now();idleSince=lastUserActivity;idleShown=false;},{capture:true,passive:true});
 // Automatic camera dives are off by default on phones; the setting can switch them on.
 const autoZoomOn=()=>sim.config.autoZoom??!(typeof window!=='undefined'&&window.innerWidth<700);
 function maybeDive(x,y,important=false){
@@ -380,6 +383,13 @@ function momentTarget(entry){
   return sim.tile(0,1);
 }
 function focusPlace(tile){if(!tile)return;renderer.focusTile(tile);inspectTile(tile);}
+let chipAt=-Infinity,chipTimer=null,chipEntry=null;
+function surfaceStory(entries){
+  const now=performance.now();if(now-chipAt<75000||sim.ending)return;
+  const pick=entries.find(e=>e.type==='family')||entries.find(e=>['famous','treasure','delight','palace'].includes(e.type));if(!pick)return;
+  chipAt=now;chipEntry=pick;const text=nl(pick.text),short=text.length>90?text.slice(0,88)+'…':text;
+  $('story-chip-text').textContent=short;$('story-chip').hidden=false;clearTimeout(chipTimer);chipTimer=setTimeout(()=>{$('story-chip').hidden=true;},14000);
+}
 function queueMoments(entries){
   if(sim.config.storyCards!==true)return;
   for(const entry of entries){if((entry.priority||eventPriority(entry.type))<76||seenMoments.has(entry.id))continue;seenMoments.add(entry.id);momentQueue.push(entry);}
@@ -401,20 +411,25 @@ function updateSnapshotOptions(){
   select.replaceChildren(...sim.snapshots.map((snapshot,index)=>{const option=document.createElement('option');option.value=String(index);option.textContent=`${snapshot.year} · ${nl(snapshot.label)}`;return option;}));
   select.value=value&&sim.snapshots[Number(value)]?value:'0';renderer.historySnapshot=sim.snapshots[Number(select.value)];
 }
-function miniMap(land){
-  return '<rect width="250" height="250" fill="#dbe7da"/>'+land.map(id=>{const [x,y]=id.split(',').map(Number);if(!Number.isFinite(x)||!Number.isFinite(y)||Math.abs(x)>14||Math.abs(y)>14)return'';return `<rect x="${(x+14)*250/29}" y="${(y+14)*250/29}" width="${250/29}" height="${250/29}" fill="#a8ba85"/>`;}).join('')+'<circle cx="125" cy="125" r="4" fill="#546f43"/>';
+function miniMap(land,fill='#a9b88d'){
+  return '<rect width="250" height="250" fill="#cfe3e0"/>'+land.map(id=>{const [x,y]=id.split(',').map(Number);if(!Number.isFinite(x)||!Number.isFinite(y)||Math.abs(x)>14||Math.abs(y)>14)return'';return `<rect x="${(x+14)*250/29}" y="${(y+14)*250/29}" width="${250/29+.4}" height="${250/29+.4}" fill="${fill}"/>`;}).join('');
+}
+// The island at the end, coloured by what stands on each plot.
+function fullMap(){
+  const colour=t=>t.landform?'#9aab97':['hut','house','townhouse','tower','manor'].includes(t.building)?'#c9805f':t.building==='farm'?'#d8c27a':['park','forest','tree','garden','castle-garden','original-tree'].includes(t.building)?'#7fa36a':t.building==='beach'?'#ecdcae':t.building?'#e2b84a':t.road?'#c9c3ad':'#a9c28a';
+  return '<rect width="250" height="250" fill="#cfe3e0"/>'+sim.land.map(t=>Math.abs(t.x)>14||Math.abs(t.y)>14?'':`<rect x="${(t.x+14)*250/29}" y="${(t.y+14)*250/29}" width="${250/29+.4}" height="${250/29+.4}" fill="${colour(t)}"/>`).join('');
 }
 function renderEnding(){
   const o=Object.fromEntries(Object.entries(sim.outcome||ENDINGS.independent).map(([key,value])=>[key,typeof value==='string'?nl(value):value]));
   // The island's own name is the title; how it ended is a sentence below it.
   $('ending-title').textContent=islandIdentity(sim).name;$('ending-quote').textContent=o.title;$('ending-description').textContent=`“${o.quote}” ${o.description}`;$('ending-consequence').textContent=o.consequence;$('ending-detail').textContent=o.detail;
   $('ending-stats').textContent=`Jaar ${o.year||sim.year} · ${Math.round(o.population??sim.population).toLocaleString("nl-NL")} inwoners · ${o.land??sim.land.length} landtegels · ${o.interferences??sim.interferences} ingrepen`;
-  const first=sim.snapshots[0];$('ending-before').innerHTML=miniMap(first?.land||[]);$('ending-after').innerHTML=miniMap(o.coast||sim.land.map(t=>`${t.x},${t.y}`));
+  const first=sim.snapshots[0];$('ending-before').innerHTML=miniMap(first?.land||[],'#9fbb73');$('ending-after').innerHTML=fullMap();
   const influence=o.influence||sim.influence;
   $('ending-causes').textContent=(o.interferences??sim.interferences)?`Jouw invloed: ${influence.rain} regenbuien, ${influence.nudge+influence.rescues} keer hulp, ${influence.rumble} bevingen. ${Math.round(influence.dependence)}% afhankelijkheid; ${influence.fear} angst. ${nl(o.lastConsequence||sim.interventionLedger.at(-1)?.consequence||'')}.`:"Jij keek toe. Zij namen hun eigen beslissingen. De wegen, ruzies en prestaties zijn van hen.";
   $('ending-chronicle').replaceChildren(...(o.chronicle||sim.history.filter(e=>['palace','reform','flood','endgame','legacy'].includes(e.type)).slice(-5)).map(historyItem));
   const score=currentScores(sim,sim.outcome?.scores);$('ending-score').textContent=String(score.total);$('score-recipe').textContent=SCORE_RECIPE;
-  $('keur-title').textContent=score.level.title;$('keur-line').textContent=score.level.line;$('keur-medal').style.setProperty?.('--medal',score.level.color);
+  $('keur-title').textContent=score.level.title;$('keur-line').textContent=score.level.line+(score.patience?` Plus ${score.patience} punten voor je geduld.`:'');$('keur-medal').style.setProperty?.('--medal',score.level.color);
   $('keur-count').textContent=`Alles erop en eraan: ${score.done} van ${score.items}`;
   $('keur-list').replaceChildren(...score.checklist.map(item=>{const li=document.createElement('li');li.textContent=item.label;li.dataset.done=String(item.done);return li;}));
   $('score-breakdown').replaceChildren(...Object.entries(score.values).map(([name,value])=>{const item=document.createElement('details');item.className='score-row';const label=document.createElement('span'),number=document.createElement('strong'),bar=document.createElement('progress'),note=document.createElement('small'),info=explainScore(name,value,score.maxes?.[name]||score.max||100);label.textContent=name;number.textContent=value;const max=score.maxes?.[name]||score.max||100;bar.max=max;bar.value=value;bar.setAttribute('aria-label',`${name}: ${value} van ${max}. ${info.what}. ${info.verdict}`);note.className='score-note';note.textContent=`${info.what}. ${info.verdict}`;const head=document.createElement('summary');head.append(label,bar,number);item.append(head,note);return item;}));
@@ -475,11 +490,14 @@ function frame(now){
     let updates=0;
     while(accumulator>=sim.yearDuration && updates<12 && !sim.ending){const duration=sim.yearDuration;sim.tick();accumulator-=duration;updates++;}
     if(updates){
-      if(sim.events.length){dirtyHistory=true;queueMoments(sim.events);takeAlbumPhoto(sim.events);sim.events=[];}
+      if(sim.events.length){dirtyHistory=true;queueMoments(sim.events);takeAlbumPhoto(sim.events);surfaceStory(sim.events);sim.events=[];}
       updateUI();
     }
   }
   advanceTour(now);offerGift();
+  if(!paused&&!modal&&!document.hidden&&!sim.ending&&!cinemaActive()){sim.watch??={total:0,slow:0};sim.watch.total+=dt;if(speed===1)sim.watch.slow+=dt;}
+  // Doing truly nothing for ten minutes is rewarded with something rare.
+  if(!idleShown&&now-idleSince>600000&&!paused&&!modal&&!document.hidden&&!sim.ending){idleShown=true;renderer.idleEvent={kind:renderer.light?.darkness>.4?(sim.year%2?'aurora':'meteors'):'whale',start:renderer.time};showToast(renderer.light?.darkness>.4?'Omdat je zo heerlijk niets deed: kijk eens naar de lucht.':'Omdat je zo heerlijk niets deed: kijk eens naar zee.',6000);soundscape?.play('chime');}
   if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({era:sim.era,storm:!!sim.storm,night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite),close:Math.max(0,Math.min(1,(renderer.zoom/Math.max(.3,renderer.fitZoom||1)-1)/1.1))});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
   if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(signal.type==='flood')soundscape?.play('flood');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');if(signal.moment){maybeDive(signal.x,signal.y,true);soundscape?.play(signal.moment.sound);showToast(signal.moment.text,5200);}}sim.signals=[];}
@@ -548,7 +566,7 @@ $('ending-close').addEventListener('click',()=>$('ending-dialog').close());
 $('intro-dialog').addEventListener('cancel',e=>{e.preventDefault();finishIntro();});
 $('intro-close').addEventListener('click',finishIntro);
 $('intro-back').addEventListener('click',()=>{introStep=Math.max(0,introStep-1);updateIntro();});
-$('intro-next').addEventListener('click',()=>{if(introStep<2){introStep++;updateIntro();return;}finishIntro();});
+$('intro-next').addEventListener('click',()=>{if(introStep<introScreens.length-1){introStep++;updateIntro();return;}finishIntro();});
 $('cinema-skip').addEventListener('click',completeCinema);
 $('tour-skip').addEventListener('click',finishTour);
 // 3.6: photo mode hides the interface, offers day or night and saves a postcard.
@@ -631,6 +649,7 @@ function newIsland(){
   undoTimer=setTimeout(()=>{previousIsland=null;$('undo-reset').hidden=true;},10000);
 }
 $('new-island').addEventListener('click',newIsland);
+$('story-chip').addEventListener('click',()=>{$('story-chip').hidden=true;openBook(chipEntry?.type==='family'?'family':'journal');});
 try{const id=islandIdentity(sim);$('title-island').textContent=sim.year>1?`${id.name} · jaar ${sim.year}`:`${id.name} · een nieuw begin`;}catch{}
 // Minimal interface: the few buttons that used to live around the island join the bar at the bottom.
 $('island-toolbar').append($('new-island'),$('undo-reset'),$('open-ending'));
@@ -641,8 +660,10 @@ $('undo-reset').addEventListener('click',()=>{
 });
 const modeHints={look:'Je kijkt alleen. Kies links een ingreep als je toch iets wilt doen.',help:'Klik op een vraagteken om te lezen wat iemand vraagt. Kies zelf of je helpt.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
 // Clicking the active tool again puts it away: back to the ordinary cursor, just looking.
+function hintOnce(key,text){sim.config.hints??={};if(sim.config.hints[key])return;sim.config.hints[key]=true;showToast(text,5200);}
 function chooseMode(mode){
   if(mode===interferenceMode&&mode!=='look')mode='look';
+  if(mode!=='look'&&modeHints[mode])hintOnce(`mode-${mode}`,modeHints[mode]);
   interferenceMode=mode;renderer.mode=interferenceMode;inspectionPinned=false;
   for(const b of document.querySelectorAll('[data-interference]')){const selected=b.dataset.interference===mode;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected));}
   $('interaction-hint').textContent=modeHints[interferenceMode];canvas.dataset.mode=interferenceMode;

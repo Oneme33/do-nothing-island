@@ -49,7 +49,7 @@ test('the actual application shows a contextual recap, then permits explicit fre
  e.get('cinema-cheer').handlers.click();assert.match(e.get('cinema-cheer').textContent,/1/);
  a.advance(9);assert.equal(e.get('cinema-skip').hidden,false);e.get('cinema-skip').handlers.click();
  assert.equal(e.get('ending-dialog').open,true);assert.equal(e.get('ending-quote').textContent,nl(sim.outcome.title));assert.ok(e.get('ending-title').textContent.length>2,'the island name is the title');assert.match(e.get('ending-before').innerHTML,/<rect/);assert.match(e.get('ending-after').innerHTML,/<rect/);
- assert.match(e.get('ending-causes').textContent,/Jij keek toe/);assert.equal(e.get('score-breakdown').children.length,6);const stats=e.get('ending-stats').textContent,score=e.get('ending-score').textContent;
+ assert.match(e.get('ending-causes').textContent,/Jij keek toe/);assert.equal(e.get('score-breakdown').children.length,5);const stats=e.get('ending-stats').textContent,score=e.get('ending-score').textContent;
  e.get('ending-replay').handlers.click();assert.equal(e.get('ending-dialog').open,false);assert.equal(a.saved().cinematic.elapsed,0);
  a.advance(41);assert.equal(e.get('ending-dialog').open,true);assert.equal(a.saved().cinematic.completed,true);
  e.get('ending-sandbox').handlers.click();assert.equal(e.get('ending-dialog').open,false);assert.equal(a.saved().sandbox,true);
@@ -57,10 +57,9 @@ test('the actual application shows a contextual recap, then permits explicit fre
  e.get('open-ending').handlers.click();assert.equal(e.get('ending-dialog').open,true);assert.equal(e.get('ending-stats').textContent,stats,'recap keeps the original ending rather than the free-play world');
  assert.equal(e.get('ending-score').textContent,score,'scores stay frozen after free play');
 });
-test('first visit has three quiet intro screens and begins at 1x only when finished',async()=>{
+test('first visit has one short greeting and begins at 1x when it is closed',async()=>{
  const sim=new Civilization(31);sim.config.speedMultiplier=10;const a=await appHarness(sim,{firstVisit:true}),e=a.elements;
  assert.equal(e.get('intro-dialog').open,true);assert.match(e.get('intro-title').textContent,/Dit is jouw eiland/);a.advance(15);assert.equal(e.get('year').textContent,1);
- e.get('intro-next').handlers.click();assert.match(e.get('intro-title').textContent,/redden zich/);e.get('intro-next').handlers.click();assert.match(e.get('intro-title').textContent,/aan te raken/);
  e.get('intro-next').handlers.click();assert.equal(e.get('intro-dialog').open,false);assert.equal(a.saved().config.speedMultiplier,1);a.advance(2);assert.ok(e.get('year').textContent>1);
 });
 test('the logbook and settings stop simulation time without changing the chosen speed',async()=>{

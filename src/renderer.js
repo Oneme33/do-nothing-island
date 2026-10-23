@@ -5,12 +5,13 @@ import {drawSeaLife} from './sea.js';
 import {drawInterventionFx} from './fx.js';
 import {drawAnimals,isPasture} from './animals.js';
 import {drawFestive} from './festive.js';
-import {drawSeasonal,drawNightLife,drawSummerSun} from './ambient.js';
+import {drawSeasonal,drawNightLife,drawSummerSun,drawFestivities,drawIdleEvent} from './ambient.js';
 import {drawWeather} from './weatherfx.js';
 import {drawOverseas} from './visitors.js';
 import {drawIslets} from './islets.js';
 import {drawFamous} from './famous.js';
 import {drawMedieval,tulipTime,CATHEDRAL_YEARS} from './medieval.js';
+import {drawHazards} from './hazards.js';
 import {squareRole} from './square.js';
 import {islandIdentity} from './identity.js';
 import { drawFlames, drawBonfire, drawFestivalGround, drawLifeWorld, drawComicBubbles } from './pageants.js';
@@ -135,7 +136,9 @@ export class IslandRenderer {
       const close=Math.min(1,(this.sim.land.length-500)/95);
       target=mix(target,mobile?1.3:2.1,close);
     }
-    if(this.sim.year<120&&!this.focus)target=Math.max(target,mobile?.95:1.12);
+    // The story starts close to the first home and the first residents, then widens as the island grows.
+    const early=this.focus||cinemaVisible(this.sim)?1:Math.min(1,Math.max(0,(this.sim.year-1)/350));
+    if(!this.focus)target=Math.max(target,mix(mobile?1.3:1.5,target,early));
     if(cinemaVisible(this.sim)&&!this.touring){this.focus=null;target=mobile?.72:.9;}
     if(this.focus){this.focus.remaining-=dt;if(this.focus.remaining<=0)this.focus=null;}
     if(this.focus)target=this.focus.zoom?this.focus.zoom*(mobile?.85:1):mobile?1.65:2.05;
@@ -143,9 +146,10 @@ export class IslandRenderer {
     const desiredZoom=mix(this.zoom,target*this.userZoom,Math.min(1,dt*2));
     this.zoom+=Math.max(-.065,Math.min(.065,desiredZoom-this.zoom));
     const focusPoint=this.focus?this.p(this.focus.x,this.focus.y):null;
-    this.center.x=mix(this.center.x,focusPoint?focusPoint.x:(minX+maxX)/2,Math.min(1,dt*.9));
+    const home=this.p(-1,1);
+    this.center.x=mix(this.center.x,focusPoint?focusPoint.x:mix(home.x,(minX+maxX)/2,early),Math.min(1,dt*.9));
     // During the closing tour the focus sits higher, above the caption card.
-    this.center.y=mix(this.center.y,focusPoint?focusPoint.y-24+(this.touring?this.height*.32/this.zoom:0):(minY+maxY)/2+15,Math.min(1,dt*.9));
+    this.center.y=mix(this.center.y,focusPoint?focusPoint.y-24+(this.touring?this.height*.32/this.zoom:0):mix(home.y-10,(minY+maxY)/2+15,early),Math.min(1,dt*.9));
     // A camera flight overrides the usual framing: an eased path through waypoints with a gentle zoom-out in the middle.
     if(this.flight){
       const f=this.flight;f.start??=now;const u=this.reduced?1:Math.min(1,(now-f.start)/1000/f.duration),e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
@@ -190,7 +194,7 @@ export class IslandRenderer {
     drawAnimals(this);
     drawSeasonal(this);
     drawFestive(this);
-    drawOverseas(this);drawFamous(this);drawMedieval(this);
+    drawOverseas(this);drawFamous(this);drawMedieval(this);drawHazards(this);
     this.drawVisitors();drawLifeWorld(this);
     this.scene.sort((a,b)=>a.depth-b.depth);
     for(const item of this.scene)item.draw();
@@ -212,6 +216,7 @@ export class IslandRenderer {
     drawSummerSun(this);
     drawDaylight(this,this.light);
     drawNightLife(this);
+    drawFestivities(this);drawIdleEvent(this);
     this.drawEffectLabels();
     this.drawDistrictLabels();
     if(!cinemaVisible(this.sim))this.drawLandmarkLabels();
@@ -603,6 +608,7 @@ export class IslandRenderer {
     else if(b==='shrine'||b==='church'){if(b==='church'&&this.archStyle==='classical')this.library();else this.church(b==='church');}
     else if(b==='dock'||b==='harbor')this.dock(b==='harbor'&&this.sim.era>=2);
     else if(b==='warehouse')this.warehouse(t);
+    else if(b==='airfield')this.airfield(t);
     else if(b==='monastery')this.monastery(t);
     else if(b==='cathedral')this.cathedral(t);
     else if(b==='pump')this.pump(t);
@@ -1220,6 +1226,19 @@ export class IslandRenderer {
       const cr=at(-L/2+2,-W/2,0);this.line([[cr[0],cr[1]],[cr[0]+2,cr[1]-H-22]],'#6e5a40',1.4);this.line([[cr[0]+2,cr[1]-H-22],[cr[0]+18,cr[1]-H-16]],'#6e5a40',1.2);this.line([[cr[0]+18,cr[1]-H-16],[cr[0]+18,cr[1]-H-6]],'#6e6a62',.5);
     }
   }
+  // A small airfield: three tiles of runway along the x axis, a terminal with a tower, and a plane now and then.
+  airfield(t){
+    const i=t.runway??1,f=[.894,.447],v=[-.894,.447],P=(a,c)=>[f[0]*a+v[0]*c,f[1]*a+v[1]*c],L=this.light||{};
+    this.diamond(0,0,22,11,L.winter>.6?'#e4e9e4':'#a9bf86');
+    this.poly([P(-13,-4.5),P(13,-4.5),P(13,4.5),P(-13,4.5)],'#7d8580');
+    for(let k=0;k<2;k++)this.line([P(-9+k*12,0),P(-4+k*12,0)],'#f2efe4',.8);
+    if(i===0)for(let k=0;k<4;k++)this.line([P(-11,-3+k*2),P(-8,-3+k*2)],'#f2efe4',.6);
+    if(i===2)for(let k=0;k<4;k++)this.line([P(8,-3+k*2),P(11,-3+k*2)],'#f2efe4',.6);
+    if(i===0){const [x,y]=P(0,-10);this.rect(x-6,y-6,12,6,'#e6e2d6');this.rect(x,y-6,6,6,'#c9c5b8');this.window([[x-5,y-4],[x-1,y-4],[x-1,y-2],[x-5,y-2]],'#9fc4d6');this.rect(x+3,y-15,3,9,'#d9d5c8');this.rect(x+2,y-17,5,2.4,'#9fc4d6');this.lampLight(x+4.5,y-17,t);}
+    if(i===1){const [x,y]=P(-4,-9);this.line([[x,y],[x,y-9]],'#7d8580',.7);this.poly([[x,y-9],[x+6,y-8],[x,y-7]],'#e48a3a');
+      // The plane: rolls down the runway, lifts off and climbs out of view, then a while later lands again.
+      const cyc=this.reduced?.2:((this.time*.02+t.x*.1)%1);if(cyc<.55){const u=cyc/.55,a=-30+u*110,alt=Math.max(0,a-6)*.9,[px,py]=P(a,0);this.enqueueActor(this.p(t.x,t.y).y+30,()=>{const c=this.ctx;c.save();c.translate(this.p(t.x,t.y).x+px,this.p(t.x,t.y).y+py-2-alt);this.ellipse(0,alt?alt+4:3,6,1.6,'rgba(40,50,45,.18)');this.ellipse(0,0,6.5,1.8,'#f4f4f0');this.poly([[-1,-.4],[2,-.4],[-2,6],[-4,6]],'#dfe3e4');this.poly([[-1,.2],[2,.2],[-2,-5.5],[-4,-5.5]],'#cfd4d6');this.poly([[-6,0],[-4.6,0],[-6.6,-3.4]],'#c95b4c');this.ellipse(4.6,-.3,1,.6,'#7fb6d6');c.restore();});}}
+  }
   // A tall brick warehouse with a stepped gable, loading doors and a hoist beam; from 1900 a crane stands beside it.
   warehouse(t){
     const brick=['#a8664f','#9a5d4a','#b2745a'][Math.floor(hash(t.x,t.y)*3)],L=20,W=16,H=20,R=11;
@@ -1241,7 +1260,12 @@ export class IslandRenderer {
   delightYard(t){
     const p=this.p(t.x,t.y),c=this.ctx,time=this.reduced?0:this.time,{type,i}=t.yardOf,fence=(color='#8a7552')=>{for(const [a,b] of [[[-21,0],[0,-10.5]],[[0,-10.5],[21,0]],[[21,0],[0,10.5]],[[0,10.5],[-21,0]]])this.line([a,b],color,.9);for(const [x,y] of [[-21,0],[0,-10.5],[21,0],[0,10.5],[-10.5,-5.25],[10.5,-5.25],[10.5,5.25],[-10.5,5.25]])this.line([[x,y],[x,y-3]],color,.8);};
     c.save();c.translate(p.x,p.y-1);
-    if(type==='zoo'&&(i<3||i===5)){
+    if(type==='zoo'&&(i<3||i===5)&&this.light.night){
+      // Night at the zoo: the animals lie asleep.
+      this.diamond(0,0,22,11,i===1?'#b9cbc6':'#a9b882');for(const [x,y,w,col] of [[-6,-2,6,i===1?'#2f3236':i===0?'#9a9c98':i===5?'#d9a858':'#d1a35c'],[6,1,5,i===1?'#2f3236':i===0?'#9a9c98':i===5?'#d9a858':'#d1a35c']]){this.ellipse(x,y,w,w*.45,col);this.ellipse(x+w*.7,y-1,w*.35,w*.3,col);}
+      const c=this.ctx;c.save();c.fillStyle='rgba(250,249,240,.75)';c.font='italic 5px Georgia, serif';const bob=this.reduced?0:Math.sin(this.time*1.2)*1.2;c.fillText('z',-2,-8+bob);c.fillText('z',1,-11+bob);c.restore();
+      for(const [a,b] of [[[-21,0],[0,-10.5]],[[0,-10.5],[21,0]],[[21,0],[0,10.5]],[[0,10.5],[-21,0]]])this.line([a,b],'#8a7552',.9);
+    }else if(type==='zoo'&&(i<3||i===5)){
       this.diamond(0,0,22,11,i===1?'#c7d8d2':'#b9c58f');
       if(i===0){// Elephants by a muddy pool.
         this.ellipse(4,3,9,3.4,'#9cb7ae');for(const [x,ph] of [[-7,0],[8,2]]){const ex=x+Math.sin(time*.25+ph)*1.5;this.ellipse(ex,-4,6,4.4,'#9a9c98');this.ellipse(ex+5.4,-5.6,2.8,2.8,'#9a9c98');this.ellipse(ex+3,-6.4,2,2.6,'#888a86');this.line([[ex+7.6,-4.6],[ex+8.6,-.6+Math.sin(time*1.3+ph)]],'#9a9c98',1.7);for(const lx of [-3.5,2.5])this.line([[ex+lx,-1.2],[ex+lx,1.8]],'#858782',2.2);}
@@ -1265,10 +1289,12 @@ export class IslandRenderer {
       if(i===0){// A ferris wheel, the tallest thing in town.
         const cx=0,cy=-30,R=22,a0=time*.25;this.line([[-8,4],[cx,cy]],'#7d7464',1.6);this.line([[8,4],[cx,cy]],'#7d7464',1.6);
         c.beginPath();c.ellipse(cx,cy,R,R,0,0,Math.PI*2);c.strokeStyle='#c95b4c';c.lineWidth=1.4;c.stroke();
-        for(let k=0;k<10;k++){const a=a0+k*Math.PI/5,x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;this.line([[cx,cy],[x,y]],'#d9cbb2',.5);this.rect(x-2.4,y,4.8,3.6,['#e2c26a','#5c8fc0','#8cc07a','#c98fb0','#d4644f'][k%5]);}
+        for(let k=0;k<10;k++){const a=a0+k*Math.PI/5,x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;this.line([[cx,cy],[x,y]],'#d9cbb2',.5);this.rect(x-2.4,y,4.8,3.6,['#e2c26a','#5c8fc0','#8cc07a','#c98fb0','#d4644f'][k%5]);if(k%2===0)this.lampLight(x,y+1,t);}
+        // At night the wheel is lit with a ring of bulbs.
+        if(this.light.darkness>.2)for(let k=0;k<16;k++){const a=a0+k*Math.PI/8;this.lampLight(cx+Math.cos(a)*R,cy+Math.sin(a)*R,t);}
         this.ellipse(cx,cy,2,2,'#7d7464');
       }else if(i===1){// A roller coaster with a train racing round.
-        const track=[[-21,2],[-16,-26],[-8,-30],[-2,-10],[4,-6],[10,-20],[16,-16],[20,2]];this.line(track,'#c95b4c',1.8);for(const [x,y] of track)this.line([[x,y],[x,3]],'#9b9488',.6);
+        const track=[[-21,2],[-16,-26],[-8,-30],[-2,-10],[4,-6],[10,-20],[16,-16],[20,2]];this.line(track,'#c95b4c',1.8);if(this.light.darkness>.2)for(const [x,y] of track)this.lampLight(x,y,t);for(const [x,y] of track)this.line([[x,y],[x,3]],'#9b9488',.6);
         const u=(time*.18)%1,seg=u*(track.length-1),k=Math.floor(seg),f=seg-k,a=track[k],b=track[Math.min(track.length-1,k+1)];for(let j=0;j<3;j++){const g=Math.max(0,f-j*.12);this.rect(a[0]+(b[0]-a[0])*g-2,a[1]+(b[1]-a[1])*g-3,4,2.6,['#e2c26a','#5c8fc0','#e2c26a'][j]);}
       }else{// A carousel, a candy-floss stall and balloons.
         this.ellipse(-6,3,10,4,'#e2c26a');this.poly([[-17,1],[-6,-12],[5,1]],'#7fa3a8');this.poly([[-6,-12],[5,1],[-6,3]],'#6b8e93');for(let k=0;k<6;k++){const a=time*1.5+k*Math.PI/3;this.line([[-6+Math.cos(a)*7,1+Math.sin(a)*2.6],[-6+Math.cos(a)*7,-4+Math.sin(a)*2.6]],'#d9cbb2',.5);this.ellipse(-6+Math.cos(a)*7,-1+Math.sin(a)*2.6,1.4,1.8,'#f1ead6');}

@@ -35,7 +35,7 @@ function closeWish(s,status){
  if(status==='helped'){earnCommission(s);const lasting=rewardWish(s,wish);if(lasting)wish.thanks=`${wish.thanks||'Het is gelukt.'} ${lasting}`;startParty(s,s.tile(wish.x,wish.y),'Een feestje als dank');}
  if(status==='helped'){s.influence.trust=wishClamp(s.influence.trust+3);s.influence.dependence=wishClamp(s.influence.dependence+1.5);}
  // Wishes come about twice as often as before, so each unanswered one weighs half as much.
- if(status==='independent'){s.influence.trust=wishClamp(s.influence.trust+.5);s.influence.dependence=wishClamp(s.influence.dependence-.5);}
+ if(status==='independent'){s.influence.trust=wishClamp(s.influence.trust+.5);s.influence.dependence=wishClamp(s.influence.dependence-.15);}
  if(status==='expired'){s.influence.trust=wishClamp(s.influence.trust-.5);s.influence.dependence=wishClamp(s.influence.dependence-.25);}
  if(status!=='changed')s.log(`${wish.speaker}: “${wish.text}” ${status==='helped'?(wish.thanks?`${wish.thanks} Het vertrouwen groeit; ze rekenen iets meer op je.`:'Je hielp. Het vertrouwen groeit; ze rekenen iets meer op je.'):status==='independent'?'De inwoners losten het zelf op. Dat geeft vertrouwen in eigen kunnen.':'Er kwam geen ingreep. Ze gaan op eigen kracht verder.'}`,'wish',{x:wish.x,y:wish.y,wishId:wish.id});
  state.history.push({...wish});state.history=state.history.slice(-24);state.active=null;state.nextAt=s.year+30+(s.seed+state.serial*17)%25;
@@ -132,7 +132,7 @@ export function advanceWishes(s){
   const target=s.tile(active.x,active.y);
   if(active.kind==='extinguish'&&!target?.fire){closeWish(s,target?.building==='ruins'||target?.burntForest?'expired':'independent');return;}
   if(!target||target.kind!=='land'||active.kind==='rain'&&target.building!=='farm'||FUNNY_WISHES[active.kind]?.where==='farm'&&target.building!=='farm'||active.kind==='bonfire'&&(target.buildSite||target.building&&!['bonfire','campfire'].includes(target.building))){closeWish(s,'changed');return;}
-  if(s.year>active.deadline)closeWish(s,'expired');
+  if(s.year>active.deadline)closeWish(s,((s.seed>>>0)+s.year)%5<2?'independent':'expired');
   return;
  }
  if(s.year<state.nextAt)return;

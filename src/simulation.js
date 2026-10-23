@@ -15,6 +15,7 @@ import {advanceVisitors} from './visitors.js';
 import {advanceIslets} from './islets.js';
 import {advanceFamous,advanceDigs} from './famous.js';
 import {advanceMedieval} from './medieval.js';
+import {lavaFlow,registerHit,advanceHazards} from './hazards.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 // New islands sit in a 29×29 sea; the natural island stays within the original 25×25, so the extra sea is room for polders.
@@ -405,7 +406,9 @@ export class Civilization {
     if(this.year%9===4&&!this.storm)planDelight(this);
     if(this.year>=200&&this.year%10===7)reserveDelightGrounds(this);
     advanceMonuments(this);advanceWeather(this);advanceCommissions(this);
-    advanceVisitors(this);advanceIslets(this);advanceFamous(this);advanceDigs(this);advanceMedieval(this);
+    advanceVisitors(this);advanceIslets(this);advanceFamous(this);advanceDigs(this);advanceMedieval(this);advanceHazards(this);
+    if(this.pendingHit){registerHit(this,this.pendingHit.mode,this.tile(this.pendingHit.x,this.pendingHit.y));this.pendingHit=null;}
+    if(this.year>=1955&&this.year%10===3)this.placeAirfield();
     // Years in which the stores ran low count against wellbeing; a helped rain wish often prevents them.
     if(this.population>20&&this.food<this.population*.6)this.hungryYears=(this.hungryYears||0)+1;
     advanceCivicStory(this);
@@ -718,6 +721,18 @@ export class Civilization {
       this.signal('built',t,'Een pakhuis aan de kade');
     }
   }
+  // Late in the story a small airfield appears on the newest polder: three tiles of runway.
+  placeAirfield(){
+    if(this.ending||this.land.some(t=>t.building==='airfield'))return null;
+    const ok=t=>t&&t.kind==='land'&&t.reclaimed&&(!t.building||t.building==='farm')&&!t.reservedFor&&!t.buildSite&&!t.landform&&!t.foundingHome;
+    const starts=this.land.filter(t=>ok(t)&&ok(this.tile(t.x+1,t.y))&&ok(this.tile(t.x+2,t.y))).sort((a,b)=>(b.polder||0)-(a.polder||0));
+    const first=starts[0];if(!first)return null;
+    for(let i=0;i<3;i++){const t=this.tile(first.x+i,first.y);t.building='airfield';t.runway=i;t.reservedFor='airfield';t.builtYear=this.year;}
+    this.rebuildRoads();
+    this.log('Op de nieuwste polder komt een vliegveldje. Het eerste vliegtuig landt met drie passagiers en een taart.','technology',{x:first.x+1,y:first.y});
+    this.signal('built',this.tile(first.x+1,first.y),'Een vliegveld!',{sound:'whoosh',text:'Op de nieuwste polder komt een vliegveldje.'});
+    return first;
+  }
   buildDock() {
     const docks=[...this.tiles.values()].filter(t=>t.building==='dock' || t.building==='harbor');
     if(docks.length>=Math.min(4,this.era+1)) return;
@@ -814,6 +829,9 @@ export class Civilization {
       const fresh=p.tiles.map(id=>this.tiles.get(id)).filter(t=>t.kind==='land'&&!t.building);
       for(const t of fresh.filter((_,i)=>i%3===0)){t.building='farm';t.builtYear=this.year;}
     }
+    // Every polder keeps a windmill on its edge, so you can see how the land was won from the sea.
+    {const tiles=p.tiles.map(id=>this.tiles.get(id)),edge=tiles.filter(t=>t.kind==='land'&&!t.building&&neighbors(t).some(([x,y])=>this.tile(x,y)?.kind==='water'));
+     if(edge.length&&!this.land.some(m=>m.building==='windmill'&&tiles.some(q=>Math.hypot(q.x-m.x,q.y-m.y)<=3))){const mill=edge[Math.floor(edge.length/2)];mill.building='windmill';mill.builtYear=this.year;mill.polderMill=true;}}
     if(p.isArtificial) {
       const bridge=this.tiles.get(p.tiles[0]);bridge.kind='water';bridge.building='bridge';bridge.reclaimed=false;
     }
@@ -878,6 +896,8 @@ export class Civilization {
     this.interferences++;
     const t=this.tile(x,y);
     const spot=t||this.tile(0,1);
+    // Unasked fire, quakes and rain are remembered: a few make them strong, many in a row wreck the island.
+    if(!this.helpingWish&&['fire','rumble','rain'].includes(mode))this.pendingHit={mode,x:spot.x,y:spot.y};
     const finish=(type,title,detail,expires=0)=>{
       rememberIntervention(this,spot,type);
       answerWish(this,spot,type);
@@ -940,7 +960,7 @@ export class Civilization {
   advanceGeology() {
     const volcano=this.land.find(t=>t.landform==='volcano');
     if(!volcano || this.year<this.nextVolcanicEvent)return;
-    this.nextVolcanicEvent=this.year+280+Math.floor(this.random()*260);this.volcanoActiveUntil=this.year+16;
+    this.nextVolcanicEvent=this.year+280+Math.floor(this.random()*260);this.volcanoActiveUntil=this.year+16;lavaFlow(this);
     this.prosperity=Math.max(12,this.prosperity-4);
     for(const tile of this.houses.filter(t=>Math.abs(t.x-volcano.x)+Math.abs(t.y-volcano.y)<=2).slice(0,2))tile.quakeDamage=.55;
     this.stone=Math.min(600,this.stone+18);

@@ -18,6 +18,7 @@ export function advanceIslets(s){
   s.log(`De eerste veerboot vaart naar ${isles.list[0].name}. De kapitein heeft één pet, één fluitje en heel veel meningen over golven.`,'islet');
   s.signal('celebrate',s.tile(0,0),'De veerboot vaart!',{sound:'horn',text:`De eerste veerboot vaart naar ${isles.list[0].name}.`});
  }
+ if(isles.ferry&&isles.linked==null&&s.year>=1960&&s.year%15===5){isles.linked=0;s.log(`Een dijk met een weg verbindt ${isles.list[0].name} met het eiland. De veerman krijgt een pensioen en een bankje bij de dijk.`,'islet');s.signal('celebrate',s.tile(0,0),'Een dijk naar het buureiland',{sound:'fanfare',text:`${isles.list[0].name} is nu met een dijk verbonden.`});}
  if(!isles.ferry||s.year%15!==0)return;
  for(const [i,islet] of isles.list.entries()){
   const want=Math.min(islet.cap,Math.floor((s.year-isles.ferry-i*40)/45)+1);
@@ -61,6 +62,8 @@ export function drawIslets(r){
   if(islet.houses>=islet.cap){r.line([[p.x+30*k,p.y-2],[p.x+30*k,p.y-26]],'#6e6252',.8);r.poly([[p.x+30*k,p.y-26],[p.x+38*k,p.y-23.5],[p.x+30*k,p.y-21]],'#c64a42');}
   if(!isles.ferry)continue;
   const shore=isleShore(r,islet);if(!shore)continue;
+  // A linked islet gets a causeway with a road instead of the ferry.
+  if(isles.linked===n){const a=r.p(shore.x,shore.y),b={x:p.x,y:p.y+4},dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;for(const [w,col] of [[8,'#b9a57c'],[6,'#c9b98e'],[3,'#8f9792']])r.poly([[a.x+nx*w,a.y+ny*w*.5],[b.x+nx*w,b.y+ny*w*.5],[b.x-nx*w,b.y-ny*w*.5],[a.x-nx*w,a.y-ny*w*.5]],col);for(let k=1;k<6;k++){const f=k/6;r.line([[a.x+dx*f,a.y+dy*f],[a.x+dx*(f+.06),a.y+dy*(f+.06)]],'#eee8d2',.6);}continue;}
   const from=r.p(shore.x+(islet.x-shore.x)*.06,shore.y+(islet.y-shore.y)*.06),to={x:p.x+(from.x-p.x)*.16,y:p.y+(from.y-p.y)*.16+6};
   r.line([[to.x,to.y],[to.x+(from.x-to.x)*.06,to.y+(from.y-to.y)*.06]],'#8f7457',2.2);
   // Each crossing lasts a while, with a short wait at either side.

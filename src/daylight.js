@@ -36,7 +36,7 @@ export function seasonalLeaf(hex,light){
 }
 const FIRES=new Set(['campfire','bonfire']);
 // Lights are painted after the island, so anything standing right in front must hide them.
-const LOW_FRONT=new Set(['castle-garden','farm','beach','park','garden','campfire','bonfire','playground','campus-square','palace-square','town-square','royal-garden','ruins']);
+const LOW_FRONT=new Set(['airfield','castle-garden','farm','beach','park','garden','campfire','bonfire','playground','campus-square','palace-square','town-square','royal-garden','ruins']);
 const TALL=new Set(['tower','townhouse','palace','manor','factory','powerplant','science-center','church','lighthouse']);
 const coversLight=t=>!!t&&t.kind==='land'&&(!!t.landform||!!t.buildSite||!!t.building&&!LOW_FRONT.has(t.building));
 // Rough visible heights of what may stand in front, in tile units, to decide which windows are covered.

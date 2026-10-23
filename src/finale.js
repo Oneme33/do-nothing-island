@@ -1,9 +1,8 @@
 import {wishTally} from './wishes.js';
 const score100=n=>Math.round(Math.max(0,Math.min(100,n)));
 const scoreCap=v=>Math.min(1,Math.max(0,v));
-// The island inspection ('de eilandkeur'): six parts, 100 points. Watching alone gives a fine island; the perfect one
-// needs a middle ground: help about half the wishes and test them a few times, but not too often.
-export const SCORE_RECIPE='Zo haal je 100: help ongeveer de helft van de wensen (wie alles voor ze doet, maakt ze afhankelijk), zet ze hooguit een paar keer zelf voor een beproeving met vuur of een beving, laat ze alles bouwen wat bij een compleet eiland hoort (ook een cadeau voor jou), en houd het groen en schoon.';
+// The island inspection ('de eilandkeur'): five parts, 100 points. Helping and leaving them be both count;
+// only a heavy hand costs. A few trials of your own make them stronger.
 const has=(s,type)=>s.land.some(t=>t.building===type);
 export const ISLAND_CHECKLIST=[
  {id:'square',label:'Een dorpsplein',done:s=>!!s.square?.builtYear,at:'town-square'},
@@ -37,14 +36,12 @@ const GREEN=new Set(['park','forest','tree','original-tree','garden','castle-gar
 export function greenShare(s){return s.land.length?s.land.filter(t=>GREEN.has(t.building)).length/s.land.length:0;}
 export function scoreInputs(s){
  const helped=wishTally(s,'helped'),missed=wishTally(s,'expired')+wishTally(s,'independent'),ledger=s.interventionLedger||[];
- return{helped,missed,helpShare:helped+missed?helped/(helped+missed):0,unrequested:Math.max(0,(s.interferences||0)-helped),
+ return{helped,independent:wishTally(s,'independent'),missed,helpShare:helped+missed?helped/(helped+missed):0,unrequested:Math.max(0,(s.interferences||0)-helped),
   tests:ledger.filter(e=>!e.asked&&(e.type==='fire'||e.type==='rumble')).length,
   hungry:s.hungryYears||0,lost:s.lostBuildings||0,rescued:s.rescuedFires||0,rebuilt:s.rebuiltFires||0,abandoned:s.storyStats?.abandoned||0,ruins:s.land.filter(t=>t.building==='ruins').length,green:greenShare(s)};
 }
-// Six parts that pull against each other: helping makes them grateful but dependent, a few trials make them strong
-// but too many break them. The sweet spot is roughly half the wishes and a handful of trials.
-export const SCORE_MAX={compleet:20,welzijn:15,natuur:15,veerkracht:15,hulp:15,zelfstandigheid:20};
-export const IDEAL_HELP=.5,IDEAL_TESTS=[1,4];
+export const SCORE_MAX={compleet:20,welzijn:15,natuur:15,veerkracht:15,band:35};
+export const SCORE_RECIPE='Zo haal je 100: help bij wensen wanneer je wilt (ook wat ze zelf oplossen telt), stel ze een paar keer op de proef met vuur of een beving maar niet te vaak, laat ze alles bouwen wat bij een compleet eiland hoort en houd het groen. Wie vooral op de langzaamste snelheid kijkt, krijgt er nog drie punten bij.';
 export const SCORE_LEVELS=[
  {min:100,id:'perfect',title:'Het Perfecte Eiland',line:'Alles erop en eraan, en iedereen tevreden. Dit eiland wordt in verre landen op ansichtkaarten gezet.',color:'#c98fb0'},
  {min:85,id:'gold',title:'Een geweldig eiland',line:'Bijna alles wat een eiland kan hebben, en een gelukkig volk.',color:'#e2b84a'},
@@ -62,17 +59,20 @@ export function islandScores(s){
  const nature=15*(.5*scoreCap((s.environment-55)/30)+.25*scoreCap((100-s.pollution)/72)+.25*scoreCap(k.green/.12));
  // Recovering well is ten points; being put to the test by you a few times is five more, too often costs them again.
  const recovery=10*scoreCap(1-Math.max(0,k.lost-k.rebuilt*.75-4)*.03-Math.min(.3,k.abandoned*.012)-(k.ruins?.15:0));
- const trial=k.tests<IDEAL_TESTS[0]?0:k.tests<=IDEAL_TESTS[1]?5:Math.max(-5,5-(k.tests-IDEAL_TESTS[1])*1.5);
+ // A few trials of your own make them stronger; only many in a row start to cost.
+ const trial=k.tests<1?0:k.tests<=6?5:Math.max(-5,5-(k.tests-6)*1.2);
  const resilience=Math.max(0,recovery+trial);
- // Helping half of what they ask is enough to be a good neighbour.
- const help=15*scoreCap(k.helpShare/IDEAL_HELP);
- // Every helped wish beyond that half makes them lean on you; unasked meddling beyond the trials does too.
- const meddling=Math.max(0,k.unrequested-Math.min(k.tests,IDEAL_TESTS[1]));
- const independence=Math.max(0,20-Math.max(0,k.helpShare-IDEAL_HELP-.1)/(1-IDEAL_HELP-.1)*12-Math.min(8,meddling*1.5));
- const values={compleet:Math.round(complete),welzijn:Math.round(wellbeing),natuur:Math.round(nature),veerkracht:Math.round(resilience),hulp:Math.round(help),zelfstandigheid:Math.round(independence)};
- const total=score100(complete+wellbeing+nature+resilience+help+independence);
+ // The bond with the residents is win-win: every wish you help with counts, and so does every wish they solve
+ // themselves. Only a heavy hand beyond a dozen unasked interventions costs anything.
+ const asked=k.helped+k.missed,bondShare=asked?(k.helped+.8*k.independent)/(asked*.6):0;
+ const excess=Math.max(0,k.unrequested-Math.max(12,k.tests));
+ const bond=Math.max(0,35*scoreCap(bondShare)-Math.min(15,excess*1.5));
+ // A small reward for patience: mostly watching at the slowest speed.
+ const watch=s.watch||{total:0,slow:0},patience=watch.total>=600&&watch.slow/watch.total>=.75?3:0;
+ const values={compleet:Math.round(complete),welzijn:Math.round(wellbeing),natuur:Math.round(nature),veerkracht:Math.round(resilience),band:Math.round(bond)};
+ const total=score100(complete+wellbeing+nature+resilience+bond+patience);
  const level=scoreLevel(total);
- return {values,maxes:SCORE_MAX,max:20,total,level:{id:level.id,title:level.title,line:level.line,color:level.color},checklist,done,items:checklist.length};
+ return {values,maxes:SCORE_MAX,max:20,total,patience,level:{id:level.id,title:level.title,line:level.line,color:level.color},checklist,done,items:checklist.length};
 }
 // What each part means, in plain words, with a short verdict for the value out of twenty.
 const SCORE_MEANING={
@@ -80,8 +80,7 @@ const SCORE_MEANING={
  welzijn:['Genoeg eten in alle jaren, welvaart en schoon water',['Het was vaak krap of onrustig.','De meeste mensen kwamen goed rond.','Iedereen had het goed.']],
  natuur:['Schone lucht, een levend landschap en genoeg groen tussen de huizen',['Er bleef weinig natuur over.','Een redelijk groen eiland.','Een levend, schoon en groen eiland.']],
  veerkracht:['Herstel na rampen, plus een paar beproevingen door jou (te veel breekt ze)',['Rampen lieten diepe sporen na, of ze werden nooit echt op de proef gesteld.','Ze herstelden op eigen tempo.','Beproefd en sterker opgestaan.']],
- hulp:['Hoeveel wensen je hielp; de helft is genoeg',['Ze vroegen vaak om hulp en kregen die zelden.','Je hielp soms een handje.','Je was er wanneer het ertoe deed.']],
- zelfstandigheid:['Wat ze zelf deden: te veel hulp of ingrepen maakt ze afhankelijk',['Ze leunden flink op jou.','Soms namen ze het wat makkelijk.','Ze redden zich prima zelf.']]
+ band:['Je band met de bewoners: wensen waar je bij hielp en wensen die ze zelf oplosten tellen allebei',['Er werd weinig samen opgelost.','Een fijne band, met hier en daar een gemiste kans.','Samen kwamen jullie overal uit.']]
 };
 export function explainScore(name,value,max=SCORE_MAX[name]||20){const [what,verdicts]=SCORE_MEANING[name]||['',['','','']];const share=value/max;return{what,verdict:verdicts[share>=.75?2:share>=.45?1:0]};}
 // Old saves stored five scores of 0–100; recompute those so every ending shows the inspection.

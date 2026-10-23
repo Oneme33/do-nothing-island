@@ -288,3 +288,19 @@ body>main{padding:0;margin:0;max-width:none}
 
 .keur-fold{margin:12px 0}.keur-fold summary{cursor:pointer;list-style:none}.keur-fold summary::-webkit-details-marker{display:none}.keur-fold summary::after{content:' ▾';color:#8a9a7c}.keur-fold[open] summary::after{content:' ▴'}
 details.score-row{display:block}details.score-row>summary{display:grid;grid-template-columns:115px 1fr 30px;align-items:center;gap:10px;cursor:pointer;list-style:none}details.score-row>summary::-webkit-details-marker{display:none}details.score-row .score-note{margin:4px 0 6px!important}
+
+/* Readability: a touch larger and darker, still calm. */
+.timeline{font-size:10px!important;color:#34452f!important}.timeline-track .age{opacity:.8}.timeline-track .age[data-state=now]{color:#1f2f1b!important}
+.timeline-now{font-size:11.5px!important;color:#24321f!important;background:rgba(250,249,240,.82);padding:2px 9px;border-radius:10px;display:inline-block}
+.island-toolbar button,.island-toolbar .speed-buttons button,.map-controls button{color:#26321f!important;font-size:11.5px!important}
+.weather{font-size:11px!important;color:#2f3d2b!important;background:rgba(250,249,240,.85)!important;padding:3px 10px!important;border-radius:12px!important}
+.population-card .eyebrow{font-size:8.5px!important;color:#3f4f39!important}.population-count{color:#1f2f1b}
+/* A story that surfaces on the island: a small note you can click. */
+.story-chip{position:absolute;left:12px;bottom:62px;z-index:14;display:flex;gap:7px;align-items:flex-start;max-width:min(340px,calc(100% - 24px));padding:8px 12px;font-size:12px;line-height:1.45;text-align:left;color:#2f3d2b;background:rgba(250,249,240,.95);border:1px solid #d9dfcd;border-radius:12px 12px 12px 3px;box-shadow:0 3px 12px #3d4a3a1c;cursor:pointer;animation:chip-in .5s ease}
+.story-chip[hidden]{display:none}@keyframes chip-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(max-width:700px){.story-chip{bottom:52px;left:8px;font-size:11px}}
+/* The ending page: the small green beginning set into the big, full island. */
+.ending-maps{position:relative;display:block!important}.ending-maps figure:last-child{max-width:420px;margin:0 auto}.ending-maps figure:last-child svg{max-height:none!important;aspect-ratio:1;border-radius:10px;box-shadow:0 6px 22px #2f3d2b22}
+.ending-maps figure:first-child{position:absolute;left:8px;top:8px;width:110px;z-index:2;background:#fbf8ee;padding:5px;border-radius:8px;box-shadow:0 3px 10px #2f3d2b22}.ending-maps figure:first-child svg{max-height:none!important}
+.ending-maps figcaption{text-align:center}
+.commission-auto{margin:6px 0 10px}

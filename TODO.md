@@ -56,7 +56,9 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 
 **Ronde na fase 2, gepusht en online op coenvermeer.nl/nothing-island:** seizoenen (bloesem in de lente, warme zomer met picknicks en zonnebloemen, kale bomen en dwarrelende bladeren in de herfst, dekkende sneeuw op daken, kasteel en bomen in de winter); bakstenen schoorstenen; rechte piramidedaken; een echte vulkaan die 's nachts gloeit; een haven die per tijdperk groeit; roofvogels om de bergtop; akkers en omheinde weilanden apart; pakhuizen met trapgevel; middeleeuwse momenten per eeuw (klooster, jaarmarkt, drakenvlieger, toernooi, pelgrims, kathedraal, gilden, troubadours, drukpers, kermis, tulpenmanie); een titelscherm; vuurwerk bij een gouden of perfect eiland; keur met hongerjaren, strengere natuur en verdiende standbeelden en cadeaus; grotere standbeelden; een rustigere mobiele weergave met alleen de tijd; snellere weergave op telefoons.
 
-## Wensenlijst ronde 7 (nog niet gebouwd)
+## Wensenlijst ronde 7
+
+**Gebouwd en online:** groep 1, 2, 3, 4, 7 en 8 (zonder minispelletjes). **Na de reset van 28 oktober:** groep 5 en 6.
 
 ### 1. Natuurrampen met echte gevolgen
 - **Vulkaan: lavastroom.** Bij een uitbarsting van de vulkaan stroomt de lava echt de helling af, steekt onderaan de vulkaan branden aan en verwoest een paar huizen.
