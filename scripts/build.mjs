@@ -12,4 +12,6 @@ const html = (await readFile('index.html','utf8'))
   .replace('<script type="module" src="./src/app.js"></script>',()=>`<script>(()=>{\n${script}\n})();</script>`);
 await writeFile('start.html',html);
 await writeFile('dist/start.html',html);
+// Online, the single-file version is the front page: a page reload always fetches it fresh, so updates show at once.
+await writeFile('dist/index.html',html);
 console.log('Built Do Nothing Island → dist/ (no runtime dependencies)');
