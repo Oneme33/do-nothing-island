@@ -233,7 +233,7 @@ const seasonLines={lente:'Lente. Alles loopt uit, ook de vergaderingen.',zomer:'
 function ambienceLine(){
   const light=renderer.light,weather=weatherActive(sim);
   if(weather)return WEATHER[weather].line;
-  if(sim.weather?.rainbow&&sim.year-sim.weather.rainbow<3)return 'Een regenboog! Iedereen wijst tegelijk.';
+  if(sim.weather?.rainbow&&sim.year-sim.weather.rainbow<3&&!light.night)return 'Een regenboog! Iedereen wijst tegelijk.';
   if(sim.config.dayNight===false||!light)return sim.era>=3?"Stijgende zee. Optimistische ingenieurs.":"Kalme zee. Kleine ambities.";
   if(light.night)return sim.power>0?'Nacht. De straatlantaarns doen het werk.':'Nacht. Een paar ramen houden de wacht.';
   if(light.dusk>.6)return light.phase<.5?'Ochtendgloren. De eerste bakker is al op.':'Avondrood. Iemand roept dat het eten klaar is.';
@@ -418,7 +418,7 @@ function frame(now){
     }
   }
   advanceTour(now);
-  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;if(sim.festival&&sim.year<=sim.festival.until&&!paused)soundscape.festive(`${sim.festival.x},${sim.festival.y},${sim.festival.until}`);soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite)});}
+  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite)});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
   if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);}sim.signals=[];}
   presentMoment(now);

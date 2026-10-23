@@ -834,7 +834,7 @@ export class IslandRenderer {
   window(points,color){
     this.poly(points,color);
     if(this.light.darkness<.15||!this.currentTile)return;
-    const mapped=points.map(([x,y])=>this.screenPoint(x,y));if(mapped.every(Boolean))this.litWindows.push({tile:this.currentTile,points:mapped});
+    const mapped=points.map(([x,y])=>this.screenPoint(x,y)),base=this.screenPoint(0,0);if(mapped.every(Boolean)&&base)this.litWindows.push({tile:this.currentTile,points:mapped,baseY:base[1],unit:this.zoom*this.dpr});
   }
   lampLight(x,y,tile=null){
     if(this.light.darkness<.15)return;const p=this.screenPoint(x,y);if(!p)return;const m=this.ctx.getTransform();
@@ -1101,12 +1101,14 @@ export class IslandRenderer {
   }
   historicalHouse(v,style){
     if(style==='classical'){
-      this.poly([[-16,-4],[0,4],[16,-4],[16,-20],[0,-28],[-16,-20]],'#ded3b2');
-      this.poly([[0,4],[16,-4],[16,-20],[0,-12]],'#bcc3a1');
-      this.poly([[-20,-21],[0,-34],[20,-21],[0,-11]],'#bd8b69');
-      this.poly([[-20,-21],[0,-34],[0,-11]],'#d1a47a');
+      // Classical villas differ too: their own plaster and a roof of terracotta, ochre, slate or wood.
+      const Lc=this.look||DEFAULT_LOOK,croof=['#bd8b69','#a5483c','#c9a14f','#8a6a4c','#6d7a86','#b8643f'][Math.floor(hash((this.currentTile?.x??1)*5,(this.currentTile?.y??1)*3)*6)];
+      this.poly([[-16,-4],[0,4],[16,-4],[16,-20],[0,-28],[-16,-20]],this.look?Lc.wall:'#ded3b2');
+      this.poly([[0,4],[16,-4],[16,-20],[0,-12]],this.look?Lc.side:'#bcc3a1');
+      this.poly([[-20,-21],[0,-34],[20,-21],[0,-11]],croof);
+      this.poly([[-20,-21],[0,-34],[0,-11]],shadeColor(croof,1.1));
       for(let i=0;i<4;i++)this.line([[-13+i*4,-5+i*2],[-13+i*4,-18+i*2]],'#eee3c3',2.3);
-      this.poly([[5,-5],[10,-8],[10,-17],[5,-14]],'#84977e');
+      this.window([[5,-5],[10,-8],[10,-17],[5,-14]],this.look?Lc.shutter:'#84977e');
       this.diamond(-3,5,10,5,'#c8bd98');this.ellipse(12,2,2.5,1.5,'#a7ad75');return;
     }
     const L=this.look||DEFAULT_LOOK,medieval=style==='medieval',h=(medieval?22:27)+L.extra,roof=L.roof?(medieval?shadeColor(L.roof,.95):L.roof):medieval?'#958663':v>.5?'#ae7e65':'#8c9879';

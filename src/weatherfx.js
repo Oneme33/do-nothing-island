@@ -24,9 +24,12 @@ export function drawWeather(r){
   c.fillStyle='rgba(240,244,248,.2)';c.fillRect(0,0,W,H);c.fillStyle='rgba(255,255,255,.9)';
   for(let i=0;i<160;i++){const x=(wfHash(i,4)*W+t*40+Math.sin(t+i)*10)%W,y=(wfHash(i,5)*H+t*55)%H;const rad=1+wfHash(i,6)*1.4;c.beginPath();c.ellipse(x,y,rad,rad,0,0,Math.PI*2);c.fill();}
  }
- // A rainbow for a little while after a shower.
- if(!active&&w.rainbow&&s.year-w.rainbow<3){
-  const cx=W*.5,cy=H*.95,colours=['#e46b5d','#eda04f','#efd36a','#8cc07a','#6fa8d6','#8f7fc4'];c.globalAlpha=.28;c.lineWidth=7;
+ // A rainbow after a shower, only by day: it fades in, stays about fourteen seconds and fades out, whatever the speed.
+ if(w.rainbow&&r._rainbowKey!==w.rainbow){r._rainbowKey=w.rainbow;r._rainbowStart=Date.now();}
+ const since=(Date.now()-(r._rainbowStart||0))/1000,day=1-Math.min(1,(r.light?.darkness||0)*3);
+ const rainbow=r._rainbowStart&&!active&&since<18?Math.min(1,since/2.5,(18-since)/3)*day:0;
+ if(rainbow>0){
+  const cx=W*.5,cy=H*.95,colours=['#e46b5d','#eda04f','#efd36a','#8cc07a','#6fa8d6','#8f7fc4'];c.globalAlpha=.3*rainbow;c.lineWidth=7;
   colours.forEach((col,i)=>{c.strokeStyle=col;const rad=H*.85-i*7;c.beginPath();c.ellipse(cx,cy,rad,rad,0,Math.PI*1.08,Math.PI*1.92);c.stroke();});
  }
  c.restore();

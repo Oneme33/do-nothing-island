@@ -39,6 +39,17 @@ const FIRES=new Set(['campfire','bonfire']);
 const LOW_FRONT=new Set(['farm','beach','park','garden','campfire','bonfire','playground','campus-square','palace-square','town-square','royal-garden','ruins']);
 const TALL=new Set(['tower','townhouse','palace','manor','factory','powerplant','science-center','church','lighthouse']);
 const coversLight=t=>!!t&&t.kind==='land'&&(!!t.landform||!!t.buildSite||!!t.building&&!LOW_FRONT.has(t.building));
+// Rough visible heights of what may stand in front, in tile units, to decide which windows are covered.
+const FRONT_HEIGHT={hut:28,house:38,townhouse:52,tower:72,manor:52,palace:110,'royal-palace':140,factory:52,powerplant:55,church:62,lighthouse:75,windmill:56,museum:32,station:26,observatory:36,carillon:56,watchtower:50,'science-center':40,school:34,library:34,workshop:40,tree:42,forest:36};
+export function windowHidden(sim,w){
+ const lowest=Math.max(...w.points.map(p=>p[1]));
+ for(const [dx,dy,rows] of [[1,1,1],[2,2,2]]){
+  const front=sim.tile(w.tile.x+dx,w.tile.y+dy);if(!front||front.kind!=='land'||!front.building)continue;
+  const height=FRONT_HEIGHT[front.building]??(LOW_FRONT.has(front.building)?0:35);
+  if(lowest>=w.baseY+23*rows*w.unit-height*w.unit)return true;
+ }
+ return false;
+}
 export function lightHidden(sim,t){
  return coversLight(sim.tile(t.x+1,t.y+1))||TALL.has(sim.tile(t.x+2,t.y+2)?.building);
 }
@@ -66,7 +77,7 @@ export function drawDaylight(r,light){
   }
   // Only real windows and real lamp posts light up: their shapes were recorded while the island was drawn.
   c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='source-over';
-  for(const w of r.litWindows||[]){if(lightHidden(r.sim,w.tile))continue;c.beginPath();w.points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=`rgba(255,214,130,${(.85*d).toFixed(3)})`;c.fill();}
+  for(const w of r.litWindows||[]){if(windowHidden(r.sim,w))continue;c.beginPath();w.points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=`rgba(255,214,130,${(.85*d).toFixed(3)})`;c.fill();}
   c.globalCompositeOperation='lighter';
   for(const l of r.litLamps||[]){if(l.tile&&lightHidden(r.sim,l.tile))continue;glow(l.x,l.y,9*l.scale,6*l.scale,`rgba(255,215,150,${(.16*d).toFixed(3)})`);glow(l.x,l.y,2.2*l.scale,2*l.scale,`rgba(255,236,180,${(.7*d).toFixed(3)})`);}
  }
