@@ -259,3 +259,18 @@ body>main{padding:0;margin:0;max-width:none}
 
 .timeline-now b{font-weight:600}
 @media(max-width:700px){.timeline-track{display:none!important}.timeline-next{display:none}.timeline{top:12px!important;left:auto!important;right:110px!important;transform:none!important;width:auto!important;text-align:right}.timeline-now{margin-top:0!important}}
+
+/* Phones: the tools and the time bar share one slim row at the bottom. */
+@media(max-width:700px){
+ .interference-tools{left:8px!important;right:auto!important;bottom:10px!important;top:auto!important;transform:none!important}
+ .interference-buttons{flex-direction:row!important;padding:3px!important;gap:2px!important}
+ .interference-buttons button{width:27px!important;height:27px!important}
+ .interference-buttons .tool-icon{width:15px!important;height:15px!important}
+ .island-toolbar{left:auto!important;right:8px!important;transform:none!important;bottom:10px!important;padding:3px 4px!important;gap:2px!important;max-width:calc(100% - 172px)!important}
+ .island-toolbar button,.island-toolbar .new-island-button{height:27px!important;padding:0 6px!important}
+ .island-toolbar [data-speed="2"],.map-controls{display:none!important}
+ #canvas-journal,#new-island,#open-ending{font-size:0!important}
+ #canvas-journal::before{content:'Boek';font-size:10px}
+ #open-ending::before{content:'Einde';font-size:10px}
+ #new-island span{font-size:13px!important}
+}
