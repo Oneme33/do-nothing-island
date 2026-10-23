@@ -60,7 +60,7 @@ export function canHelpWish(s,wish=ensureWishes(s).active){
 export function helpActiveWish(s,expectedId){
  const wish=ensureWishes(s).active;
  if(!wish||wish.id!==expectedId||!canHelpWish(s,wish))return false;
- s.interfere(wish.x,wish.y,FUNNY_WISHES[wish.kind]?.mode||{rain:'rain',extinguish:'rain',feast:'nudge',bonfire:'fire',spring:'rumble'}[wish.kind]);
+ s.helpingWish=true;try{s.interfere(wish.x,wish.y,FUNNY_WISHES[wish.kind]?.mode||{rain:'rain',extinguish:'rain',feast:'nudge',bonfire:'fire',spring:'rumble'}[wish.kind]);}finally{delete s.helpingWish;}
  return s.wishes.history.some(w=>w.id===expectedId&&w.status==='helped');
 }
 // An open plot: nothing tall stands in front of it, so a fire there is actually visible.

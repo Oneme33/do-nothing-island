@@ -1,9 +1,9 @@
 import {wishTally} from './wishes.js';
 const score100=n=>Math.round(Math.max(0,Math.min(100,n)));
 const scoreCap=v=>Math.min(1,Math.max(0,v));
-// The island inspection ('de eilandkeur'): five parts of twenty points. Watching alone gives a fine island;
-// listening to the residents, helping when they ask and keeping disasters small makes it a perfect one.
-export const SCORE_RECIPE='Zo haal je 100: help (bijna) elke wens met een vraagteken en grijp verder niet in, laat ze alles bouwen wat bij een compleet eiland hoort (ook een opdracht van jou), houd het groen en schoon, en blus branden op hun verzoek zodat er weinig verloren gaat.';
+// The island inspection ('de eilandkeur'): six parts, 100 points. Watching alone gives a fine island; the perfect one
+// needs a middle ground: help about half the wishes and test them a few times, but not too often.
+export const SCORE_RECIPE='Zo haal je 100: help ongeveer de helft van de wensen (wie alles voor ze doet, maakt ze afhankelijk), zet ze hooguit een paar keer zelf voor een beproeving met vuur of een beving, laat ze alles bouwen wat bij een compleet eiland hoort (ook een cadeau voor jou), en houd het groen en schoon.';
 const has=(s,type)=>s.land.some(t=>t.building===type);
 export const ISLAND_CHECKLIST=[
  {id:'square',label:'Een dorpsplein',done:s=>!!s.square?.builtYear,at:'town-square'},
@@ -34,10 +34,15 @@ export const ISLAND_CHECKLIST=[
 const GREEN=new Set(['park','forest','tree','original-tree','garden','castle-garden','royal-garden','rose-garden']);
 export function greenShare(s){return s.land.length?s.land.filter(t=>GREEN.has(t.building)).length/s.land.length:0;}
 export function scoreInputs(s){
- const helped=wishTally(s,'helped');
- return{helped,missed:wishTally(s,'expired'),unrequested:Math.max(0,(s.interferences||0)-helped),ownDependence:Math.max(0,(s.influence?.dependence||0)-helped*1.5),
+ const helped=wishTally(s,'helped'),missed=wishTally(s,'expired')+wishTally(s,'independent'),ledger=s.interventionLedger||[];
+ return{helped,missed,helpShare:helped+missed?helped/(helped+missed):0,unrequested:Math.max(0,(s.interferences||0)-helped),
+  tests:ledger.filter(e=>!e.asked&&(e.type==='fire'||e.type==='rumble')).length,
   lost:s.lostBuildings||0,rescued:s.rescuedFires||0,rebuilt:s.rebuiltFires||0,abandoned:s.storyStats?.abandoned||0,ruins:s.land.filter(t=>t.building==='ruins').length,green:greenShare(s)};
 }
+// Six parts that pull against each other: helping makes them grateful but dependent, a few trials make them strong
+// but too many break them. The sweet spot is roughly half the wishes and a handful of trials.
+export const SCORE_MAX={compleet:20,welzijn:15,natuur:15,veerkracht:15,hulp:15,zelfstandigheid:20};
+export const IDEAL_HELP=.5,IDEAL_TESTS=[1,4];
 export const SCORE_LEVELS=[
  {min:100,id:'perfect',title:'Het Perfecte Eiland',line:'Alles erop en eraan, en iedereen tevreden. Dit eiland wordt in verre landen op ansichtkaarten gezet.',color:'#c98fb0'},
  {min:85,id:'gold',title:'Een geweldig eiland',line:'Bijna alles wat een eiland kan hebben, en een gelukkig volk.',color:'#e2b84a'},
@@ -50,26 +55,32 @@ export function islandScores(s){
  const k=scoreInputs(s),checklist=ISLAND_CHECKLIST.map(item=>({id:item.id,label:item.label,done:!!item.done(s)}));
  const done=checklist.filter(i=>i.done).length;
  const complete=20*done/checklist.length;
- const wellbeing=8*scoreCap(s.prosperity/65)+6*scoreCap(s.freshwater/75)+6*scoreCap(1-(s.unrest||0)/50);
- const nature=10*scoreCap(s.environment/90)+5*scoreCap((100-s.pollution)/75)+5*scoreCap(k.green/.1);
- // Disasters happen anyway; what counts is how much was lost for good, and whether they helped each other back up.
- const resilience=Math.max(0,20-Math.max(0,k.lost-k.rebuilt*.75-4)*.45-Math.min(6,k.abandoned*.25)-(k.ruins?3:0));
- // Being a good neighbour: help when asked, and keep your hands to yourself otherwise.
- const asked=k.helped+k.missed,neighbour=Math.max(0,14*scoreCap(asked?k.helped/asked/.85:0)+6-Math.min(6,k.unrequested*.75));
- const values={compleet:Math.round(complete),welzijn:Math.round(wellbeing),natuur:Math.round(nature),veerkracht:Math.round(resilience),'goede buur':Math.round(neighbour)};
- const total=score100(complete+wellbeing+nature+resilience+neighbour);
+ const wellbeing=15*(.4*scoreCap(s.prosperity/65)+.3*scoreCap(s.freshwater/75)+.3*scoreCap(1-(s.unrest||0)/50));
+ const nature=15*(.5*scoreCap(s.environment/90)+.25*scoreCap((100-s.pollution)/75)+.25*scoreCap(k.green/.1));
+ // Recovering well is ten points; being put to the test by you a few times is five more, too often costs them again.
+ const recovery=10*scoreCap(1-Math.max(0,k.lost-k.rebuilt*.75-4)*.03-Math.min(.3,k.abandoned*.012)-(k.ruins?.15:0));
+ const trial=k.tests<IDEAL_TESTS[0]?0:k.tests<=IDEAL_TESTS[1]?5:Math.max(-5,5-(k.tests-IDEAL_TESTS[1])*1.5);
+ const resilience=Math.max(0,recovery+trial);
+ // Helping half of what they ask is enough to be a good neighbour.
+ const help=15*scoreCap(k.helpShare/IDEAL_HELP);
+ // Every helped wish beyond that half makes them lean on you; unasked meddling beyond the trials does too.
+ const meddling=Math.max(0,k.unrequested-Math.min(k.tests,IDEAL_TESTS[1]));
+ const independence=Math.max(0,20-Math.max(0,k.helpShare-IDEAL_HELP-.1)/(1-IDEAL_HELP-.1)*12-Math.min(8,meddling*1.5));
+ const values={compleet:Math.round(complete),welzijn:Math.round(wellbeing),natuur:Math.round(nature),veerkracht:Math.round(resilience),hulp:Math.round(help),zelfstandigheid:Math.round(independence)};
+ const total=score100(complete+wellbeing+nature+resilience+help+independence);
  const level=scoreLevel(total);
- return {values,max:20,total,level:{id:level.id,title:level.title,line:level.line,color:level.color},checklist,done,items:checklist.length};
+ return {values,maxes:SCORE_MAX,max:20,total,level:{id:level.id,title:level.title,line:level.line,color:level.color},checklist,done,items:checklist.length};
 }
 // What each part means, in plain words, with a short verdict for the value out of twenty.
 const SCORE_MEANING={
  compleet:['Alles erop en eraan: speciale gebouwen, vondsten, beroemdheden en meer',['Er ontbrak nog veel.','Het meeste staat er.','Werkelijk alles erop en eraan.']],
  welzijn:['Welvaart, schoon water en rust onder de bewoners',['Het was vaak krap of onrustig.','De meeste mensen kwamen goed rond.','Iedereen had het goed.']],
  natuur:['Schone lucht, een levend landschap en genoeg groen tussen de huizen',['Er bleef weinig natuur over.','Een redelijk groen eiland.','Een levend, schoon en groen eiland.']],
- veerkracht:['Hoeveel er blijvend verloren ging bij branden, bevingen en hoog water',['Rampen lieten diepe sporen na.','Ze herstelden op eigen tempo.','Na elke ramp stonden ze sterker op.']],
- 'goede buur':['Wensen waar je bij hielp, en ingrepen waar niemand om vroeg',['Ze vroegen vaak om hulp en kregen die zelden.','Je hielp soms een handje.','Je was er precies wanneer ze je nodig hadden.']]
+ veerkracht:['Herstel na rampen, plus een paar beproevingen door jou (te veel breekt ze)',['Rampen lieten diepe sporen na, of ze werden nooit echt op de proef gesteld.','Ze herstelden op eigen tempo.','Beproefd en sterker opgestaan.']],
+ hulp:['Hoeveel wensen je hielp; de helft is genoeg',['Ze vroegen vaak om hulp en kregen die zelden.','Je hielp soms een handje.','Je was er wanneer het ertoe deed.']],
+ zelfstandigheid:['Wat ze zelf deden: te veel hulp of ingrepen maakt ze afhankelijk',['Ze leunden flink op jou.','Soms namen ze het wat makkelijk.','Ze redden zich prima zelf.']]
 };
-export function explainScore(name,value,max=20){const [what,verdicts]=SCORE_MEANING[name]||['',['','','']];const share=value/max;return{what,verdict:verdicts[share>=.75?2:share>=.45?1:0]};}
+export function explainScore(name,value,max=SCORE_MAX[name]||20){const [what,verdicts]=SCORE_MEANING[name]||['',['','','']];const share=value/max;return{what,verdict:verdicts[share>=.75?2:share>=.45?1:0]};}
 // Old saves stored five scores of 0–100; recompute those so every ending shows the inspection.
 export const currentScores=(s,stored)=>stored?.checklist?stored:islandScores(s);
 export function drawFinale(c,w,h,s,m,reduced=false){

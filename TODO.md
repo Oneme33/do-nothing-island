@@ -42,6 +42,8 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 
 **Ronde 5, gepusht:** bezoekers van overzee (handelsschip, ontdekkingsreiziger, luchtballon op het plein, zeppelin, cruiseschip), twee buureilandjes met een veerboot vanaf 1700 en langzaam groeiende huisjes, beroemde inwoners met een blauw bordje en museumstuk, opgravingen vanaf 1890 met vondsten voor het museum, en een fotoalbum in het Eilandboek.
 
-**Eilandkeur, gepusht:** nieuwe score van vijf onderdelen van 20 (compleet, welzijn, natuur, veerkracht, goede buur) met een checklist van 24 dingen ‘erop en eraan’, medailles van ‘een eiland’ tot ‘Het Perfecte Eiland’, een keurronde in de rondvlucht, een keurstempel in de aftiteling, de keur op de eindkaart en ‘tot nu toe’ in het Eilandboek. Niks doen geeft ongeveer 75–83, alle wensen helpen 94–100.
+**Eilandkeur, gepusht:** nieuwe score van zes onderdelen, samen 100 (compleet 20, welzijn 15, natuur 15, veerkracht 15, hulp 15, zelfstandigheid 20), die tegen elkaar in werken met een checklist van 24 dingen ‘erop en eraan’, medailles van ‘een eiland’ tot ‘Het Perfecte Eiland’, een keurronde in de rondvlucht, een keurstempel in de aftiteling, de keur op de eindkaart en ‘tot nu toe’ in het Eilandboek. Niks doen geeft ongeveer 72–78, alles helpen 80–83, te veel ingrijpen ongeveer 80, het midden (helft van de wensen helpen en een paar beproevingen) 95–98.
 
 **Volgende rondes:** zie de to-do lijst in `INVENTARIS.md`.
+
+**Kasteelgrond, gepusht:** het kasteel krijgt twee ringen grond (24 tegels): een siertuin en daaromheen een kasteelpark met bomen, vijvertjes en bankjes. Het label staat weer bij het kasteel.

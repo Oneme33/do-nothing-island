@@ -709,6 +709,13 @@ export class IslandRenderer {
     if(style==='formal'){this.diamond(0,0,18,9,'#5f7d4a');this.diamond(0,0,15.5,7.7,'#d8cfae');this.line([[-15,0],[15,0]],'#d8cfae',2.4);this.line([[0,-7.5],[0,7.5]],'#d8cfae',2.4);for(const [x,y] of [[-8,-3],[8,-3],[-8,3],[8,3]]){this.diamond(x,y,5,2.5,'#6f8f4f');this.ellipse(x,y-2,1.4,1.4,flower);}this.poly([[-1.6,0],[0,-9],[1.6,0]],'#4f6b3e');}
     else if(style==='roses'){for(let i=0;i<16;i++){const x=(hash(i,t.x)-.5)*32,y=(hash(t.y,i)-.5)*15;this.ellipse(x,y-1.5,2.4,1.9,'#5f7d4a');this.ellipse(x,y-2.4,1.3,1.1,i%3?flower:'#f3e9c8');}this.line([[-3,4],[-3,-7]],'#8a7552',1);this.line([[3,4],[3,-7]],'#8a7552',1);this.ctx.beginPath();this.ctx.ellipse(0,-7,3,2.4,0,Math.PI,0);this.ctx.strokeStyle='#5f7d4a';this.ctx.lineWidth=1.6;this.ctx.stroke();}
     else if(style==='orchard'){for(let i=0;i<4;i++){const x=-10+(i%2)*20-(i>1?0:0),y=(i<2?-3:3);this.ctx.save();this.ctx.translate(x+(i>1?5:-5),y);this.ctx.scale(.42,.42);this.tree(false,.7+i*.05);this.ctx.restore();this.ellipse(x+(i>1?5:-5)+2,y-14,1.2,1.2,L.autumn>.5||L.summer>.5?'#d4644f':'#f1c6d0');}}
+    else if(style==='park'){
+      // The outer castle park: lawn, a clipped hedge, a few old trees and now and then a pond with a swan.
+      const h=hash(t.x*3,t.y*7);this.diamond(0,0,20,10,'#9cbb76');this.line([[-20,0],[0,10],[20,0]],'#5f7d4a',1.4);
+      if(h<.3){this.ellipse(2,1,9,3.6,'#a9cbc6');this.ellipse(2,.4,7,2.6,'#bcd9d3');this.ellipse(4,-.6,1.6,1,'#fbfaf4');this.line([[5.2,-.8],[5.6,-2.6]],'#fbfaf4',.8);}
+      else{for(let i=0;i<2;i++){const x=(hash(i,t.x+t.y)-.5)*22,y=(hash(t.y-i,t.x)-.5)*8;this.ctx.save();this.ctx.translate(x,y);this.ctx.scale(.5,.5);this.tree(false,.85+i*.1);this.ctx.restore();}}
+      if(h>.85){this.rect(-6,3,7,1.2,'#8a6a4c');this.rect(-6,4.2,1,1.6,'#6c5038');this.rect(0,4.2,1,1.6,'#6c5038');}
+    }
     else{this.diamond(0,0,18,9,'#5f7d4a');for(let k=1;k<4;k++){const f=k/4;this.line([[-18*f,0],[0,-9*f],[18*f,0]],'#8fae6a',1.6);}this.ellipse(0,0,2,1,'#d8cfae');this.person(0,1,'#a37b5f',3);}
   }
   // The island's castle: curtain walls with battlements, round towers with pointed roofs, a keep and a gate.
@@ -1406,7 +1413,7 @@ export class IslandRenderer {
   }
   drawLandmarkLabels(){
     const court=this.sim.court&&this.sim.tile(this.sim.court.x,this.sim.court.y);
-    if(['royal-palace','palace'].includes(court?.building)){const p=this.point(court.x,court.y);this.landmarkLabel(court.building==='palace'?(this.sim.year<1250?'DE BURCHT':'HET KASTEEL'):'HET NIEUWE PALEIS',p.x,p.y-(this.sim.year<1250?110:150)*this.zoom);}
+    if(['royal-palace','palace'].includes(court?.building)){const p=this.point(court.x,court.y);this.landmarkLabel(court.building==='palace'?(this.sim.year<1250?'DE BURCHT':'HET KASTEEL'):'HET NIEUWE PALEIS',p.x,p.y-(this.sim.year<1250?80:100)*this.zoom);}
     const home=this.sim.buildings.find(t=>t.foundingHome);if(!home||!['manor','palace'].includes(home.building))return;
     const p=this.point(home.x,home.y);
     this.landmarkLabel(home.building==='palace'?(court?'HET OUDE PALEIS · HET EERSTE HUIS':'PALEIS · HET EERSTE HUIS'):'HET EERSTE HUIS',p.x,p.y-(home.building==='palace'?104:82)*this.zoom);

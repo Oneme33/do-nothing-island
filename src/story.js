@@ -79,7 +79,7 @@ export function rememberIntervention(s,spot,type){
   else{i.trust++;i.dependence=bound(i.dependence+.7,0,100);spot.inspired=true;}
   spot.interventionMemory={type,year:s.year,count:(spot.interventionMemory?.count||0)+1};
   spot.lifeEvents=[...(spot.lifeEvents||[]),{type,year:s.year}].slice(-8);
-  const entry={id:`touch-${s.interferences}`,year:s.year,type,x:spot.x,y:spot.y,consequence:type==='fire'?'Brandsporen, vruchtbare as en nieuwe bouwtradities':type==='rain'?'Irrigation traditions and an expectation of rain':type==='rumble'?'Stronger foundations and a lasting fear of the sky':type==='repair'?'A rescued district and greater public trust':'A locally inspired building and a taste for outside help'};
+  const entry={id:`touch-${s.interferences}`,year:s.year,type,asked:!!s.helpingWish,x:spot.x,y:spot.y,consequence:type==='fire'?'Brandsporen, vruchtbare as en nieuwe bouwtradities':type==='rain'?'Irrigation traditions and an expectation of rain':type==='rumble'?'Stronger foundations and a lasting fear of the sky':type==='repair'?'A rescued district and greater public trust':'A locally inspired building and a taste for outside help'};
   s.interventionLedger.push(entry);if(s.interventionLedger.length>100)s.interventionLedger.splice(1,1);
   if(type==='rumble'){
     for(const h of s.houses.filter(h=>Math.abs(h.x-spot.x)+Math.abs(h.y-spot.y)<=2))h.needsRetrofit=true;

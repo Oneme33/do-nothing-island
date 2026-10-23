@@ -16,7 +16,7 @@ Het concept staat en de onderliggende systemen zijn rijk: familie, wensen, rampe
 |---|---|---|
 | Systemen en inhoud | 85% | Bijna alles wat erin moet, zit erin. |
 | Vroeg spel (beeld en sfeer) | 80% | Mooi, rustig en leesbaar. |
-| Score en eindresultaat | 75% | De nieuwe eilandkeur staat; balans moet nog in echt spel blijken. |
+| Score en eindresultaat | 80% | De eilandkeur met evenwicht staat; moet nog in echt spel blijken. |
 | Techniek en stabiliteit | 80% | 176 tests, geen afhankelijkheden, opslag werkt. |
 | Geluid | 55% | Werkt, maar het is dun en er is geen muziek. |
 | Tempo en opbouw | 50% | Te lang, te vaste momenten, rustig middenstuk. |
@@ -43,8 +43,10 @@ Gemeten bij acht eilanden die je met rust laat, op maximaal 720 tegels:
 | Feesten | 28 – 33 per spel |
 | Wensen | 24 per spel, die bij niks doen allemaal verlopen |
 | Oude score bij niks doen | 89 – 97 (jij zag 98) |
-| Nieuwe eilandkeur bij niks doen | 75 – 83 ("een prachtig eiland") |
-| Nieuwe eilandkeur als je alle wensen helpt | 94 – 100 (3 van 4 keer "Het Perfecte Eiland") |
+| Eilandkeur bij niks doen | 72 – 78 |
+| Eilandkeur als je alle wensen helpt | 80 – 83 (te afhankelijk) |
+| Eilandkeur bij te veel ingrijpen | 79 – 81 |
+| Eilandkeur in het midden (helft helpen, 3 beproevingen) | 95 – 98 |
 
 ## Per onderdeel
 

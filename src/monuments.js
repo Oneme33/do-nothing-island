@@ -12,13 +12,16 @@ export const MONUMENTS=[
 ];
 export const monumentTitle=(s,m)=>typeof m.title==='function'?m.title(s):m.title;
 // Around 400 the island already marks out where its castle will stand, so the grounds stay free.
+// The grounds are two rings deep: an inner formal garden and an outer castle park, so the castle never stands squeezed in.
+export const CASTLE_RING=[];for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)if(dx||dy)CASTLE_RING.push([dx,dy]);
+const castleOpen=n=>n?.kind==='land'&&!n.landform&&(!n.building||['tree','forest','park','garden'].includes(n.building))&&!n.reservedFor&&!n.buildSite&&!n.foundingHome&&!n.river;
 function reserveCastleSite(s){
  if(s.court||s.castleSite||s.year<400)return;
- const room=t=>[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].filter(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return n?.kind==='land'&&!n.landform&&!n.building&&!n.reservedFor;}).length;
- const spots=s.land.filter(t=>!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.foundingHome&&Math.hypot(t.x,t.y)>=4&&room(t)>=6).sort((a,b)=>room(b)-room(a)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
+ const room=t=>CASTLE_RING.filter(([dx,dy])=>castleOpen(s.tile(t.x+dx,t.y+dy))).length;
+ const spots=s.land.filter(t=>!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.foundingHome&&!t.river&&Math.hypot(t.x,t.y)>=4&&room(t)>=17).sort((a,b)=>room(b)-room(a)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
  const site=spots[(s.seed>>>5)%Math.max(1,spots.length)];if(!site)return;
  s.castleSite={x:site.x,y:site.y};site.reservedFor='castle';
- for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]){const n=s.tile(site.x+dx,site.y+dy);if(n?.kind==='land'&&!n.landform&&!n.building&&!n.reservedFor&&!n.buildSite)n.reservedFor='castle';}
+ for(const [dx,dy] of CASTLE_RING){const n=s.tile(site.x+dx,site.y+dy);if(castleOpen(n))n.reservedFor='castle';}
 }
 export function advanceMonuments(s){
  s.monuments??=[];if(s.year%10===5){reserveCastleSite(s);if(s.court)claimCastleGrounds(s);}if(s.ending||s.year%7!==3)return;
@@ -44,9 +47,9 @@ export function buildCastle(s){
  const sea=t=>[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>s.tile(t.x+dx,t.y+dy)?.kind==='water');
  const free=t=>(!t.building||['tree','forest','park','garden','farm'].includes(t.building))&&!t.buildSite&&(!t.reservedFor||t.reservedFor==='castle')&&!t.landform&&!t.road&&!t.foundingHome&&Math.hypot(t.x,t.y)>=4;
  const styles=[t=>near(t)?0:1,t=>sea(t)?0:1,t=>-Math.hypot(t.x,t.y)];
- const room=t=>[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].filter(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return n?.kind==='land'&&!n.landform&&(!n.building||['tree','forest','park','garden','farm'].includes(n.building))&&!n.reservedFor;}).length;
+ const room=t=>CASTLE_RING.filter(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return n?.kind==='land'&&!n.landform&&(!n.building||['tree','forest','park','garden','farm'].includes(n.building))&&(!n.reservedFor||n.reservedFor==='castle');}).length;
  const reserved=s.castleSite&&s.tile(s.castleSite.x,s.castleSite.y);
- const style=styles[(s.seed>>>0)%styles.length],spots=reserved?[reserved]:s.land.filter(t=>free(t)&&room(t)>=5).sort((a,b)=>style(a)-style(b)||room(b)-room(a)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
+ const style=styles[(s.seed>>>0)%styles.length],spots=reserved?[reserved]:s.land.filter(t=>free(t)&&room(t)>=12).sort((a,b)=>style(a)-style(b)||room(b)-room(a)||(a.x+a.y)-(b.x+b.y)).slice(0,5);
  const tile=spots[((s.seed>>>3)+s.year)%Math.max(1,spots.length)];if(!tile)return null;
  tile.reservedFor=null;tile.building='palace';tile.builtYear=s.year;tile.architecture=s.age.id;tile.district='heritage';tile.landmark=true;tile.castle=true;
  s.court={x:tile.x,y:tile.y,year:s.year};claimCastleGrounds(s);
@@ -60,11 +63,12 @@ export const GARDEN_STYLES=['formal','roses','orchard','maze'];
 export function claimCastleGrounds(s){
  if(!s.court)return 0;const castle=s.tile(s.court.x,s.court.y);if(castle?.building!=='palace')return 0;
  let claimed=0;const style=GARDEN_STYLES[(s.seed>>>0)%GARDEN_STYLES.length];
- for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]){
-  const t=s.tile(s.court.x+dx,s.court.y+dy);
-  if(!t||t.kind!=='land'||t.landform||t.foundingHome||t.reservedFor&&t.reservedFor!=='castle'||t.buildSite)continue;
-  if(t.building&&!['tree','forest','park','garden','farm','castle-garden'].includes(t.building))continue;
-  if(t.building!=='castle-garden'){t.building='castle-garden';t.gardenStyle=style;t.reservedFor='castle';t.district='heritage';claimed++;}
+ for(const [dx,dy] of CASTLE_RING){
+  const t=s.tile(s.court.x+dx,s.court.y+dy),outer=Math.max(Math.abs(dx),Math.abs(dy))===2;
+  if(!t||t.kind!=='land'||t.landform||t.foundingHome||t.river||t.reservedFor&&t.reservedFor!=='castle'||t.buildSite)continue;
+  // The outer park does not push out farms; the inner garden may take a field.
+  if(t.building&&!['tree','forest','park','garden',...(outer?[]:['farm']),'castle-garden'].includes(t.building))continue;
+  if(t.building!=='castle-garden'){t.building='castle-garden';t.gardenStyle=outer?'park':style;t.reservedFor='castle';t.district='heritage';claimed++;}
  }
  if(claimed)s.rebuildRoads();
  return claimed;

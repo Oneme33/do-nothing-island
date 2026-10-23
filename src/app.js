@@ -188,7 +188,7 @@ function renderAlbum(){
 }
 function renderChallenges(){
   const state=ensureChallenges(sim),keur=islandScores(sim);
-  $('keur-now').textContent=`Als het eiland nu gekeurd werd: ${keur.total} van 100, ${keur.level.title.toLowerCase()}. Alles erop en eraan: ${keur.done} van ${keur.items}. ${Object.entries(keur.values).map(([name,value])=>`${name} ${value}/20`).join(' · ')}.`;
+  $('keur-now').textContent=`Als het eiland nu gekeurd werd: ${keur.total} van 100, ${keur.level.title.toLowerCase()}. Alles erop en eraan: ${keur.done} van ${keur.items}. ${Object.entries(keur.values).map(([name,value])=>`${name} ${value}/${keur.maxes[name]}`).join(' · ')}.`;
   $('keur-now-list').replaceChildren(...keur.checklist.map(item=>{const li=document.createElement('li');li.textContent=item.label;li.dataset.done=String(item.done);return li;}));
   $('challenge-note').textContent=state.trackingSince>1?`Bijhouden begonnen in jaar ${state.trackingSince}. Voorbijgegane doelen zijn niet achteraf beoordeeld.`:'Deze ideeën horen bij de seed van je eiland. Je hoeft ze niet te volgen.';
   $('challenge-list').replaceChildren(...state.goals.map(goal=>{
@@ -382,7 +382,7 @@ function renderEnding(){
   $('keur-title').textContent=score.level.title;$('keur-line').textContent=score.level.line;$('keur-medal').style.setProperty?.('--medal',score.level.color);
   $('keur-count').textContent=`Alles erop en eraan: ${score.done} van ${score.items}`;
   $('keur-list').replaceChildren(...score.checklist.map(item=>{const li=document.createElement('li');li.textContent=item.label;li.dataset.done=String(item.done);return li;}));
-  $('score-breakdown').replaceChildren(...Object.entries(score.values).map(([name,value])=>{const item=document.createElement('div');item.className='score-row';const label=document.createElement('span'),number=document.createElement('strong'),bar=document.createElement('progress'),note=document.createElement('small'),info=explainScore(name,value,score.max||100);label.textContent=name;number.textContent=value;bar.max=score.max||100;bar.value=value;bar.setAttribute('aria-label',`${name}: ${value} van ${score.max||100}. ${info.what}. ${info.verdict}`);note.className='score-note';note.textContent=`${info.what}. ${info.verdict}`;item.append(label,bar,number,note);return item;}));
+  $('score-breakdown').replaceChildren(...Object.entries(score.values).map(([name,value])=>{const item=document.createElement('div');item.className='score-row';const label=document.createElement('span'),number=document.createElement('strong'),bar=document.createElement('progress'),note=document.createElement('small'),info=explainScore(name,value,score.maxes?.[name]||score.max||100);label.textContent=name;number.textContent=value;const max=score.maxes?.[name]||score.max||100;bar.max=max;bar.value=value;bar.setAttribute('aria-label',`${name}: ${value} van ${max}. ${info.what}. ${info.verdict}`);note.className='score-note';note.textContent=`${info.what}. ${info.verdict}`;item.append(label,bar,number,note);return item;}));
 }
 function cinemaActive(){return !!sim.cinematic&&!sim.cinematic.completed;}
 // 2.8: before the finale, the camera visits the island's big moments and ends under the old tree.
