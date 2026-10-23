@@ -59,9 +59,9 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 ## Wensenlijst ronde 7 (nog niet gebouwd)
 
 ### 1. Natuurrampen met echte gevolgen
-- **Lavastroom:** bij een uitbarsting stroomt de lava echt naar beneden, steekt onderaan branden aan en verwoest een paar huizen.
-- **Waterval bij de heuvels:** een waterval midden in het heuvelland. Bij veel regen overstroomt die, met hetzelfde soort gevolgen als de lavastroom (natte, beschadigde huizen beneden).
-- **Lawine bij de bergen:** een aardbeving kan een lawine veroorzaken, ook met dezelfde gevolgen.
+- **Vulkaan: lavastroom.** Bij een uitbarsting van de vulkaan stroomt de lava echt de helling af, steekt onderaan de vulkaan branden aan en verwoest een paar huizen.
+- **Heuvels: waterval.** Midden in de heuvels komt een waterval. Bij veel regen overstroomt die en loopt het water de heuvels af, met hetzelfde soort gevolgen als de lavastroom (overstroomde, beschadigde huizen onderaan de heuvels).
+- **Bergen: lawine.** Een aardbeving bij de bergen kan een lawine van sneeuw en stenen veroorzaken die de berg af komt, met dezelfde gevolgen onderaan de bergen.
 - **Herbouwen kost tijd:** verwoeste huizen staan eerst een tijd als ruïne of bouwplaats voordat ze terugkomen.
 - **Verwoestingsmodus:** wie heel vaak op vuur, beving of regen klikt, kan het eiland echt verwoesten (branden, ingestorte wijken, overstromingen). De keur zakt dan flink.
 
