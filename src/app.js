@@ -199,8 +199,11 @@ function renderChallenges(){
     item.append(title,description,status,progress);return item;
   }));
 }
+let wishHeard=null;
 function updateWishBubble(){
   const wish=ensureWishes(sim).active;
+  // A soft ping when someone starts asking for something.
+  if(wish&&!wish.hidden&&wish.id!==wishHeard){if(wishHeard!==null)soundscape?.play('wish');wishHeard=wish.id;}else if(!wish&&wishHeard===null)wishHeard='';
   $('book-tab-wishes').dataset.pending=String(!!wish&&!sim.ending);
   $('wish-bubble').hidden=!wish||wish.hidden||sim.config.wishBubbles===false||!!sim.ending;
   if(wish){$('wish-speaker').textContent=wish.speaker;$('wish-text').textContent=wish.text;}
@@ -288,7 +291,26 @@ function announceAge(){
   clearTimeout(ageTimer);ageTimer=setTimeout(()=>{$('age-card').hidden=true;$('island-window').classList.remove('age-shift');},4800);
 }
 let shownCentury=null;
+// The timeline: one stretch per age, a marker for now and a dot for each big moment you can hover.
+const TIMELINE_AGES=['Begin','Oude wereld','Stoomtijd','Moderne tijd','Toekomst'];
+const TIMELINE_KINDS={delight:'good',palace:'good',famous:'good',visitor:'good',treasure:'good',lighthouse:'good',age:'good',fire:'disaster',flood:'disaster',crisis:'disaster',volcano:'disaster',interference:'you',helped:'you'};
+let timelineKey='';
+function timelinePosition(year){
+  const starts=ERAS.map(e=>Math.max(1,e.year)),end=Math.max(sim.finaleDeadline||2200,starts.at(-1)+60);
+  let i=0;while(i<starts.length-1&&year>=starts[i+1])i++;
+  const from=starts[i],to=starts[i+1]??end;return Math.min(1,(i+Math.max(0,Math.min(1,(year-from)/Math.max(1,to-from))))/starts.length);
+}
+function renderTimeline(){
+  const key=`${sim.year}|${sim.era}|${sim.history.length}`;if(key===timelineKey)return;timelineKey=key;
+  const ages=TIMELINE_AGES.map((label,i)=>{const el=document.createElement('span');el.className='age';el.textContent=label;el.dataset.state=i<sim.era?'past':i===sim.era?'now':'future';return el;});
+  const moments=sim.history.filter(e=>TIMELINE_KINDS[e.type]&&(e.priority||0)>=78).slice(-28).map(e=>{const dot=document.createElement('span');dot.className='moment';dot.dataset.kind=TIMELINE_KINDS[e.type];dot.style.left=`${(timelinePosition(e.year)*100).toFixed(2)}%`;dot.title=`Jaar ${e.year}: ${nl(e.text)}`;return dot;});
+  const marker=document.createElement('span');marker.className='marker';marker.style.left=`${(timelinePosition(sim.year)*100).toFixed(2)}%`;
+  $('timeline-track').replaceChildren(...ages,...moments,marker);
+  const next=ERAS[sim.era+1];
+  $('timeline-now').textContent=sim.ending?'Het verhaal is af':sim.endgameStarted?`Jaar ${sim.year} · het laatste hoofdstuk`:next?`Jaar ${sim.year} · ${TIMELINE_AGES[sim.era+1].toLowerCase()} vanaf ongeveer ${next.year}`:`Jaar ${sim.year} · nog even tot het laatste hoofdstuk`;
+}
 function updateUI(){
+  renderTimeline();
   announceAge();
   const century=Math.floor(sim.year/100);if(shownCentury!==null&&century>shownCentury)soundscape?.play('century');shownCentury=century;
   updateAwayReport();
@@ -452,9 +474,9 @@ function frame(now){
     }
   }
   advanceTour(now);offerGift();
-  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite),close:Math.max(0,Math.min(1,(renderer.zoom/Math.max(.3,renderer.fitZoom||1)-1)/1.1))});}
+  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({era:sim.era,storm:!!sim.storm,night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite),close:Math.max(0,Math.min(1,(renderer.zoom/Math.max(.3,renderer.fitZoom||1)-1)/1.1))});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
-  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');if(signal.moment){maybeDive(signal.x,signal.y,true);soundscape?.play(signal.moment.sound);showToast(signal.moment.text,5200);}}sim.signals=[];}
+  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(signal.type==='flood')soundscape?.play('flood');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');if(signal.moment){maybeDive(signal.x,signal.y,true);soundscape?.play(signal.moment.sound);showToast(signal.moment.text,5200);}}sim.signals=[];}
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;
@@ -574,6 +596,8 @@ $('show-numbers').addEventListener('change',e=>toggleNumbers(e.target.checked));
 $('resources').addEventListener('click',()=>toggleNumbers(sim.config.showNumbers!==true));
 $('resources').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleNumbers(sim.config.showNumbers!==true);}});
 $('show-numbers').checked=sim.config.showNumbers===true;
+const volumes=()=>({music:(sim.config.musicVolume??50)/100,effects:(sim.config.effectsVolume??100)/100});
+for(const [id,keyName] of [['music-volume','musicVolume'],['effects-volume','effectsVolume']]){$(id).value=String(sim.config[keyName]??(id==='music-volume'?50:100));$(id).addEventListener('input',e=>{sim.config[keyName]=Number(e.target.value);soundscape?.setVolumes(volumes());save();});}
 $('auto-zoom').checked=sim.config.autoZoom!==false;
 $('auto-zoom').addEventListener('change',e=>{sim.config.autoZoom=e.target.checked;save();});
 $('day-night').addEventListener('change',e=>{sim.config.dayNight=e.target.checked;renderer.dayNight=e.target.checked;updateUI();save();});
@@ -690,7 +714,7 @@ document.addEventListener('keydown',e=>{
 
 async function toggleAudio(){
   try{
-    soundscape??=new Soundscape();
+    if(!soundscape){soundscape=new Soundscape();soundscape.setVolumes(volumes());}
     if(soundscape.enabled)await soundscape.stop();else await soundscape.start();
     sim.config.sound=soundscape.enabled;save();
     $('sound').classList.toggle('enabled',soundscape.enabled);$('sound').setAttribute('aria-label',soundscape.enabled?"Zet het geluid uit":"Zet het geluid aan");

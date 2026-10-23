@@ -553,7 +553,7 @@ export class IslandRenderer {
     else if(b==='observatory')this.observatory();
     else if(b==='ice-cream')this.iceCream(t);
     else if(b==='greenhouse')this.greenhouse();
-    else if(b==='manor'||b==='palace'){const y=this.sim.year;if(b==='palace'&&t.castle){const grow=y<1250?1.35:y<1750?1.45:y<1950?1.52:1.6;c.scale(grow,grow);this.castleKeep(y);}else{const grow=b==='palace'?(y<1250?1.5:y<1750?1.7:1.8):1.14;c.scale(grow,grow);this.palace(b==='palace',t.variant);}}
+    else if(b==='manor'||b==='palace'){const y=this.sim.year;if(b==='palace'&&t.castle){const court=this.sim.court,level=court?.level??(y<1250?0:y<1750?2:y<1950?4:5),grow=1.35+Math.min(7,level)*.045;c.scale(grow,grow);this.castleKeep(y,level,court?.renovating>=this.sim.year);}else{const grow=b==='palace'?(y<1250?1.5:y<1750?1.7:1.8):1.14;c.scale(grow,grow);this.palace(b==='palace',t.variant);}}
     else if(b==='palace-wing'){this.house(t.variant,2);this.line([[0,-40],[0,-53]],'#a39668',1);this.poly([[0,-53],[9,-50],[0,-47]],'#c8af64');}
     else if(b==='royal-garden')this.formalGarden();
     else if(b==='campus-square'){this.diamond(0,0,22,11,'#d6d6bc');this.line([[-17,0],[0,8],[17,0]],'#aab7a0',2);this.ellipse(0,-3,6,2.5,'#b6c5af');this.poly([[-4,-4],[0,-9],[4,-4],[0,-2]],'#eee9c8');}
@@ -740,8 +740,10 @@ export class IslandRenderer {
   }
   // The island's castle: curtain walls with battlements, round towers with pointed roofs, a keep and a gate.
   // It grows by adding towers, a gatehouse, a palace wing and lights rather than by simply getting bigger.
-  castleKeep(year){
-    const stone='#ddd6c1',stoneDark='#bcb49c',roof=year>=1750?'#6f9a8c':'#5f6f7a',roofDark=shadeColor(roof,.8),stage=year<1250?0:year<1750?1:year<1950?2:3;
+  castleKeep(year,level=0,renovating=false){
+    const stone='#ddd6c1',stoneDark='#bcb49c',roof=year>=1750?'#6f9a8c':'#5f6f7a',roofDark=shadeColor(roof,.8),stage=level>=4?3:level>=3?2:level>=2?1:0;
+    // From the first step on, a low outer wall rings the castle.
+    if(level>=1){const o=[[-30,2],[0,17],[30,2],[0,-13]];for(let i=0;i<4;i++){const a=o[i],b=o[(i+1)%4];if(i<2)continue;this.poly([a,b,[b[0],b[1]-5],[a[0],a[1]-5]],i===2?'#d3ccb6':'#c4bca4');}}
     const merlons=(a,b,h)=>{for(let i=0;i<=6;i++){const u=i/6,x=a[0]+(b[0]-a[0])*u,y=a[1]+(b[1]-a[1])*u-h;this.rect(x-1,y-2.2,2,2.2,stone);}};
     const wall=(a,b,h,face)=>{this.poly([a,b,[b[0],b[1]-h],[a[0],a[1]-h]],face);this.line([[a[0],a[1]-h],[b[0],b[1]-h]],'#c9c2ab',.6);merlons(a,b,h);};
     const tower=(x,y,r,h,flag=false)=>{
@@ -774,6 +776,16 @@ export class IslandRenderer {
     for(const [x,y] of [[-13,-6],[-6,-2],[-19,-20-stage*3],[19,-20-stage*3]]){this.line([[x,y+3],[x,y]],'#6f5a40',1);this.ellipse(x,y-1,1.2,1.6,this.light.darkness>.2?'#ffcf6a':'#d9a24e');this.lampLight(x,y-1,this.currentTile);}
     if(stage>=1)tower(0,9,4.4,13+stage*2,stage>=3);
     if(stage>=3){this.ellipse(-24,8,6,2.4,'#a8c4bd');this.ellipse(24,8,6,2.4,'#a8c4bd');}
+    if(level>=1){const o=[[-30,2],[0,17],[30,2]];for(let i=0;i<2;i++){const a=o[i],b=o[i+1];this.poly([a,b,[b[0],b[1]-5],[a[0],a[1]-5]],i?'#c4bca4':'#d3ccb6');merlons(a,b,5);}tower(-30,2,3,9);tower(30,2,3,9);tower(0,17,3,9,level>=2);}
+    if(level>=3){tower(-8,-16,3.6,34,true);}
+    if(level>=5){const colors=['#d4644f','#e2c26a','#5c8fc0','#8cc07a','#c98fb0'];for(let i=0;i<5;i++){const x=-17+i*8.5,y=-12+Math.abs(i-2)*-1.2,sway=this.reduced?0:Math.sin(this.time*2+i)*1;this.line([[x,y],[x,y-7]],'#6f5a40',.6);this.poly([[x,y-7],[x+4+sway,y-6],[x,y-4.6]],colors[i]);}}
+    if(level>=6){const kh=26+stage*4,dy=-14-kh;this.ellipse(0,dy-1,6,4.6,'rgba(190,225,235,.85)');this.ellipse(-1.6,dy-2.6,2,1.4,'rgba(255,255,255,.7)');if(this.light.darkness>.2)this.lampLight(0,dy-1,this.currentTile);}
+    if(level>=7){for(const [x,y] of [[-15,-1],[9,1],[-4,5]])this.poly([[x,y],[x+5,y+2.5],[x+5,y],[x,y-2.5]],'#3f5f7a');this.ellipse(-8,-16-34-3,3,1.2,'#7f9f62');}
+    if(renovating){
+      // Scaffolding up the right side, with a little crane.
+      for(let k=0;k<4;k++){this.line([[6+k*4,6-k*2],[6+k*4,-30-k*2]],'#a08a64',.8);}for(let k=0;k<6;k++){this.line([[6,2-k*6],[18,-4-k*6]],'#a08a64',.6);}
+      const sw=this.reduced?0:Math.sin(this.time*.5)*.2;this.line([[22,0],[22,-44]],'#c95b4c',1.2);this.ctx.save();this.ctx.translate(22,-44);this.ctx.rotate(-.2+sw);this.line([[-14,0],[10,0]],'#c95b4c',1);this.line([[-12,0],[-12,9]],'#6e6a62',.4);this.rect(-13.5,9,3,2,'#bcb49c');this.ctx.restore();
+    }
   }
   palace(grand,v){
     const year=this.sim.year;
@@ -1080,7 +1092,8 @@ export class IslandRenderer {
     this.ellipse(1,6,7,3,'#8fbcc8');for(let i=0;i<3;i++){const px=-3+i*3,hop=this.reduced?0:Math.abs(Math.sin(t*3+i))*1.5;this.ellipse(px,4-hop,1,1.6,'#2f3236');this.ellipse(px,4.4-hop,.6,1,'#f2f0ea');}
   }
   // The grounds next to a special building: enclosures for the zoo, big rides for the theme park, a plaza for the rest.
-  nearFields(t){let n=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(this.sim.tile(t.x+dx,t.y+dy)?.building==='farm')n++;return n>=2;}
+  // Only some homes deep among the fields are farms; the others stay ordinary houses.
+  nearFields(t){let n=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(this.sim.tile(t.x+dx,t.y+dy)?.building==='farm')n++;return n>=3&&hash(t.x*3+1,t.y*5+2)<.5;}
   // Among the fields people live in farmhouses: long and low under one big roof, with a barn door and a haystack.
   farmhouse(t){
     const L=26,W=12,H=7,R=9,h=hash(t.x,t.y),wall=['#efe4cc','#e6d6b8','#d9c6a6'][Math.floor(h*3)],roof=this.sim.year<1400?'#bda46c':['#9b4f3f','#7a4b3a','#5e6b63','#8a6a4c'][Math.floor(h*11)%4];
@@ -1095,7 +1108,7 @@ export class IslandRenderer {
     this.poly([at(2,W/2,0),at(7,W/2,0),at(7,W/2,5.4),at(2,W/2,5.4)],'#6f5a40');this.line([at(4.5,W/2,0),at(4.5,W/2,5.4)],'#5a4632',.5);
     for(const u of [-9,-4])this.window([at(u,W/2,2),at(u+2.4,W/2,2),at(u+2.4,W/2,4.4),at(u,W/2,4.4)],'#7d8f8a');
     const chimney=at(-L/3,0,H+R*.72);this.rect(chimney[0]-1,chimney[1]-5,2,5,'#8a6a5a');
-    if(this.sim.year>=1900&&h>.55){const sx=20,sy=-2;this.rect(sx-3,sy-20,6,20,'#c9cfd0');this.rect(sx,sy-20,3,20,'#aeb5b7');this.ellipse(sx,sy-20,3,1.4,'#8f9a9c');}
+    if(this.sim.year>=1900&&h>.82){const sx=20,sy=-2;this.rect(sx-3,sy-20,6,20,'#c9cfd0');this.rect(sx,sy-20,3,20,'#aeb5b7');this.ellipse(sx,sy-20,3,1.4,'#8f9a9c');}
   }
   // A tall brick warehouse with a stepped gable, loading doors and a hoist beam; from 1900 a crane stands beside it.
   warehouse(t){
@@ -1145,6 +1158,11 @@ export class IslandRenderer {
         for(let k=0;k<3;k++){const bx=16+k*2,by=-16-k*2+Math.sin(time*2+k)*1;this.line([[15,-6],[bx,by+3]],'#8a8478',.4);this.ellipse(bx,by,1.8,2.2,['#d4644f','#5c8fc0','#e2c26a'][k]);}
       }
       this.person(-14,6,'#b18d6b',1);this.person(14,5,'#879c76',2);
+    }else if(i>=8){
+      // The spaceport apron: concrete with markings, fuel tanks or a small control tower.
+      this.diamond(0,0,22,11,'#c9c9c2');this.diamond(0,0,18,9,'#d4d4cd');this.line([[-14,0],[14,0]],'#e8c040',.7);this.line([[0,-7],[0,7]],'#e8c040',.7);
+      if(i===9){for(const [x,y] of [[-6,-2],[5,1]]){this.rect(x-3.5,y-9,7,9,'#eef0f1');this.rect(x,y-9,3.5,9,'#d2d6d8');this.ellipse(x,y-9,3.5,1.6,'#f6f7f8');this.line([[x-3.5,y-5],[x+3.5,y-5]],'#d9534a',.8);}}
+      else if(i===10){this.rect(-3,-22,6,22,'#e3e5e6');this.rect(0,-22,3,22,'#c9cdd0');this.poly([[-6,-22],[0,-26],[6,-22],[0,-19]],'#9fc4d6');this.ellipse(0,-27,1.4,1.4,this.light.darkness>.2?'#ff6b5a':'#d9534a');}
     }else if(i===6){
       // The green ring around the theme park, drawn like the castle park.
       this.castleGarden({x:t.x,y:t.y,gardenStyle:'park'});

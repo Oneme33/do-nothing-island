@@ -158,6 +158,18 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
 #instruction{animation:hint-fade 1.2s ease 60s forwards}
 @keyframes hint-fade{to{opacity:0;visibility:hidden}}
 .map-controls #toggle-details{width:auto;padding:0 10px;font-size:10px;border-right:1px solid #dfe4d4}
+
+/* The timeline: five ages of equal width, a marker for now and dots for the big moments. */
+.timeline{position:absolute;top:66px;left:50%;transform:translateX(-50%);width:min(46%,520px);z-index:2;pointer-events:none;font-size:8px;letter-spacing:.06em;color:#6f826f;text-align:center}
+.timeline-track{position:relative;height:16px;display:flex;gap:2px;pointer-events:auto}
+.timeline-track .age{flex:1;position:relative;border-bottom:3px solid #c9d6c4;padding-bottom:3px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.55}
+.timeline-track .age[data-state=past]{border-color:#9db48f;opacity:.8}.timeline-track .age[data-state=now]{border-color:#5d8a4c;opacity:1;font-weight:600;color:#3f5a35}
+.timeline-track .moment{position:absolute;bottom:-3px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:#e2b84a;box-shadow:0 0 0 1px #fbf9f0}
+.timeline-track .moment[data-kind=disaster]{background:#c86b55}.timeline-track .moment[data-kind=you]{background:#5c8fc0}
+.timeline-track .marker{position:absolute;bottom:-6px;width:2px;height:11px;margin-left:-1px;background:#2f4a2a;border-radius:1px}
+.timeline-now{display:block;margin-top:5px;font-size:9px;letter-spacing:0;color:#5f735f}
+.island-window.is-night .timeline,.island-window.is-night .timeline-now{color:#e8ecdf}
+@media(max-width:700px){.timeline{top:auto;bottom:118px;width:80%}}
 </style>
 </head>
 <body>
@@ -186,7 +198,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
     <section id="island-window" class="island-window" aria-label="Een levend eiland">
       <canvas id="island" tabindex="0" aria-label="Jouw levende eiland. Klik voor een ingreep, scroll om te zoomen en sleep om rond te kijken. Pijltjes verplaatsen de kaart; plus en min zoomen."></canvas>
       <div class="island-heading"><span class="status-dot"></span><span id="island-mood">Een behoorlijk rustig begin</span></div>
-      <div class="weather" id="weather"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/></svg><span>Kalme zee. Kleine ambities.</span></div>
+      <div id="timeline" class="timeline" aria-label="Tijdlijn van het eiland"><div id="timeline-track" class="timeline-track"></div><span id="timeline-now" class="timeline-now"></span></div><div class="weather" id="weather"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/></svg><span>Kalme zee. Kleine ambities.</span></div>
       <div class="civic-overview"><span id="energy-source">Nog geen stroomnet</span><span id="civic-life">Een huisje en een kleine akker.</span><span id="places-status">Strand · Bos</span><span id="district-status">Eén kleine akker</span><span id="mobility-status">Te voet over het eiland</span><span id="chapter-status" title="Het laatste tijdperk begint rond 2100. Jouw ingrepen veranderen de timing en de uitkomst.">Laatste tijdperk rond 2100</span></div>
       <div id="tile-inspector" class="tile-inspector" hidden></div><button id="inspector-close" aria-label="Sluit het informatiekaartje">×</button>
 
@@ -231,7 +243,7 @@ canvas[data-mode=help]{cursor:help}.wish-actions{display:flex;gap:18px;align-ite
   <dialog id="guide-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN KLEINE HANDLEIDING</span><h2>Welkom bij het nietsdoen.</h2><p>Eén huisje, een kleine akker en zes mensen. De beschaving groeit vanzelf. Jij kiest of je toekijkt of ingrijpt.</p><div class="guide-steps"><div><span>01</span><p><strong>Neem de tijd.</strong> Het eiland begint op 1×. Met de balk op het eiland kies je de snelheid of pauzeer je. Een open eilandboek, handleiding of instellingenvenster zet het leven even stil.</p></div><div><span>02</span><p><strong>Alles laat sporen achter.</strong> Bouw helpt de bewoners. Regen voedt de akkers. Vuur en bevingen kunnen blijvende veranderingen veroorzaken. Probeer dingen uit en kijk wat de bewoners ermee doen.</p></div><div><span>03</span><p><strong>Help een inwoner.</strong> Zie je een vraagteken op het eiland? Klik erop, lees de wens en kies of je helpt. Een klik op andere gebouwen toont bewoners, bouwjaar en herinneringen. Versleep de kaart of zoom om de rest te zien. Rond 2100 begint het laatste hoofdstuk, met een eigen eindscène en eilandscore.</p></div></div><p class="dialog-note">Spatie: pauze · Scroll of +/−: zoom · Slepen: verkennen<br>Je eiland wordt automatisch in deze browser bewaard.</p><button class="primary-button" data-close>Ik laat ze even hun gang gaan ↗</button></dialog>
 
   <dialog id="book-dialog" class="book-dialog" aria-label="Het eilandboek"><div class="book-bar"><div class="book-tabs" role="tablist" aria-label="Hoofdstukken van het eilandboek"><button id="book-tab-journal" role="tab" aria-controls="book-journal" aria-selected="true" tabindex="0"><span aria-hidden="true">✳</span> Kroniek</button><button id="book-tab-family" role="tab" aria-controls="book-family" aria-selected="false" tabindex="-1"><span aria-hidden="true">♧</span> Familie</button><button id="book-tab-wishes" role="tab" aria-controls="book-wishes" aria-selected="false" tabindex="-1"><span aria-hidden="true">♡</span> Wensen</button><button id="book-tab-challenges" role="tab" aria-controls="book-challenges" aria-selected="false" tabindex="-1"><span aria-hidden="true">✧</span> Uitdagingen</button><button id="book-tab-museum" role="tab" aria-controls="book-museum" aria-selected="false" tabindex="-1"><span aria-hidden="true">⌂</span> Museum</button><button id="book-tab-album" role="tab" aria-controls="book-album" aria-selected="false" tabindex="-1"><span aria-hidden="true">▣</span> Album</button><button id="book-tab-collection" role="tab" aria-controls="book-collection" aria-selected="false" tabindex="-1"><span aria-hidden="true">▧</span> Verzameling</button></div><button id="book-close" class="dialog-close book-close" aria-label="Sluit het eilandboek">×</button></div><section id="book-journal" class="book-page journal-page" role="tabpanel" aria-labelledby="book-tab-journal"><span class="eyebrow">HET EILANDARCHIEF</span><h2>De kroniek van jouw eiland.</h2><p>Hoofdstukken vol familie, eigen ideeën en jouw ingrepen. Laat zien brengt je naar de plek zoals die er nu bij ligt.</p><div class="chronicle-legend"><span>♧ Familie</span><span>✳ Jouw ingreep</span></div><nav id="journal-chapters" class="journal-chapters" aria-label="Hoofdstukken van de kroniek"></nav><p class="dialog-note">De kroniek bewaart maximaal 350 berichten. Grote momenten en familie krijgen voorrang op dagelijkse nieuwtjes.</p><div id="journal-entries"></div></section><section id="book-family" class="book-page family-page" role="tabpanel" aria-labelledby="book-tab-family" hidden><span class="eyebrow">DE FAMILIE VAN HET EERSTE HUIS</span><h2 id="family-title"></h2><p>Het huis blijft. Iedere generatie geeft de sleutel door.</p><section id="family-current" class="family-current"></section><p id="family-note" class="dialog-note"></p><div class="family-navigation"><button id="family-oldest">Naar de eerste generatie ↑</button><button id="family-latest">Naar de huidige generatie ↓</button><button id="family-find-home">Bekijk hun huis ↗</button></div><ol id="family-generations" class="family-generations" aria-label="Generaties van de eerste familie"></ol></section><section id="book-wishes" class="book-page wishes-page" role="tabpanel" aria-labelledby="book-tab-wishes" hidden><span class="eyebrow">EEN VRAAG VAN HET EILAND</span><h2 id="wishes-title">Wensen van inwoners</h2><p>Je mag helpen of gewoon blijven kijken. Hulp vergroot hun vertrouwen én de verwachting dat je terugkomt. Zonder ingreep zoeken ze hun eigen weg.</p><section id="commission-box" class="commission-box" hidden><h3>Jouw opdracht</h3><p id="commission-note"></p><div class="commission-choices"><button id="commission-watchtower">Uitkijktoren</button><button id="commission-rose-garden">Rozentuin</button><button id="commission-grand-fountain">Grote fontein</button><button id="commission-carillon">Klokkentoren</button></div></section><section id="wish-current" class="family-current"></section><div class="wish-actions"><button id="wish-help" class="primary-button" hidden>Help deze inwoner</button><button id="wish-find" class="secondary-button" hidden>Bekijk inwoner ↗</button></div><label class="setting-row"><span>Toon kleine wenswolkjes</span><input id="wish-bubbles" type="checkbox"></label><h3>Eerdere wensen</h3><ol id="wish-history" class="wish-history"></ol></section><section id="book-challenges" class="book-page challenges-page" role="tabpanel" aria-labelledby="book-tab-challenges" hidden><span class="eyebrow">ALLEEN ALS JE ZIN HEBT</span><h2 id="challenges-title">Kleine uitdagingen</h2><p>Dit eiland heeft een paar vrijblijvende ideeën. Er hangt geen beloning of straf aan. Gewoon kijken blijft genoeg.</p><p id="challenge-note" class="dialog-note"></p><ol id="challenge-list" class="challenge-list"></ol><h3>De eilandkeur tot nu toe</h3><p id="keur-now" class="dialog-note"></p><ul id="keur-now-list" class="keur-list"></ul></section><section id="book-museum" class="book-page museum-page" role="tabpanel" aria-labelledby="book-tab-museum" hidden><span class="eyebrow">EEN TIJDCAPSULE</span><h2>Het eilandmuseum</h2><p id="museum-note"></p><ol id="museum-list" class="challenge-list"></ol></section><section id="book-album" class="book-page album-page" role="tabpanel" aria-labelledby="book-tab-album" hidden><span class="eyebrow">VANZELF GEKIEKT</span><h2>Het fotoalbum</h2><p id="album-note"></p><div id="album-grid" class="album-grid"></div></section><section id="book-collection" class="book-page collection-page" role="tabpanel" aria-labelledby="book-tab-collection" hidden><span class="eyebrow">SPOREN VAN AL JE EILANDEN</span><h2 id="collection-title">De verzameling</h2><p id="collection-progress"></p><p id="collection-storage" class="dialog-note"></p><div id="collection-groups"></div></section></dialog>
-  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480">Een groeiende wereld · 480</option><option value="560">Een klein rijk · 560</option><option value="625">Een groot rijk · 625</option><option value="720" selected>Groeit mee · tot 720</option></select></label><label class="setting-row"><span><strong>Leven tijdens afwezigheid</strong><small>Bij terugkomst maximaal drie eeuwen verder, behalve wanneer je pauzeert.</small></span><input type="checkbox" id="offline-life" checked></label><label class="setting-row"><span><strong>Wisselend tempo</strong><small>Vlot in de eerste eeuwen, rustiger in de korte moderne tijdperken.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Af en toe inzoomen</strong><small>De camera glijdt soms dichtbij een nieuw tijdperk, een schat of een opening, als je even niets doet.</small></span><input type="checkbox" id="auto-zoom" checked></label><label class="setting-row"><span><strong>Exacte getallen</strong><small>Toon voorraden en percentages als cijfers in plaats van in woorden.</small></span><input type="checkbox" id="show-numbers"></label><label class="setting-row"><span><strong>Dag, nacht en seizoenen</strong><small>Avondlicht, lantaarns, herfstbladeren en sneeuw. Alleen sfeer: het eiland zelf merkt er niets van.</small></span><input type="checkbox" id="day-night" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
+  <dialog id="settings-dialog"><button class="dialog-close" data-close aria-label="Sluiten">×</button><span class="eyebrow">EEN PAAR KLEINE VOORKEUREN</span><h2>Jouw hoekje van de oceaan.</h2><label class="setting-row"><span><strong>Ruimte om te groeien</strong><small>Een vaste grens aan de ambities van het eiland.</small></span><select id="expansion-limit"><option value="160" hidden>Oud klein eiland · 160</option><option value="320" hidden>Bewaard eiland · 320</option><option value="440">Ruimte voor buurten · 440</option><option value="480">Een groeiende wereld · 480</option><option value="560">Een klein rijk · 560</option><option value="625">Een groot rijk · 625</option><option value="720" selected>Groeit mee · tot 720</option></select></label><label class="setting-row"><span><strong>Leven tijdens afwezigheid</strong><small>Bij terugkomst maximaal drie eeuwen verder, behalve wanneer je pauzeert.</small></span><input type="checkbox" id="offline-life" checked></label><label class="setting-row"><span><strong>Wisselend tempo</strong><small>Vlot in de eerste eeuwen, rustiger in de korte moderne tijdperken.</small></span><input type="checkbox" id="accelerating" checked></label><label class="setting-row"><span><strong>Af en toe inzoomen</strong><small>De camera glijdt soms dichtbij een nieuw tijdperk, een schat of een opening, als je even niets doet.</small></span><input type="checkbox" id="auto-zoom" checked></label><label class="setting-row"><span><strong>Muziek</strong><small>Een rustige muziekbedding die per tijdperk van klank verandert.</small></span><input type="range" id="music-volume" min="0" max="100" step="5" value="50" aria-label="Volume van de muziek"></label><label class="setting-row"><span><strong>Geluiden</strong><small>Zee, vogels, het dorp en grote momenten.</small></span><input type="range" id="effects-volume" min="0" max="100" step="5" value="100" aria-label="Volume van de geluiden"></label><label class="setting-row"><span><strong>Exacte getallen</strong><small>Toon voorraden en percentages als cijfers in plaats van in woorden.</small></span><input type="checkbox" id="show-numbers"></label><label class="setting-row"><span><strong>Dag, nacht en seizoenen</strong><small>Avondlicht, lantaarns, herfstbladeren en sneeuw. Alleen sfeer: het eiland zelf merkt er niets van.</small></span><input type="checkbox" id="day-night" checked></label><label class="setting-row"><span><strong>Zeldzame eindes</strong><small>Laat ruimte voor buitengewone beslissingen.</small></span><input type="checkbox" id="rare-endings" checked></label><label class="setting-row"><span><strong>Verhaalkaarten op het eiland</strong><small>Standaard uit. Alle gebeurtenissen blijven in het logboek.</small></span><input type="checkbox" id="story-cards"></label><label class="setting-row"><span><strong>Rustige animaties</strong><small>Minder golven, wolken en beweging.</small></span><input type="checkbox" id="reduce-motion"></label><p class="dialog-note">De laatste druppel vraagt om geavanceerde techniek, ongewone ambitie en ruimte om vrijwel de hele oceaan droog te leggen. De meeste eilanden komen nooit zo ver.</p><button id="restart" class="text-danger">Begin een nieuw eiland</button><div id="restart-confirm" hidden><p>Het huidige eiland en zijn geschiedenis worden vervangen.</p><button id="confirm-restart" class="primary-button">Een nieuw begin</button><button id="cancel-restart" class="secondary-button">Bewaar dit eiland</button></div><p id="save-status" class="save-status">Je eiland is op dit apparaat opgeslagen.</p></dialog>
 
   <dialog id="ending-dialog" class="ending-dialog"><button id="ending-close" class="dialog-close" aria-label="Sluit het naschrift">×</button><span class="eyebrow">HET EILAND HEEFT EEN VERHAAL</span><div class="ending-symbol">◉</div><h2 id="ending-title">De erfenis van het eiland.</h2><p class="ending-quote" id="ending-quote"></p><p id="ending-description"></p><div class="ending-shortage"><span>WAT ZE ACHTERLATEN</span><strong id="ending-consequence"></strong><p id="ending-detail"></p></div><section class="island-scores" aria-label="De eilandkeur"><span class="eyebrow">DE EILANDKEUR</span><div class="keur-head"><div id="keur-medal" class="keur-medal"><strong id="ending-score"></strong><small>van 100</small></div><div><h3 id="keur-title"></h3><p id="keur-line"></p></div></div><div id="score-breakdown"></div><h4 id="keur-count" class="keur-count"></h4><ul id="keur-list" class="keur-list"></ul><p>De keur telt zes onderdelen, samen 100 punten. Ze trekken tegen elkaar in: helpen maakt ze dankbaar maar afhankelijk, en een paar beproevingen maken ze sterk, maar te veel breekt ze. Alleen toekijken levert een mooi eiland op; een perfect eiland vraagt om het midden: ongeveer de helft van de wensen helpen en ze een paar keer op de proef stellen.</p><p id="score-recipe" class="dialog-note"></p></section><p id="ending-stats"></p><div class="ending-maps"><figure><svg id="ending-before" viewBox="0 0 250 250" role="img" aria-label="Het oorspronkelijke eiland"></svg><figcaption>Het begin</figcaption></figure><figure><svg id="ending-after" viewBox="0 0 250 250" role="img" aria-label="Het uiteindelijke eiland"></svg><figcaption>Het eiland dat zij maakten</figcaption></figure></div><p id="ending-causes"></p><div id="ending-chronicle"></div><button id="ending-continue" class="primary-button">Bekijk het uiteindelijke eiland ↗</button><button id="ending-replay" class="secondary-button">Speel de eindscène opnieuw ↻</button><button id="ending-sandbox" class="secondary-button">Speel vrij verder →</button><button id="ending-new" class="secondary-button">Begin een nieuw eiland ↻</button><button id="ending-card" class="secondary-button">Bewaar eindkaart ↓</button><button id="ending-link" class="secondary-button">Kopieer link naar dit eiland</button></dialog>
   <script>(()=>{
@@ -2157,9 +2169,9 @@ const DELIGHT_NAMES=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.name]));
 const DELIGHT_LABELS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.label]));
 const DELIGHT_OPENINGS=Object.fromEntries(DELIGHTS.map(d=>[d.type,d.opening]));
 // The zoo and the theme park need a whole block, so from year 200 the island keeps one free for each of them.
-const BIG_DELIGHTS=['zoo','theme-park'];
+const BIG_DELIGHTS=['zoo','theme-park','spaceport'];
 // Rides stand at the back (they are tall); the zoo's low enclosures sit in front of its gate, with giraffes on the sides.
-const DELIGHT_RING=[[-1,0],[0,-1],[-1,-1],[1,1],[1,0],[0,1],[1,-1],[-1,1]],DELIGHT_ROLES={'theme-park':[0,1,2,3,4,4,6,6],zoo:[3,4,4,0,1,2,5,5]};
+const DELIGHT_RING=[[-1,0],[0,-1],[-1,-1],[1,1],[1,0],[0,1],[1,-1],[-1,1]],DELIGHT_ROLES={'theme-park':[0,1,2,3,4,4,6,6],zoo:[3,4,4,0,1,2,5,5],spaceport:[9,10,8,8,8,8,8,8]};
 function reserveDelightGrounds(s){
  s.delightGrounds??={};
  for(const type of BIG_DELIGHTS){
@@ -2168,12 +2180,14 @@ function reserveDelightGrounds(s){
   // A block of five by five, like the castle grounds: three enclosures or rides at the back, a plaza at the front,
   // and a ring of park around it so no houses crowd in and hide it.
   const ring2=[];for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)if(Math.max(Math.abs(dx),Math.abs(dy))===2)ring2.push([dx,dy]);
-  const spots=s.land.filter(t=>free(t)&&Math.hypot(t.x,t.y)>=3&&DELIGHT_RING.every(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy)))&&ring2.filter(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy))).length>=7);
+  // The spaceport only needs its concrete apron, but it must be by the sea, well away from the homes.
+  const rocket=type==='spaceport',seaward=t=>[[2,0],[-2,0],[0,2],[0,-2],[2,2],[-2,-2],[2,-2],[-2,2],[3,0],[0,3],[-3,0],[0,-3]].some(([dx,dy])=>{const n=s.tile(t.x+dx,t.y+dy);return !n||n.kind==='water';});
+  const spots=s.land.filter(t=>free(t)&&Math.hypot(t.x,t.y)>=3&&DELIGHT_RING.every(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy)))&&(rocket?seaward(t):ring2.filter(([dx,dy])=>free(s.tile(t.x+dx,t.y+dy))).length>=7));
   if(!spots.length)continue;
   const spot=spots[(s.seed+type.length*31)%spots.length];
   spot.reservedFor=`delight:${type}`;s.delightGrounds[type]={x:spot.x,y:spot.y};
   const claim=(dx,dy,i)=>{const yard=s.tile(spot.x+dx,spot.y+dy);if(!free(yard))return;yard.reservedFor='delight';yard.yardOf={type,x:spot.x,y:spot.y,i};};
-  DELIGHT_RING.forEach(([dx,dy],k)=>claim(dx,dy,DELIGHT_ROLES[type][k]));for(const [dx,dy] of ring2)claim(dx,dy,type==='zoo'?7:6);
+  DELIGHT_RING.forEach(([dx,dy],k)=>claim(dx,dy,DELIGHT_ROLES[type][k]));if(!rocket)for(const [dx,dy] of ring2)claim(dx,dy,type==='zoo'?7:6);
  }
 }
 // When the zoo or the theme park opens, the strip in front of it is cleared (the residents move a street over),
@@ -2236,8 +2250,18 @@ function reserveCastleSite(s){
  s.castleSite={x:site.x,y:site.y};site.reservedFor='castle';
  for(const [dx,dy] of CASTLE_RING){const n=s.tile(site.x+dx,site.y+dy);if(castleOpen(n))n.reservedFor='castle';}
 }
+// The castle keeps growing: every century and a half it spends a few years in scaffolding and comes out grander.
+const CASTLE_STEPS=['Het kasteel krijgt een tweede ring muren. De wachters moeten nu twee keer zo ver lopen.','Er komt een poortgebouw met een ophaalbrug die echt op en neer kan. De kinderen proberen het om de vijf minuten.','Een nieuwe, hoge toren met een uitkijkpost. Op heldere dagen zie je de buureilandjes zwaaien.','Een lichte paleisvleugel met hoge ramen. Het kasteel is nu officieel ook gezellig.','Op de muren wapperen vlaggen voor elke familie van het eiland. Het waait er nooit meer stil.','Een glazen koepel op de oude toren. ’s Nachts gloeit hij als een lantaarn boven het eiland.','Zonnepanelen op de kantelen en een tuin op het dak. De ridders van vroeger zouden het niet geloven.'];
+const CASTLE_STEP_YEARS=150,CASTLE_SCAFFOLD_YEARS=8;
+function advanceCastle(s){
+ const court=s.court;if(!court||s.ending)return;const tile=s.tile(court.x,court.y);if(tile?.building!=='palace')return;
+ court.level??=0;
+ if(court.renovating){if(s.year<court.renovating)return;court.renovating=null;court.level++;
+  s.log(CASTLE_STEPS[court.level-1],'palace',{x:court.x,y:court.y});s.signal('built',tile,'Het kasteel groeit',{sound:'fanfare',text:CASTLE_STEPS[court.level-1].split('. ')[0]+'.'});return;}
+ if(court.level<CASTLE_STEPS.length&&s.year>=court.year+(court.level+1)*CASTLE_STEP_YEARS){court.renovating=s.year+CASTLE_SCAFFOLD_YEARS;s.log('Het kasteel staat in de steigers. Niemand weet precies wat er komt, behalve de metselaars, en die zeggen niets.','culture',{x:court.x,y:court.y});}
+}
 function advanceMonuments(s){
- s.monuments??=[];if(s.year%10===5){reserveCastleSite(s);if(s.court)claimCastleGrounds(s);}if(s.ending||s.year%7!==3)return;
+ s.monuments??=[];advanceCastle(s);if(s.year%10===5){reserveCastleSite(s);if(s.court)claimCastleGrounds(s);}if(s.ending||s.year%7!==3)return;
  for(const m of MONUMENTS){
   if(s.monuments.some(x=>x.kind===m.kind)||!m.when(s))continue;
   if(m.square&&s.monuments.some(x=>x.square))continue;
@@ -4259,10 +4283,23 @@ function drawWeather(r){
 }
 
 // A soundscape that grows with the island, synthesised in the browser: no audio files.
+// The music never repeats a tune: each age has its own instrument, chords and scale, and a phrase now and then.
+const ERA_MUSIC=[
+ {name:'begin',root:130.81,scale:[0,2,4,7,9],chords:[[0,7],[5,12],[-3,4],[0,7]],pad:'sine',lead:'flute',octave:2,gap:1.25},
+ {name:'oude wereld',root:146.83,scale:[0,2,3,5,7,9,10],chords:[[0,3,7],[5,9,12],[3,7,10],[-2,5,10]],pad:'triangle',lead:'lute',octave:2,gap:1},
+ {name:'stoomtijd',root:174.61,scale:[0,2,4,5,7,9,11],chords:[[0,4,7],[5,9,12],[-3,4,9],[7,11,14]],pad:'triangle',lead:'musicbox',octave:3,gap:.9},
+ {name:'moderne tijd',root:155.56,scale:[0,2,4,7,9,11],chords:[[0,4,7,11],[-3,4,7,12],[5,9,12,16],[7,11,14,17]],pad:'sine',lead:'epiano',octave:2,gap:1.1},
+ {name:'toekomst',root:110,scale:[0,2,4,6,7,9,11],chords:[[0,7,14],[2,9,14],[5,12,16],[4,11,16]],pad:'sine',lead:'glass',octave:3,gap:1.3}
+];
+const semis=(root,n)=>root*Math.pow(2,n/12);
 class Soundscape{
  constructor(){
   const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw new Error('unavailable');
   this.ctx=new Audio();this.master=this.ctx.createGain();this.master.gain.value=.9;this.master.connect(this.ctx.destination);
+  // Two buses: effects and ambience on one, music (softened by a gentle low-pass) on the other.
+  this.sfx=this.ctx.createGain();this.sfx.connect(this.master);
+  this.musicBus=this.ctx.createGain();this.musicBus.gain.value=.5;const warm=this.ctx.createBiquadFilter();warm.type='lowpass';warm.frequency.value=2400;this.musicBus.connect(warm).connect(this.master);
+  this.musicStep=0;this.melody=0;
   this.enabled=false;this.next={};this.brown=this.noise(4,true);this.white=this.noise(2,false);this.sea();
  }
  noise(seconds,brown){
@@ -4273,24 +4310,55 @@ class Soundscape{
  sea(){
   const c=this.ctx,src=c.createBufferSource(),filter=c.createBiquadFilter(),gain=c.createGain(),lfo=c.createOscillator(),depth=c.createGain();
   src.buffer=this.brown;src.loop=true;filter.type='lowpass';filter.frequency.value=450;gain.gain.value=.22;this.seaGain=gain;
-  lfo.frequency.value=.13;depth.gain.value=.055;lfo.connect(depth).connect(gain.gain);src.connect(filter).connect(gain).connect(this.master);src.start();lfo.start();
+  lfo.frequency.value=.13;depth.gain.value=.055;lfo.connect(depth).connect(gain.gain);src.connect(filter).connect(gain).connect(this.sfx);src.start();lfo.start();
  }
  async start(){await this.ctx.resume();this.enabled=true;}
  async stop(){await this.ctx.suspend();this.enabled=false;}
  pause(){if(this.ctx.state==='running')this.ctx.suspend();}
  resume(){if(this.enabled)this.ctx.resume();}
- tone(freq,duration,{type='sine',volume=.05,delay=0,to=null}={}){
+ // Volumes from 0 to 1; music sits well under the island's own sounds.
+ setVolumes({music=.5,effects=1}={}){const now=this.ctx.currentTime;this.musicBus.gain.setTargetAtTime(Math.max(0,Math.min(1,music))*.9,now,.3);this.sfx.gain.setTargetAtTime(Math.max(0,Math.min(1,effects)),now,.3);}
+ tone(freq,duration,{type='sine',volume=.05,delay=0,to=null,bus=null}={}){
   const c=this.ctx,t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+duration);
-  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(volume,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g).connect(this.master);o.start(t);o.stop(t+duration+.05);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(volume,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g).connect(bus||this.sfx);o.start(t);o.stop(t+duration+.05);
  }
  hiss(duration,{volume=.05,delay=0,filter='lowpass',frequency=800,attack=.02}={}){
   const c=this.ctx,t=c.currentTime+delay,s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();s.buffer=this.white;f.type=filter;f.frequency.value=frequency;
-  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(volume,t+attack);g.gain.exponentialRampToValueAtTime(.0001,t+duration);s.connect(f).connect(g).connect(this.master);s.start(t,Math.random());s.stop(t+duration+.05);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(volume,t+attack);g.gain.exponentialRampToValueAtTime(.0001,t+duration);s.connect(f).connect(g).connect(this.sfx);s.start(t,Math.random());s.stop(t+duration+.05);
+ }
+ // A slow swell for chords: long attack and release, two slightly detuned voices.
+ pad(freq,duration,{type='sine',volume=.012,delay=0,attack=2.4}={}){
+  const c=this.ctx,t=c.currentTime+delay,g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(volume,t+attack);g.gain.setValueAtTime(volume,t+Math.max(attack,duration-2.5));g.gain.linearRampToValueAtTime(0,t+duration);g.connect(this.musicBus);
+  for(const detune of [-4,4]){const o=c.createOscillator();o.type=type;o.frequency.value=freq;o.detune.value=detune;o.connect(g);o.start(t);o.stop(t+duration+.1);}
+ }
+ // One melody note, in the voice of the age.
+ lead(kind,freq,{delay=0,volume=.02}={}){
+  const c=this.ctx,t=c.currentTime+delay,bus=this.musicBus;
+  if(kind==='flute'){const o=c.createOscillator(),g=c.createGain(),lfo=c.createOscillator(),depth=c.createGain();o.frequency.value=freq;lfo.frequency.value=5;depth.gain.value=freq*.006;lfo.connect(depth).connect(o.frequency);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(volume,t+.18);g.gain.linearRampToValueAtTime(volume*.7,t+.8);g.gain.linearRampToValueAtTime(0,t+1.4);o.connect(g).connect(bus);o.start(t);lfo.start(t);o.stop(t+1.5);lfo.stop(t+1.5);}
+  else if(kind==='lute'){this.tone(freq,1.3,{type:'triangle',volume,delay,bus});this.tone(freq*2,.5,{volume:volume*.25,delay,bus});}
+  else if(kind==='musicbox'){this.tone(freq,1.6,{volume,delay,bus});this.tone(freq*4,.4,{volume:volume*.18,delay,bus});}
+  else if(kind==='epiano'){this.tone(freq,2.2,{volume,delay,bus});this.tone(freq*2,1,{volume:volume*.3,delay,bus});this.tone(freq*1.003,2,{volume:volume*.5,delay,bus});}
+  else{this.pad(freq,2.6,{volume:volume*.9,delay,attack:.5});this.tone(freq*2,1.8,{volume:volume*.25,delay:delay+.05,bus});}
+ }
+ // Every chord change: a soft pad and, now and then, a short wandering phrase. Night plays less and lower.
+ music(era,night){
+  const now=this.ctx.currentTime;if((this.next.music||0)>now)return;
+  const m=ERA_MUSIC[Math.max(0,Math.min(ERA_MUSIC.length-1,era))],chord=m.chords[this.musicStep%m.chords.length],length=(7.5+Math.random()*2.5)*m.gap;
+  this.next.music=now+length;this.musicStep++;
+  const quiet=night?.55:1;
+  for(const n of chord)this.pad(semis(m.root,n),length+2.5,{type:m.pad,volume:.011*quiet});
+  if(Math.random()<(night?.3:.62)){
+   const notes=3+Math.floor(Math.random()*3),step=(.42+Math.random()*.3)*m.gap;
+   for(let i=0;i<notes;i++){this.melody=Math.max(0,Math.min(m.scale.length*2-1,this.melody+[-2,-1,-1,1,1,2][Math.floor(Math.random()*6)]));
+    const degree=this.melody%m.scale.length,octave=Math.floor(this.melody/m.scale.length)+m.octave;
+    this.lead(m.lead,semis(m.root,m.scale[degree]+12*(octave-1)),{delay:1.2+i*step,volume:.018*quiet});}
+  }
  }
  // Called a few times a second with the island's state; each layer keeps its own loose rhythm.
  // close: 0 when the whole island is in view, 1 when zoomed right in. Closer means more town and less sea.
- update({night=false,year=1,building=false,close=0}={}){
+ update({night=false,year=1,building=false,close=0,era=0,storm=false}={}){
   if(!this.enabled)return;
+  this.music(era,night);
   const now=this.ctx.currentTime,quiet=night?.4:1,due=(key,gap)=>{if((this.next[key]||0)>now)return false;this.next[key]=now+gap*(.6+Math.random()*.8);return true;};
   this.master.gain.setTargetAtTime(night?.6:.9,now,1.5);this.seaGain?.gain.setTargetAtTime(.22*(1-.65*close),now,1);
   if(!night&&due('birds',4.5-close*2))this.bird(close);
@@ -4302,6 +4370,7 @@ class Soundscape{
   if(year>=600&&due('bell',50))for(const [f,v] of [[523,.05],[1046,.02],[784,.015]])this.tone(f,3,{volume:v*quiet});
   if(year>=1860&&year<1990&&!night&&due('tram',35)){this.tone(880,.35,{volume:.035});this.tone(1175,.35,{volume:.03,delay:.18});}
   if(year>=1920&&due('traffic',7))this.hiss(2.4,{volume:.03*quiet,frequency:260,attack:.9});
+  if(storm&&due('wind',3))this.hiss(3.4,{volume:.05,filter:'bandpass',frequency:380+Math.random()*200,attack:1.2});
   if(night&&due('crickets',2.5))for(let i=0;i<4;i++)this.tone(4300,.035,{type:'square',volume:.01,delay:i*.07});
  }
  // A cheerful little tune, once at the start of each party.
@@ -4321,10 +4390,24 @@ class Soundscape{
  }
  play(type){
   if(!this.enabled)return;
-  if(type==='rain'){this.hiss(2.2,{volume:.07,filter:'highpass',frequency:1400,attack:.3});for(let i=0;i<6;i++)this.tone(1800+Math.random()*900,.05,{volume:.01,delay:Math.random()*1.6});}
-  else if(type==='rumble'){this.tone(48,1.4,{volume:.12,to:34});this.hiss(1.2,{volume:.06,frequency:140,attack:.05});}
-  else if(type==='fire'){this.hiss(1.4,{volume:.035,filter:'bandpass',frequency:900,attack:.2});for(let i=0;i<10;i++)this.hiss(.03,{volume:.04,delay:Math.random()*1.3,filter:'highpass',frequency:2500,attack:.002});}
-  else if(type==='nudge'||type==='repair'){[659,784,988].forEach((f,i)=>this.tone(f,.5,{volume:.03,delay:i*.09}));}
+  if(type==='rain'){
+   // A shower: soft hiss rising and falling, a lower patter underneath, and drops that land on leaves and roofs.
+   this.hiss(3.6,{volume:.06,filter:'highpass',frequency:1800,attack:.9});this.hiss(3.2,{volume:.04,filter:'bandpass',frequency:700,attack:1.1});
+   for(let i=0;i<18;i++){const f=2400+Math.random()*1600;this.tone(f,.06,{volume:.008+Math.random()*.008,delay:.2+Math.random()*3,to:f*.6});}
+  }
+  else if(type==='rumble'){
+   // A deep thud, a rolling growl and two small aftershocks.
+   this.tone(55,2.2,{volume:.13,to:30});this.tone(82,1.2,{type:'triangle',volume:.05,to:41});this.hiss(2,{volume:.07,frequency:120,attack:.08});
+   for(const d of [1.4,2.1])this.tone(46,.5,{volume:.07,delay:d,to:34});for(let i=0;i<6;i++)this.hiss(.05,{volume:.03,delay:.3+Math.random()*1.4,filter:'bandpass',frequency:1400,attack:.002});
+  }
+  else if(type==='fire'){
+   // A whoosh as it catches, then crackles and pops.
+   this.hiss(.9,{volume:.05,filter:'bandpass',frequency:500,attack:.15});this.hiss(2.6,{volume:.03,filter:'bandpass',frequency:1100,attack:.5});
+   for(let i=0;i<22;i++)this.hiss(.02+Math.random()*.03,{volume:.03+Math.random()*.04,delay:.2+Math.random()*2.4,filter:'highpass',frequency:2000+Math.random()*2500,attack:.001});
+  }
+  else if(type==='nudge'||type==='repair'){for(let i=0;i<3;i++)this.hiss(.05,{volume:.06,delay:i*.14,filter:'bandpass',frequency:1100,attack:.002});[659,784,988].forEach((f,i)=>this.tone(f,.6,{volume:.025,delay:.45+i*.09}));}
+  else if(type==='wish'){this.tone(1319,.5,{volume:.018});this.tone(1976,.7,{volume:.014,delay:.16});}
+  else if(type==='flood'){this.hiss(3,{volume:.07,frequency:320,attack:.6});this.hiss(2.4,{volume:.03,filter:'bandpass',frequency:900,attack:.8,delay:.4});}
   else if(type==='treasure'){[1047,1319,1568,2093].forEach((f,i)=>this.tone(f,.4,{type:'triangle',volume:.025,delay:i*.07}));}
   else if(type==='horn'){this.tone(98,2.2,{type:'sawtooth',volume:.018,to:92});this.tone(147,2,{type:'triangle',volume:.014,to:139});}
   else if(type==='whoosh'){this.hiss(2.4,{volume:.05,filter:'bandpass',frequency:600,attack:.8});}
@@ -4874,7 +4957,7 @@ class IslandRenderer {
     else if(b==='observatory')this.observatory();
     else if(b==='ice-cream')this.iceCream(t);
     else if(b==='greenhouse')this.greenhouse();
-    else if(b==='manor'||b==='palace'){const y=this.sim.year;if(b==='palace'&&t.castle){const grow=y<1250?1.35:y<1750?1.45:y<1950?1.52:1.6;c.scale(grow,grow);this.castleKeep(y);}else{const grow=b==='palace'?(y<1250?1.5:y<1750?1.7:1.8):1.14;c.scale(grow,grow);this.palace(b==='palace',t.variant);}}
+    else if(b==='manor'||b==='palace'){const y=this.sim.year;if(b==='palace'&&t.castle){const court=this.sim.court,level=court?.level??(y<1250?0:y<1750?2:y<1950?4:5),grow=1.35+Math.min(7,level)*.045;c.scale(grow,grow);this.castleKeep(y,level,court?.renovating>=this.sim.year);}else{const grow=b==='palace'?(y<1250?1.5:y<1750?1.7:1.8):1.14;c.scale(grow,grow);this.palace(b==='palace',t.variant);}}
     else if(b==='palace-wing'){this.house(t.variant,2);this.line([[0,-40],[0,-53]],'#a39668',1);this.poly([[0,-53],[9,-50],[0,-47]],'#c8af64');}
     else if(b==='royal-garden')this.formalGarden();
     else if(b==='campus-square'){this.diamond(0,0,22,11,'#d6d6bc');this.line([[-17,0],[0,8],[17,0]],'#aab7a0',2);this.ellipse(0,-3,6,2.5,'#b6c5af');this.poly([[-4,-4],[0,-9],[4,-4],[0,-2]],'#eee9c8');}
@@ -5061,8 +5144,10 @@ class IslandRenderer {
   }
   // The island's castle: curtain walls with battlements, round towers with pointed roofs, a keep and a gate.
   // It grows by adding towers, a gatehouse, a palace wing and lights rather than by simply getting bigger.
-  castleKeep(year){
-    const stone='#ddd6c1',stoneDark='#bcb49c',roof=year>=1750?'#6f9a8c':'#5f6f7a',roofDark=shadeColor(roof,.8),stage=year<1250?0:year<1750?1:year<1950?2:3;
+  castleKeep(year,level=0,renovating=false){
+    const stone='#ddd6c1',stoneDark='#bcb49c',roof=year>=1750?'#6f9a8c':'#5f6f7a',roofDark=shadeColor(roof,.8),stage=level>=4?3:level>=3?2:level>=2?1:0;
+    // From the first step on, a low outer wall rings the castle.
+    if(level>=1){const o=[[-30,2],[0,17],[30,2],[0,-13]];for(let i=0;i<4;i++){const a=o[i],b=o[(i+1)%4];if(i<2)continue;this.poly([a,b,[b[0],b[1]-5],[a[0],a[1]-5]],i===2?'#d3ccb6':'#c4bca4');}}
     const merlons=(a,b,h)=>{for(let i=0;i<=6;i++){const u=i/6,x=a[0]+(b[0]-a[0])*u,y=a[1]+(b[1]-a[1])*u-h;this.rect(x-1,y-2.2,2,2.2,stone);}};
     const wall=(a,b,h,face)=>{this.poly([a,b,[b[0],b[1]-h],[a[0],a[1]-h]],face);this.line([[a[0],a[1]-h],[b[0],b[1]-h]],'#c9c2ab',.6);merlons(a,b,h);};
     const tower=(x,y,r,h,flag=false)=>{
@@ -5095,6 +5180,16 @@ class IslandRenderer {
     for(const [x,y] of [[-13,-6],[-6,-2],[-19,-20-stage*3],[19,-20-stage*3]]){this.line([[x,y+3],[x,y]],'#6f5a40',1);this.ellipse(x,y-1,1.2,1.6,this.light.darkness>.2?'#ffcf6a':'#d9a24e');this.lampLight(x,y-1,this.currentTile);}
     if(stage>=1)tower(0,9,4.4,13+stage*2,stage>=3);
     if(stage>=3){this.ellipse(-24,8,6,2.4,'#a8c4bd');this.ellipse(24,8,6,2.4,'#a8c4bd');}
+    if(level>=1){const o=[[-30,2],[0,17],[30,2]];for(let i=0;i<2;i++){const a=o[i],b=o[i+1];this.poly([a,b,[b[0],b[1]-5],[a[0],a[1]-5]],i?'#c4bca4':'#d3ccb6');merlons(a,b,5);}tower(-30,2,3,9);tower(30,2,3,9);tower(0,17,3,9,level>=2);}
+    if(level>=3){tower(-8,-16,3.6,34,true);}
+    if(level>=5){const colors=['#d4644f','#e2c26a','#5c8fc0','#8cc07a','#c98fb0'];for(let i=0;i<5;i++){const x=-17+i*8.5,y=-12+Math.abs(i-2)*-1.2,sway=this.reduced?0:Math.sin(this.time*2+i)*1;this.line([[x,y],[x,y-7]],'#6f5a40',.6);this.poly([[x,y-7],[x+4+sway,y-6],[x,y-4.6]],colors[i]);}}
+    if(level>=6){const kh=26+stage*4,dy=-14-kh;this.ellipse(0,dy-1,6,4.6,'rgba(190,225,235,.85)');this.ellipse(-1.6,dy-2.6,2,1.4,'rgba(255,255,255,.7)');if(this.light.darkness>.2)this.lampLight(0,dy-1,this.currentTile);}
+    if(level>=7){for(const [x,y] of [[-15,-1],[9,1],[-4,5]])this.poly([[x,y],[x+5,y+2.5],[x+5,y],[x,y-2.5]],'#3f5f7a');this.ellipse(-8,-16-34-3,3,1.2,'#7f9f62');}
+    if(renovating){
+      // Scaffolding up the right side, with a little crane.
+      for(let k=0;k<4;k++){this.line([[6+k*4,6-k*2],[6+k*4,-30-k*2]],'#a08a64',.8);}for(let k=0;k<6;k++){this.line([[6,2-k*6],[18,-4-k*6]],'#a08a64',.6);}
+      const sw=this.reduced?0:Math.sin(this.time*.5)*.2;this.line([[22,0],[22,-44]],'#c95b4c',1.2);this.ctx.save();this.ctx.translate(22,-44);this.ctx.rotate(-.2+sw);this.line([[-14,0],[10,0]],'#c95b4c',1);this.line([[-12,0],[-12,9]],'#6e6a62',.4);this.rect(-13.5,9,3,2,'#bcb49c');this.ctx.restore();
+    }
   }
   palace(grand,v){
     const year=this.sim.year;
@@ -5401,7 +5496,8 @@ class IslandRenderer {
     this.ellipse(1,6,7,3,'#8fbcc8');for(let i=0;i<3;i++){const px=-3+i*3,hop=this.reduced?0:Math.abs(Math.sin(t*3+i))*1.5;this.ellipse(px,4-hop,1,1.6,'#2f3236');this.ellipse(px,4.4-hop,.6,1,'#f2f0ea');}
   }
   // The grounds next to a special building: enclosures for the zoo, big rides for the theme park, a plaza for the rest.
-  nearFields(t){let n=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(this.sim.tile(t.x+dx,t.y+dy)?.building==='farm')n++;return n>=2;}
+  // Only some homes deep among the fields are farms; the others stay ordinary houses.
+  nearFields(t){let n=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(this.sim.tile(t.x+dx,t.y+dy)?.building==='farm')n++;return n>=3&&hash(t.x*3+1,t.y*5+2)<.5;}
   // Among the fields people live in farmhouses: long and low under one big roof, with a barn door and a haystack.
   farmhouse(t){
     const L=26,W=12,H=7,R=9,h=hash(t.x,t.y),wall=['#efe4cc','#e6d6b8','#d9c6a6'][Math.floor(h*3)],roof=this.sim.year<1400?'#bda46c':['#9b4f3f','#7a4b3a','#5e6b63','#8a6a4c'][Math.floor(h*11)%4];
@@ -5416,7 +5512,7 @@ class IslandRenderer {
     this.poly([at(2,W/2,0),at(7,W/2,0),at(7,W/2,5.4),at(2,W/2,5.4)],'#6f5a40');this.line([at(4.5,W/2,0),at(4.5,W/2,5.4)],'#5a4632',.5);
     for(const u of [-9,-4])this.window([at(u,W/2,2),at(u+2.4,W/2,2),at(u+2.4,W/2,4.4),at(u,W/2,4.4)],'#7d8f8a');
     const chimney=at(-L/3,0,H+R*.72);this.rect(chimney[0]-1,chimney[1]-5,2,5,'#8a6a5a');
-    if(this.sim.year>=1900&&h>.55){const sx=20,sy=-2;this.rect(sx-3,sy-20,6,20,'#c9cfd0');this.rect(sx,sy-20,3,20,'#aeb5b7');this.ellipse(sx,sy-20,3,1.4,'#8f9a9c');}
+    if(this.sim.year>=1900&&h>.82){const sx=20,sy=-2;this.rect(sx-3,sy-20,6,20,'#c9cfd0');this.rect(sx,sy-20,3,20,'#aeb5b7');this.ellipse(sx,sy-20,3,1.4,'#8f9a9c');}
   }
   // A tall brick warehouse with a stepped gable, loading doors and a hoist beam; from 1900 a crane stands beside it.
   warehouse(t){
@@ -5466,6 +5562,11 @@ class IslandRenderer {
         for(let k=0;k<3;k++){const bx=16+k*2,by=-16-k*2+Math.sin(time*2+k)*1;this.line([[15,-6],[bx,by+3]],'#8a8478',.4);this.ellipse(bx,by,1.8,2.2,['#d4644f','#5c8fc0','#e2c26a'][k]);}
       }
       this.person(-14,6,'#b18d6b',1);this.person(14,5,'#879c76',2);
+    }else if(i>=8){
+      // The spaceport apron: concrete with markings, fuel tanks or a small control tower.
+      this.diamond(0,0,22,11,'#c9c9c2');this.diamond(0,0,18,9,'#d4d4cd');this.line([[-14,0],[14,0]],'#e8c040',.7);this.line([[0,-7],[0,7]],'#e8c040',.7);
+      if(i===9){for(const [x,y] of [[-6,-2],[5,1]]){this.rect(x-3.5,y-9,7,9,'#eef0f1');this.rect(x,y-9,3.5,9,'#d2d6d8');this.ellipse(x,y-9,3.5,1.6,'#f6f7f8');this.line([[x-3.5,y-5],[x+3.5,y-5]],'#d9534a',.8);}}
+      else if(i===10){this.rect(-3,-22,6,22,'#e3e5e6');this.rect(0,-22,3,22,'#c9cdd0');this.poly([[-6,-22],[0,-26],[6,-22],[0,-19]],'#9fc4d6');this.ellipse(0,-27,1.4,1.4,this.light.darkness>.2?'#ff6b5a':'#d9534a');}
     }else if(i===6){
       // The green ring around the theme park, drawn like the castle park.
       this.castleGarden({x:t.x,y:t.y,gardenStyle:'park'});
@@ -6213,8 +6314,11 @@ function renderChallenges(){
     item.append(title,description,status,progress);return item;
   }));
 }
+let wishHeard=null;
 function updateWishBubble(){
   const wish=ensureWishes(sim).active;
+  // A soft ping when someone starts asking for something.
+  if(wish&&!wish.hidden&&wish.id!==wishHeard){if(wishHeard!==null)soundscape?.play('wish');wishHeard=wish.id;}else if(!wish&&wishHeard===null)wishHeard='';
   $('book-tab-wishes').dataset.pending=String(!!wish&&!sim.ending);
   $('wish-bubble').hidden=!wish||wish.hidden||sim.config.wishBubbles===false||!!sim.ending;
   if(wish){$('wish-speaker').textContent=wish.speaker;$('wish-text').textContent=wish.text;}
@@ -6302,7 +6406,26 @@ function announceAge(){
   clearTimeout(ageTimer);ageTimer=setTimeout(()=>{$('age-card').hidden=true;$('island-window').classList.remove('age-shift');},4800);
 }
 let shownCentury=null;
+// The timeline: one stretch per age, a marker for now and a dot for each big moment you can hover.
+const TIMELINE_AGES=['Begin','Oude wereld','Stoomtijd','Moderne tijd','Toekomst'];
+const TIMELINE_KINDS={delight:'good',palace:'good',famous:'good',visitor:'good',treasure:'good',lighthouse:'good',age:'good',fire:'disaster',flood:'disaster',crisis:'disaster',volcano:'disaster',interference:'you',helped:'you'};
+let timelineKey='';
+function timelinePosition(year){
+  const starts=ERAS.map(e=>Math.max(1,e.year)),end=Math.max(sim.finaleDeadline||2200,starts.at(-1)+60);
+  let i=0;while(i<starts.length-1&&year>=starts[i+1])i++;
+  const from=starts[i],to=starts[i+1]??end;return Math.min(1,(i+Math.max(0,Math.min(1,(year-from)/Math.max(1,to-from))))/starts.length);
+}
+function renderTimeline(){
+  const key=`${sim.year}|${sim.era}|${sim.history.length}`;if(key===timelineKey)return;timelineKey=key;
+  const ages=TIMELINE_AGES.map((label,i)=>{const el=document.createElement('span');el.className='age';el.textContent=label;el.dataset.state=i<sim.era?'past':i===sim.era?'now':'future';return el;});
+  const moments=sim.history.filter(e=>TIMELINE_KINDS[e.type]&&(e.priority||0)>=78).slice(-28).map(e=>{const dot=document.createElement('span');dot.className='moment';dot.dataset.kind=TIMELINE_KINDS[e.type];dot.style.left=`${(timelinePosition(e.year)*100).toFixed(2)}%`;dot.title=`Jaar ${e.year}: ${nl(e.text)}`;return dot;});
+  const marker=document.createElement('span');marker.className='marker';marker.style.left=`${(timelinePosition(sim.year)*100).toFixed(2)}%`;
+  $('timeline-track').replaceChildren(...ages,...moments,marker);
+  const next=ERAS[sim.era+1];
+  $('timeline-now').textContent=sim.ending?'Het verhaal is af':sim.endgameStarted?`Jaar ${sim.year} · het laatste hoofdstuk`:next?`Jaar ${sim.year} · ${TIMELINE_AGES[sim.era+1].toLowerCase()} vanaf ongeveer ${next.year}`:`Jaar ${sim.year} · nog even tot het laatste hoofdstuk`;
+}
 function updateUI(){
+  renderTimeline();
   announceAge();
   const century=Math.floor(sim.year/100);if(shownCentury!==null&&century>shownCentury)soundscape?.play('century');shownCentury=century;
   updateAwayReport();
@@ -6466,9 +6589,9 @@ function frame(now){
     }
   }
   advanceTour(now);offerGift();
-  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite),close:Math.max(0,Math.min(1,(renderer.zoom/Math.max(.3,renderer.fitZoom||1)-1)/1.1))});}
+  if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({era:sim.era,storm:!!sim.storm,night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite),close:Math.max(0,Math.min(1,(renderer.zoom/Math.max(.3,renderer.fitZoom||1)-1)/1.1))});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
-  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');if(signal.moment){maybeDive(signal.x,signal.y,true);soundscape?.play(signal.moment.sound);showToast(signal.moment.text,5200);}}sim.signals=[];}
+  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(signal.type==='flood')soundscape?.play('flood');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');if(signal.moment){maybeDive(signal.x,signal.y,true);soundscape?.play(signal.moment.sound);showToast(signal.moment.text,5200);}}sim.signals=[];}
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;
@@ -6588,6 +6711,8 @@ $('show-numbers').addEventListener('change',e=>toggleNumbers(e.target.checked));
 $('resources').addEventListener('click',()=>toggleNumbers(sim.config.showNumbers!==true));
 $('resources').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleNumbers(sim.config.showNumbers!==true);}});
 $('show-numbers').checked=sim.config.showNumbers===true;
+const volumes=()=>({music:(sim.config.musicVolume??50)/100,effects:(sim.config.effectsVolume??100)/100});
+for(const [id,keyName] of [['music-volume','musicVolume'],['effects-volume','effectsVolume']]){$(id).value=String(sim.config[keyName]??(id==='music-volume'?50:100));$(id).addEventListener('input',e=>{sim.config[keyName]=Number(e.target.value);soundscape?.setVolumes(volumes());save();});}
 $('auto-zoom').checked=sim.config.autoZoom!==false;
 $('auto-zoom').addEventListener('change',e=>{sim.config.autoZoom=e.target.checked;save();});
 $('day-night').addEventListener('change',e=>{sim.config.dayNight=e.target.checked;renderer.dayNight=e.target.checked;updateUI();save();});
@@ -6704,7 +6829,7 @@ document.addEventListener('keydown',e=>{
 
 async function toggleAudio(){
   try{
-    soundscape??=new Soundscape();
+    if(!soundscape){soundscape=new Soundscape();soundscape.setVolumes(volumes());}
     if(soundscape.enabled)await soundscape.stop();else await soundscape.start();
     sim.config.sound=soundscape.enabled;save();
     $('sound').classList.toggle('enabled',soundscape.enabled);$('sound').setAttribute('aria-label',soundscape.enabled?"Zet het geluid uit":"Zet het geluid aan");

@@ -23,8 +23,18 @@ function reserveCastleSite(s){
  s.castleSite={x:site.x,y:site.y};site.reservedFor='castle';
  for(const [dx,dy] of CASTLE_RING){const n=s.tile(site.x+dx,site.y+dy);if(castleOpen(n))n.reservedFor='castle';}
 }
+// The castle keeps growing: every century and a half it spends a few years in scaffolding and comes out grander.
+export const CASTLE_STEPS=['Het kasteel krijgt een tweede ring muren. De wachters moeten nu twee keer zo ver lopen.','Er komt een poortgebouw met een ophaalbrug die echt op en neer kan. De kinderen proberen het om de vijf minuten.','Een nieuwe, hoge toren met een uitkijkpost. Op heldere dagen zie je de buureilandjes zwaaien.','Een lichte paleisvleugel met hoge ramen. Het kasteel is nu officieel ook gezellig.','Op de muren wapperen vlaggen voor elke familie van het eiland. Het waait er nooit meer stil.','Een glazen koepel op de oude toren. ’s Nachts gloeit hij als een lantaarn boven het eiland.','Zonnepanelen op de kantelen en een tuin op het dak. De ridders van vroeger zouden het niet geloven.'];
+export const CASTLE_STEP_YEARS=150,CASTLE_SCAFFOLD_YEARS=8;
+export function advanceCastle(s){
+ const court=s.court;if(!court||s.ending)return;const tile=s.tile(court.x,court.y);if(tile?.building!=='palace')return;
+ court.level??=0;
+ if(court.renovating){if(s.year<court.renovating)return;court.renovating=null;court.level++;
+  s.log(CASTLE_STEPS[court.level-1],'palace',{x:court.x,y:court.y});s.signal('built',tile,'Het kasteel groeit',{sound:'fanfare',text:CASTLE_STEPS[court.level-1].split('. ')[0]+'.'});return;}
+ if(court.level<CASTLE_STEPS.length&&s.year>=court.year+(court.level+1)*CASTLE_STEP_YEARS){court.renovating=s.year+CASTLE_SCAFFOLD_YEARS;s.log('Het kasteel staat in de steigers. Niemand weet precies wat er komt, behalve de metselaars, en die zeggen niets.','culture',{x:court.x,y:court.y});}
+}
 export function advanceMonuments(s){
- s.monuments??=[];if(s.year%10===5){reserveCastleSite(s);if(s.court)claimCastleGrounds(s);}if(s.ending||s.year%7!==3)return;
+ s.monuments??=[];advanceCastle(s);if(s.year%10===5){reserveCastleSite(s);if(s.court)claimCastleGrounds(s);}if(s.ending||s.year%7!==3)return;
  for(const m of MONUMENTS){
   if(s.monuments.some(x=>x.kind===m.kind)||!m.when(s))continue;
   if(m.square&&s.monuments.some(x=>x.square))continue;
