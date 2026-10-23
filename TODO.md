@@ -96,3 +96,9 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 
 ### 7. Eindscherm
 - **Mooier en aansprekender:** het oorspronkelijke kleine, groene eiland naast het grote, volle eiland van het einde, netter vormgegeven en minder tekst.
+
+### 8. Eerste indruk en leesbaarheid (feedback van een speler)
+- **Beter leesbaar:** de interface is nu erg klein en licht. Vooral de tijdlijn, de snelheidsknoppen en de informatie rechtsboven kosten moeite. Iets grotere tekst en donkerdere letters, zonder de rustige uitstraling te verliezen.
+- **Dichterbij beginnen:** de eerste blik toont veel lege grond, terwijl het interessante in een klein stukje gebeurt. Begin dicht op het eerste huis en de bewoners en zoom geleidelijk uit naarmate het eiland groeit.
+- **Verstopte verhalen naar voren halen:** het familieverhaal en andere mooie details zitten nu in het Eilandboek. Laat af en toe zo'n moment op het eiland zelf opvallen, met een subtiel, aanklikbaar berichtje, zodat je eerder een band krijgt met de bewoners.
+- **Kortere introductie:** in plaats van drie schermen één korte begroeting, en de uitleg daarna tijdens het ontdekken, op het moment dat je iets voor het eerst ziet of doet.
