@@ -1816,6 +1816,10 @@ export class IslandRenderer {
     for(const effect of this.effects){
       const p=this.p(effect.x,effect.y),age=effect.elapsed,fade=Math.min(1,age*3,4.8-age);
       this.ctx.save();this.ctx.globalAlpha=fade*.8;
+      // A finished gift: confetti fountains up and a few small fireworks pop overhead.
+      if(effect.type==='gift'){const c=this.ctx;c.globalAlpha=fade;for(let i=0;i<26;i++){const f=((age*.55)+hash(i,31))%1,a=hash(i,7)*Math.PI*2,rr=f*30;this.rect(p.x+Math.cos(a)*rr,p.y-34+f*f*40-Math.sin(f*Math.PI)*30,2,1.4,['#d4644f','#e2c26a','#5c8fc0','#c98fb0','#8cc07a'][i%5]);}
+        for(let k=0;k<3;k++){const cyc=(age*.6+k*.33)%1,bx=p.x+(k-1)*22,by=p.y-70-k*8;if(cyc>.2){const open=(cyc-.2)/.8;c.globalAlpha=fade*(1-open);for(let i=0;i<12;i++){const a=i/12*Math.PI*2;this.ellipse(bx+Math.cos(a)*open*18,by+Math.sin(a)*open*14,1.4,1.4,['#ffd36a','#ff6b5a','#7fd0ff'][k]);}}}
+        c.restore();continue;}
       const danger=effect.type==='rumble',color=danger?'#d1a179':'#e8d49b';
       this.diamond(p.x,p.y,25,12,danger?'#dbab7133':'#edf0be33',color);
       if(effect.type==='rain'){

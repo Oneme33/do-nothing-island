@@ -10,7 +10,7 @@ import {carveRiver,rerouteRiver} from './river.js';
 import {planDelight,reserveDelightGrounds,DELIGHT_LABELS,DELIGHT_OPENINGS} from './delights.js';
 import {advanceMonuments,buildCastle} from './monuments.js';
 import {advanceWeather} from './weather.js';
-import {advanceCommissions} from './commissions.js';
+import {advanceCommissions,COMMISSIONS} from './commissions.js';
 import {advanceVisitors} from './visitors.js';
 import {advanceIslets} from './islets.js';
 import {advanceFamous,advanceDigs} from './famous.js';
@@ -622,6 +622,7 @@ export class Civilization {
       Object.assign(openings,{park:'A public park opens. Doing nothing is now an approved land use.',forest:'A woodland is planted. The squirrels establish a rival economy.',beach:'A beach opens on the new shore. The sea asks everyone to take their towels home.',shop:'The first shop opens. Wanting things becomes a local industry.',bakery:'A bakery opens. The village begins scheduling its mornings around bread.',cafe:'A café terrace opens. The gossip now comes with a small cup.',playground:'A playground opens. The children test gravity. Repeatedly.',fairground:'A Ferris wheel begins turning. The island invents a recreational queue.'});
       Object.assign(openings,{school:'A school opens. The children immediately question the entire system.','science-center':'A science center opens. The researchers request more funding before lunch.'});
       Object.assign(openings,DELIGHT_OPENINGS,{watchtower:'De uitkijktoren is klaar. De eerste bezoeker roept naar beneden dat hij zijn huis ziet.','rose-garden':'De rozentuin bloeit. Het ruikt tot aan de haven.','grand-fountain':'De grote fontein spuit voor het eerst. De duiven zijn meteen vaste klant.',carillon:'De klokkentoren slaat voor het eerst. Hij is twee minuten te vroeg, uit enthousiasme.'});
+      if(t.commissioned)this.signal('gift',t,'Je cadeau is klaar!',{sound:'fanfare',text:`Je cadeau is klaar: de bewoners hebben je ${(COMMISSIONS[type]?.name||'bouwwerk').toLowerCase()} afgebouwd.`});
       if(DELIGHT_OPENINGS[type]&&(this.seed+this.year)%3!==0)startParty(this,t,`Opening: ${DELIGHT_LABELS[type]}`,['Er wordt een lint doorgeknipt. Het lint is er niet blij mee.','Gratis koffie! De hele wijk komt kijken.','De fanfare oefent nog. Het klinkt bijna als muziek.'],8);
       if(type==='powerplant'&&this.year>=1980)openings.powerplant='Een regelbare reservecentrale versterkt het stroomnet. De stad kiest voor leveringszekerheid.';
       if(['school','library','science-center'].includes(type)){const court=neighbors(t).map(([x,y])=>this.tile(x,y)).find(p=>p?.kind==='land'&&!p.building&&!p.buildSite&&!p.landform&&(!p.reservedFor||p.reservedFor==='knowledge')&&p.district==='knowledge');if(court&&!this.buildings.some(p=>p.building==='campus-square')){court.building='campus-square';court.civicLegacy='The knowledge quarter';court.builtYear=this.year;}}

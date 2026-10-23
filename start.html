@@ -3585,6 +3585,7 @@ class Civilization {
       Object.assign(openings,{park:'A public park opens. Doing nothing is now an approved land use.',forest:'A woodland is planted. The squirrels establish a rival economy.',beach:'A beach opens on the new shore. The sea asks everyone to take their towels home.',shop:'The first shop opens. Wanting things becomes a local industry.',bakery:'A bakery opens. The village begins scheduling its mornings around bread.',cafe:'A café terrace opens. The gossip now comes with a small cup.',playground:'A playground opens. The children test gravity. Repeatedly.',fairground:'A Ferris wheel begins turning. The island invents a recreational queue.'});
       Object.assign(openings,{school:'A school opens. The children immediately question the entire system.','science-center':'A science center opens. The researchers request more funding before lunch.'});
       Object.assign(openings,DELIGHT_OPENINGS,{watchtower:'De uitkijktoren is klaar. De eerste bezoeker roept naar beneden dat hij zijn huis ziet.','rose-garden':'De rozentuin bloeit. Het ruikt tot aan de haven.','grand-fountain':'De grote fontein spuit voor het eerst. De duiven zijn meteen vaste klant.',carillon:'De klokkentoren slaat voor het eerst. Hij is twee minuten te vroeg, uit enthousiasme.'});
+      if(t.commissioned)this.signal('gift',t,'Je cadeau is klaar!',{sound:'fanfare',text:`Je cadeau is klaar: de bewoners hebben je ${(COMMISSIONS[type]?.name||'bouwwerk').toLowerCase()} afgebouwd.`});
       if(DELIGHT_OPENINGS[type]&&(this.seed+this.year)%3!==0)startParty(this,t,`Opening: ${DELIGHT_LABELS[type]}`,['Er wordt een lint doorgeknipt. Het lint is er niet blij mee.','Gratis koffie! De hele wijk komt kijken.','De fanfare oefent nog. Het klinkt bijna als muziek.'],8);
       if(type==='powerplant'&&this.year>=1980)openings.powerplant='Een regelbare reservecentrale versterkt het stroomnet. De stad kiest voor leveringszekerheid.';
       if(['school','library','science-center'].includes(type)){const court=neighbors(t).map(([x,y])=>this.tile(x,y)).find(p=>p?.kind==='land'&&!p.building&&!p.buildSite&&!p.landform&&(!p.reservedFor||p.reservedFor==='knowledge')&&p.district==='knowledge');if(court&&!this.buildings.some(p=>p.building==='campus-square')){court.building='campus-square';court.civicLegacy='The knowledge quarter';court.builtYear=this.year;}}
@@ -6648,6 +6649,10 @@ class IslandRenderer {
     for(const effect of this.effects){
       const p=this.p(effect.x,effect.y),age=effect.elapsed,fade=Math.min(1,age*3,4.8-age);
       this.ctx.save();this.ctx.globalAlpha=fade*.8;
+      // A finished gift: confetti fountains up and a few small fireworks pop overhead.
+      if(effect.type==='gift'){const c=this.ctx;c.globalAlpha=fade;for(let i=0;i<26;i++){const f=((age*.55)+hash(i,31))%1,a=hash(i,7)*Math.PI*2,rr=f*30;this.rect(p.x+Math.cos(a)*rr,p.y-34+f*f*40-Math.sin(f*Math.PI)*30,2,1.4,['#d4644f','#e2c26a','#5c8fc0','#c98fb0','#8cc07a'][i%5]);}
+        for(let k=0;k<3;k++){const cyc=(age*.6+k*.33)%1,bx=p.x+(k-1)*22,by=p.y-70-k*8;if(cyc>.2){const open=(cyc-.2)/.8;c.globalAlpha=fade*(1-open);for(let i=0;i<12;i++){const a=i/12*Math.PI*2;this.ellipse(bx+Math.cos(a)*open*18,by+Math.sin(a)*open*14,1.4,1.4,['#ffd36a','#ff6b5a','#7fd0ff'][k]);}}}
+        c.restore();continue;}
       const danger=effect.type==='rumble',color=danger?'#d1a179':'#e8d49b';
       this.diamond(p.x,p.y,25,12,danger?'#dbab7133':'#edf0be33',color);
       if(effect.type==='rain'){
@@ -6995,7 +7000,7 @@ function renderCommissions(){
 }
 function giftSpot(){return sim.land.filter(t=>canCommission(sim,t)).sort((a,b)=>Number(['park','garden','tree'].includes(b.building)||!b.building)-Number(['park','garden','tree'].includes(a.building)||!a.building)||Math.hypot(a.x-.5,a.y-2)-Math.hypot(b.x-.5,b.y-2))[0];}
 for(const type of Object.keys(COMMISSIONS))$(`commission-${type}`).addEventListener('click',()=>{
-  if($('commission-auto').checked){const spot=giftSpot();if(spot&&placeCommission(sim,type,spot.x,spot.y)){$('book-dialog').close();showToast(`De bewoners zetten je ${COMMISSIONS[type].name.toLowerCase()} op een mooie plek.`,3600);maybeDive(spot.x,spot.y,true);renderCommissions();updateUI();save();return;}}
+  if($('commission-auto').checked){const spot=giftSpot();if(spot&&placeCommission(sim,type,spot.x,spot.y)){$('book-dialog').close();showToast(`De bewoners zetten je ${COMMISSIONS[type].name.toLowerCase()} op een mooie plek.`,3600);renderer.dive(spot.x,spot.y,6);renderCommissions();updateUI();save();return;}}
   commissionChoice=type;$('book-dialog').close();chooseMode('nudge');$('interaction-hint').textContent=`Klik op een vrije plek voor je ${COMMISSIONS[type].name.toLowerCase()}. ${COMMISSIONS[type].effect}`;showToast(`Kies een plek voor je ${COMMISSIONS[type].name.toLowerCase()}.`,3600);
 });
 function updateAwayReport(){
@@ -7240,7 +7245,7 @@ function frame(now){
   if(!idleShown&&now-idleSince>600000&&!paused&&!modal&&!document.hidden&&!sim.ending){idleShown=true;renderer.idleEvent={kind:renderer.light?.darkness>.4?(sim.year%2?'aurora':'meteors'):'whale',start:renderer.time};showToast(renderer.light?.darkness>.4?'Omdat je zo heerlijk niets deed: kijk eens naar de lucht.':'Omdat je zo heerlijk niets deed: kijk eens naar zee.',6000);soundscape?.play('chime');}
   if(soundscape?.enabled&&now-soundAt>400){soundAt=now;soundscape.update({era:sim.era,storm:!!sim.storm,night:!!renderer.light?.night,year:sim.year,building:sim.land.some(t=>t.buildSite),close:Math.max(0,Math.min(1,(renderer.zoom/Math.max(.3,renderer.fitZoom||1)-1)/1.1))});}
   if(cinemaActive()&&!touring()&&!paused&&!modal&&!document.hidden){if(advanceCinema(sim,dt))completeCinema();else updateCinemaUI();}
-  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(signal.type==='flood')soundscape?.play('flood');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');if(signal.moment){maybeDive(signal.x,signal.y,true);soundscape?.play(signal.moment.sound);showToast(signal.moment.text,5200);}}sim.signals=[];}
+  if(sim.signals.length){const ordered=sim.signals.slice().sort((a,b)=>(b.priority||0)-(a.priority||0));for(const signal of ordered.slice(0,8)){renderer.addEffect(signal);if(/^Een schat/.test(signal.label||''))soundscape?.play('treasure');if(signal.type==='flood')soundscape?.play('flood');if(/^(Een schat|Opening|Onthulling|Inhuldiging)/.test(signal.label||''))maybeDive(signal.x,signal.y);if(/^(Opening|Onthulling|Inhuldiging)/.test(signal.label||''))soundscape?.play('fanfare');if(signal.type==='gift'&&!tour&&!photoOn)renderer.dive(signal.x,signal.y,7);else if(signal.moment)maybeDive(signal.x,signal.y,true);if(signal.moment){soundscape?.play(signal.moment.sound);showToast(signal.moment.text,5200);}}sim.signals=[];}
   presentMoment(now);
   if(!document.hidden)saveTimer+=dt;if(saveTimer>=10){saveTimer=0;save();}
   renderer.paused=paused||modal||sim.ending&&!tour||now<beatHoldUntil;
