@@ -191,6 +191,7 @@ export class IslandRenderer {
       if(t.yardOf&&!t.building&&this.sim.tile(t.yardOf.x,t.yardOf.y)?.building===t.yardOf.type)this.scene.push({depth:depth-1,draw:()=>this.delightYard(t)});
       else if(t.kind==='land'&&!t.building&&!t.buildSite&&!t.landform&&!t.road&&t.reservedFor!=='square'&&!t.foundingHome&&hash(t.x*5+1,t.y*3-2)<.24)this.scene.push({depth:depth-2,draw:()=>this.meadowTree(t)});
       if(t.treasure&&this.sim.year-t.treasure.year<40)this.scene.push({depth:depth+1,draw:()=>this.treasureChest(t)});
+      if(t.building==='farm'&&isPasture(t)&&!t.fire&&!t.buildSite)this.scene.push({depth:depth+6,draw:()=>this.pastureFront(t)});
       if(t.landform||t.building||t.buildSite)this.scene.push({depth,draw:()=>{if(t.landform)this.drawLandform(t);if(t.building)this.drawBuilding(t);if(t.buildSite)this.drawBuildingSite(t);}});
     }
     // While you zoom or drag, the decoration waits: animals, walkers, boats, clouds and birds come back when you let go.
@@ -1389,13 +1390,35 @@ export class IslandRenderer {
     const walk=this.reduced?0:Math.sin(this.time*.7+t.x)*3;
     for(const [i,[x,y]] of [[3+walk,1],[9-walk*.6,-3],[-1,5]].entries()){const goat=i===1;this.ellipse(x,y-3,4,2.6,goat?'#e9e2cf':'#f4f1e6');this.ellipse(x+3.6,y-5,1.8,1.6,goat?'#7d6a55':'#5f5a50');this.line([[x-2,y-1],[x-2,y+1]],'#6f665a',.8);this.line([[x+2,y-1],[x+2,y+1]],'#6f665a',.8);}
   }
+  // A round stone tower with a silver dome; the slit is open and a white telescope points at the sky.
   observatory(){
-    this.ellipse(4,4,16,5,'#58654418');
-    this.poly([[-9,-3],[0,1],[0,-20],[-9,-24]],'#e2dbc4');this.poly([[0,1],[9,-3],[9,-24],[0,-20]],'#c7c0a8');
-    this.ellipse(0,-23,10,4.5,'#b9b39b');this.poly([[-10,-23],[-8,-30],[-3,-34],[3,-34],[8,-30],[10,-23],[0,-19]],'#a9b4b2');this.poly([[0,-19],[10,-23],[8,-30],[3,-34],[1,-34]],'#8f9b99');
-    this.poly([[-1.5,-34],[1.5,-34],[1.5,-22],[-1.5,-21]],'#4f5d66');
-    this.line([[1,-30],[11,-38]],'#6d6556',2);this.ellipse(11.5,-38.5,1.6,1.2,'#d6d1b8');
-    this.poly([[-5,-7],[-2,-6],[-2,-11],[-5,-12]],'#7d8f8c');
+    const c=this.ctx,winter=(this.light?.winter||0)>.6;
+    this.ellipse(5,4,17,5.5,'#58654418');
+    // The drum, shaded round from light to dark.
+    const grad=(g,stops)=>{if(!g?.addColorStop)return stops[1][1];for(const [o,col] of stops)g.addColorStop(o,col);return g;};
+    let g=grad(c.createLinearGradient?.(-11,0,11,0),[[0,'#ece5cf'],[.45,'#ddd5bc'],[1,'#b5ae98']]);
+    c.beginPath();c.moveTo(-11,-17);c.lineTo(-11,0);c.ellipse(0,0,11,5,0,Math.PI,0,true);c.lineTo(11,-17);c.closePath();c.fillStyle=g;c.fill();
+    for(const y of [-6,-12])this.ctx.beginPath(),c.ellipse(0,y,11,5,0,.15*Math.PI,.85*Math.PI),c.strokeStyle='#00000012',c.lineWidth=.6,c.stroke();
+    // An arched door and two round windows that glow at night.
+    this.poly([[-5.5,1.4],[-1.5,3],[-1.5,-4.5],[-5.5,-6]],'#7b6a55');this.ellipse(-3.5,-5.4,2,1.4,'#7b6a55');this.line([[-3.5,-5],[-3.5,2.2]],'#00000022',.5);
+    this.diamond(-3.5,3.8,4,1.6,'#c9c1a8');
+    for(const [x,y] of [[-8,-11],[4.5,-12]])this.window([[x-1.3,y+1],[x+1.3,y+2],[x+1.3,y-1.4],[x-1.3,y-2.4]],'#6f8794');
+    // A cornice with a little railing.
+    this.ellipse(0,-17,12.5,5.8,'#a69f88');this.ellipse(0,-18,12,5.4,'#c9c2aa');
+    for(let k=0;k<9;k++){const a=Math.PI*(.05+k*.1125),x=Math.cos(a)*12,y=-18+Math.sin(a)*5.6;this.line([[x,y],[x,y-2.6]],'#8d867a',.6);}
+    c.beginPath();c.ellipse(0,-20.6,12,5.6,0,0,Math.PI);c.strokeStyle='#8d867a';c.lineWidth=.6;c.stroke();
+    // The dome, lit from the upper left.
+    g=grad(c.createRadialGradient?.(-4,-28,1,0,-22,15),[[0,winter?'#ffffff':'#f1f4f4'],[.55,winter?'#e3eaee':'#bfcacc'],[1,winter?'#b7c3ca':'#8a989c']]);
+    c.beginPath();c.ellipse(0,-19,10.5,13,0,Math.PI,0);c.ellipse(0,-19,10.5,4.6,0,0,Math.PI);c.fillStyle=g;c.fill();
+    for(const x of [-6,6]){c.beginPath();c.ellipse(0,-19,Math.abs(x),13,0,Math.PI*(x<0?1:1.5),Math.PI*(x<0?1.5:2));c.strokeStyle='#00000014';c.lineWidth=.5;c.stroke();}
+    // The open slit and the telescope looking out of it.
+    this.poly([[-1.8,-31.8],[1.8,-31.6],[2.6,-15],[-2.6,-15]],'#33404a');
+    c.save();c.lineCap='round';
+    c.beginPath();c.moveTo(-.5,-20);c.lineTo(8,-36);c.strokeStyle='#5d666b';c.lineWidth=4.2;c.stroke();
+    c.beginPath();c.moveTo(-.5,-20);c.lineTo(8,-36);c.strokeStyle='#eeebe1';c.lineWidth=3.2;c.stroke();
+    c.lineCap='butt';c.beginPath();c.moveTo(5.8,-31.9);c.lineTo(6.4,-33);c.strokeStyle='#c9a24a';c.lineWidth=3.6;c.stroke();c.restore();
+    this.ellipse(8.2,-36.3,1.8,1.3,'#2f3a44');this.ellipse(8,-36.4,1,.7,this.light?.darkness>.3?'#e8f0ff':'#8fb1c9');
+    this.ellipse(0,-32.4,1.4,.8,'#8a989c');this.line([[0,-32.6],[0,-34.6]],'#7a8589',.6);
   }
   iceCream(t){
     const stripe=['#e9a8a2','#a9cfc6','#efd58e'][Math.floor(hash(t.x,t.y)*3)];
@@ -1479,12 +1502,13 @@ export class IslandRenderer {
     this.poly([[-14,-5],[0,2],[14,-5],[0,-12]],'#b5af87');
     this.poly([[-13,-5],[0,2],[0,2-h],[-13,-5-h]],L.wall);
     this.poly([[0,2],[13,-5],[13,-5-h],[0,2-h]],L.side);
-    this.poly([[-17,-h-3],[-2,-h-20],[17,-h-11],[2,-h-1]],roof);
-    this.poly([[-17,-h-3],[0,-h+5],[17,-h-3],[2,-h-20]],roof);
-    // Visible gable and two sloped roof planes.
-    this.poly([[-17,-h-3],[-2,-h-17],[12,-h-10],[-2,-h+4]],L.gable||(v>.5?'#bd8b69':'#af805e'));
-    this.poly([[-2,-h-17],[17,-h-7],[2,-h+5],[-2,-h+4]],roof);
-    this.snow([[-17,-h-3],[-2,-h-20],[17,-h-11],[2,-h-1]]);this.snow([[-2,-h-17],[17,-h-7],[2,-h+3],[-2,-h+2]],true);
+    // A gabled roof: the ridge runs along the right wall, with the gable end facing left.
+    const r1=[-7.5,-h-16],r2=[7.5,-h-24];
+    this.poly([[-15.5,-h-4],r1,r2,[1,-h-13.5]],L.gable||shadeColor(roof,1.12));
+    this.poly([[-13,-5-h],[0,2-h],[-6.5,-h-15.5]],shadeColor(L.wall,.97));
+    this.poly([[-1.5,4-h],[15.5,-4.5-h],r2,r1],roof);
+    this.line([[-1.5,4-h],r1],shadeColor(roof,.8),.8);
+    this.snow([[-1.5,4-h],[15.5,-4.5-h],r2,r1],true);
     this.poly([[-8,-2],[-3,0],[-3,-8],[-8,-10]],'#897957');
     this.window([[5,-7],[9,-9],[9,-14],[5,-12]],L.shutter);
     if(L.flowers){this.poly([[4,-6],[10,-9],[10,-7],[4,-4]],'#8d7a5a');for(let i=0;i<3;i++)this.ellipse(5.5+i*2,-6.6-i,1.2,1,L.flowers);}
@@ -1532,9 +1556,18 @@ export class IslandRenderer {
     const L=this.light||{},grass=L.winter>.6?'#e4e9e4':L.autumn>.5?'#a9b06e':'#9fbb73';
     this.diamond(0,-1,21,10,grass);
     for(let i=0;i<7;i++){const x=(hash(i,t.x)-.5)*30,y=(hash(t.y,i)-.5)*13-1;this.line([[x,y],[x-1,y-2.4]],shadeColor(grass,.8),.8);this.line([[x+1,y],[x+1.6,y-2]],shadeColor(grass,.85),.7);}
-    const corners=[[-21,-1],[0,-11],[21,-1],[0,9]];
-    for(let i=0;i<4;i++){const a=corners[i],b=corners[(i+1)%4];for(let k=0;k<=4;k++){const f=k/4,x=mix(a[0],b[0],f),y=mix(a[1],b[1],f);this.line([[x,y],[x,y-4]],'#8a6a4c',.9);}this.line([[a[0],a[1]-3],[b[0],b[1]-3]],'#a08260',.7);this.line([[a[0],a[1]-1.6],[b[0],b[1]-1.6]],'#a08260',.6);}
+    // Only the back half of the fence here; the front half is drawn after the animals, so they stand inside it.
+    this.pastureFence(0,2);
     this.poly([[6,2],[12,5],[12,3.5],[6,.5]],'#7f6a52');this.poly([[6,.5],[12,3.5],[13,3],[7,0]],'#9fc4cf');
+  }
+  pastureFence(from,to){
+    const corners=[[-21,-1],[0,-11],[21,-1],[0,9]];
+    for(let i=from;i<to;i++){const a=corners[i],b=corners[(i+1)%4];for(let k=0;k<=4;k++){const f=k/4,x=mix(a[0],b[0],f),y=mix(a[1],b[1],f);this.line([[x,y],[x,y-4]],'#8a6a4c',.9);}this.line([[a[0],a[1]-3],[b[0],b[1]-3]],'#a08260',.7);this.line([[a[0],a[1]-1.6],[b[0],b[1]-1.6]],'#a08260',.6);}
+  }
+  pastureFront(t){
+    const p=this.p(t.x,t.y),c=this.ctx;c.save();c.translate(p.x,p.y-2);
+    if(t.builtYear&&this.sim.year-t.builtYear<3){const s=.75+(this.sim.year-t.builtYear)/12;c.scale(s,s);}
+    this.pastureFence(2,4);c.restore();
   }
   farm(v){
     this.diamond(0,-1,21,10,'#b0a575');

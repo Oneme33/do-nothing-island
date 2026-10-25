@@ -283,7 +283,10 @@ let shownAge=null,ageTimer;
 // Now and then the camera glides in close to something happening, but never while you are busy yourself.
 let lastUserActivity=-Infinity,lastDive=-Infinity,idleSince=performance.now(),idleShown=false;
 for(const type of ['pointerdown','wheel','keydown'])window.addEventListener(type,()=>{lastUserActivity=performance.now();idleSince=lastUserActivity;idleShown=false;},{capture:true,passive:true});
-window.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch'){lastUserActivity=performance.now();idleSince=lastUserActivity;}},{capture:true,passive:true});
+// Only real camera moves (dragging, pinching, scroll-zooming) hide the small details for a moment; a click does not.
+let lastCameraMove=-Infinity;
+window.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch'){lastUserActivity=performance.now();idleSince=lastUserActivity;if(e.buttons&&Math.hypot(e.movementX||0,e.movementY||0)>1)lastCameraMove=lastUserActivity;}},{capture:true,passive:true});
+window.addEventListener('wheel',()=>{lastCameraMove=performance.now();},{capture:true,passive:true});
 // Automatic camera dives are off by default on phones; the setting can switch them on.
 const autoZoomOn=()=>sim.config.autoZoom??!(typeof window!=='undefined'&&window.innerWidth<700);
 function maybeDive(x,y,important=false){
@@ -512,7 +515,7 @@ function frame(now){
   // A paused island only needs half the frames, and so does a device that struggles to keep up.
   // While you touch, drag or zoom, every frame is drawn.
   drawTick=(drawTick+1)%2;const slow=(renderer.drawCost||0)>22,interacting=now-lastUserActivity<1500;
-  renderer.interacting=interacting;
+  renderer.interacting=now-lastCameraMove<500;
   if((!renderer.paused&&(!slow||interacting))||interacting||tour||drawTick===0||renderer.needsDraw){renderer.needsDraw=false;const t0=performance.now();renderer.draw(now);renderer.drawCost=(renderer.drawCost||0)*.9+(performance.now()-t0)*.1;}
   const night=renderer.light.darkness>.3;if(night!==nightShown){nightShown=night;$('island-window').classList.toggle('is-night',night);updateUI();}
   if(cinemaActive()){
