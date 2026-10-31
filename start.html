@@ -4607,6 +4607,31 @@ function drawAnimals(r){
  }
 }
 
+// The night sky remembers what the island's visitor did most. Pure scenery, no simulation state.
+const constellationCatalog={
+ hand:{name:'De Grote Hand',stars:[[0,.42],[-.34,.08],[-.48,-.22],[-.22,-.12],[-.04,-.38],[.16,-.16],[.42,-.27],[.32,.04],[.08,.22]],lines:[[0,1],[0,2],[0,4],[0,6],[0,8],[1,2],[2,3],[4,5],[6,7],[7,8]]},
+ bucket:{name:'De Brandende Emmer',stars:[[-.28,.28],[-.18,-.26],[.2,-.26],[.3,.28],[-.28,.28],[0,.52],[0,.8]],lines:[[0,1],[1,2],[2,3],[3,0],[5,6],[5,4]]},
+ cloud:{name:'De Regenwolk',stars:[[-.4,.12],[-.22,-.14],[.04,-.22],[.3,-.1],[.4,.14],[-.12,.24],[.18,.22],[-.02,.62]],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[2,6],[6,7]]},
+ mountain:{name:'De Bevende Berg',stars:[[-.5,.3],[-.2,-.36],[.02,-.08],[.2,-.24],[.48,.3],[-.18,.18],[.16,.16]],lines:[[0,1],[1,2],[2,3],[3,4],[4,0],[1,5],[3,6]]},
+ rescuer:{name:'De Helpende Hand',stars:[[0,.34],[-.3,.06],[-.44,-.2],[-.18,-.1],[0,-.3],[.18,-.1],[.36,-.2],[.3,.06],[-.02,.54]],lines:[[0,1],[0,2],[0,4],[0,6],[0,8],[1,2],[4,5],[6,7]]},
+ house:{name:'Het Eerste Huis',stars:[[-.32,.3],[.32,.3],[.32,-.12],[0,-.38],[-.32,-.12],[-.32,.3],[0,.04]],lines:[[0,1],[1,2],[2,3],[3,4],[4,0],[0,6],[6,1]]},
+ tree:{name:'De Oude Eik',stars:[[0,.5],[0,.12],[-.28,-.12],[.28,-.12],[-.12,-.32],[.12,-.32],[0,-.5]],lines:[[0,1],[1,2],[1,3],[2,4],[3,5],[4,6],[5,6]]},
+ circle:{name:'De Steencirkel',stars:[[0,-.4],[.34,-.2],[.34,.2],[0,.4],[-.34,.2],[-.34,-.2],[-.18,-.52]],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[0,6],[6,5]]}
+};
+const constellationKinds=[
+ ['fire','bucket'],['rain','cloud'],['nudge','hand'],['rumble','mountain'],['rescues','rescuer']
+];
+function constellationsFor(s){
+ const count=s?.interferences||0;if(count<8)return[];
+ const influence=s.influence||{};
+ const dominant=[...constellationKinds].sort((a,b)=>(influence[b[0]]||0)-(influence[a[0]]||0))[0];
+ const first=influence[dominant[0]]>0?dominant[1]:'house';
+ const list=[constellationCatalog[first]];
+ const second=s.origin?.id==='stone-circle'?'circle':s.origin?.id==='ancient-oak'?'tree':'house';
+ if(count>=18&&second!==first)list.push(constellationCatalog[second]);
+ return list;
+}
+
 // Seasonal customs and night life: only scenery, never a change to the island itself.
 const ambHash=(a,b)=>{const n=Math.sin(a*73.1+b*19.7)*31415.9;return n-Math.floor(n);};
 function drawSeasonal(r){
@@ -4692,11 +4717,25 @@ function drawSummerSun(r){
  const g=c.createRadialGradient(W*.88,H*.08,0,W*.88,H*.08,H*.5);g.addColorStop(0,`rgba(255,240,190,${(.45*k).toFixed(3)})`);g.addColorStop(.25,`rgba(255,226,160,${(.16*k).toFixed(3)})`);g.addColorStop(1,'rgba(255,226,160,0)');c.fillStyle=g;c.fillRect(0,0,W,H);
  c.restore();
 }
-// Screen-space night life: stars reflected in the sea, fireflies, and now and then a shooting star.
+// The stars belong to the sky: draw them before the island so trees and roofs hide them naturally.
+function drawNightSky(r){
+ const L=r.light||{},c=r.ctx,W=r.width,H=r.height,t=r.reduced?0:r.time;if(!L.darkness||L.darkness<.35)return;
+ c.save();c.setTransform(r.dpr,0,0,r.dpr,0,0);const d=L.darkness;
+ for(let i=0;i<70;i++){const tw=.5+.5*Math.sin(t*2+i*1.7);c.fillStyle=`rgba(255,250,225,${(.25+.5*tw)*d})`;c.fillRect(ambHash(i,1)*W,ambHash(i,2)*H,1.3,1.3);}
+ const constellations=constellationsFor(r.sim);
+ constellations.forEach((shape,i)=>{
+  const spread=constellations.length===1?.5:.28+i*.4,scale=Math.min(W,H)*(W<600?.075:.065),x=W*spread,y=H*(.13+(i?.15:0)),fade=d*(.45+.2*Math.sin(t*.3+i));
+  c.strokeStyle=`rgba(236,241,224,${(fade*.36).toFixed(3)})`;c.lineWidth=1;
+  for(const [a,b] of shape.lines){c.beginPath();c.moveTo(x+shape.stars[a][0]*scale,y+shape.stars[a][1]*scale);c.lineTo(x+shape.stars[b][0]*scale,y+shape.stars[b][1]*scale);c.stroke();}
+  for(const [sx,sy] of shape.stars){c.fillStyle=`rgba(255,250,224,${(fade*.85).toFixed(3)})`;c.beginPath();c.ellipse(x+sx*scale,y+sy*scale,1.5,1.5,0,0,Math.PI*2);c.fill();}
+  if(W>=600){c.fillStyle=`rgba(236,241,224,${(fade*.55).toFixed(3)})`;c.font='italic 10px Georgia, serif';c.textAlign='center';c.fillText(shape.name,x,y+scale*.78);}
+ });
+ c.restore();
+}
+// Screen-space night life: fireflies above the island and now and then a shooting star.
 function drawNightLife(r){
  const L=r.light||{},c=r.ctx,W=r.width,H=r.height,t=r.reduced?0:r.time;if(!L.darkness||L.darkness<.35)return;
  c.save();const d=L.darkness;
- for(let i=0;i<70;i++){const tw=.5+.5*Math.sin(t*2+i*1.7);c.fillStyle=`rgba(255,250,225,${(.25+.5*tw)*d})`;c.fillRect(ambHash(i,1)*W,ambHash(i,2)*H,1.3,1.3);}
  if(L.summer>.4&&!r.reduced)for(let i=0;i<24;i++){const x=W*(.25+ambHash(i,3)*.5)+Math.sin(t*.7+i)*14,y=H*(.35+ambHash(i,4)*.4)+Math.cos(t*.9+i)*8,glow=.5+.5*Math.sin(t*3+i*2);c.fillStyle=`rgba(220,255,140,${glow*.8*d})`;c.beginPath();c.ellipse(x,y,1.4,1.4,0,0,Math.PI*2);c.fill();}
  const cycle=(t/45)%1;
  if(!r.reduced&&cycle<.04){const u=cycle/.04,x=W*(.15+u*.5),y=H*(.08+u*.18);c.strokeStyle=`rgba(255,255,240,${(1-u)*d})`;c.lineWidth=1.6;c.beginPath();c.moveTo(x,y);c.lineTo(x-40,y-14);c.stroke();c.fillStyle=`rgba(250,246,226,${(1-u)*d})`;c.font='11px Georgia, serif';c.fillText('Iemand doet een wens…',x+8,y+14);}
@@ -5061,6 +5100,7 @@ class IslandRenderer {
     const quake=this.reduced?0:this.effects.filter(e=>e.type==='rumble'&&e.elapsed<1).reduce((s,e)=>s+Math.sin(e.elapsed*55)*(1-e.elapsed)*3,0);
     this.origin={x:this.width*(mobile?.54:.55)-this.center.x*this.zoom+this.pan.x+quake,y:this.height*(cinemaVisible(this.sim)?.62:mobile?.54:.52)-this.center.y*this.zoom+this.pan.y};
     this.drawWater();
+    drawNightSky(this);
     c.save();c.translate(this.origin.x,this.origin.y);c.scale(this.zoom,this.zoom);
     drawIslets(this);
     // Shore water is derived from current geography, so the coast follows every project.

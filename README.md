@@ -8,6 +8,8 @@ De [afvinkbare planning en het werklogboek](TODO.md) worden één onderdeel per 
 
 **Huizen verschillen van elkaar.** De eerste hutjes komen in drie vormen: ronde hutten met een kegeldak, lage langhuizen en houten huisjes met een steil puntdak, elk met een eigen tint stro, riet of hout. Latere huizen krijgen hun eigen gevelkleur, verhoudingen en een dak in leisteen, rood, groen, petrol, terracotta of donkergrijs. Sommige hebben bloembakken, andere geen schoorsteen. Hetzelfde huis houdt altijd hetzelfde uiterlijk.
 
+**De nacht onthoudt je.** Na veel ingrepen verschijnen er sterrenbeelden boven het eiland, genoemd naar wat je het vaakst deed: ‘De Grote Hand’, ‘De Brandende Emmer’, ‘De Regenwolk’ of ‘De Bevende Berg’. Later komt daar een tweede beeld bij, vernoemd naar het oude ding van dit eiland. Ze zijn alleen decoratie en veranderen de simulatie niet.
+
 **Elk eiland heeft één oud ding.** Al voor het eerste huis staat er iets bijzonders dat alleen dit eiland heeft: een eeuwenoude eik, een steencirkel, een hunebed, een rotsboog, een warme bron of een scheepswrak. Je ziet het op de kaart, het staat in het museum en het komt terug in het naschrift. Een nieuw eiland met dezelfde seed krijgt hetzelfde oude ding.
 
 **Op de telefoon** vult het eiland bijna het hele scherm. De bewonerskaart is een klein labeltje dat openklapt als je erop tikt, de ingrepen staan als grote knoppen onderaan, en met twee vingers knijp je om te zoomen.

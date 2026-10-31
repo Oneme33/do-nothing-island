@@ -1,4 +1,5 @@
 // Seasonal customs and night life: only scenery, never a change to the island itself.
+import {constellationsFor} from './constellations.js';
 const ambHash=(a,b)=>{const n=Math.sin(a*73.1+b*19.7)*31415.9;return n-Math.floor(n);};
 export function drawSeasonal(r){
  const L=r.light||{},still=r.reduced,t=still?0:r.time;
@@ -83,11 +84,25 @@ export function drawSummerSun(r){
  const g=c.createRadialGradient(W*.88,H*.08,0,W*.88,H*.08,H*.5);g.addColorStop(0,`rgba(255,240,190,${(.45*k).toFixed(3)})`);g.addColorStop(.25,`rgba(255,226,160,${(.16*k).toFixed(3)})`);g.addColorStop(1,'rgba(255,226,160,0)');c.fillStyle=g;c.fillRect(0,0,W,H);
  c.restore();
 }
-// Screen-space night life: stars reflected in the sea, fireflies, and now and then a shooting star.
+// The stars belong to the sky: draw them before the island so trees and roofs hide them naturally.
+export function drawNightSky(r){
+ const L=r.light||{},c=r.ctx,W=r.width,H=r.height,t=r.reduced?0:r.time;if(!L.darkness||L.darkness<.35)return;
+ c.save();c.setTransform(r.dpr,0,0,r.dpr,0,0);const d=L.darkness;
+ for(let i=0;i<70;i++){const tw=.5+.5*Math.sin(t*2+i*1.7);c.fillStyle=`rgba(255,250,225,${(.25+.5*tw)*d})`;c.fillRect(ambHash(i,1)*W,ambHash(i,2)*H,1.3,1.3);}
+ const constellations=constellationsFor(r.sim);
+ constellations.forEach((shape,i)=>{
+  const spread=constellations.length===1?.5:.28+i*.4,scale=Math.min(W,H)*(W<600?.075:.065),x=W*spread,y=H*(.13+(i?.15:0)),fade=d*(.45+.2*Math.sin(t*.3+i));
+  c.strokeStyle=`rgba(236,241,224,${(fade*.36).toFixed(3)})`;c.lineWidth=1;
+  for(const [a,b] of shape.lines){c.beginPath();c.moveTo(x+shape.stars[a][0]*scale,y+shape.stars[a][1]*scale);c.lineTo(x+shape.stars[b][0]*scale,y+shape.stars[b][1]*scale);c.stroke();}
+  for(const [sx,sy] of shape.stars){c.fillStyle=`rgba(255,250,224,${(fade*.85).toFixed(3)})`;c.beginPath();c.ellipse(x+sx*scale,y+sy*scale,1.5,1.5,0,0,Math.PI*2);c.fill();}
+  if(W>=600){c.fillStyle=`rgba(236,241,224,${(fade*.55).toFixed(3)})`;c.font='italic 10px Georgia, serif';c.textAlign='center';c.fillText(shape.name,x,y+scale*.78);}
+ });
+ c.restore();
+}
+// Screen-space night life: fireflies above the island and now and then a shooting star.
 export function drawNightLife(r){
  const L=r.light||{},c=r.ctx,W=r.width,H=r.height,t=r.reduced?0:r.time;if(!L.darkness||L.darkness<.35)return;
  c.save();const d=L.darkness;
- for(let i=0;i<70;i++){const tw=.5+.5*Math.sin(t*2+i*1.7);c.fillStyle=`rgba(255,250,225,${(.25+.5*tw)*d})`;c.fillRect(ambHash(i,1)*W,ambHash(i,2)*H,1.3,1.3);}
  if(L.summer>.4&&!r.reduced)for(let i=0;i<24;i++){const x=W*(.25+ambHash(i,3)*.5)+Math.sin(t*.7+i)*14,y=H*(.35+ambHash(i,4)*.4)+Math.cos(t*.9+i)*8,glow=.5+.5*Math.sin(t*3+i*2);c.fillStyle=`rgba(220,255,140,${glow*.8*d})`;c.beginPath();c.ellipse(x,y,1.4,1.4,0,0,Math.PI*2);c.fill();}
  const cycle=(t/45)%1;
  if(!r.reduced&&cycle<.04){const u=cycle/.04,x=W*(.15+u*.5),y=H*(.08+u*.18);c.strokeStyle=`rgba(255,255,240,${(1-u)*d})`;c.lineWidth=1.6;c.beginPath();c.moveTo(x,y);c.lineTo(x-40,y-14);c.stroke();c.fillStyle=`rgba(250,246,226,${(1-u)*d})`;c.font='11px Georgia, serif';c.fillText('Iemand doet een wens…',x+8,y+14);}

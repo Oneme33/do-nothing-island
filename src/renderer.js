@@ -5,7 +5,7 @@ import {drawSeaLife} from './sea.js';
 import {drawInterventionFx} from './fx.js';
 import {drawAnimals,isPasture} from './animals.js';
 import {drawFestive} from './festive.js';
-import {drawSeasonal,drawNightLife,drawSummerSun,drawFestivities,drawIdleEvent} from './ambient.js';
+import {drawSeasonal,drawNightSky,drawNightLife,drawSummerSun,drawFestivities,drawIdleEvent} from './ambient.js';
 import {drawWeather} from './weatherfx.js';
 import {drawOverseas} from './visitors.js';
 import {drawIslets,drawCauseway} from './islets.js';
@@ -164,6 +164,7 @@ export class IslandRenderer {
     const quake=this.reduced?0:this.effects.filter(e=>e.type==='rumble'&&e.elapsed<1).reduce((s,e)=>s+Math.sin(e.elapsed*55)*(1-e.elapsed)*3,0);
     this.origin={x:this.width*(mobile?.54:.55)-this.center.x*this.zoom+this.pan.x+quake,y:this.height*(cinemaVisible(this.sim)?.62:mobile?.54:.52)-this.center.y*this.zoom+this.pan.y};
     this.drawWater();
+    drawNightSky(this);
     c.save();c.translate(this.origin.x,this.origin.y);c.scale(this.zoom,this.zoom);
     drawIslets(this);
     // Shore water is derived from current geography, so the coast follows every project.
