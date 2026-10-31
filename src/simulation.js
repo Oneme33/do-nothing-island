@@ -16,6 +16,7 @@ import {advanceIslets} from './islets.js';
 import {advanceFamous,advanceDigs} from './famous.js';
 import {advanceMedieval} from './medieval.js';
 import {lavaFlow,registerHit,advanceHazards} from './hazards.js';
+import {ensureOrigin} from './origin.js';
 import { ensureStory, eventPriority, rememberIntervention, advanceEconomy, advanceEnvironment, growEstate, advanceCivicStory, advanceFinale, finishStory, captureSnapshot, districtFor } from './story.js';
 export const SAVE_VERSION = 1;
 // New islands sit in a 29×29 sea; the natural island stays within the original 25×25, so the extra sea is room for polders.
@@ -169,6 +170,7 @@ export class Civilization {
     ensureSquare(this);
     carveRiver(this);
     seedPleasures(this);
+    ensureOrigin(this);
     this.rebuildRoads();
     this.log('A tree. A few people. An unreasonable amount of potential.','tree',{x:0,y:0});
     ensureFamily(this);
@@ -662,7 +664,7 @@ export class Civilization {
     }
     for(const id of parents.keys())this.tiles.get(id).walkable=true;
     // Natural places can be reached on foot. Only actual construction needs a road.
-    const nature=['forest','beach','tree','original-tree','flowers'];
+    const nature=['forest','beach','tree','original-tree','origin','flowers'];
     const destinations=[...this.tiles.values()].filter(t=>(t.buildSite||t.building&&!nature.includes(t.building)&&!['dock','harbor','palace-wing'].includes(t.building))&&walk(t));
     const roadTargets=destinations.filter(t=>!t.foundingHome&&!(t.foundingField&&!t.buildSite&&(t.builtYear||1)===1));
     // Docks meet the road at their landward end.
@@ -1032,6 +1034,7 @@ export class Civilization {
       if(!parsed.collectionRecords)delete sim.collectionRecords;
       advanceCollection(sim);
       if(parsed.routeVersion!==2){const field=sim.tile(1,-1);if(field?.building==='farm'&&!field.builtYear)field.foundingField=true;sim.rebuildRoads();}
+      ensureOrigin(sim,{restoring:true});
       if(sim.endgameStarted&&!sim.finaleDeadline&&!sim.ending)advanceFinale(sim);
       return sim;
     } catch { return null; }

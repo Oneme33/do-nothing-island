@@ -2,7 +2,7 @@ import { startCinema } from './spectacle.js';
 import {islandScores} from './finale.js';
 // Persistent consequences, civic projects and the finite story of an island.
 export const STORY_VERSION=1;
-export const eventPriority=type=>({ending:100,endgame:98,palace:96,age:92,discovery:91,treasure:90,delight:83,famous:81,visitor:78,islet:70,lighthouse:80,crisis:90,fire:89,flood:88,abandon:87,reform:86,family:85,interference:84,legacy:82,technology:76,culture:68,land:66,district:65,repair:55,storm:45,life:35,trade:25,farm:20,build:10}[type]||30);
+export const eventPriority=type=>({ending:100,endgame:98,palace:96,age:92,discovery:91,treasure:90,delight:83,origin:82,famous:81,visitor:78,islet:70,lighthouse:80,crisis:90,fire:89,flood:88,abandon:87,reform:86,family:85,interference:84,legacy:82,technology:76,culture:68,land:66,district:65,repair:55,storm:45,life:35,trade:25,farm:20,build:10}[type]||30);
 export const ENDINGS={
   artists:{title:'Een eiland vol makers.',quote:'Ze hebben het eiland zo vaak geschilderd dat het zelf is gaan poseren.',description:'Schilders, dichters, componisten en uitvinders maakten van dit eiland een plek waar iedereen iets maakt. Het museum is te klein, de musea daarna ook.',consequence:'Een eiland vol makers',detail:'Op elke muur hangt iets. Op sommige muren hangt een schilderij van een muur.'},
   funfair:{title:'Een eiland dat graag feest.',quote:'Nog één keer! En dan nog één keer.',description:'Een dierentuin, een circus, een pretpark en veel te veel feesten: dit eiland koos voor plezier en heeft daar nooit spijt van gehad.',consequence:'Een eiland dat altijd feest viert',detail:'De achtbaan heeft een eigen kroniek. De giraf ook.'},

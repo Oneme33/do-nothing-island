@@ -7,6 +7,7 @@ import {VISITORS} from './visitors.js';
 const EXHIBIT_NAMES={fire:'De Grote Brand',rumble:'De Beving',rain:'De Wonderbui',nudge:'De Vreemde Bouwhaast',repair:'De Redding'};
 export function museumExhibits(s){
  const items=[];
+ if(s.origin)items.push({year:1,kind:'Oudste plek',title:s.origin.name,text:s.origin.description});
  for(const t of s.coast?.treasures||[]){const c=TREASURE_CATALOG.find(x=>x.id===t.id);if(c)items.push({year:t.year,kind:'Vondst',title:c.title,text:c.description});}
  for(const e of s.interventionLedger||[])if(EXHIBIT_NAMES[e.type])items.push({year:e.year,kind:'Jouw ingreep',title:`${EXHIBIT_NAMES[e.type]} van ${e.year}`,text:`Wat bleef: ${nl(e.consequence).toLowerCase()}.`});
  for(const id of s.discoveries||[]){const c=SECRET_CATALOG.find(x=>x.discovery===id);if(c)items.push({year:s.discoveryRecords?.[id]?.year||0,kind:'Geheim',title:c.title,text:c.description});}

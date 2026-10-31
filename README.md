@@ -8,6 +8,8 @@ De [afvinkbare planning en het werklogboek](TODO.md) worden één onderdeel per 
 
 **Huizen verschillen van elkaar.** De eerste hutjes komen in drie vormen: ronde hutten met een kegeldak, lage langhuizen en houten huisjes met een steil puntdak, elk met een eigen tint stro, riet of hout. Latere huizen krijgen hun eigen gevelkleur, verhoudingen en een dak in leisteen, rood, groen, petrol, terracotta of donkergrijs. Sommige hebben bloembakken, andere geen schoorsteen. Hetzelfde huis houdt altijd hetzelfde uiterlijk.
 
+**Elk eiland heeft één oud ding.** Al voor het eerste huis staat er iets bijzonders dat alleen dit eiland heeft: een eeuwenoude eik, een steencirkel, een hunebed, een rotsboog, een warme bron of een scheepswrak. Je ziet het op de kaart, het staat in het museum en het komt terug in het naschrift. Een nieuw eiland met dezelfde seed krijgt hetzelfde oude ding.
+
 **Op de telefoon** vult het eiland bijna het hele scherm. De bewonerskaart is een klein labeltje dat openklapt als je erop tikt, de ingrepen staan als grote knoppen onderaan, en met twee vingers knijp je om te zoomen.
 
 **Zonder muis** zet je de focus op het eiland. De pijltjes verplaatsen dan een tegelcursor, Enter voert de gekozen ingreep uit, en Shift met de pijltjes schuift het beeld. De voorkeur voor rustige animaties blijft bewaard en volgt anders de systeeminstelling. Grijze teksten hebben meer contrast gekregen, en een gepauzeerd eiland tekent maar de helft van de beelden.

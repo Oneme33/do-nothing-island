@@ -25,6 +25,7 @@ export function creditsFor(s){
   {kind:'line',text:`Familie ${family?.lastName||'van het eerste huis'}`,sub:`${family?.generations.length||1} generaties sleutelhouders`},
   {kind:'head',text:'Bijrollen'},
   {kind:'line',text:'De oude boom',sub:'was er als eerste, en is er nog'},
+  ...(s.origin?[{kind:'line',text:s.origin.name,sub:'het oudste spoor van dit eiland'}]:[]),
   {kind:'line',text:islandAnimal(s)},
   ...(treasure?[{kind:'line',text:treasure.title,sub:'gevonden, gepoetst en in het museum gezet'}]:[]),
   ...(s.court?[{kind:'line',text:'Het kasteel',sub:credPick(s,['met meer kamers dan mensen','en een trap die nooit ophoudt','dat elke eeuw een stukje groter werd'],5)}]:[]),

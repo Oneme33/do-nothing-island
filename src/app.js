@@ -110,7 +110,7 @@ function updateClock(){
   $('pace-readout').textContent=sim.ending?"Een compleet eilandverhaal.":held?"Even kijken · Verder om over te slaan":paused?"De tijd neemt even pauze.":`${rate.toFixed(1)} jaar / seconde${sim.config.accelerating?" · steeds wat sneller":''}`;
   renderer.daySpeed=speed;renderer.activityRate=cinemaActive()?1:rate*.68;renderer.paused=paused||modal||!cinemaActive()&&(sim.ending||held);
 }
-const icons={legacy:'✳',reform:'✧',crisis:'⚑',age:'✧',tree:'♧',farm:'♧',home:'⌂',life:'✳',dock:'⚑',technology:'✧',dike:'≋',land:'▱',district:'⌂',storm:'☂',flood:'≈',repair:'⚒',beach:'◌',abandon:'↗',interference:'✳',ending:'◉',road:'⌁',trade:'⚑',palace:'♜',culture:'♫',bridge:'⌒',protest:'⚑',endgame:'✧',volcano:'△'};
+const icons={origin:'◇',legacy:'✳',reform:'✧',crisis:'⚑',age:'✧',tree:'♧',farm:'♧',home:'⌂',life:'✳',dock:'⚑',technology:'✧',dike:'≋',land:'▱',district:'⌂',storm:'☂',flood:'≈',repair:'⚒',beach:'◌',abandon:'↗',interference:'✳',ending:'◉',road:'⌁',trade:'⚑',palace:'♜',culture:'♫',bridge:'⌒',protest:'⚑',endgame:'✧',volcano:'△'};
 function historyItem(entry,locate=false){
   const item=document.createElement('article');item.className='history-item'+(entry.type==='family'?' family-history-item':entry.type==='interference'?' interference-history-item':'');
   const marker=document.createElement('span');marker.className='history-marker';marker.setAttribute('aria-hidden','true');marker.textContent=icons[entry.type]||'✳';
@@ -430,7 +430,7 @@ function fullMap(){
 function renderEnding(){
   const o=Object.fromEntries(Object.entries(sim.outcome||ENDINGS.independent).map(([key,value])=>[key,typeof value==='string'?nl(value):value]));
   // The island's own name is the title; how it ended is a sentence below it.
-  $('ending-title').textContent=islandIdentity(sim).name;$('ending-quote').textContent=o.title;$('ending-description').textContent=`“${o.quote}” ${o.description}`;$('ending-consequence').textContent=o.consequence;$('ending-detail').textContent=o.detail;
+  $('ending-title').textContent=islandIdentity(sim).name;$('ending-quote').textContent=o.title;$('ending-description').textContent=`“${o.quote}” ${o.description}`;$('ending-consequence').textContent=o.consequence;$('ending-detail').textContent=`${o.detail}${sim.origin?` Het oudste spoor van het eiland: ${sim.origin.name.toLowerCase()}.`:''}`;
   $('ending-stats').textContent=`Jaar ${o.year||sim.year} · ${Math.round(o.population??sim.population).toLocaleString("nl-NL")} inwoners · ${o.land??sim.land.length} landtegels · ${o.interferences??sim.interferences} ingrepen`;
   const first=sim.snapshots[0];$('ending-before').innerHTML=miniMap(first?.land||[],'#9fbb73');$('ending-after').innerHTML=fullMap();
   const influence=o.influence||sim.influence;

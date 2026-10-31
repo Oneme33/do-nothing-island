@@ -74,8 +74,8 @@ export class IslandRenderer {
     for(const t of candidates){
       if(!t.building&&!t.buildSite&&!t.landform)continue;
       const p=this.point(t.x,t.y),b=t.building;
-      const height=b==='palace'?96:t.landform?(t.relief||55)+8:b==='original-tree'?70:['tower','palace','turbine','church','fairground'].includes(b)?62:['farm','campfire','garden','solar','flowers','beach','playground'].includes(b)?20:42;
-      const width=b==='palace'?37:t.landform?33:b==='original-tree'?29:['palace','forest','park','beach','fairground'].includes(b)?25:17;
+      const height=b==='palace'?96:t.landform?(t.relief||55)+8:b==='origin'?64:b==='original-tree'?70:['tower','palace','turbine','church','fairground'].includes(b)?62:['farm','campfire','garden','solar','flowers','beach','playground'].includes(b)?20:42;
+      const width=b==='palace'?37:t.landform?33:b==='origin'?25:b==='original-tree'?29:['palace','forest','park','beach','fairground'].includes(b)?25:17;
       if(Math.abs(sx-p.x)<width*this.zoom && sy>=p.y-height*this.zoom && sy<=p.y+5*this.zoom)return{x:t.x,y:t.y};
     }
     return this.screenToTile(sx,sy);
@@ -539,7 +539,7 @@ export class IslandRenderer {
     this.archStyle=t.material==='stone'&&this.sim.year<120?'classical':t.architecture||this.sim.age.id;
     c.save();c.translate(p.x,p.y-2);
     // A soft shadow to the lower right gives every building weight on the ground.
-    if(!['beach','forest','farm','park','garden','town-square','palace-square','tree','original-tree','ruins'].includes(t.building))this.ellipse(9,5,18,6,'rgba(40,55,40,.09)');
+    if(!['beach','forest','farm','park','garden','town-square','palace-square','tree','original-tree','origin','ruins'].includes(t.building))this.ellipse(9,5,18,6,'rgba(40,55,40,.09)');
     if(t.builtYear && this.sim.year-t.builtYear<3){const s=.75+(this.sim.year-t.builtYear)/12;c.scale(s,s);}
     if(t.kind==='flooded')c.globalAlpha=.78;
     const b=t.building;this.currentTile=t;
@@ -548,6 +548,7 @@ export class IslandRenderer {
     // Special places are drawn larger so they stand out between the houses.
     if(SPECIAL_BIG.has(b))c.scale(1.4,1.4);
     if(b==='original-tree')this.tree(true,t.variant,!!t.bloomYear);
+    else if(b==='origin')this.drawOrigin(t);
     else if(b==='tree')this.tree(false,t.variant);
     else if(b==='forest')this.forest(t.variant);
     else if(b==='beach')this.beach(t);
@@ -1769,6 +1770,49 @@ export class IslandRenderer {
     for(const [x,y] of [[-10,-2],[10,-2],[0,5]]){this.ellipse(x,y,5,2.8,'#809d71');this.ellipse(x,y-1,3.5,2,'#9eaf7a');}
     this.ellipse(0,-5,5,2.5,'#c9d3b4');this.ellipse(0,-5,3.7,1.6,'#8fb5a6');
   }
+  // The one old place that was already there before the first hut.
+  drawOrigin(t){
+    const id=t.originId,c=this.ctx;
+    if(id==='ancient-oak'){this.ellipse(0,2,22,8,'#728d5c33');this.tree(true,t.variant,!!t.bloomYear);return;}
+    if(id==='stone-circle'){
+      this.ellipse(0,2,23,9,'#8fa373');this.ellipse(0,1,18,7,'#a9b985');
+      for(let i=0;i<7;i++){const a=i/7*TAU-Math.PI/2,x=Math.cos(a)*13,y=Math.sin(a)*6,h=6+hash(i,t.x)*5;
+        this.ellipse(x,y+1,3.4,1.4,'#6f7c5b44');
+        this.poly([[x-2.2,y+1],[x+2.2,y+1],[x+1.7,y-h],[x-1.6,y-h-1]],i%2?'#8b8b7e':'#9a998a');
+        this.poly([[x-1.6,y-h-1],[x+.2,y-h-2],[x+.2,y-1],[x-1.7,y]],'#b2af99');
+      }
+      this.ellipse(0,-1,3.2,1.6,'#c4b98d');this.line([[0,-2],[0,-5]],'#8b8269',1);return;
+    }
+    if(id==='dolmen'){
+      this.ellipse(0,3,23,9,'#8fa373');this.poly([[-17,3],[-12,-4],[0,-7],[13,-4],[18,3],[5,8]],'#a7b482');
+      for(const x of [-7,6]){this.poly([[x-2.5,2],[x+2.5,2],[x+2.2,-10],[x-2.2,-10]],'#858579');this.poly([[x-2.2,-10],[x-.2,-11],[x-.2,1],[x-2.5,1]],'#aaa892');}
+      this.poly([[-11,-10],[10,-12],[12,-8],[-9,-6]],'#9a998a');this.poly([[-11,-10],[-9,-6],[8,-5],[10,-12]],'#b7b39b');
+      this.ellipse(0,5,7,2,'#7c8d64');return;
+    }
+    if(id==='rock-arch'){
+      this.ellipse(0,4,24,9,'#a7b482');this.ellipse(0,7,20,6,'#c7c39b');
+      this.poly([[-15,4],[-11,-8],[-5,-9],[-2,4]],'#8d8878');this.poly([[3,4],[7,-8],[14,-6],[16,4]],'#958f7d');
+      this.poly([[-13,-7],[-6,-14],[0,-13],[7,-15],[13,-8],[6,-10],[0,-9],[-6,-10]],'#a8a28d');
+      this.line([[-12,-7],[-5,-12],[1,-11],[7,-13],[13,-7]],'#c3bda3',1.4);
+      this.line([[-8,1],[-8,-7]],'#736f62',1);this.line([[8,1],[9,-7]],'#736f62',1);return;
+    }
+    if(id==='warm-spring'){
+      this.ellipse(0,3,21,8,'#8fa373');this.ellipse(0,1,15,6,'#a7b482');this.ellipse(0,1,11,4,'#8fc2bd');this.ellipse(0,1,8,2.8,'#b7ded4');
+      for(const [x,y] of [[-13,3],[-9,-2],[-3,-4],[4,-4],[10,-2],[14,3]])this.ellipse(x,y,2.4,1.2,'#9a998a');
+      for(let i=0;i<3;i++){const x=-4+i*4,bob=this.reduced?0:Math.sin(this.time*1.7+i)*1.5;c.save();c.globalAlpha=.55;this.line([[x,0],[x-1+bob,-7],[x+1+bob,-13],[x-1+bob,-19]],'#f4f1e7',1.6);c.restore();}
+      return;
+    }
+    if(id==='shipwreck'){
+      this.ellipse(0,4,23,9,'#c8bb8f');this.ellipse(0,7,19,5,'#e0d5ae');
+      this.poly([[-16,1],[-10,6],[8,8],[15,2],[11,-2],[-4,-4]],'#6e5a45');
+      this.poly([[-13,1],[-7,4],[7,5],[11,1],[3,0],[-4,-1]],'#8f7456');
+      for(const x of [-7,-1,5])this.line([[x,-1],[x+1,5]],'#4f4234',1.2);
+      this.line([[2,0],[8,-15]],'#5a4a3a',2);this.poly([[8,-15],[15,-13],[8,-9]],'#d7c9a2');
+      this.line([[-12,2],[-15,-7]],'#5a4a3a',1.3);
+      c.save();c.globalAlpha=.7;this.line([[-18,7],[-11,9],[-4,8],[3,10]],'#f7f0dc',1.4);c.restore();return;
+    }
+    this.ellipse(0,2,18,7,'#8fa373');this.tree(false,t.variant);
+  }
   drawHeritage(){
     const c=this.ctx,tiles=[...this.sim.tiles.values()];
     if(this.showHistory){
@@ -1793,6 +1837,8 @@ export class IslandRenderer {
     if(this.width<700&&!this.showDetails)return;
     const court=this.sim.court&&this.sim.tile(this.sim.court.x,this.sim.court.y);
     if(['royal-palace','palace'].includes(court?.building)){const p=this.point(court.x,court.y);this.landmarkLabel(court.building==='palace'?(this.sim.year<1250?'DE BURCHT':'HET KASTEEL'):'HET NIEUWE PALEIS',p.x,p.y-(this.sim.year<1250?80:100)*this.zoom);}
+    const origin=this.sim.origin&&this.sim.tile(this.sim.origin.x,this.sim.origin.y);
+    if(origin?.building==='origin'){const p=this.point(origin.x,origin.y);this.landmarkLabel((origin.originName||this.sim.origin.name).toUpperCase(),p.x,p.y-66*this.zoom);}
     const home=this.sim.buildings.find(t=>t.foundingHome);if(!home||!['manor','palace'].includes(home.building))return;
     const p=this.point(home.x,home.y);
     this.landmarkLabel(home.building==='palace'?(court?'HET OUDE PALEIS · HET EERSTE HUIS':'PALEIS · HET EERSTE HUIS'):'HET EERSTE HUIS',p.x,p.y-(home.building==='palace'?104:82)*this.zoom);

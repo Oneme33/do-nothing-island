@@ -58,7 +58,7 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 
 ## Wensenlijst ronde 7
 
-**Gebouwd en online:** groep 1, 2, 3, 4, 7 en 8 (zonder minispelletjes). **Na de reset van 28 oktober:** groep 5 en 6.
+**Gebouwd en online:** groep 1, 2, 3, 4, 7 en 8 (zonder minispelletjes). **Na de reset van 28 oktober:** groep 5 en 6; het unieke eilandding is als eerste onderdeel gebouwd en getest.
 
 ### 1. Natuurrampen met echte gevolgen
 - **Vulkaan: lavastroom.** Bij een uitbarsting van de vulkaan stroomt de lava echt de helling af, steekt onderaan de vulkaan branden aan en verwoest een paar huizen.
@@ -87,7 +87,7 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 - **Dierentuin 's nachts dicht:** het hek gaat dicht en de dieren liggen te slapen.
 
 ### 5. Sfeer en eigenheid
-- **Iets unieks per eiland:** elk eiland begint met één bijzonder ding dat alleen dat eiland heeft, meestal iets natuurlijks of iets uit de oudheid: een eeuwenoude reuzeneik, een steencirkel, een hunebed, een natuurlijke rotsboog, een warme bron of een scheepswrak. Het komt terug in het museum en het naschrift.
+- **Iets unieks per eiland:** elk eiland begint met één bijzonder ding dat alleen dat eiland heeft, meestal iets natuurlijks of iets uit de oudheid: een eeuwenoude reuzeneik, een steencirkel, een hunebed, een natuurlijke rotsboog, een warme bron of een scheepswrak. Het komt terug in het museum en het naschrift. **Gebouwd:** zes varianten, deterministisch per seed, met een eigen plek op de kaart, een museumstuk, een inspectiekaart en een regel in de aftiteling en het naschrift.
 - **Sterrenbeelden naar jou genoemd:** na veel ingrepen ontstaan sterrenbeelden aan de nachtlucht, zoals "De Grote Hand" of "De Brandende Emmer".
 
 ### 6. Meespelen en bewaren
