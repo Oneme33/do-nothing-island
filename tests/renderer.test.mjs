@@ -89,6 +89,8 @@ test('standalone distribution contains valid executable JavaScript and no module
   assert.ok(script,'standalone script included');assert.doesNotMatch(script,/^import /m);
   assert.doesNotThrow(()=>new vm.Script(script));
   assert.match(html,/Probeer niets aan te raken/);assert.match(html,/DO NOTHING/);
+  assert.match(html,/Versie <strong id="app-version">\d+\.\d+\.\d+<\/strong>/,'the built game carries its version');
+  assert.doesNotMatch(html,/lokale versie|niet gebouwd/,'the build fills in its version and date');
 });
 test('walkers stay on the drawn street geometry, approach entrances, and spend time inside',()=>{
   const {canvas}=canvasHarness(),sim=new Civilization(31);sim.planBuilding(sim.freeLand.filter(t=>!t.reservedFor).sort((a,b)=>Math.hypot(a.x,a.y)-Math.hypot(b.x,b.y))[0],'well');for(let i=0;i<5;i++)sim.advanceBuildings();sim.population=100;
