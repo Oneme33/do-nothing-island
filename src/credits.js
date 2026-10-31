@@ -18,6 +18,8 @@ export function creditsFor(s){
  const houses=s.houses.length,towers=s.houses.filter(t=>t.building==='tower').length,years=s.year,pop=Math.floor(s.population);
  const keur=currentScores(s,o.scores);
  const treasure=TREASURE_CATALOG.find(t=>t.id===s.coast?.treasures?.[0]?.id);
+ const influence=s.influence||{},gestures={fire:'vuur',rain:'regen',nudge:'een duwtje',rumble:'bevingen',rescues:'reddingen'};
+ const dominant=Object.keys(gestures).filter(kind=>(influence[kind]||0)>0).sort((a,b)=>(influence[b]||0)-(influence[a]||0))[0];
  const lines=[
   {kind:'title',text:id.name,sub:nl(o.title||'Een eilandverhaal')},
   {kind:'head',text:'In de hoofdrol'},
@@ -43,6 +45,7 @@ export function creditsFor(s){
   {kind:'stat',text:'Keren dat iemand ‘wat was dát?’ riep',sub:nlNumber((s.interferences||0)*37+(s.fireCount||0)*12+3)},
   {kind:'head',text:'Met dank aan'},
   {kind:'thanks',text:s.interferences===0?'Jou, voor het geduld. Je deed helemaal niets, en dat was precies goed.':unasked===0?`Jou, voor ${helped} keer helpen. Ze vroegen het zelf, dus het telt niet.`:unasked>8?`De Hand, die echt niet kon stilzitten (${unasked} keer).`:`De Hand, voor ${helped} keer helpen en ${unasked} keer… nou ja.`},
+  ...(dominant?[{kind:'line',text:`De hemel noemt je “${gestures[dominant]}”`,sub:`${influence[dominant]}× ${gestures[dominant]} · ${s.interferences||0} ingrepen in totaal`}]:[]),
   {kind:'line',text:o.quote?`“${nl(o.quote)}”`:'Einde.',sub:''},
   {kind:'end',text:'Do Nothing Island',sub:'Geen dieren of eilanders kwamen iets tekort tijdens het maken van dit eiland.'}
  ];

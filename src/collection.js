@@ -23,11 +23,18 @@ export const COLLECTION_CATALOG=[
  {id:'moment:volcano',group:'moments',title:'De berg heeft een mening',description:'Je zag een vulkaan ontwaken. De bouwers houden de gratis steen.',hint:'Niet iedere berg blijft voor altijd stil.'},
  {id:'moment:rebirth',group:'moments',title:'Sterker uit de as',description:'Een uitgebrand gebouw werd herbouwd in steen. De oude brand bleef in de gevel herdacht.',hint:'Een ruïne hoeft geen eindpunt te zijn.'},
  {id:'moment:waterfront',group:'moments',title:'De wijk komt terug',description:'Een overstroomde wijk heropende met hoogwaterstrepen en sterkere funderingen.',hint:'Zoek een nieuw begin waar het water net vertrokken is.'},
+ {id:'intervention:fire',group:'interventions',title:'Het eerste vuur',description:'Je eerste vonk werd een kampvuur, een verhaal en een gewoonte om naar te kijken.',hint:'Soms begint een traditie met één klein vuur.'},
+ {id:'intervention:rain',group:'interventions',title:'De eerste regen',description:'Je eerste bui trok irrigatieslootjes en een beetje vertrouwen door de akkers.',hint:'Een droge akker onthoudt de eerste regen.'},
+ {id:'intervention:nudge',group:'interventions',title:'Het eerste duwtje',description:'Eén klein duwtje gaf een gebouw een aanbouw, een verhaal en een eigen idee.',hint:'Een huis kan soms wel een extra kamer gebruiken.'},
+ {id:'intervention:rumble',group:'interventions',title:'De eerste beving',description:'Je eerste beving leerde de bewoners voorzichtiger bouwen. De scheuren bleven in het geheugen.',hint:'De grond hoeft maar één keer te bewegen.'},
+ {id:'intervention:rescues',group:'interventions',title:'De eerste redding',description:'Je eerste redding werd een verhaal dat ze elkaar op het plein bleven vertellen.',hint:'Er is altijd wel ergens iets dat aandacht nodig heeft.'},
+ {id:'intervention:all',group:'interventions',title:'Het volledige handpalet',description:'Vuur, regen, een duwtje, een beving en een redding: dit eiland kent je hele repertoire.',hint:'Misschien past elke soort hulp wel een keer op dit eiland.'},
+ {id:'intervention:many',group:'interventions',title:'De hand die bleef',description:'Vijfentwintig ingrepen later is de Hand geen bezoek meer, maar een weerbericht met meningen.',hint:'Blijf je wel eens vaker dan je van plan was?'},
  ...SECRET_CATALOG.map(secret=>({...secret,id:`secret:${secret.discovery}`,group:'secrets'})),
  ...TREASURE_CATALOG.map(t=>({id:`treasure:${t.id}`,group:'treasures',title:t.title,description:t.description,hint:t.hint})),
  ...CHALLENGE_CATALOG.map(goal=>({id:`challenge:${goal.id}`,group:'challenges',title:goal.title,description:goal.description,hint:goal.experiment?'Een ongewoon idee van een eiland wacht op uitvoering.':'Sommige eilanden hebben een klein extra idee. Zoek hun uitdagingen op.'}))
 ];
-export const COLLECTION_GROUPS={endings:'Eindes',moments:'Bijzondere momenten',challenges:'Uitdagingen',secrets:'Geheimen',treasures:'Schatten'};
+export const COLLECTION_GROUPS={endings:'Eindes',moments:'Bijzondere momenten',interventions:'Jouw ingrepen',challenges:'Uitdagingen',secrets:'Geheimen',treasures:'Schatten'};
 const validCollectionRecord=r=>r&&Number.isInteger(r.seed)&&r.seed>=0&&r.seed<=0xffffffff&&Number.isInteger(r.year)&&r.year>=1;
 export function readCollection(raw){
  const result={version:1,entries:{}};let parsed;
@@ -60,6 +67,14 @@ export function advanceCollection(s){
  if(s.volcanoActiveUntil>0)remember('moment:volcano');
  if(s.rebuiltFires>0)remember('moment:rebirth',s.land.find(t=>t.rebuiltYear&&t.material==='stone')?.rebuiltYear);
  const repaired=s.land.find(t=>t.floodMemorial);if(repaired)remember('moment:waterfront',repaired.rebuiltYear);
+ // A first intervention is a reward in itself: the island remembers the kind of help you brought.
+ const first={fire:'intervention:fire',rain:'intervention:rain',nudge:'intervention:nudge',rumble:'intervention:rumble',rescues:'intervention:rescues'};
+ for(const [kind,id] of Object.entries(first))if((s.influence?.[kind]||0)>0){
+  const touch=s.interventionLedger?.find(e=>e.type===kind||(kind==='rescues'&&e.type==='repair'));
+  remember(id,touch?.year);
+ }
+ if(Object.keys(first).every(kind=>(s.influence?.[kind]||0)>0))remember('intervention:all');
+ if((s.interferences||0)>=25)remember('intervention:many');
  return s.collectionRecords;
 }
 export function collectIsland(collection,s){

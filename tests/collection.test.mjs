@@ -29,3 +29,12 @@ test('old saves backfill verifiable moments without fabricated family history or
  const restored=Civilization.restore(JSON.stringify(old));assert.equal(restored.collectionRecords['moment:manor'],130);assert.equal(restored.collectionRecords['moment:generations'],undefined);assert.deepEqual(restored.history,old.history);assert.deepEqual([...restored.tiles],old.tiles);assert.equal(restored.randomState,old.randomState);
  advanceCollection(restored);assert.equal(restored.collectionRecords['moment:generations'],undefined);
 });
+
+test('the first interventions become quiet collection rewards, including a full hand and a long visit',()=>{
+ const s=new Civilization(31),book=readCollection(null);
+ s.influence={...s.influence,rain:2};s.interferences=2;
+ collectIsland(book,s);assert.ok(book.entries['intervention:rain']);assert.equal(book.entries['intervention:all'],undefined);
+ s.influence={fire:1,rain:2,nudge:1,rumble:1,rescues:1};s.interferences=25;
+ collectIsland(book,s);
+ for(const id of ['intervention:fire','intervention:rain','intervention:nudge','intervention:rumble','intervention:rescues','intervention:all','intervention:many'])assert.ok(book.entries[id],id);
+});

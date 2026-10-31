@@ -88,13 +88,15 @@ export function drawSummerSun(r){
 export function drawNightSky(r){
  const L=r.light||{},c=r.ctx,W=r.width,H=r.height,t=r.reduced?0:r.time;if(!L.darkness||L.darkness<.35)return;
  c.save();c.setTransform(r.dpr,0,0,r.dpr,0,0);const d=L.darkness;
- for(let i=0;i<70;i++){const tw=.5+.5*Math.sin(t*2+i*1.7);c.fillStyle=`rgba(255,250,225,${(.25+.5*tw)*d})`;c.fillRect(ambHash(i,1)*W,ambHash(i,2)*H,1.3,1.3);}
+ for(let i=0;i<118;i++){const tw=.5+.5*Math.sin(t*2+i*1.7),size=1.1+ambHash(i,7)*1.5;c.fillStyle=`rgba(255,250,225,${(.38+.55*tw)*d})`;c.fillRect(ambHash(i,1)*W,ambHash(i,2)*H,size,size);}
  const constellations=constellationsFor(r.sim);
  constellations.forEach((shape,i)=>{
   const spread=constellations.length===1?.5:.28+i*.4,scale=Math.min(W,H)*(W<600?.075:.065),x=W*spread,y=H*(.13+(i?.15:0)),fade=d*(.45+.2*Math.sin(t*.3+i));
-  c.strokeStyle=`rgba(236,241,224,${(fade*.36).toFixed(3)})`;c.lineWidth=1;
+  c.strokeStyle=`rgba(236,241,224,${(fade*.58).toFixed(3)})`;c.lineWidth=1.15;
   for(const [a,b] of shape.lines){c.beginPath();c.moveTo(x+shape.stars[a][0]*scale,y+shape.stars[a][1]*scale);c.lineTo(x+shape.stars[b][0]*scale,y+shape.stars[b][1]*scale);c.stroke();}
-  for(const [sx,sy] of shape.stars){c.fillStyle=`rgba(255,250,224,${(fade*.85).toFixed(3)})`;c.beginPath();c.ellipse(x+sx*scale,y+sy*scale,1.5,1.5,0,0,Math.PI*2);c.fill();}
+  c.save();c.shadowColor='rgba(255,250,224,.8)';c.shadowBlur=7;
+  for(const [sx,sy] of shape.stars){const twinkle=.85+.15*Math.sin(t*1.7+sx*8+sy*5);c.fillStyle=`rgba(255,250,224,${(fade*twinkle).toFixed(3)})`;c.beginPath();c.ellipse(x+sx*scale,y+sy*scale,2.2,2.2,0,0,Math.PI*2);c.fill();}
+  c.restore();
   if(W>=600){c.fillStyle=`rgba(236,241,224,${(fade*.55).toFixed(3)})`;c.font='italic 10px Georgia, serif';c.textAlign='center';c.fillText(shape.name,x,y+scale*.78);}
  });
  c.restore();

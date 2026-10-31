@@ -6,6 +6,7 @@ import { Civilization } from '../src/simulation.js';
 import { IslandRenderer } from '../src/renderer.js';
 import {startCinema} from '../src/spectacle.js';
 import {ENDINGS} from '../src/story.js';
+import {drawAnimals,isPasture} from '../src/animals.js';
 
 function canvasHarness(width=1200,height=575) {
   const calls=[];
@@ -179,4 +180,24 @@ test('a dive glides in close, holds, and then hands the camera back',()=>{
  const s=new Civilization(31),{canvas}=canvasHarness(1200,650),r=new IslandRenderer(canvas,s);r.draw(0);const before=r.zoom;
  r.dive(1,1,2);for(let t=16;t<=3200;t+=100)r.draw(t);assert.ok(r.zoom>before+.6,'close in');assert.ok(r.flight);
  for(let t=3300;t<=6000;t+=100)r.draw(t);assert.equal(r.flight,null,'released after the hold');
+});
+
+test('pasture animals are drawn after the field and before its front fence',()=>{
+ const sim=new Civilization(31);let tile=sim.land.find(t=>isPasture(t)&&!t.building&&!t.landform&&!t.reservedFor);
+ assert.ok(tile,'the island has a free pasture plot');tile.building='farm';
+ const renderer={sim,reduced:false,activityTime:2,light:{winter:0,night:false},visibleTiles:[tile],p:()=>({x:100,y:100}),scene:[],enqueueActor(depth,draw){this.scene.push({depth,draw});}};
+ drawAnimals(renderer);
+ assert.ok(renderer.scene.length>0,'the pasture has animals');
+ for(const actor of renderer.scene)assert.ok(actor.depth>105&&actor.depth<111,`animal depth ${actor.depth} stays above the pasture and below its fence`);
+});
+
+test('a bridge replaces the street and lifts walkers over its arch',()=>{
+ const sim=new Civilization(31),{canvas}=canvasHarness(),renderer=new IslandRenderer(canvas,sim);
+ const bridge={x:0,y:0,kind:'water',building:'bridge',road:true,roadLinks:['1,0']};
+ let polys=0;const original=renderer.poly.bind(renderer);renderer.poly=(...args)=>{polys++;return original(...args);};
+ renderer.drawRoads([bridge]);assert.equal(polys,0,'the bridge tile is not drawn as a road');renderer.poly=original;
+ assert.equal(renderer.bridgeLift({building:'bridge'},{building:'house'},0),5);
+ assert.equal(renderer.bridgeLift({building:'house'},{building:'bridge'},1),5);
+ assert.ok(renderer.bridgeLift({building:'bridge'},{building:'house'},.5)>0);
+ assert.equal(renderer.bridgeLift({building:'house'},{building:'house'},.5),0);
 });

@@ -64,8 +64,9 @@ export function drawAnimals(r){
   if(tile.kind!=='land')continue;const p=r.p(tile.x,tile.y),h=animalHash(tile.x,tile.y);
   if(tile.building==='farm'&&isPasture(tile)&&!tile.fire&&!winter&&!night){
    const kind=h<.45?'sheep':h<.75?'cow':s.year>=600?'horse':'sheep',n=kind==='sheep'?3:kind==='cow'?2:1;
+   // The pasture itself is part of the building pass, so the animals must come after it but before the front fence.
    for(let i=0;i<n;i++){const drift=still?0:Math.sin(t*.12+i*2+h*9)*5,x=p.x-10+i*9+drift,y=p.y+(i%2?3:-2),phase=still?0:Math.sin(t*2+i);
-    r.enqueueActor(y+1,()=>kind==='sheep'?sheep(r,x,y,h>.2?'#f4f1e6':'#5c5752',phase):kind==='cow'?cow(r,x,y,phase):grazingHorse(r,x,y,phase));}
+    r.enqueueActor(p.y+6+(y-p.y)*.05,()=>kind==='sheep'?sheep(r,x,y,h>.2?'#f4f1e6':'#5c5752',phase):kind==='cow'?cow(r,x,y,phase):grazingHorse(r,x,y,phase));}
   }else if(tile.building==='forest'&&h<.3&&!night){
    const x=p.x+Math.sin(t*.08+h*20)*8,y=p.y+4;r.enqueueActor(y+1,()=>deer(r,x,y,still?0:Math.sin(t*1.5)));
   }else if(!tile.building&&!tile.road&&!tile.buildSite&&!tile.landform&&h<.06&&!winter){

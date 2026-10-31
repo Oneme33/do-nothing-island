@@ -283,10 +283,10 @@ let shownAge=null,ageTimer;
 // Now and then the camera glides in close to something happening, but never while you are busy yourself.
 let lastUserActivity=-Infinity,lastDive=-Infinity,idleSince=performance.now(),idleShown=false;
 for(const type of ['pointerdown','wheel','keydown'])window.addEventListener(type,()=>{lastUserActivity=performance.now();idleSince=lastUserActivity;idleShown=false;},{capture:true,passive:true});
-// Only real camera moves (dragging, pinching, scroll-zooming) hide the small details for a moment; a click does not.
+// Only real camera moves (dragging and pinching) hide the small details for a moment; a click or scroll does not.
 let lastCameraMove=-Infinity;
 window.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch'){lastUserActivity=performance.now();idleSince=lastUserActivity;if(e.buttons&&Math.hypot(e.movementX||0,e.movementY||0)>1)lastCameraMove=lastUserActivity;}},{capture:true,passive:true});
-window.addEventListener('wheel',()=>{lastCameraMove=performance.now();},{capture:true,passive:true});
+// Scrolling only changes the zoom; it does not hide the residents. Dragging and pinching still do.
 // Automatic camera dives are off by default on phones; the setting can switch them on.
 const autoZoomOn=()=>sim.config.autoZoom??!(typeof window!=='undefined'&&window.innerWidth<700);
 function maybeDive(x,y,important=false){
@@ -588,6 +588,7 @@ function setPhotoMode(on){
 }
 function setPhotoLight(night){const day=Math.floor(renderer.dayClock/DAY_SECONDS);renderer.dayClock=(day+(night?.02:.5))*DAY_SECONDS;renderer.draw(performance.now());}
 $('photo-mode').addEventListener('click',()=>setPhotoMode(!photoOn));
+$('photo-mode').setAttribute('title','Vrij zicht: verberg de knoppen, zoom vrij en maak een ansichtkaart (F)');
 $('photo-done').addEventListener('click',()=>setPhotoMode(false));
 $('photo-day').addEventListener('click',()=>setPhotoLight(false));
 $('photo-night').addEventListener('click',()=>setPhotoLight(true));
@@ -745,6 +746,7 @@ canvas.addEventListener('wheel',e=>{e.preventDefault();renderer.setZoom(e.deltaY
 document.addEventListener('keydown',e=>{
   if(e.target.matches('input,select,button') || otherDialogOpen())return;
   if(e.code==='Space'){e.preventDefault();togglePause();}
+  if((e.key==='f'||e.key==='F')&&!e.metaKey&&!e.ctrlKey&&!e.altKey){e.preventDefault();setPhotoMode(!photoOn);}
   if(e.key==='+'||e.key==='=')renderer.setZoom(1.15);
   if(e.key==='-')renderer.setZoom(1/1.15);
   if(document.activeElement===canvas){

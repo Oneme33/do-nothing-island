@@ -114,3 +114,13 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 ### Gedaan: kleine wensen
 - **Cadeau zonder inzoomen:** bij het bouwen van een cadeau door de bewoners niet automatisch inzoomen, maar een duidelijke marker op de plek laten zien (bijvoorbeeld een vlaggetje of een strik boven de bouwplaats, tot het klaar is).
 - **Kerk met kerkhof:** de kerk krijgt een kerkhof ernaast. In het begin een kleine kerk met een paar grafjes; later groeit het kerkhof mee en staat er aan het einde een grote kerk ergens achterin het eiland, met een flink kerkhof. Hoe meer je voor de bewoners doet (geholpen wensen), hoe groter en imposanter de kerk wordt.
+
+### Gedaan: ronde 9 — dichter bij het eiland (31-10-2026)
+- **Weidedieren:** koeien, schapen en paarden staan weer tussen de weide en de voorste omheining in plaats van erachter.
+- **Bruggen:** de brug krijgt een doorlopend dek op de juiste hoogte, geen weg meer onder of naast het water, en wandelaars volgen de boog.
+- **Sterrenwacht:** platte steen- en koperkleuren in dezelfde stijl als de rest van het eiland, met een bankje, struiken en een weerhaan.
+- **Nachtlucht:** meer en fellere sterren, duidelijkere sterrenbeelden en een hint in de handleiding; de eerste verschijnt na acht ingrepen.
+- **Vrij zicht:** de fotomodus heet nu **Vrij zicht** en opent ook met F; scrollen verbergt de bewoners niet meer.
+- **Verzameling:** eerste vuur, regen, duwtje, beving en redding krijgen een eigen herinnering, plus twee extra's voor het volledige handpalet en vijfentwintig ingrepen.
+- **Afsluiting:** de toer bezoekt nu ook het oudste spoor en je meest gebruikte ingreep, met meer pronkstukken; de aftiteling noemt het overheersende gebaar.
+- **Versie:** 1.2.0, 189 tests groen.
