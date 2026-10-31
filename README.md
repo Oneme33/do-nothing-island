@@ -4,7 +4,7 @@ Een kleine beschaving. Absoluut geen verantwoordelijkheid.
 
 Een eiland groeit vanzelf: van één huisje en een kleine akker naar een stad met haar eigen gewoonten, plannen en geschiedenis. Je mag kijken. Je kunt ook ingrijpen — en ontdekken wat daarvan blijft hangen.
 
-De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per commit en testmoment uitgevoerd.
+De [afvinkbare planning en het werklogboek](TODO.md) worden één onderdeel per commit en testmoment uitgevoerd. De laatste afgeronde rondes staan onderaan; openstaand werk staat in `INVENTARIS.md` en in de laatste paragraaf van `TODO.md`.
 
 **Huizen verschillen van elkaar.** De eerste hutjes komen in drie vormen: ronde hutten met een kegeldak, lage langhuizen en houten huisjes met een steil puntdak, elk met een eigen tint stro, riet of hout. Latere huizen krijgen hun eigen gevelkleur, verhoudingen en een dak in leisteen, rood, groen, petrol, terracotta of donkergrijs. Sommige hebben bloembakken, andere geen schoorsteen. Hetzelfde huis houdt altijd hetzelfde uiterlijk.
 
@@ -14,7 +14,7 @@ De [afvinkbare planning voor Ronde 2 en 3](TODO.md) wordt één onderdeel per co
 
 **Getallen met gevoel.** Voorraden, water, landschap en gemeentekas staan er in woorden: ‘De schuren puilen uit’, ‘Een stapel hout’, ‘De gemeente telt haar munten’. Het echte getal staat in de tooltip; tik op de voorraad, of zet ‘Exacte getallen’ aan in de instellingen, om alles weer in cijfers te zien.
 
-**De eilandscore en hoe je 100 haalt.** Vijf scores van 0 tot 100: leefbaarheid (eten per inwoner, water en welvaart), natuur (groen en weinig vervuiling), zelfstandigheid (ingrepen uit jezelf; wensen waar bewoners om vroegen tellen niet), veerkracht (rampen die ze te boven kwamen, zonder ruïnes aan het einde) en cultuur (parken, feesten en speciale gebouwen). Zo haal je 100: grijp alleen in als iemand erom vraagt, help veel wensen zodat er feesten zijn, houd het eiland groen en schoon, laat ze minstens drie rampen te boven komen (bliksem, hoog water of een brand die op verzoek geblust wordt) zonder ruïnes aan het einde, en laat ze lang genoeg bouwen voor al hun speciale gebouwen. Het recept staat ook in het naschrift.
+**De eilandkeur en hoe je 100 haalt.** Vijf onderdelen samen 100 punten: compleet (20, alle bijzondere gebouwen, vondsten en beroemdheden), welzijn (15, eten, water en welvaart), natuur (15, groen en weinig vervuiling), veerkracht (15, herstel na rampen plus een paar beproevingen) en band (35, wensen waar je bij hielp en wensen die ze zelf oplosten). Alleen toekijken geeft een mooi eiland; het hoogste cijfer vraagt om het midden: ongeveer de helft van de wensen helpen en ze een paar keer op de proef stellen, zonder te vaak in te grijpen. Wie vooral op de langzaamste snelheid meekijkt, krijgt drie punten geduld. Het recept staat ook in het naschrift.
 
 **Fotomodus en eindkaart.** De knop **Foto** op het eiland verbergt alle knoppen en zet de tijd even stil. Kies dag of nacht, zoom en sleep vrij, en bewaar een ansichtkaart met naam, vlag, jaar en inwoners. In het naschrift bewaar je een eindkaart met titel, quote, de kaartjes van toen en nu, de familienaam, de score en de seed. ‘Kopieer link naar dit eiland’ geeft een link met `?seed=`: wie hem opent, speelt hetzelfde eiland en kan anders ingrijpen. Het eigen eiland is daarna tien seconden terug te halen.
 
@@ -154,7 +154,7 @@ Rond 2100 begint het laatste hoofdstuk; een gewoon eiland eindigt uiterlijk in 2
 
 **De aftiteling.** Na de toer volgt een eindscène van veertig seconden als een film: je eigen eiland op de achtergrond, langzaam dichterbij, met een effect per einde (vliegers en vuurwerk, vallende bladeren, gouden stralen en een zwaaiende reuzenhand, banieren, wegvarende bootjes, een zee die wegloopt, of opstijgende vonken met een vuurvogel). Ernaast rolt een aftiteling die uit je eigen eiland is geschreven: de hoofd- en bijrollen (de oude boom, de giraf, schaap Bertha of de vuurtorenkat, je eerste schat, het kasteel), prijzen zoals ‘langste vergadering’ en ‘mooiste dak’, maffe cijfers zoals gebakken broden en kopjes koffie op het plein, en een bedankje dat past bij hoe jij speelde. Je kunt meejuichen, pauzeren, opnieuw afspelen of doorgaan naar het naschrift. De eindkaart heeft een echte foto van het eiland, de score als badge, drie prijzen, cijfers, de kaartjes van toen en nu, de seed en een stempel: ‘Goedgekeurd door de oude boom’.
 
-Het naschrift toont kaarten, oorzaken en een **eilandscore van 0–100**, het gemiddelde van vijf onderdelen: leefbaarheid, natuur, zelfstandigheid, veerkracht en cultuur. De scores volgen de werkelijke toestand en geschiedenis. Ze blijven samen met het oorspronkelijke naschrift bewaard wanneer je vrij verder speelt. Er is meer dan één manier om een geslaagd eiland te maken.
+Het naschrift toont kaarten, oorzaken en de **eilandkeur van 0–100**, opgebouwd uit vijf onderdelen: compleet (20), welzijn (15), natuur (15), veerkracht (15) en band (35), plus maximaal drie punten voor geduld. De scores volgen de werkelijke toestand en geschiedenis. Ze blijven samen met het oorspronkelijke naschrift bewaard wanneer je vrij verder speelt. Er is meer dan één manier om een geslaagd eiland te maken.
 
 ## Ontwikkelen
 
