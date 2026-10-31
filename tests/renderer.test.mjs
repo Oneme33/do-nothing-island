@@ -76,6 +76,13 @@ test('leisure destinations draw safely and the Ferris wheel stops without electr
   const stopped=renderer.wheelTime;renderer.paused=true;renderer.draw(300);assert.equal(renderer.wheelTime,stopped);
   renderer.paused=false;sim.power=0;renderer.draw(400);assert.equal(renderer.wheelTime,stopped);
 });
+test('landmark labels introduce a place briefly instead of staying over the island',()=>{
+  const {canvas}=canvasHarness(),sim=new Civilization(42),renderer=new IslandRenderer(canvas,sim);
+  renderer.draw(1000);assert.ok(renderer.landmarkReveals.length>0,'a new island introduces its first places');
+  renderer.draw(9000);assert.equal(renderer.landmarkReveals.length,0,'the labels leave again');
+  const home=sim.buildings.find(t=>t.foundingHome);home.building='manor';home.builtYear=sim.year+1;
+  renderer.draw(10000);assert.ok(renderer.landmarkReveals.some(r=>r.label==='HET EERSTE HUIS'),'a new landmark gets its moment');
+});
 test('standalone distribution contains valid executable JavaScript and no module imports',async()=>{
   const html=await readFile('start.html','utf8');
   const script=html.match(/<script>\(\(\)=>\{([\s\S]*)\}\)\(\);<\/script>/)?.[1];

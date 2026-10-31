@@ -50,6 +50,15 @@ export function windowHidden(sim,w){
  }
  return false;
 }
+// Trees and other silhouettes recorded while the island was drawn can cover a window that is behind them.
+export function lightBlocked(r,w){
+ const points=w.points||[],center=points.length?[points.reduce((n,p)=>n+p[0],0)/points.length,points.reduce((n,p)=>n+p[1],0)/points.length]:null;
+ for(const b of r.lightBlockers||[]){
+  if(b.depth<=w.baseY+.5)continue;
+  for(const [x,y] of center?[...points,center]:points){const dx=(x-b.x)/b.rx,dy=(y-b.y)/b.ry;if(dx*dx+dy*dy<=1)return true;}
+ }
+ return false;
+}
 export function lightHidden(sim,t){
  return coversLight(sim.tile(t.x+1,t.y+1))||TALL.has(sim.tile(t.x+2,t.y+2)?.building);
 }
@@ -77,11 +86,11 @@ export function drawDaylight(r,light){
   }
   // Only real windows and real lamp posts light up: their shapes were recorded while the island was drawn.
   c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='source-over';
-  for(const w of r.litWindows||[]){if(!w.grand&&windowHidden(r.sim,w))continue;c.beginPath();w.points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=`rgba(255,214,130,${(.85*d).toFixed(3)})`;c.fill();}
+  for(const w of r.litWindows||[]){if((!w.grand&&windowHidden(r.sim,w))||lightBlocked(r,w))continue;c.beginPath();w.points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=`rgba(255,214,130,${(.85*d).toFixed(3)})`;c.fill();}
   c.globalCompositeOperation='lighter';
   // Glowing lava stays bright in the dark.
   for(const l of r.litLava||[]){glow(l.x,l.y,16*l.scale,8*l.scale,`rgba(255,110,40,${(.32*d).toFixed(3)})`);glow(l.x,l.y,5*l.scale,2.6*l.scale,`rgba(255,190,90,${(.75*d).toFixed(3)})`);}
-  for(const l of r.litLamps||[]){if(l.tile&&lightHidden(r.sim,l.tile))continue;glow(l.x,l.y,9*l.scale,6*l.scale,`rgba(255,215,150,${(.16*d).toFixed(3)})`);glow(l.x,l.y,2.2*l.scale,2*l.scale,`rgba(255,236,180,${(.7*d).toFixed(3)})`);}
+  for(const l of r.litLamps||[]){if(l.tile&&lightHidden(r.sim,l.tile))continue;if(lightBlocked(r,{baseY:l.baseY??l.y,points:[[l.x,l.y]]}))continue;glow(l.x,l.y,9*l.scale,6*l.scale,`rgba(255,215,150,${(.16*d).toFixed(3)})`);glow(l.x,l.y,2.2*l.scale,2*l.scale,`rgba(255,236,180,${(.7*d).toFixed(3)})`);}
  }
  c.restore();
 }

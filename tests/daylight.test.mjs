@@ -39,12 +39,18 @@ test('a visit starts on a morning in any of the four seasons',()=>{
  assert.deepEqual(seasons.map(l=>l.seasonName),['lente','zomer','herfst','winter']);
  for(const l of seasons){assert.equal(l.darkness,0);assert.ok(l.phase>.3&&l.phase<.35);}
 });
-import {lightHidden} from '../src/daylight.js';
+import {lightHidden,lightBlocked} from '../src/daylight.js';
 test('a window behind a house in front of it stays dark',()=>{
  const s=new Civilization(31),back=s.tile(4,-4),front=s.tile(5,-3);
  back.building='house';front.building=null;front.landform=null;front.buildSite=null;assert.equal(lightHidden(s,back),false);
  front.building='house';assert.equal(lightHidden(s,back),true);
  front.building='farm';assert.equal(lightHidden(s,back),false,'a field in front hides nothing');
+});
+test('a lit window behind a tree canopy is hidden by the recorded silhouette',()=>{
+ const w={baseY:100,points:[[50,50],[70,50],[70,70],[50,70]]};
+ assert.equal(lightBlocked({lightBlockers:[{x:60,y:60,rx:18,ry:16,depth:130}]},w),true,'tree in front covers the window');
+ assert.equal(lightBlocked({lightBlockers:[{x:60,y:60,rx:18,ry:16,depth:90}]},w),false,'tree behind does not');
+ assert.equal(lightBlocked({lightBlockers:[{x:160,y:160,rx:18,ry:16,depth:130}]},w),false,'tree beside it does not');
 });
 test('seasonal customs and night life draw safely in every season and at night',()=>{
  const s=new Civilization(31);while(s.year<400)s.tick();const before=s.serialize();
