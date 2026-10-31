@@ -283,7 +283,8 @@ let shownAge=null,ageTimer;
 // Now and then the camera glides in close to something happening, but never while you are busy yourself.
 let lastUserActivity=-Infinity,lastDive=-Infinity,idleSince=performance.now(),idleShown=false;
 for(const type of ['pointerdown','wheel','keydown'])window.addEventListener(type,()=>{lastUserActivity=performance.now();idleSince=lastUserActivity;idleShown=false;},{capture:true,passive:true});
-// Only real camera moves (dragging and pinching) hide the small details for a moment; a click or scroll does not.
+// On phones, dragging and pinching may briefly hide the small details. On desktop the island keeps its people and animals.
+const lowDetailWhileMoving=()=>typeof window!=='undefined'&&window.innerWidth<700;
 let lastCameraMove=-Infinity;
 window.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch'){lastUserActivity=performance.now();idleSince=lastUserActivity;if(e.buttons&&Math.hypot(e.movementX||0,e.movementY||0)>1)lastCameraMove=lastUserActivity;}},{capture:true,passive:true});
 // Scrolling only changes the zoom; it does not hide the residents. Dragging and pinching still do.
@@ -515,7 +516,7 @@ function frame(now){
   // A paused island only needs half the frames, and so does a device that struggles to keep up.
   // While you touch, drag or zoom, every frame is drawn.
   drawTick=(drawTick+1)%2;const slow=(renderer.drawCost||0)>22,interacting=now-lastUserActivity<1500;
-  renderer.interacting=now-lastCameraMove<500;
+  renderer.interacting=lowDetailWhileMoving()&&now-lastCameraMove<500;
   if((!renderer.paused&&(!slow||interacting))||interacting||tour||drawTick===0||renderer.needsDraw){renderer.needsDraw=false;const t0=performance.now();renderer.draw(now);renderer.drawCost=(renderer.drawCost||0)*.9+(performance.now()-t0)*.1;}
   const night=renderer.light.darkness>.3;if(night!==nightShown){nightShown=night;$('island-window').classList.toggle('is-night',night);updateUI();}
   if(cinemaActive()){

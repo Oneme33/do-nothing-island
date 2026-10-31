@@ -195,7 +195,7 @@ export class IslandRenderer {
       if(t.building==='farm'&&isPasture(t)&&!t.fire&&!t.buildSite)this.scene.push({depth:depth+6,draw:()=>this.pastureFront(t)});
       if(t.landform||t.building||t.buildSite)this.scene.push({depth,draw:()=>{if(t.landform)this.drawLandform(t);if(t.building)this.drawBuilding(t);if(t.buildSite)this.drawBuildingSite(t);}});
     }
-    // While you zoom or drag, the decoration waits: animals, walkers, boats, clouds and birds come back when you let go.
+    // On small screens, zooming or dragging lets the decoration wait; desktop keeps the people and animals in view.
     if(!this.interacting)this.drawWorkers();
     drawInterventionFx(this);
     if(!this.interacting){drawAnimals(this);drawSeasonal(this);drawFestive(this);}

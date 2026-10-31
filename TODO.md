@@ -120,7 +120,7 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 - **Bruggen:** de brug krijgt een doorlopend dek op de juiste hoogte, geen weg meer onder of naast het water, en wandelaars volgen de boog.
 - **Sterrenwacht:** platte steen- en koperkleuren in dezelfde stijl als de rest van het eiland, met een bankje, struiken en een weerhaan.
 - **Nachtlucht:** meer en fellere sterren, duidelijkere sterrenbeelden en een hint in de handleiding; de eerste verschijnt na acht ingrepen.
-- **Vrij zicht:** de fotomodus heet nu **Vrij zicht** en opent ook met F; scrollen verbergt de bewoners niet meer.
+- **Vrij zicht:** de fotomodus heet nu **Vrij zicht** en opent ook met F; scrollen of slepen verbergt de bewoners op desktop niet meer. Op telefoons blijft de lichte weergave tijdens bewegen.
 - **Verzameling:** eerste vuur, regen, duwtje, beving en redding krijgen een eigen herinnering, plus twee extra's voor het volledige handpalet en vijfentwintig ingrepen.
 - **Afsluiting:** de toer bezoekt nu ook het oudste spoor en je meest gebruikte ingreep, met meer pronkstukken; de aftiteling noemt het overheersende gebaar.
 - **Versie:** 1.2.0, 189 tests groen.
