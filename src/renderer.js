@@ -365,37 +365,76 @@ export class IslandRenderer {
     for(let x=-this.height;x<this.width+this.height;x+=72){c.beginPath();c.moveTo(x,0);c.lineTo(x+this.height*2,this.height);c.stroke();c.beginPath();c.moveTo(x,0);c.lineTo(x-this.height*2,this.height);c.stroke();}
   }
   drawShore(t){
-    const p=this.p(t.x,t.y);
+    const p=this.p(t.x,t.y),c=this.ctx;
     const corners=[[0,-11.5],[23,0],[0,11.5],[-23,0]];
     const adj=[[t.x,t.y-1],[t.x+1,t.y],[t.x,t.y+1],[t.x-1,t.y]];
     for(let i=0;i<4;i++){
       const n=this.sim.tile(...adj[i]);
       if(n?.kind==='water'){
         const a=corners[i],b=corners[(i+1)%4];
-        this.line([[p.x+a[0]*1.12,p.y+a[1]*1.12+3],[p.x+b[0]*1.12,p.y+b[1]*1.12+3]],'#eaf2dc',5);
-        if(t.natural)this.line([[p.x+a[0],p.y+a[1]+2],[p.x+b[0],p.y+b[1]+2]],t.landform?'#a9b198':'#e0d8a7',7);
         const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,len=Math.hypot(mx,my*2)||1,nx=mx/len,ny=my/len;
-        // Breathing shoreline waves: soft frothy white edges and wet sand wash that surge with the tide.
+        const sandColor=t.landform?'#a9b198':'#e0d8a7';
+        const sandDark=t.landform?'#9fa68a':'#d2c594';
+
+        // Organic, meandering coastline: soft rounded sand/rock lobes break the rigid 45-degree grid edge.
+        if(t.natural||t.building==='beach'){
+          for(let k=0;k<5;k++){
+            const f=(k+.5)/5,h=hash(t.x*13+i*5+k,t.y*7-k);
+            const ex=p.x+a[0]+(b[0]-a[0])*f+nx*(1.6+h*4.4);
+            const ey=p.y+a[1]+(b[1]-a[1])*f+ny*(1.6+h*4.4)+2;
+            const rw=4.5+h*3.2;
+            this.ellipse(ex,ey,rw,rw*.5,sandColor);
+            if(h>.6&&t.building==='beach')this.ellipse(ex+nx*.6,ey+ny*.6,rw*.5,rw*.26,sandDark);
+          }
+          this.ellipse(p.x+a[0],p.y+a[1]+2,3.6,1.9,sandColor);
+        }
+
+        // Curved base water rim and shoreline contour instead of straight ruler sticks.
+        const ctrlX=p.x+mx+nx*2.2,ctrlY=p.y+my+ny*2.2+2.8;
+        c.beginPath();c.moveTo(p.x+a[0]*1.1,p.y+a[1]*1.1+2.8);
+        c.quadraticCurveTo(ctrlX,ctrlY,p.x+b[0]*1.1,p.y+b[1]*1.1+2.8);
+        c.strokeStyle='#eaf2dc';c.lineWidth=5;c.lineCap='round';c.stroke();
+
+        if(t.natural){
+          c.beginPath();c.moveTo(p.x+a[0],p.y+a[1]+2);
+          c.quadraticCurveTo(p.x+mx+nx*1.8,p.y+my+ny*1.8+2,p.x+b[0],p.y+b[1]+2);
+          c.strokeStyle=sandColor;c.lineWidth=6.5;c.lineCap='round';c.stroke();
+        }
+
+        // Breathing, curved shoreline waves: scalloped crescent foam lines that surge and recede organically.
         if(this.reduced){
-          this.line([[p.x+a[0]*1.08+nx*2.2,p.y+a[1]*1.08+ny*2.2+2.6],[p.x+b[0]*1.08+nx*2.2,p.y+b[1]*1.08+ny*2.2+2.6]],'rgba(255,255,255,.45)',1.4);
+          c.beginPath();c.moveTo(p.x+a[0]*1.06+nx*1.8,p.y+a[1]*1.06+ny*1.8+2.6);
+          c.quadraticCurveTo(p.x+mx*1.06+nx*2.5,p.y+my*1.06+ny*2.5+2.6,p.x+b[0]*1.06+nx*1.8,p.y+b[1]*1.06+ny*1.8+2.6);
+          c.strokeStyle='rgba(255,255,255,.45)';c.lineWidth=1.4;c.lineCap='round';c.stroke();
         }else{
           const wave=Math.sin(this.time*1.6+t.x*.75+t.y*1.15+i*1.3),surge=Math.max(0,wave);
-          const dist=1.6+surge*2.4,foamAlpha=(0.26+surge*.5).toFixed(2);
-          this.line([[p.x+a[0]*1.05+nx*dist,p.y+a[1]*1.05+ny*dist+2.5],[p.x+b[0]*1.05+nx*dist,p.y+b[1]*1.05+ny*dist+2.5]],`rgba(255,255,255,${foamAlpha})`,1.6);
+          const dist=1.8+surge*2.8,foamAlpha=(0.28+surge*.52).toFixed(2);
+          const pMidX=p.x+mx+nx*(dist*1.28),pMidY=p.y+my+ny*(dist*1.28)+2.5;
+
+          c.beginPath();c.moveTo(p.x+a[0]*1.04+nx*dist*.7,p.y+a[1]*1.04+ny*dist*.7+2.5);
+          c.quadraticCurveTo(pMidX,pMidY,p.x+b[0]*1.04+nx*dist*.7,p.y+b[1]*1.04+ny*dist*.7+2.5);
+          c.strokeStyle=`rgba(255,255,255,${foamAlpha})`;c.lineWidth=1.6;c.lineCap='round';c.stroke();
+
           if(t.building==='beach'||(t.natural&&!t.landform)){
-            const washAlpha=(0.14+surge*.26).toFixed(2);
-            this.line([[p.x+a[0]*.98+nx*(dist*.5),p.y+a[1]*.98+ny*(dist*.5)+2.2],[p.x+b[0]*.98+nx*(dist*.5),p.y+b[1]*.98+ny*(dist*.5)+2.2]],`rgba(235,245,240,${washAlpha})`,2.6);
-            if(surge>.42){
+            const washAlpha=(0.13+surge*.26).toFixed(2),washDist=dist*.45;
+            c.beginPath();c.moveTo(p.x+a[0]*.98+nx*washDist,p.y+a[1]*.98+ny*washDist+2.2);
+            c.quadraticCurveTo(p.x+mx*.98+nx*(washDist*1.25),p.y+my*.98+ny*(washDist*1.25)+2.2,p.x+b[0]*.98+nx*washDist,p.y+b[1]*.98+ny*washDist+2.2);
+            c.strokeStyle=`rgba(235,245,240,${washAlpha})`;c.lineWidth=2.6;c.lineCap='round';c.stroke();
+            if(surge>.38){
               for(const f of [.28,.72]){
-                const fx=p.x+a[0]+(b[0]-a[0])*f+nx*(dist+.6),fy=p.y+a[1]+(b[1]-a[1])*f+ny*(dist+.6)+2.5;
-                this.ellipse(fx,fy,1.3,.6,`rgba(255,255,255,${(surge*.65).toFixed(2)})`);
+                const fx=p.x+a[0]+(b[0]-a[0])*f+nx*(dist*1.18);
+                const fy=p.y+a[1]+(b[1]-a[1])*f+ny*(dist*1.18)+2.5;
+                this.ellipse(fx,fy,1.4,.7,`rgba(255,255,255,${(surge*.7).toFixed(2)})`);
               }
             }
           }else{
-            const rockFoam=1.4+surge*1.2;
-            this.line([[p.x+a[0]*1.06+nx*rockFoam,p.y+a[1]*1.06+ny*rockFoam+2.6],[p.x+b[0]*1.06+nx*rockFoam,p.y+b[1]*1.06+ny*rockFoam+2.6]],`rgba(255,255,255,${(0.18+surge*.35).toFixed(2)})`,1.3);
+            const rockDist=1.4+surge*1.3;
+            c.beginPath();c.moveTo(p.x+a[0]*1.05+nx*rockDist,p.y+a[1]*1.05+ny*rockDist+2.6);
+            c.quadraticCurveTo(p.x+mx*1.05+nx*(rockDist*1.2),p.y+my*1.05+ny*(rockDist*1.2)+2.6,p.x+b[0]*1.05+nx*rockDist,p.y+b[1]*1.05+ny*rockDist+2.6);
+            c.strokeStyle=`rgba(255,255,255,${(0.18+surge*.35).toFixed(2)})`;c.lineWidth=1.3;c.lineCap='round';c.stroke();
           }
         }
+
         // From 1980 the polder edges soften into sand and dunes, so the coast stops looking ruled with a pencil.
         if(t.reclaimed&&this.sim.year>=1980&&!['harbor','dock'].includes(n.building)){
           for(let k=0;k<5;k++){const f=(k+.5)/5,h=hash(t.x*7+i*3+k,t.y*5-k),ex=p.x+a[0]+(b[0]-a[0])*f+nx*(2+h*6),ey=p.y+a[1]+(b[1]-a[1])*f+ny*(2+h*6)+2;this.ellipse(ex,ey,4+h*5,(4+h*5)*.48,'#e2d5a6');}
