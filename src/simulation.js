@@ -700,6 +700,12 @@ export class Civilization {
     const stops=[...new Set([...jobs,...naturalPlaces,...roam])].sort((a,b)=>Math.atan2(a.y,a.x)-Math.atan2(b.y,b.x));
     const path=t=>{let id=key(t.x,t.y),r=[];if(!parents.has(id))return r;while(id){r.push(id);id=parents.get(id);}return r.reverse();};
     this.journeys=stops.flatMap((job,i)=>{let home=homes[i%Math.max(1,homes.length)];if(home===job)home=homes[(i+1)%Math.max(1,homes.length)];if(!home)return[];const a=path(home),b=path(job);if(!a.length||!b.length)return[];let common=0;while(common<Math.min(a.length,b.length)&&a[common]===b[common])common++;const route=[...a.slice(common-1).reverse(),...b.slice(common)];return route.length>1?[{route,from:key(home.x,home.y),to:key(job.x,job.y),purpose:job.fire?'rescue':job.buildSite?'building':['shop','market','bakery','cafe'].includes(job.building)?'shopping':['school','library','science-center'].includes(job.building)?'learning':['farm','factory','workshop','powerplant','pump'].includes(job.building)?'work':roam.includes(job)?'exploring':'leisure'}]:[];});
+    // A stroll across each bridge keeps new shortcuts visible even before the far bank develops.
+    for(const t of this.tiles.values())if(t.building==='bridge'){
+      const approach=path(t);if(approach.length<2)continue;
+      const bank=neighbors(t).map(([x,y])=>this.tile(x,y)).find(n=>n?.kind==='land'&&walk(n)&&crosses(t,n)&&!n.buildSite&&key(n.x,n.y)!==approach.at(-2));
+      if(bank)this.journeys.push({route:[...approach,key(bank.x,bank.y)],from:rootId,to:key(bank.x,bank.y),purpose:'leisure'});
+    }
     this.roadCoverage=roadTargets.length?connected/roadTargets.length:0;
     this.routeVersion=3;
   }
