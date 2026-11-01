@@ -124,3 +124,13 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 - **Verzameling:** eerste vuur, regen, duwtje, beving en redding krijgen een eigen herinnering, plus twee extra's voor het volledige handpalet en vijfentwintig ingrepen.
 - **Afsluiting:** de toer bezoekt nu ook het oudste spoor en je meest gebruikte ingreep, met meer pronkstukken; de aftiteling noemt het overheersende gebaar.
 - **Versie:** 1.2.0, 189 tests groen.
+
+## Ronde 10 — De Meester-Upgrade (Game Feel, Juice, Diepte & Sfeer)
+
+- [x] **10.1 Kustbranding en wolkenschaduwen.** Ritmisch ademende witte schuimranden en branding langs zandstranden, duinen en rotseinden met een zachte natte-zandglans; zachte wolkenschaduwen die qua vorm en snelheid exact passen bij de overdrijvende wolken en het eiland diepte geven.
+- [ ] **10.2 "Inspectie met liefde": Bewoners volgen & gedachten.** Klik op een wandelaar om mee te lopen: een subtiel kaartje toont hun naam, leeftijd, beroep en een eigenzinnige gedachte.
+- [ ] **10.3 Diorama micro-interacties.** Klikbare wereld: ritselende bomen met opvliegende vogels, luidbare kerkklok met dorpsreactie en deinende bootjes.
+- [ ] **10.4 Audio-verrijking & intieme soundscape.** Dynamische lagen per zoomniveau, zachte warme boventonen in de synthesizers en verstilde nachtdrones.
+- [ ] **10.5 Prestaties: Offscreen canvas caching.** Het statische landschap cachen naar een achtergrondbuffer voor vloeiende 60fps op mobiel.
+- [ ] **10.6 Fotomodus Deluxe & Ansichtkaart.** Tilt-shift miniatuureffect en polaroid-export in Vrij zicht.
+- [ ] **10.7 Emergente micro-situaties.** Seizoensverrassingen zoals schaatsers in de winter en zandkastelen in de zomer.

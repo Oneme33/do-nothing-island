@@ -374,9 +374,30 @@ export class IslandRenderer {
         const a=corners[i],b=corners[(i+1)%4];
         this.line([[p.x+a[0]*1.12,p.y+a[1]*1.12+3],[p.x+b[0]*1.12,p.y+b[1]*1.12+3]],'#eaf2dc',5);
         if(t.natural)this.line([[p.x+a[0],p.y+a[1]+2],[p.x+b[0],p.y+b[1]+2]],t.landform?'#a9b198':'#e0d8a7',7);
+        const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,len=Math.hypot(mx,my*2)||1,nx=mx/len,ny=my/len;
+        // Breathing shoreline waves: soft frothy white edges and wet sand wash that surge with the tide.
+        if(this.reduced){
+          this.line([[p.x+a[0]*1.08+nx*2.2,p.y+a[1]*1.08+ny*2.2+2.6],[p.x+b[0]*1.08+nx*2.2,p.y+b[1]*1.08+ny*2.2+2.6]],'rgba(255,255,255,.45)',1.4);
+        }else{
+          const wave=Math.sin(this.time*1.6+t.x*.75+t.y*1.15+i*1.3),surge=Math.max(0,wave);
+          const dist=1.6+surge*2.4,foamAlpha=(0.26+surge*.5).toFixed(2);
+          this.line([[p.x+a[0]*1.05+nx*dist,p.y+a[1]*1.05+ny*dist+2.5],[p.x+b[0]*1.05+nx*dist,p.y+b[1]*1.05+ny*dist+2.5]],`rgba(255,255,255,${foamAlpha})`,1.6);
+          if(t.building==='beach'||(t.natural&&!t.landform)){
+            const washAlpha=(0.14+surge*.26).toFixed(2);
+            this.line([[p.x+a[0]*.98+nx*(dist*.5),p.y+a[1]*.98+ny*(dist*.5)+2.2],[p.x+b[0]*.98+nx*(dist*.5),p.y+b[1]*.98+ny*(dist*.5)+2.2]],`rgba(235,245,240,${washAlpha})`,2.6);
+            if(surge>.42){
+              for(const f of [.28,.72]){
+                const fx=p.x+a[0]+(b[0]-a[0])*f+nx*(dist+.6),fy=p.y+a[1]+(b[1]-a[1])*f+ny*(dist+.6)+2.5;
+                this.ellipse(fx,fy,1.3,.6,`rgba(255,255,255,${(surge*.65).toFixed(2)})`);
+              }
+            }
+          }else{
+            const rockFoam=1.4+surge*1.2;
+            this.line([[p.x+a[0]*1.06+nx*rockFoam,p.y+a[1]*1.06+ny*rockFoam+2.6],[p.x+b[0]*1.06+nx*rockFoam,p.y+b[1]*1.06+ny*rockFoam+2.6]],`rgba(255,255,255,${(0.18+surge*.35).toFixed(2)})`,1.3);
+          }
+        }
         // From 1980 the polder edges soften into sand and dunes, so the coast stops looking ruled with a pencil.
         if(t.reclaimed&&this.sim.year>=1980&&!['harbor','dock'].includes(n.building)){
-          const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,len=Math.hypot(mx,my*2)||1,nx=mx/len,ny=my/len;
           for(let k=0;k<5;k++){const f=(k+.5)/5,h=hash(t.x*7+i*3+k,t.y*5-k),ex=p.x+a[0]+(b[0]-a[0])*f+nx*(2+h*6),ey=p.y+a[1]+(b[1]-a[1])*f+ny*(2+h*6)+2;this.ellipse(ex,ey,4+h*5,(4+h*5)*.48,'#e2d5a6');}
           for(let k=0;k<3;k++){const f=.2+k*.3,h=hash(t.y+k,t.x*3+i),gx=p.x+a[0]+(b[0]-a[0])*f,gy=p.y+a[1]+(b[1]-a[1])*f;if(h<.6)for(let g=0;g<3;g++)this.line([[gx+g*1.4-1.4,gy+1],[gx+g*1.8-2,gy-3]],'#8ea06a',.7);}
         }
@@ -1977,10 +1998,25 @@ export class IslandRenderer {
     c.save();c.translate(rightMost+85+Math.sin(this.time*.08)*17,20+Math.sin(this.time*.6)*2);this.smallBoat();c.restore();
     if(this.sim.era>=1){c.save();c.translate(-rightMost-65,65+Math.sin(this.time*.55)*1.5);c.scale(.75,.75);this.smallBoat();c.restore();}
   }
-  // Soft cloud shadows drift across the island, which makes the landscape feel alive.
+  // Soft cloud shadows drift across the island, matching the shape of the clouds above.
   drawCloudShadows(){
-    if(this.reduced)return;const c=this.ctx,through=Math.max(0,Math.min(1,1-(this.zoom/Math.max(.3,this.fitZoom||1)-1)/.7));if(through<=.02)return;c.save();c.fillStyle=`rgba(40,60,50,${(.07*through).toFixed(3)})`;
-    for(let i=0;i<3;i++){const span=1700,wx=((hash(i,55)*span+this.time*(i%2?.8:1.3))%span)-span/2,wy=hash(i,22)*560-355,x=this.origin.x+wx*this.zoom,y=this.origin.y+wy*this.zoom;c.beginPath();c.ellipse(x+40*this.zoom,y,90*this.zoom,34*this.zoom,0,0,TAU);c.fill();}
+    if(this.reduced||this.sim.storm)return;
+    const c=this.ctx,through=Math.max(0,Math.min(1,1-(this.zoom/Math.max(.3,this.fitZoom||1)-1)/.7));
+    if(through<=.02)return;
+    const night=this.light?.night?.18:1,alpha=(0.068*through*night).toFixed(3);
+    c.save();c.fillStyle=`rgba(32,54,44,${alpha})`;
+    const span=1700;
+    for(let i=0;i<4;i++){
+      const wx=((hash(i,55)*span+this.time*(i%2?.8:1.3))%span)-span/2,wy=hash(i,22)*560-430;
+      const x=this.origin.x+(wx+45)*this.zoom,y=this.origin.y+(wy+115)*this.zoom,s=(.6+hash(i,5)*.55)*this.zoom;
+      c.save();c.translate(x,y);c.scale(s*1.22,s*.72);
+      c.beginPath();
+      c.ellipse(-18,0,25,11,0,0,TAU);
+      c.ellipse(0,-6,24,15,0,0,TAU);
+      c.ellipse(22,-1,25,12,0,0,TAU);
+      c.ellipse(6,5,36,10,0,0,TAU);
+      c.fill();c.restore();
+    }
     c.restore();
   }
   drawClouds(){
