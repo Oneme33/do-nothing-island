@@ -136,5 +136,3 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 - [ ] **10.7 Emergente micro-situaties.** Seizoensverrassingen zoals schaatsers in de winter en zandkastelen in de zomer.
 
 - [x] **Stabiele bewoners (feedback 1 november).** Bewoners houden hun lopende tocht vast bij bevolkingsgroei of nieuwe bestemmingen. De tekenvolgorde volgt hun voeten vloeiend.
-
-- [x] **Bruggen gebruiken (feedback 1 november).** Brugdek en verkeer delen dezelfde straatpositie en boog. Rivierbruggen volgen het echte snijpunt van weg en water; de weg stopt bij het dek. Zeebruggen zijn alleen in de lengterichting bereikbaar. Oudere saves krijgen een opnieuw opgebouwd wegennet.
