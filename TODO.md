@@ -134,3 +134,5 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 - [ ] **10.5 Prestaties: Offscreen canvas caching.** Het statische landschap cachen naar een achtergrondbuffer voor vloeiende 60fps op mobiel.
 - [ ] **10.6 Fotomodus Deluxe & Ansichtkaart.** Tilt-shift miniatuureffect en polaroid-export in Vrij zicht.
 - [ ] **10.7 Emergente micro-situaties.** Seizoensverrassingen zoals schaatsers in de winter en zandkastelen in de zomer.
+
+- [x] **Stabiele bewoners (feedback 1 november).** Bewoners houden hun lopende tocht vast bij bevolkingsgroei of nieuwe bestemmingen. De tekenvolgorde volgt hun voeten vloeiend.
