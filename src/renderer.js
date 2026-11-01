@@ -287,32 +287,13 @@ export class IslandRenderer {
     const p=this.walkingPoint(a),q=this.walkingPoint(b);
     return{x:mix(p.x,q.x,t),y:mix(p.y,q.y,t)-lift};
   }
-  walkerTrip(index,time){
-    if(this.walkerSim!==this.sim){this.walkerSim=this.sim;this.walkerTrips=new Map();}
-    const routes=this.sim.journeys?.length?this.sim.journeys.map(j=>j.route):this.sim.routes;
-    if(!routes?.length)return null;
-    const clock=time*.9;
-    let trip=this.walkerTrips.get(index);
-    if(trip&&time<trip.lastTime)trip=null;
-    if(!trip||clock>=trip.start+trip.cycle){
-      // Keep a resident on the same trip while the town grows and reorders its destinations.
-      const count=Math.min(64,Math.max(6,Math.floor(this.sim.population*.65)));
-      const route=trip&&routes.find(r=>r[0]===trip.route[0]&&r.at(-1)===trip.route.at(-1))||
-        routes[Math.floor(index*routes.length/count)%routes.length];
-      if(!route||route.length<2)return null;
-      const cycle=(route.length-1)*2+6.2;
-      const phase=trip?((clock-trip.start)%trip.cycle)%cycle:hash(index,79)*cycle;
-      trip={route:route.slice(),cycle,start:clock-phase,lastTime:time};
-      this.walkerTrips.set(index,trip);
-    }
-    trip.lastTime=time;
-    return {route:trip.route,phase:clock-trip.start};
-  }
   sampleWalker(index,time=this.activityTime){
-    const trip=this.walkerTrip(index,this.reduced?0:time);if(!trip)return null;
-    const {route,phase}=trip,steps=route.length-1,doorTime=1.6,insideTime=3;
-    const target=this.sim.tiles.get(route.at(-1));if(!target)return null;
-    const street=this.walkingPoint(target),door=this.entrancePoint(target);
+    const routes=this.sim.journeys?.length?this.sim.journeys.map(j=>j.route):this.sim.routes;
+    const count=Math.min(64,Math.max(6,Math.floor(this.sim.population*.65))),routeIndex=Math.floor(index*routes.length/count)%Math.max(1,routes.length);
+    const route=routes[routeIndex];if(!route||route.length<2)return null;
+    const steps=route.length-1,doorTime=1.6,insideTime=3,cycle=steps*2+doorTime*2+insideTime;
+    const phase=this.reduced?((hash(index,79)*cycle)%cycle):(time*.9+hash(index,79)*cycle)%cycle;
+    const target=this.sim.tiles.get(route.at(-1)),street=this.walkingPoint(target),door=this.entrancePoint(target);
     // Nobody wanders onto a building site: the builders have it to themselves.
     if(target.buildSite&&phase>=steps)return null;
     const outdoors=!target.building||['forest','beach','park','garden','farm','bonfire','campfire','playground','royal-garden','palace-square','town-square','campus-square'].includes(target.building);
@@ -1767,7 +1748,7 @@ export class IslandRenderer {
     const colors=['#a18463','#d4c08a','#7a8d6b','#b89774','#d6d0ae'];
     for(let i=0;i<count;i++){
       const p=this.sampleWalker(i);if(!p||p.stage==='inside')continue;
-      this.enqueueActor(p.y+3,()=>{
+      this.enqueueActor(Math.round(p.y/5.75)*5.75+3,()=>{
         this.ctx.save();this.ctx.globalAlpha=p.alpha;this.person(p.x,p.y,colors[i%colors.length],i);
         if(i%3===0){this.rect(p.x+1,p.y-5,3,2,'#bd9f69');this.line([[p.x+1,p.y-5],[p.x+4,p.y-5]],'#e0c995',.5);}this.ctx.restore();
       });
