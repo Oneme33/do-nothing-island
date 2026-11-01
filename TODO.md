@@ -127,7 +127,7 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 
 ## Ronde 10 — De Meester-Upgrade (Game Feel, Juice, Diepte & Sfeer)
 
-- [x] **10.1 Echte kust en wolkenschaduwen.** Doorlopende afgeronde kust met een verhoogde aardrand, aflopende zandstrook, enkele rotsen en ondiep water. De zee heeft geen bewegende streepjes meer. Wolken en schaduwen delen dezelfde vorm. Visueel gecontroleerd; Coens beoordeling volgt.
+- [x] **10.1 Kustbranding en wolkenschaduwen — herzien.** Smalle zand- en rotsranden langs echte watergrenzen, met rustige branding die langzaam uitdooft; geen herhaalde zandbollen of extra watertegels. Wolken en hun lichtere schaduwen delen dezelfde vorm en beweging. Rustige animaties en lichte mobiele weergave houden een vaste waterlijn. Visueel gecontroleerd; Coens beoordeling volgt.
 - [ ] **10.2 "Inspectie met liefde": Bewoners volgen & gedachten.** Klik op een wandelaar om mee te lopen: een subtiel kaartje toont hun naam, leeftijd, beroep en een eigenzinnige gedachte.
 - [ ] **10.3 Diorama micro-interacties.** Klikbare wereld: ritselende bomen met opvliegende vogels, luidbare kerkklok met dorpsreactie en deinende bootjes.
 - [ ] **10.4 Audio-verrijking & intieme soundscape.** Dynamische lagen per zoomniveau, zachte warme boventonen in de synthesizers en verstilde nachtdrones.

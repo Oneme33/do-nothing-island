@@ -35,38 +35,6 @@ function houseLook(t){
  return{wall,side:shadeColor(wall,.86),roof,gable:shadeColor(roof,1.12),shutter,shutterSide:shadeColor(shutter,1.1),sx:.86+b*.3,sy:.9+c*.24,extra:Math.floor(a*3)*3,flowers:c<.35?['#d58f7a','#e2c26a','#c98fb0'][Math.floor(a*3)]:null,chimney:b>.25};
 }
 
-// Trace the actual land boundary once, including bays, enclosed water and separate islands.
-export function coastContours(tiles){
-  const land=new Set(tiles.filter(t=>t.kind==='land').map(t=>`${t.x},${t.y}`));
-  const corners=[[0,-1],[1,0],[0,1],[-1,0]],adj=[[0,-1],[1,0],[0,1],[-1,0]];
-  const edges=[],outgoing=new Map(),vertex=p=>`${p.x},${p.y}`;
-  for(const t of tiles){
-    if(t.kind!=='land')continue;
-    for(let i=0;i<4;i++){
-      if(land.has(`${t.x+adj[i][0]},${t.y+adj[i][1]}`))continue;
-      const point=j=>({x:t.x-t.y+corners[j][0],y:t.x+t.y+corners[j][1]});
-      const edge={a:point(i),b:point((i+1)%4),used:false};edges.push(edge);
-      const k=vertex(edge.a);if(!outgoing.has(k))outgoing.set(k,[]);outgoing.get(k).push(edge);
-    }
-  }
-  const contours=[];
-  for(const first of edges){
-    if(first.used)continue;
-    const points=[];let edge=first;
-    while(edge&&!edge.used){
-      edge.used=true;points.push({x:edge.a.x*23,y:edge.a.y*23});
-      const dx=edge.b.x-edge.a.x,dy=edge.b.y-edge.a.y;
-      // At diagonal contacts turn right, keeping the two shores separate.
-      edge=(outgoing.get(vertex(edge.b))||[]).filter(e=>!e.used).sort((a,b)=>{
-        const angle=e=>Math.atan2(dx*(e.b.y-e.a.y)-dy*(e.b.x-e.a.x),dx*(e.b.x-e.a.x)+dy*(e.b.y-e.a.y));
-        return angle(b)-angle(a);
-      })[0];
-    }
-    if(points.length>=4)contours.push(points);
-  }
-  return contours;
-}
-
 export class IslandRenderer {
   constructor(canvas,simulation) {
     this.canvas=canvas;
@@ -205,7 +173,8 @@ export class IslandRenderer {
       this.line([[p.x-15,p.y],[p.x,p.y+7],[p.x+15,p.y]],'#716e5e',2);
     }
     drawCauseway(this);
-    this.drawShore(land);
+    // Waterline rings softly break up the tile silhouette.
+    for(const t of land.filter(t=>t.kind==='land'))this.drawShore(t);
     const sorted=land.sort((a,b)=>a.x+a.y-b.x-b.y||a.x-b.x);
     this.visibleTiles=sorted;
     for(const t of sorted)this.drawGround(t);
@@ -379,56 +348,49 @@ export class IslandRenderer {
     c.fillStyle=this.sim.storm?'#c5d8d3':'#d6e8e3';c.fillRect(0,0,this.width,this.height);
     const g=c.createRadialGradient(this.width*.55,this.height*.5,40,this.width*.55,this.height*.5,this.width*.7);
     g.addColorStop(0,'#eaf3e6aa');g.addColorStop(.55,'#cfe4df33');g.addColorStop(1,'#9fc4c1aa');c.fillStyle=g;c.fillRect(0,0,this.width,this.height);
-    // The sea stays quiet: depth comes from the coastal shelf, without drifting dash marks.
+    if(!this.reduced)for(let i=0;i<26;i++){const tw=Math.sin(this.time*1.7+i*2.3);if(tw<.7)continue;const x=hash(i,41)*this.width,y=hash(i,43)*this.height;c.fillStyle=`rgba(255,255,250,${(tw-.7)*2})`;c.fillRect(x-2,y,4,.8);c.fillRect(x-.4,y-1.6,.8,4);}
+    for(let i=0;i<(this.interacting?24:115);i++){
+      const x=hash(i,2)*this.width+Math.sin(this.time*.13+i)*3;
+      const y=hash(i,8)*this.height;
+      const w=6+hash(i,9)*14;
+      const alpha=.2+Math.sin(this.time*.7+i)*.1;
+      c.strokeStyle=`rgba(255,255,240,${alpha})`;c.lineWidth=1;c.beginPath();c.moveTo(x,y);c.bezierCurveTo(x+w*.3,y+2,x+w*.7,y-2,x+w,y);c.stroke();
+      if(i%5===0){c.strokeStyle='#a4c4b227';c.beginPath();c.moveTo(x-2,y+5);c.lineTo(x+w*.6,y+5);c.stroke();}
+    }
+    // A quiet coordinate grid gives the sea a cartographic quality.
+    c.strokeStyle='#8aaf9b0a';c.lineWidth=.6;
+    for(let x=-this.height;x<this.width+this.height;x+=72){c.beginPath();c.moveTo(x,0);c.lineTo(x+this.height*2,this.height);c.stroke();c.beginPath();c.moveTo(x,0);c.lineTo(x-this.height*2,this.height);c.stroke();}
   }
-  drawShore(tiles){
-    const c=this.ctx,dry=tiles.filter(t=>t.kind==='land');
-    const signature=dry.map(t=>`${t.x},${t.y}`).join(';');
-    if(signature!==this.shoreSignature){
-      this.shoreSignature=signature;
-      const contours=coastContours(dry);
-      this.shoreRings=new Map();
-      for(const width of [19,13,8,3])this.shoreRings.set(width,contours.map(points=>points.map((p,i)=>{
-        const before=points[(i+points.length-1)%points.length],after=points[(i+1)%points.length];
-        const normal=(a,b)=>{const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);return {x:dy/d,y:-dx/d};};
-        const a=normal(before,p),b=normal(p,after),d=Math.max(.65,1+a.x*b.x+a.y*b.y);
-        const spread=.85+.18*Math.sin(p.x/86)+.12*Math.cos(p.y/105);
-        return {x:p.x+(a.x+b.x)*width*spread/d,y:p.y+(a.y+b.y)*width*spread/d};
-      })));
+  drawShore(t){
+    const p=this.p(t.x,t.y),c=this.ctx;
+    const corners=[[0,-11.5],[23,0],[0,11.5],[-23,0]];
+    const adj=[[t.x,t.y-1],[t.x+1,t.y],[t.x,t.y+1],[t.x-1,t.y]];
+    c.save();c.lineCap='round';
+    for(let i=0;i<4;i++){
+      if(this.sim.tile(...adj[i])?.kind!=='water')continue;
+      const a=corners[i],b=corners[(i+1)%4];
+      const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
+      const len=Math.hypot(mx,my*2),nx=mx/len,ny=my/len;
+      const sandy=!t.landform&&(t.natural||t.building==='beach'||t.reclaimed&&this.sim.year>=1980);
+      // Keep the land footprint intact: a narrow continuous rim, without repeated sand blobs.
+      const curve=(inset,offset,bend,color,width)=>{
+        c.beginPath();
+        c.moveTo(p.x+a[0]+(b[0]-a[0])*inset+nx*offset,p.y+a[1]+(b[1]-a[1])*inset+ny*offset+4);
+        c.quadraticCurveTo(p.x+mx+nx*(offset+bend),p.y+my+ny*(offset+bend)+4,
+          p.x+b[0]+(a[0]-b[0])*inset+nx*offset,p.y+b[1]+(a[1]-b[1])*inset+ny*offset+4);
+        c.strokeStyle=color;c.lineWidth=width;c.stroke();
+      };
+      curve(0,1.2,.4,sandy?'#d9d0a4':'#a6b6a2',sandy?3.2:2);
+      // Neighbouring edges share a slow tide; foam fades away before a new wave starts.
+      // Reduced motion and the light mobile rendering keep one quiet, fixed waterline.
+      const still=this.reduced||this.interacting;
+      const phase=still?.35:((this.time*.14+(t.x+t.y)*.025)%1+1)%1;
+      const strength=still?.35:Math.sin(Math.PI*phase)**2;
+      const distance=still?3.3:2+phase*4;
+      curve(.08,distance,1.2,`rgba(255,255,242,${(.08+strength*(sandy?.34:.2)).toFixed(3)})`,sandy?1.1:.8);
+      if(sandy&&!still)curve(.18,1.8,.5,`rgba(225,240,222,${(strength*.16).toFixed(3)})`,1.8);
     }
-    const surface=(width,height,color)=>{
-      c.beginPath();
-      for(const points of this.shoreRings.get(width)){
-        const toward=(p,q,f)=>({x:p.x+(q.x-p.x)*f,y:(p.y+(q.y-p.y)*f)*.5+height});
-        const first=toward(points[0],points.at(-1),.28);c.moveTo(first.x,first.y);
-        for(let i=0;i<points.length;i++){
-          const p=points[i],next=toward(p,points[(i+1)%points.length],.28);
-          c.quadraticCurveTo(p.x,p.y*.5+height,next.x,next.y);
-          const end=toward(points[(i+1)%points.length],p,.28);c.lineTo(end.x,end.y);
-        }
-        c.closePath();
-      }
-      c.fillStyle=color;c.fill();
-    };
-    // A continuous underwater shelf, a sloping sand bank and a raised grassy lip.
-    // Filled surfaces give the island volume; the front faces remain visible below the top.
-    surface(19,9,'#c2dcd2');
-    surface(13,8,'#b9d3c2');
-    surface(8,10,'#c4b58d');
-    surface(8,5,'#dfd0a5');
-    surface(3,2,'#b1aa80');
-    surface(3,-2,'#a6b77e');
-    // Occasional low, faceted rocks anchor the shore without turning it into a wall.
-    for(const t of dry){
-      if(t.building==='beach'||t.building==='harbor'||t.building==='dock'||(!t.landform&&hash(t.x,t.y)<.88))continue;
-      for(const [dx,dy] of [[1,0],[0,1],[-1,0],[0,-1]]){
-        if(this.sim.tile(t.x+dx,t.y+dy)?.kind!=='water')continue;
-        const q=this.p(t.x+dx*.65,t.y+dy*.65),x=q.x,y=q.y+7;
-        this.poly([[x-4,y],[x-2,y-4],[x+2,y-5],[x+5,y-1],[x+2,y+2]],'#a6ac95');
-        this.poly([[x-4,y],[x-2,y-4],[x+1,y-2],[x,y+1]],'#c4c5ac');
-        this.poly([[x,y+1],[x+1,y-2],[x+2,y-5],[x+5,y-1],[x+2,y+2]],'#909c87');
-      }
-    }
+    c.restore();
   }
   drawGround(t){
     const p=this.p(t.x,t.y),x=p.x,y=p.y;
@@ -442,8 +404,8 @@ export class IslandRenderer {
       return;
     }
     // Two exposed earth faces, with a grassy top. No expensive mesh rebuilds.
-    if(!['land','water'].includes(this.sim.tile(t.x+1,t.y)?.kind))this.poly([[x,y+10],[x+23,y-1],[x+23,y+4],[x,y+16]],t.reclaimed?'#a7a184':'#bdb286');
-    if(!['land','water'].includes(this.sim.tile(t.x,t.y+1)?.kind))this.poly([[x-23,y-1],[x,y+10],[x,y+16],[x-23,y+4]],t.reclaimed?'#b2ac89':'#d2c594');
+    if(this.sim.tile(t.x+1,t.y)?.kind!=='land')this.poly([[x,y+10],[x+23,y-1],[x+23,y+4],[x,y+16]],t.reclaimed?'#a7a184':'#bdb286');
+    if(this.sim.tile(t.x,t.y+1)?.kind!=='land')this.poly([[x-23,y-1],[x,y+10],[x,y+16],[x-23,y+4]],t.reclaimed?'#b2ac89':'#d2c594');
     const districtColors={heritage:'#bfc29d',knowledge:'#bec9b3',industry:'#b3b8a1',fields:'#afbe7d',town:'#c2c3a1',gardens:'#a4b984',skyline:'#b5c2a3'};
     const terrain={beach:'#e0d2a2',forest:'#91a574',park:'#acc28a',playground:'#c8bc8c',fairground:'#c7bc93',factory:'#b7bba3',powerplant:'#b7bba3','science-center':'#c1d0b8',school:'#c8d2b3'};
     this.diamond(x,y-2,23.2,11.6,terrain[t.building]||(this.showDistricts&&t.building&&t.district?districtColors[t.district]:null)||(t.reclaimed?'#b2bc86':palette[Math.floor(t.variant*palette.length)]));
