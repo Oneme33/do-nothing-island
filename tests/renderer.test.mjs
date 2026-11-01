@@ -166,7 +166,7 @@ test('every open wish shows one clickable question mark at the requested place a
   const s=new Civilization(31),{canvas}=canvasHarness(width,650),r=new IslandRenderer(canvas,s);s.wishes.active={x:1,y:-1,id:'test'};r.draw(100);
   const p=r.wishResidentPoint();assert.ok(p&&Number.isFinite(p.x)&&Number.isFinite(p.y),'visible outside Help mode too');assert.equal(r.pickWishResident(p.x,p.y),true);assert.equal(r.pickWishResident(p.x+100,p.y),false);
   r.mode='help';assert.doesNotThrow(()=>r.draw(200));
-  s.wishes.active.hidden=true;assert.equal(r.wishResidentPoint(),null,'a dismissed wish hides its question mark');
+  s.wishes.active.hidden=true;assert.ok(r.wishResidentPoint(),'dismissing the cloud leaves its active question mark visible');
   s.wishes.active=null;r.draw(300);assert.equal(r.pickWishResident(p.x,p.y),false);
  }
 });

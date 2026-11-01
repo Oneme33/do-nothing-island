@@ -138,3 +138,5 @@ Daarna volgt **2.8 (filmisch einde op het echte eiland)**. Ronde 3 blijft open.
 - [x] **Stabiele bewoners (feedback 1 november).** Bewoners houden hun lopende tocht vast bij bevolkingsgroei of nieuwe bestemmingen. De tekenvolgorde volgt hun voeten vloeiend.
 
 - [x] **Bruggen gebruiken (feedback 1 november).** Brugdek en verkeer delen dezelfde straatpositie en boog. Rivierbruggen volgen het echte snijpunt van weg en water; de weg stopt bij het dek. Zeebruggen zijn alleen in de lengterichting bereikbaar. Oudere saves krijgen een opnieuw opgebouwd wegennet.
+
+- [x] **Zichtbare vraagtekens (feedback 1 november).** Actieve kaartmarkers blijven zichtbaar wanneer wenswolkjes uitstaan of gesloten worden. Grotere vaste leesmaat, boven daken, en een aanklikbare randmarker wanneer de plek buiten beeld valt.

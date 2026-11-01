@@ -256,18 +256,32 @@ export class IslandRenderer {
   }
   // A question mark floats over every open wish; in Help mode the asking resident stands beside it.
   wishResidentPoint(){
-    const wish=this.sim.wishes?.active;if(!wish||wish.hidden||this.sim.ending||this.sim.config.wishBubbles===false)return null;
-    const p=this.point(wish.x,wish.y);return{x:p.x,y:p.y-30*this.zoom,ground:p,wish};
+    // The preference and dismiss button silence the text cloud, never an active map marker.
+    const wish=this.sim.wishes?.active;if(!wish||this.sim.ending)return null;
+    const ground=this.point(wish.x,wish.y),tile=this.sim.tile(wish.x,wish.y);
+    const heights={tower:92,palace:140,'royal-palace':160,manor:80,church:95,cathedral:105,lighthouse:85,'original-tree':75,forest:40,house:48,townhouse:62,hut:38};
+    const height=tile?.landform?(tile.relief||55)*1.9:heights[tile?.building]||22;
+    const rawX=ground.x,rawY=ground.y-Math.max(30,height+12)*this.zoom;
+    const bottom=Math.max(100,this.height-105),x=Math.max(34,Math.min(this.width-34,rawX));
+    let y=Math.max(90,Math.min(bottom,rawY));
+    if(x<(this.width<600?150:210)&&y<(this.width<600?200:230))y=Math.min(bottom,this.width<600?210:240);
+    return {x,y,ground,wish,radius:12,edge:x!==rawX||y!==rawY};
   }
-  pickWishResident(x,y){const p=this.wishResidentPoint();return !!p&&Math.hypot(x-p.x,y-p.y)<=Math.max(16,12*this.zoom);}
+  pickWishResident(x,y){const p=this.wishResidentPoint();return !!p&&Math.hypot(x-p.x,y-p.y)<=22;}
   drawWishResident(){
     const p=this.wishResidentPoint();if(!p)return;
-    const c=this.ctx,bob=this.reduced?0:Math.sin(this.time*2.2)*2;
-    if(this.mode==='help'){c.save();c.translate(p.ground.x+16*this.zoom,p.ground.y+8*this.zoom);c.scale(this.zoom,this.zoom);this.ellipse(0,0,7,3,'#8c9e6e44');this.person(0,0,'#a37b5f',0);c.restore();}
-    c.save();c.translate(p.x,p.y+bob);c.scale(Math.max(.8,this.zoom),Math.max(.8,this.zoom));
-    this.line([[0,9],[0,16]],'#8f9e7f88',1);
-    this.ellipse(0,0,9,9,'#fbf6df');c.strokeStyle='#c7a85c';c.lineWidth=1.3;c.beginPath();c.ellipse(0,0,9,9,0,0,TAU);c.stroke();
-    c.fillStyle='#7a6230';c.font='bold 12px Georgia, serif';c.textAlign='center';c.textBaseline='middle';c.fillText('?',0,1);c.restore();
+    const c=this.ctx,bob=this.reduced||p.edge?0:Math.sin(this.time*2.2)*1.3;
+    if(this.mode==='help'&&!p.edge){c.save();c.translate(p.ground.x+16*this.zoom,p.ground.y+8*this.zoom);c.scale(this.zoom,this.zoom);this.ellipse(0,0,7,3,'#8c9e6e44');this.person(0,0,'#a37b5f',0);c.restore();}
+    c.save();c.translate(p.x,p.y+bob);
+    if(p.edge){
+      const dx=p.ground.x-p.x,dy=p.ground.y-p.y,length=Math.hypot(dx,dy)||1,nx=dx/length,ny=dy/length;
+      this.poly([[nx*21,ny*21],[nx*14-ny*3,ny*14+nx*3],[nx*14+ny*3,ny*14-nx*3]],'#a48742');
+    }else this.line([[0,13],[0,20]],'#a08e63',1.2);
+    c.shadowColor='rgba(48,57,35,.23)';c.shadowBlur=5;c.shadowOffsetY=1;
+    this.ellipse(0,0,p.radius+2,p.radius+2,'#fffff3');
+    c.shadowBlur=0;c.shadowOffsetY=0;this.ellipse(0,0,p.radius,p.radius,'#fbf1d0');
+    c.strokeStyle='#aa873e';c.lineWidth=1.3;c.beginPath();c.ellipse(0,0,p.radius,p.radius,0,0,TAU);c.stroke();
+    c.fillStyle='#72551e';c.font='bold 17px Georgia, serif';c.textAlign='center';c.textBaseline='middle';c.fillText('?',0,.8);c.restore();
   }
   enqueueActor(depth,draw){if(this.scene)this.scene.push({depth,draw});else draw();}
   streetPoint(tile){const p=this.p(tile.x,tile.y);return{x:p.x,y:p.y+11.5};}
