@@ -16,7 +16,7 @@ import {squareRole} from './square.js';
 import {islandIdentity} from './identity.js';
 import { drawFlames, drawBonfire, drawFestivalGround, drawLifeWorld, drawComicBubbles } from './pageants.js';
 const aroundLand=(s,t)=>neighbors(t).every(([x,y])=>s.tile(x,y)?.kind==='land');
-import { neighbors, key } from './simulation.js';
+import { neighbors, key, bridgeAxis } from './simulation.js';
 const TAU=Math.PI*2;
 const hash=(x,y=0)=>{const n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n);};
 const mix=(a,b,t)=>a+(b-a)*t;
@@ -213,6 +213,7 @@ export class IslandRenderer {
     this.drawMoat();
     this.drawHeritage();
     this.drawRoads(sorted);
+    this.drawRiverBridges();
     this.scene=[];
     for(const t of sorted){
       this.drawDetails(t);
@@ -272,18 +273,21 @@ export class IslandRenderer {
   streetPoint(tile){const p=this.p(tile.x,tile.y);return{x:p.x,y:p.y+11.5};}
   streetPosition(a,b,t,lane=0){
     const p=this.streetPoint(a),q=this.streetPoint(b),dx=q.x-p.x,dy=q.y-p.y,len=Math.hypot(dx,dy)||1;
-    return{x:mix(p.x,q.x,t)-dy/len*lane,y:mix(p.y,q.y,t)+dx/len*lane};
+    const crossing=this.riverCrossings?.get([key(a.x,a.y),key(b.x,b.y)].sort().join('|'));
+    const u=crossing?((key(a.x,a.y)===crossing.from?t:1-t)-crossing.t)*len/crossing.halfSpan:2;
+    const lift=this.bridgeLift(a,b,t)+(Math.abs(u)<1?3*(1-u*u):0);
+    return{x:mix(p.x,q.x,t)-dy/len*lane,y:mix(p.y,q.y,t)+dx/len*lane-lift};
   }
   entrancePoint(tile){const p=this.p(tile.x,tile.y);return{x:p.x-5,y:p.y};}
   walkingPoint(tile){return tile.road||tile.building||tile.buildSite?this.streetPoint(tile):this.p(tile.x,tile.y);}
   bridgeLift(a,b,t){
     const bridge=a?.building==='bridge'?a:b?.building==='bridge'?b:null;if(!bridge)return 0;
     const u=Math.max(0,Math.min(1,a?.building==='bridge'?1-t:t));
-    return 5*u*u*(3-2*u);
+    return 5*u*(2-u);
   }
   walkingPosition(a,b,t,lane=0){
     const lift=this.bridgeLift(a,b,t);
-    if(a.roadLinks?.includes(key(b.x,b.y))){const p=this.streetPosition(a,b,t,lane);return{x:p.x,y:p.y-lift};}
+    if(a.roadLinks?.includes(key(b.x,b.y))||a.building==='bridge'||b.building==='bridge')return this.streetPosition(a,b,t,lane);
     const p=this.walkingPoint(a),q=this.walkingPoint(b);
     return{x:mix(p.x,q.x,t),y:mix(p.y,q.y,t)-lift};
   }
@@ -311,7 +315,7 @@ export class IslandRenderer {
   sampleWalker(index,time=this.activityTime){
     const trip=this.walkerTrip(index,this.reduced?0:time);if(!trip)return null;
     const {route,phase}=trip,steps=route.length-1,doorTime=1.6,insideTime=3;
-    const target=this.sim.tiles.get(route.at(-1));if(!target)return null;
+    const target=this.sim.tiles.get(route.at(-1));if(!target||target.kind!=='land')return null;
     const street=this.walkingPoint(target),door=this.entrancePoint(target);
     // Nobody wanders onto a building site: the builders have it to themselves.
     if(target.buildSite&&phase>=steps)return null;
@@ -322,7 +326,8 @@ export class IslandRenderer {
     if(phase>=steps+doorTime+insideTime&&phase<steps+doorTime*2+insideTime){const t=(phase-steps-doorTime-insideTime)/doorTime;return{x:mix(door.x,street.x,t),y:mix(door.y,street.y,t),stage:'leaving',alpha:Math.min(1,t/.4),target};}
     const distance=phase<steps?phase:steps-(phase-steps-doorTime*2-insideTime);
     const segment=Math.min(steps-1,Math.max(0,Math.floor(distance))),a=this.sim.tiles.get(route[segment]),b=this.sim.tiles.get(route[segment+1]);
-    if(!a||!b||a.kind==='flooded'||b.kind==='flooded'||a.buildSite||b.buildSite)return null;
+    const passable=t=>t&&(t.kind==='land'||t.kind==='water'&&t.building==='bridge');
+    if(!passable(a)||!passable(b)||a.buildSite||b.buildSite)return null;
     const road=a.roadLinks?.includes(key(b.x,b.y));
     return{...this.walkingPosition(a,b,distance-segment,(hash(index,9)-.5)*1.8),stage:road?'road':'walking',alpha:1,a,b,t:distance-segment,target};
   }
@@ -375,14 +380,14 @@ export class IslandRenderer {
   }
   // A river, not a canal: a smooth meandering line that starts at a spring below the mountain and widens towards the sea, with sandy banks, reeds and stones.
   drawRiver(){
-    const river=this.sim.river;if(!river?.tiles?.length)return;
+    const river=this.sim.river;if(!river?.tiles?.length){this.riverCrossings=new Map();return;}
     const c=this.ctx,seed=(this.sim.seed%97)*.7,tiles=river.tiles.map(k=>k.split(',').map(Number));
     const pts=tiles.map(([x,y])=>this.p(x,y));
     if(river.sea){const q=this.p(river.sea.x,river.sea.y),last=pts.at(-1);pts.push({x:(last.x+q.x)/2,y:(last.y+q.y)/2+4});}
     // Bend the line sideways along its course.
     const bent=pts.map((p,i)=>{const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)],dx=b.x-a.x,dy=(b.y-a.y)*2,len=Math.hypot(dx,dy)||1,sway=i===0||i===pts.length-1?0:Math.sin(i*1.35+seed)*7;return{x:p.x-dy/len*sway,y:p.y+dx/len*sway*.5};});
     // Remember where the water really runs, so footbridges sit on it.
-    this.riverPoints=new Map(tiles.map(([x,y],i)=>{const a=bent[Math.max(0,i-1)],b=bent[Math.min(bent.length-1,i+1)];return[key(x,y),{x:bent[i].x,y:bent[i].y,alongX:(b.x-a.x)*(b.y-a.y)>0,i}];}));this.riverBridges=[];
+    this.prepareRiverCrossings(bent);
     const n=bent.length,stroke=(width,color)=>{for(let i=0;i<n-1;i++){const a=bent[i],b=bent[i+1],m0=i?{x:(bent[i-1].x+a.x)/2,y:(bent[i-1].y+a.y)/2}:a,m1={x:(a.x+b.x)/2,y:(a.y+b.y)/2};c.beginPath();c.moveTo(m0.x,m0.y);c.quadraticCurveTo(a.x,a.y,m1.x,m1.y);if(i===n-2)c.lineTo(b.x,b.y);c.strokeStyle=color;c.lineWidth=width(i/(n-1));c.lineCap='round';c.lineJoin='round';c.stroke();}};
     stroke(u=>6+u*9,'#cdbd8e');stroke(u=>3+u*7,'#7fb2bd');stroke(u=>1.2+u*2.4,'#a9d4dc');
     // A small spring and waterfall at the source.
@@ -391,6 +396,47 @@ export class IslandRenderer {
       if(h<.45)for(let k=0;k<3;k++)this.line([[p.x+7+k*1.5,p.y+2],[p.x+6+k*1.8,p.y-4-k]],'#6f8f4f',.8);
       else if(h<.6){this.ellipse(p.x-8,p.y+2,1.8,1.1,'#a9a69a');this.ellipse(p.x-5,p.y+3,1.2,.8,'#bdb9ab');}
       if(!this.reduced){const f=(this.time*.35+i*.37)%1,q=bent[i+1];this.ellipse(p.x+(q.x-p.x)*f,p.y+(q.y-p.y)*f,1.6,.5,'rgba(255,255,255,.65)');}}
+  }
+  prepareRiverCrossings(bent){
+    const roads=[...this.sim.tiles.values()].filter(t=>t.road&&t.kind==='land');
+    const signature=this.sim.seed+'|'+bent.map(p=>`${p.x},${p.y}`).join(';')+'|'+roads.map(t=>`${t.x},${t.y}:${(t.roadLinks||[]).join('/')}`).join(';');
+    if(signature===this.riverCrossingSignature)return;
+    this.riverCrossingSignature=signature;this.riverCrossings=new Map();
+    // Sample the same quadratic curves used to paint the water, not the tile centres.
+    const water=[];
+    for(let i=0;i<bent.length-1;i++){
+      const p=bent[i],q=bent[i+1],a=i?{x:(bent[i-1].x+p.x)/2,y:(bent[i-1].y+p.y)/2}:p;
+      const b={x:(p.x+q.x)/2,y:(p.y+q.y)/2};
+      for(let j=0;j<=8;j++){
+        const u=j/8,v=1-u;water.push({x:v*v*a.x+2*v*u*p.x+u*u*b.x,y:v*v*a.y+2*v*u*p.y+u*u*b.y,width:6+9*i/(bent.length-1)});
+      }
+      if(i===bent.length-2)water.push({...q,width:15});
+    }
+    const cross=(a,b)=>a.x*b.y-a.y*b.x;
+    for(const t of roads)for(const [dx,dy] of [[1,0],[0,1]]){
+      const next=this.sim.tile(t.x+dx,t.y+dy);if(next?.kind!=='land'||!t.roadLinks?.includes(key(next.x,next.y)))continue;
+      const a=this.streetPoint(t),b=this.streetPoint(next),r={x:b.x-a.x,y:b.y-a.y},length=Math.hypot(r.x,r.y);
+      for(let i=1;i<water.length;i++){
+        const p=water[i-1],q=water[i],s={x:q.x-p.x,y:q.y-p.y},den=cross(r,s);
+        const sine=Math.abs(den)/(length*Math.hypot(s.x,s.y));if(!Number.isFinite(sine)||sine<.3)continue;
+        const delta={x:p.x-a.x,y:p.y-a.y},u=cross(delta,s)/den,v=cross(delta,r)/den;
+        if(u<0||u>1||v<0||v>1)continue;
+        const halfSpan=Math.min(length*.8,Math.max(7,(q.width/2+1.5)/sine));
+        const crossing={x:mix(a.x,b.x,u),y:mix(a.y,b.y,u),from:key(t.x,t.y),t:u,halfSpan,length,alongX:dx===1,dx:r.x/length,dy:r.y/length};
+        this.riverCrossings.set([key(t.x,t.y),key(next.x,next.y)].sort().join('|'),crossing);break;
+      }
+    }
+  }
+  riverBridgeAt(p){
+    for(const b of this.riverCrossings?.values()||[])if(Math.abs((p.x-b.x)*b.dx+(p.y-b.y)*b.dy)<b.halfSpan&&Math.abs((p.x-b.x)*b.dy-(p.y-b.y)*b.dx)<6)return b;
+    return null;
+  }
+  drawRiverBridges(){
+    for(const b of this.riverCrossings?.values()||[]){
+      this.ctx.save();this.ctx.translate(b.x,b.y);
+      this.deck(b.alongX,b.halfSpan/Math.hypot(23,11.5),.22,3,['#b3a07a','#8d7c60','#8c795e']);
+      this.ctx.restore();
+    }
   }
   drawWater(){
     const c=this.ctx;
@@ -486,11 +532,6 @@ export class IslandRenderer {
       for(let i=0;i<3;i++){const xx=x+(hash(i+t.x,t.y)-.5)*27,yy=y+(hash(t.y,i+t.x)-.5)*8;this.ellipse(xx,yy,1.2,.7,'#d4d7a4');}
     }
     if(t.river){
-      // The river: a ribbon of water towards each river neighbour and to the sea at the mouth.
-      // A wooden footbridge where a road crosses the river.
-      // Only where a road actually crosses (it leads to dry land on both sides), on the water itself, and not every few metres.
-      const at=this.riverPoints?.get(key(t.x,t.y)),dry=(t.roadLinks||[]).filter(k=>!this.sim.tiles.get(k)?.river).length;
-      if(t.road&&at&&dry>=2&&!this.riverBridges.some(i=>Math.abs(i-at.i)<3)){this.riverBridges.push(at.i);this.ctx.save();this.ctx.translate(at.x,at.y+2);this.deck(!at.alongX,.3,.12,3,['#a08a64','#7f6a4f','#6f5a40']);this.ctx.restore();}
       const mouth=this.sim.river?.mouth;
       if(mouth&&mouth.x===t.x&&mouth.y===t.y&&this.sim.year>=1250&&this.sim.reclaimed.some(r=>Math.hypot(r.x-t.x,r.y-t.y)<=4)){this.rect(x-6,y-9,12,6,'#8a8f94');this.rect(x-5,y-12,2,3,'#6d7278');this.rect(x+3,y-12,2,3,'#6d7278');}
     }
@@ -513,7 +554,7 @@ export class IslandRenderer {
   }
   drawRoads(tiles){
     // A bridge tile is walkable and has roadLinks, but its deck is drawn as a bridge, not as a street.
-    const isRoad=t=>!!t&&t.road&&t.kind!=='flooded'&&t.kind!=='construction'&&t.building!=='bridge';
+    const isRoad=t=>!!t&&t.road&&t.kind==='land'&&t.building!=='bridge';
     const roads=tiles.filter(isRoad),edges=[];
     const paved=t=>this.sim.era>=3&&!['forest','beach','park','garden','playground'].includes(t.building);
     // Roads grow up: a fresh trail through the grass, a sandy path, cobbles in the old centre, then asphalt.
@@ -529,13 +570,17 @@ export class IslandRenderer {
     };
     for(const t of roads)for(const [nx,ny]of [[t.x+1,t.y],[t.x,t.y+1]]){
       const next=this.sim.tile(nx,ny);
-      if(isRoad(next)&&t.roadLinks?.includes(key(nx,ny)))edges.push({a:this.streetPoint(t),b:this.streetPoint(next),paved:paved(t)&&paved(next),stage:Math.min(stage(t),stage(next)),tile:t});
+      if(isRoad(next)&&t.roadLinks?.includes(key(nx,ny))){
+        const a=this.streetPoint(t),b=this.streetPoint(next),crossing=this.riverCrossings?.get([key(t.x,t.y),key(nx,ny)].sort().join('|'));
+        const parts=crossing?[[0,Math.max(0,crossing.t-crossing.halfSpan/Math.hypot(b.x-a.x,b.y-a.y))],[Math.min(1,crossing.t+crossing.halfSpan/Math.hypot(b.x-a.x,b.y-a.y)),1]]:[[0,1]];
+        for(const [u,v] of parts)if(v-u>.001)edges.push({a:{x:mix(a.x,b.x,u),y:mix(a.y,b.y,u)},b:{x:mix(a.x,b.x,v),y:mix(a.y,b.y,v)},paved:paved(t)&&paved(next),stage:Math.min(stage(t),stage(next)),tile:t});
+      }
     }
     for(const edge of edges)if(KERB[edge.stage])ribbon(edge.a,edge.b,ROAD_WIDTH[edge.stage]+KERB[edge.stage],KERB_COLOR[edge.stage]);
-    for(const t of roads){const p=this.streetPoint(t),k=stage(t);if(KERB[k])this.diamond(p.x,p.y,JOIN[k]+KERB[k]*1.6,(JOIN[k]+KERB[k]*1.6)/2,KERB_COLOR[k]);}
+    for(const t of roads){const p=this.streetPoint(t),k=stage(t);if(KERB[k]&&!this.riverBridgeAt(p))this.diamond(p.x,p.y,JOIN[k]+KERB[k]*1.6,(JOIN[k]+KERB[k]*1.6)/2,KERB_COLOR[k]);}
     for(const edge of edges)ribbon(edge.a,edge.b,ROAD_WIDTH[edge.stage],ROAD_COLOR[edge.stage]);
     // Join every branch with the same flat surface, before any markings or texture.
-    for(const t of roads){const p=this.streetPoint(t),k=stage(t);this.diamond(p.x,p.y,JOIN[k],JOIN[k]/2,ROAD_COLOR[k]);}
+    for(const t of roads){const p=this.streetPoint(t),k=stage(t);if(!this.riverBridgeAt(p))this.diamond(p.x,p.y,JOIN[k],JOIN[k]/2,ROAD_COLOR[k]);}
     for(const {a,b,paved:hard,stage:k,tile} of edges){
       if(k===0)continue;
       if(k===2){for(let i=1;i<6;i++){const f=i/6;this.ellipse(mix(a.x,b.x,f)+(i%2?1.4:-1.4),mix(a.y,b.y,f)+(i%2?.7:-.7),.9,.5,'#d6ceb5');}continue;}
@@ -615,7 +660,7 @@ export class IslandRenderer {
     c.save();c.translate(p.x,p.y-2);
     // A soft shadow to the lower right gives every building weight on the ground.
     if(!['beach','forest','farm','park','garden','town-square','palace-square','tree','original-tree','origin','ruins'].includes(t.building))this.ellipse(9,5,18,6,'rgba(40,55,40,.09)');
-    if(t.builtYear && this.sim.year-t.builtYear<3){const s=.75+(this.sim.year-t.builtYear)/12;c.scale(s,s);}
+    if(t.building!=='bridge'&&t.builtYear && this.sim.year-t.builtYear<3){const s=.75+(this.sim.year-t.builtYear)/12;c.scale(s,s);}
     if(t.kind==='flooded')c.globalAlpha=.78;
     const b=t.building;this.currentTile=t;
     this.look=['hut','house','townhouse'].includes(b)?houseLook(t):null;
@@ -1729,11 +1774,11 @@ export class IslandRenderer {
     for(const v of [-W,W]){const rail=[];for(let i=0;i<=8;i++){const u=-L+2*L*i/8;rail.push(at(u,v,lift(u/L)+5));}this.line(rail,colors[2],1.1);for(let i=0;i<=4;i++){const u=-L+2*L*i/4,p=at(u,v,lift(u/L));this.line([p,[p[0],p[1]-5]],colors[2],.9);}}
   }
   bridge(t){
-    const land=n=>n&&(n.kind==='land'||n.building==='bridge');
-    const alongX=land(this.sim.tile(t.x+1,t.y))||land(this.sim.tile(t.x-1,t.y))||!(land(this.sim.tile(t.x,t.y+1))||land(this.sim.tile(t.x,t.y-1)));
-    // The building pass is two pixels above the ground; the deck starts on the street itself.
-    this.ctx.save();this.ctx.translate(0,2);this.deck(alongX,.98,.2,5);this.ctx.restore();
+    const alongX=bridgeAxis(this.sim,t)==='x';
+    // The street runs along the front of each parcel; the bridge shares that same centreline.
+    this.ctx.save();this.ctx.translate(0,13.5);this.deck(alongX,1,.2,5);this.ctx.restore();
   }
+
   workshop(){
     if(this.sim.era<2){this.house(.2,1);this.line([[6,3],[15,-1]],'#a68e65',2.5);this.line([[7,3],[7,6]],'#9a845c',1);this.rect(12,-5,3,3,'#b7ab80');return;}
     this.house(.8,1);

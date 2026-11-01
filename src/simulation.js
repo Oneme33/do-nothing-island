@@ -63,6 +63,12 @@ const REMARKS = {
 };
 export const key = (x,y) => `${x},${y}`;
 export const neighbors = t => [[t.x+1,t.y],[t.x-1,t.y],[t.x,t.y+1],[t.x,t.y-1]];
+export function bridgeAxis(sim,t){
+  const bank=(dx,dy)=>{const n=sim.tile(t.x+dx,t.y+dy);return n&&(n.kind==='land'&&!n.landform&&!['tree','original-tree'].includes(n.building)||n.kind==='water'&&n.building==='bridge');};
+  if(bank(-1,0)&&bank(1,0))return 'x';
+  if(bank(0,-1)&&bank(0,1))return 'y';
+  return bank(-1,0)||bank(1,0)?'x':'y';
+}
 export const isUsable = t => t.kind === 'land';
 // Early centuries pass briskly; later ages, which span fewer years, get more time per year.
 export const secondsPerYear = (year,era=0) => Math.min(1.4,.55+Math.max(0,year-1)/3200+era*.04);
@@ -596,7 +602,7 @@ export class Civilization {
     }
   }
   // A bridge only makes sense with land on two opposite sides.
-  spansWater(t){const land=(x,y)=>this.tile(x,y)?.kind==='land';return land(t.x-1,t.y)&&land(t.x+1,t.y)||land(t.x,t.y-1)&&land(t.x,t.y+1);}
+  spansWater(t){const land=(x,y)=>{const n=this.tile(x,y);return n?.kind==='land'&&!n.landform&&!['tree','original-tree'].includes(n.building);};return land(t.x-1,t.y)&&land(t.x+1,t.y)||land(t.x,t.y-1)&&land(t.x,t.y+1);}
   // Bridges whose water turned into land, or whose banks are gone, are taken down.
   tidyBridges(){let changed=false;for(const t of this.tiles.values())if(t.building==='bridge'&&(t.kind!=='water'||!this.spansWater(t))&&!t.rift){t.building=null;changed=true;}if(changed)this.rebuildRoads();}
   buildBridge() {
@@ -652,20 +658,21 @@ export class Civilization {
   rebuildRoads() {
     const old=new Set([...this.tiles].filter(([,t])=>t.road).map(([id])=>id));
     for(const t of this.tiles.values()){t.road=false;t.roadLinks=[];t.walkable=false;}
-    const walk=t=>t && !t.landform && (t.kind==='land'||t.building==='bridge');
+    const walk=t=>t && !t.landform && (t.kind==='land'||t.kind==='water'&&t.building==='bridge');
+    const crosses=(a,b)=>[a,b].every(t=>t.building!=='bridge'||(bridgeAxis(this,t)==='x'?a.y===b.y:a.x===b.x));
     const root=this.houses.find(t=>t.foundingHome&&walk(t))||this.houses.find(walk)||this.land.find(walk);
     this.routes=[];this.journeys=[];
     if(!root){this.roadCoverage=0;return;}
     const rootId=key(root.x,root.y),parents=new Map([[rootId,null]]),queue=[root];
     for(let i=0;i<queue.length;i++)for(const [x,y]of neighbors(queue[i])){
       const t=this.tile(x,y),id=key(x,y);
-      if(!walk(t)||parents.has(id)||['tree','original-tree'].includes(t.building))continue;
+      if(!walk(t)||!crosses(queue[i],t)||parents.has(id)||['tree','original-tree'].includes(t.building))continue;
       parents.set(id,key(queue[i].x,queue[i].y));queue.push(t);
     }
     for(const id of parents.keys())this.tiles.get(id).walkable=true;
     // Natural places can be reached on foot. Only actual construction needs a road.
     const nature=['forest','beach','tree','original-tree','origin','flowers'];
-    const destinations=[...this.tiles.values()].filter(t=>(t.buildSite||t.building&&!nature.includes(t.building)&&!['dock','harbor','palace-wing'].includes(t.building))&&walk(t));
+    const destinations=[...this.tiles.values()].filter(t=>(t.buildSite||t.building&&!nature.includes(t.building)&&!['dock','harbor','palace-wing','bridge'].includes(t.building))&&walk(t));
     const roadTargets=destinations.filter(t=>!t.foundingHome&&!(t.foundingField&&!t.buildSite&&(t.builtYear||1)===1));
     // Docks meet the road at their landward end.
     for(const dock of [...this.tiles.values()].filter(t=>['dock','harbor'].includes(t.building))){const shore=neighbors(dock).map(([x,y])=>this.tile(x,y)).find(t=>t?.kind==='land');if(shore){destinations.push(shore);roadTargets.push(shore);}}
@@ -694,7 +701,7 @@ export class Civilization {
     const path=t=>{let id=key(t.x,t.y),r=[];if(!parents.has(id))return r;while(id){r.push(id);id=parents.get(id);}return r.reverse();};
     this.journeys=stops.flatMap((job,i)=>{let home=homes[i%Math.max(1,homes.length)];if(home===job)home=homes[(i+1)%Math.max(1,homes.length)];if(!home)return[];const a=path(home),b=path(job);if(!a.length||!b.length)return[];let common=0;while(common<Math.min(a.length,b.length)&&a[common]===b[common])common++;const route=[...a.slice(common-1).reverse(),...b.slice(common)];return route.length>1?[{route,from:key(home.x,home.y),to:key(job.x,job.y),purpose:job.fire?'rescue':job.buildSite?'building':['shop','market','bakery','cafe'].includes(job.building)?'shopping':['school','library','science-center'].includes(job.building)?'learning':['farm','factory','workshop','powerplant','pump'].includes(job.building)?'work':roam.includes(job)?'exploring':'leisure'}]:[];});
     this.roadCoverage=roadTargets.length?connected/roadTargets.length:0;
-    this.routeVersion=2;
+    this.routeVersion=3;
   }
   // Old streets renew over time: houses become townhouses in the age of steam, back districts get towers from 1960.
   renewHomes() {
@@ -1033,7 +1040,7 @@ export class Civilization {
       ensureChallenges(sim,{restoring:true});
       if(!parsed.collectionRecords)delete sim.collectionRecords;
       advanceCollection(sim);
-      if(parsed.routeVersion!==2){const field=sim.tile(1,-1);if(field?.building==='farm'&&!field.builtYear)field.foundingField=true;sim.rebuildRoads();}
+      if(parsed.routeVersion!==3){const field=sim.tile(1,-1);if(field?.building==='farm'&&!field.builtYear)field.foundingField=true;sim.rebuildRoads();}
       ensureOrigin(sim,{restoring:true});
       if(sim.endgameStarted&&!sim.finaleDeadline&&!sim.ending)advanceFinale(sim);
       return sim;
