@@ -167,10 +167,13 @@ export class IslandRenderer {
     drawNightSky(this);
     c.save();c.translate(this.origin.x,this.origin.y);c.scale(this.zoom,this.zoom);
     drawIslets(this);
-    // Earthquake rifts remain visible without tiling the entire shallow sea.
-    for(const t of this.sim.tiles.values())if(t.kind==='water'&&t.rift){
-      const p=this.p(t.x,t.y);this.diamond(p.x,p.y,23.8,12,'#708c87');
-      this.line([[p.x-15,p.y],[p.x,p.y+7],[p.x+15,p.y]],'#716e5e',2);
+    // Shore water is derived from current geography, so the coast follows every project.
+    const tiles=[...this.sim.tiles.values()];
+    for(const t of tiles){
+      if(t.kind!=='water')continue;
+      const coast=neighbors(t).some(([x,y])=>this.sim.tile(x,y)?.kind!=='water'&&this.sim.tile(x,y));
+      const near=coast||neighbors(t).some(([x,y])=>neighbors({x,y}).some(([a,b])=>this.sim.tile(a,b)?.kind==='land'));
+      if(near){const p=this.p(t.x,t.y);this.diamond(p.x,p.y,23.8,12,t.rift?'#708c87':coast?'#c0d9ca':'#d0e3d8');if(t.rift)this.line([[p.x-15,p.y],[p.x,p.y+7],[p.x+15,p.y]],'#716e5e',2);}
     }
     drawCauseway(this);
     // Waterline rings softly break up the tile silhouette.
@@ -365,32 +368,80 @@ export class IslandRenderer {
     const p=this.p(t.x,t.y),c=this.ctx;
     const corners=[[0,-11.5],[23,0],[0,11.5],[-23,0]];
     const adj=[[t.x,t.y-1],[t.x+1,t.y],[t.x,t.y+1],[t.x-1,t.y]];
-    c.save();c.lineCap='round';
     for(let i=0;i<4;i++){
-      if(this.sim.tile(...adj[i])?.kind!=='water')continue;
-      const a=corners[i],b=corners[(i+1)%4];
-      const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
-      const len=Math.hypot(mx,my*2),nx=mx/len,ny=my/len;
-      const sandy=!t.landform&&(t.natural||t.building==='beach'||t.reclaimed&&this.sim.year>=1980);
-      // Keep the land footprint intact: a narrow continuous rim, without repeated sand blobs.
-      const curve=(inset,offset,bend,color,width)=>{
-        c.beginPath();
-        c.moveTo(p.x+a[0]+(b[0]-a[0])*inset+nx*offset,p.y+a[1]+(b[1]-a[1])*inset+ny*offset+4);
-        c.quadraticCurveTo(p.x+mx+nx*(offset+bend),p.y+my+ny*(offset+bend)+4,
-          p.x+b[0]+(a[0]-b[0])*inset+nx*offset,p.y+b[1]+(a[1]-b[1])*inset+ny*offset+4);
-        c.strokeStyle=color;c.lineWidth=width;c.stroke();
-      };
-      curve(0,1.2,.4,sandy?'#d9d0a4':'#a6b6a2',sandy?3.2:2);
-      // Neighbouring edges share a slow tide; foam fades away before a new wave starts.
-      // Reduced motion and the light mobile rendering keep one quiet, fixed waterline.
-      const still=this.reduced||this.interacting;
-      const phase=still?.35:((this.time*.14+(t.x+t.y)*.025)%1+1)%1;
-      const strength=still?.35:Math.sin(Math.PI*phase)**2;
-      const distance=still?3.3:2+phase*4;
-      curve(.08,distance,1.2,`rgba(255,255,242,${(.08+strength*(sandy?.34:.2)).toFixed(3)})`,sandy?1.1:.8);
-      if(sandy&&!still)curve(.18,1.8,.5,`rgba(225,240,222,${(strength*.16).toFixed(3)})`,1.8);
+      const n=this.sim.tile(...adj[i]);
+      if(n?.kind==='water'){
+        const a=corners[i],b=corners[(i+1)%4];
+        const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,len=Math.hypot(mx,my*2)||1,nx=mx/len,ny=my/len;
+        const sandColor=t.landform?'#a9b198':'#e0d8a7';
+        const sandDark=t.landform?'#9fa68a':'#d2c594';
+
+        // Organic, meandering coastline: soft rounded sand/rock lobes break the rigid 45-degree grid edge.
+        if(t.natural||t.building==='beach'){
+          for(let k=0;k<5;k++){
+            const f=(k+.5)/5,h=hash(t.x*13+i*5+k,t.y*7-k);
+            const ex=p.x+a[0]+(b[0]-a[0])*f+nx*(1.6+h*4.4);
+            const ey=p.y+a[1]+(b[1]-a[1])*f+ny*(1.6+h*4.4)+2;
+            const rw=4.5+h*3.2;
+            this.ellipse(ex,ey,rw,rw*.5,sandColor);
+            if(h>.6&&t.building==='beach')this.ellipse(ex+nx*.6,ey+ny*.6,rw*.5,rw*.26,sandDark);
+          }
+          this.ellipse(p.x+a[0],p.y+a[1]+2,3.6,1.9,sandColor);
+        }
+
+        // Curved base water rim and shoreline contour instead of straight ruler sticks.
+        const ctrlX=p.x+mx+nx*2.2,ctrlY=p.y+my+ny*2.2+2.8;
+        c.beginPath();c.moveTo(p.x+a[0]*1.1,p.y+a[1]*1.1+2.8);
+        c.quadraticCurveTo(ctrlX,ctrlY,p.x+b[0]*1.1,p.y+b[1]*1.1+2.8);
+        c.strokeStyle='#eaf2dc';c.lineWidth=5;c.lineCap='round';c.stroke();
+
+        if(t.natural){
+          c.beginPath();c.moveTo(p.x+a[0],p.y+a[1]+2);
+          c.quadraticCurveTo(p.x+mx+nx*1.8,p.y+my+ny*1.8+2,p.x+b[0],p.y+b[1]+2);
+          c.strokeStyle=sandColor;c.lineWidth=6.5;c.lineCap='round';c.stroke();
+        }
+
+        // Breathing, curved shoreline waves: scalloped crescent foam lines that surge and recede organically.
+        if(this.reduced){
+          c.beginPath();c.moveTo(p.x+a[0]*1.06+nx*1.8,p.y+a[1]*1.06+ny*1.8+2.6);
+          c.quadraticCurveTo(p.x+mx*1.06+nx*2.5,p.y+my*1.06+ny*2.5+2.6,p.x+b[0]*1.06+nx*1.8,p.y+b[1]*1.06+ny*1.8+2.6);
+          c.strokeStyle='rgba(255,255,255,.45)';c.lineWidth=1.4;c.lineCap='round';c.stroke();
+        }else{
+          const wave=Math.sin(this.time*1.6+t.x*.75+t.y*1.15+i*1.3),surge=Math.max(0,wave);
+          const dist=1.8+surge*2.8,foamAlpha=(0.28+surge*.52).toFixed(2);
+          const pMidX=p.x+mx+nx*(dist*1.28),pMidY=p.y+my+ny*(dist*1.28)+2.5;
+
+          c.beginPath();c.moveTo(p.x+a[0]*1.04+nx*dist*.7,p.y+a[1]*1.04+ny*dist*.7+2.5);
+          c.quadraticCurveTo(pMidX,pMidY,p.x+b[0]*1.04+nx*dist*.7,p.y+b[1]*1.04+ny*dist*.7+2.5);
+          c.strokeStyle=`rgba(255,255,255,${foamAlpha})`;c.lineWidth=1.6;c.lineCap='round';c.stroke();
+
+          if(t.building==='beach'||(t.natural&&!t.landform)){
+            const washAlpha=(0.13+surge*.26).toFixed(2),washDist=dist*.45;
+            c.beginPath();c.moveTo(p.x+a[0]*.98+nx*washDist,p.y+a[1]*.98+ny*washDist+2.2);
+            c.quadraticCurveTo(p.x+mx*.98+nx*(washDist*1.25),p.y+my*.98+ny*(washDist*1.25)+2.2,p.x+b[0]*.98+nx*washDist,p.y+b[1]*.98+ny*washDist+2.2);
+            c.strokeStyle=`rgba(235,245,240,${washAlpha})`;c.lineWidth=2.6;c.lineCap='round';c.stroke();
+            if(surge>.38){
+              for(const f of [.28,.72]){
+                const fx=p.x+a[0]+(b[0]-a[0])*f+nx*(dist*1.18);
+                const fy=p.y+a[1]+(b[1]-a[1])*f+ny*(dist*1.18)+2.5;
+                this.ellipse(fx,fy,1.4,.7,`rgba(255,255,255,${(surge*.7).toFixed(2)})`);
+              }
+            }
+          }else{
+            const rockDist=1.4+surge*1.3;
+            c.beginPath();c.moveTo(p.x+a[0]*1.05+nx*rockDist,p.y+a[1]*1.05+ny*rockDist+2.6);
+            c.quadraticCurveTo(p.x+mx*1.05+nx*(rockDist*1.2),p.y+my*1.05+ny*(rockDist*1.2)+2.6,p.x+b[0]*1.05+nx*rockDist,p.y+b[1]*1.05+ny*rockDist+2.6);
+            c.strokeStyle=`rgba(255,255,255,${(0.18+surge*.35).toFixed(2)})`;c.lineWidth=1.3;c.lineCap='round';c.stroke();
+          }
+        }
+
+        // From 1980 the polder edges soften into sand and dunes, so the coast stops looking ruled with a pencil.
+        if(t.reclaimed&&this.sim.year>=1980&&!['harbor','dock'].includes(n.building)){
+          for(let k=0;k<5;k++){const f=(k+.5)/5,h=hash(t.x*7+i*3+k,t.y*5-k),ex=p.x+a[0]+(b[0]-a[0])*f+nx*(2+h*6),ey=p.y+a[1]+(b[1]-a[1])*f+ny*(2+h*6)+2;this.ellipse(ex,ey,4+h*5,(4+h*5)*.48,'#e2d5a6');}
+          for(let k=0;k<3;k++){const f=.2+k*.3,h=hash(t.y+k,t.x*3+i),gx=p.x+a[0]+(b[0]-a[0])*f,gy=p.y+a[1]+(b[1]-a[1])*f;if(h<.6)for(let g=0;g<3;g++)this.line([[gx+g*1.4-1.4,gy+1],[gx+g*1.8-2,gy-3]],'#8ea06a',.7);}
+        }
+      }
     }
-    c.restore();
   }
   drawGround(t){
     const p=this.p(t.x,t.y),x=p.x,y=p.y;
@@ -1986,40 +2037,38 @@ export class IslandRenderer {
     c.save();c.translate(rightMost+85+Math.sin(this.time*.08)*17,20+Math.sin(this.time*.6)*2);this.smallBoat();c.restore();
     if(this.sim.era>=1){c.save();c.translate(-rightMost-65,65+Math.sin(this.time*.55)*1.5);c.scale(.75,.75);this.smallBoat();c.restore();}
   }
-  cloudPosition(i){
-    const span=1700;
-    return {x:((hash(i,55)*span+this.time*(i%2?.8:1.3))%span)-span/2,
-      y:hash(i,22)*560-430,scale:.6+hash(i,5)*.55};
-  }
-  cloudShape(){
-    const c=this.ctx;c.beginPath();
-    // Separate subpaths prevent Canvas from joining the ellipses with dark diagonals.
-    for(const [x,y,rx,ry] of [[-18,0,23,10],[0,-6,22,15],[22,-1,23,11],[6,5,34,9]]){
-      c.moveTo(x+rx,y);c.ellipse(x,y,rx,ry,0,0,TAU);
-    }
-    c.fill();
-  }
-  cloudVisibility(){
-    return Math.max(0,Math.min(1,1-(this.zoom/Math.max(.3,this.fitZoom||1)-1)/.7));
-  }
+  // Soft cloud shadows drift across the island, matching the shape of the clouds above.
   drawCloudShadows(){
-    if(this.reduced||this.sim.storm||this.cloudVisibility()<=.02)return;
-    const c=this.ctx,through=this.cloudVisibility(),night=this.light?.night?.18:1;
-    c.save();c.fillStyle=`rgba(32,54,44,${(.045*through*night).toFixed(3)})`;
+    if(this.reduced||this.sim.storm)return;
+    const c=this.ctx,through=Math.max(0,Math.min(1,1-(this.zoom/Math.max(.3,this.fitZoom||1)-1)/.7));
+    if(through<=.02)return;
+    const night=this.light?.night?.18:1,alpha=(0.068*through*night).toFixed(3);
+    c.save();c.fillStyle=`rgba(32,54,44,${alpha})`;
+    const span=1700;
     for(let i=0;i<4;i++){
-      const p=this.cloudPosition(i),s=p.scale*this.zoom;
-      c.save();c.translate(this.origin.x+(p.x+45)*this.zoom,this.origin.y+(p.y+115)*this.zoom);
-      c.scale(s*1.22,s*.72);this.cloudShape();c.restore();
+      const wx=((hash(i,55)*span+this.time*(i%2?.8:1.3))%span)-span/2,wy=hash(i,22)*560-430;
+      const x=this.origin.x+(wx+45)*this.zoom,y=this.origin.y+(wy+115)*this.zoom,s=(.6+hash(i,5)*.55)*this.zoom;
+      c.save();c.translate(x,y);c.scale(s*1.22,s*.72);
+      c.beginPath();
+      c.ellipse(-18,0,25,11,0,0,TAU);
+      c.ellipse(0,-6,24,15,0,0,TAU);
+      c.ellipse(22,-1,25,12,0,0,TAU);
+      c.ellipse(6,5,36,10,0,0,TAU);
+      c.fill();c.restore();
     }
     c.restore();
   }
   drawClouds(){
-    const c=this.ctx,through=this.cloudVisibility();if(through<=.02)return;
+    const c=this.ctx;
     for(let i=0;i<4;i++){
-      const p=this.cloudPosition(i),s=p.scale*this.zoom;
-      c.save();c.translate(this.origin.x+p.x*this.zoom,this.origin.y+p.y*this.zoom);
-      c.scale(s,s);c.globalAlpha=.34*through;c.fillStyle='#f7f9e9';
-      this.cloudShape();c.restore();
+      // In world space, so zooming and panning move the clouds too.
+      const span=1700,wx=((hash(i,55)*span+this.time*(i%2?.8:1.3))%span)-span/2,wy=hash(i,22)*560-430;
+      const x=this.origin.x+wx*this.zoom,y=this.origin.y+wy*this.zoom,s=(.6+hash(i,5)*.55)*this.zoom;
+      // Zooming in takes you through the clouds: they thin out and are gone when you are close.
+      const through=Math.max(0,Math.min(1,1-(this.zoom/Math.max(.3,this.fitZoom||1)-1)/.7));if(through<=.02)continue;
+      c.save();c.translate(x,y);c.scale(s,s);c.globalAlpha=.34*through;
+      this.ellipse(15,40,44,13,'#86a58b13');
+      this.ellipse(-18,0,23,10,'#f7f9e9');this.ellipse(0,-6,22,15,'#f7f9e9');this.ellipse(22,-1,23,11,'#f7f9e9');this.ellipse(6,5,34,9,'#f7f9e9');c.restore();
     }
   }
   drawBirds(){
