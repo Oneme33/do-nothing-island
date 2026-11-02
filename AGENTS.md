@@ -21,8 +21,11 @@
 - Server: `beheer@134.209.201.232`; webroot `/var/www/coenvermeer.nl/www`. Deploy alleen de inhoud van `dist/`.
 - Lees vóór serverwijzigingen `~/scripts/README.md`. Bundel SSH via één verbinding (eventueel ControlMaster). Geen root-login of sudo.
 - Behoud bestaande links met een redirect op het oude pad. Controleer pagina, assets en redirect na deploy.
+- Apache heeft `AllowOverride None`: `.htaccess` wordt genegeerd. De oude map gebruikt `index.php` uit `scripts/legacy-redirect.php`; laat daar geen `index.html` vóór staan in de DirectoryIndex.
 
 ## Resultaten 2026-11-02
 - Zeekleur beperkt aangepast: zee `#cbdedb`, tussenwater `#c3dbd2`, kustwater `#bdd8cc`; storm `#bbcfc9`. Bestaande watertegels en spelgedrag behouden; schermgradient verwijderd.
 - Controle: één build, 18 renderercontroles geslaagd, voor/na-beeld met hetzelfde licht bekeken.
-- Hostingverhuizing: uitvoering en verificatie volgen in deze taak.
+- Gepubliceerd op `/do-nothing-island/`: pagina, app.js en styles.css HTTP 200; `start.html` heeft dezelfde SHA-256 als de lokale build.
+- `/nothing-island/` geeft HTTP 301 naar het nieuwe pad; queryparameters blijven behouden. Doorverwijzing gevolgd tot HTTP 200.
+- Oude startpagina bewaard op de server: `~/audit/do-nothing-island-move-20261102/index.html`. Voor rollback: herstel die als `nothing-island/index.html`.

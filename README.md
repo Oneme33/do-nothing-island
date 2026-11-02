@@ -1,5 +1,7 @@
 # Do Nothing Island
 
+Speel op [coenvermeer.nl/do-nothing-island](https://coenvermeer.nl/do-nothing-island/).
+
 Een kleine beschaving. Absoluut geen verantwoordelijkheid.
 
 Een eiland groeit vanzelf: van één huisje en een kleine akker naar een stad met haar eigen gewoonten, plannen en geschiedenis. Je mag kijken. Je kunt ook ingrijpen — en ontdekken wat daarvan blijft hangen.
