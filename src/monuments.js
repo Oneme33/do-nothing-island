@@ -35,17 +35,31 @@ export function advanceCastle(s){
   s.log(CASTLE_STEPS[court.level-1],'palace',{x:court.x,y:court.y});s.signal('built',tile,'Het kasteel groeit',{sound:'fanfare',text:CASTLE_STEPS[court.level-1].split('. ')[0]+'.'});return;}
  if(court.level<CASTLE_STEPS.length&&s.year>=court.year+(court.level+1)*CASTLE_STEP_YEARS){court.renovating=s.year+CASTLE_SCAFFOLD_YEARS;s.log('Het kasteel staat in de steigers. Niemand weet precies wat er komt, behalve de metselaars, en die zeggen niets.','culture',{x:court.x,y:court.y});}
 }
+// A small forecourt uses the same clearance rules as the existing special buildings.
+export function claimMonumentSpace(s,spot){
+ let changed=0;
+ for(const [dx,dy] of [[1,0],[0,1],[1,1]]){
+  const t=s.tile(spot.x+dx,spot.y+dy);
+  if(!t||t.kind!=='land'||t.landform||t.foundingHome||t.plaque||t.castle||t.buildSite||t.district==='heritage'||t.reservedFor&&t.reservedFor!=='monument')continue;
+  if(t.building&&!['hut','house','townhouse','tree','forest','park','garden','flowers'].includes(t.building))continue;
+  if(t.yardOf&&(t.yardOf.x!==spot.x||t.yardOf.y!==spot.y))continue;
+  if(t.reservedFor==='monument'&&t.yardOf?.type===spot.building&&!t.building)continue;
+  t.building=null;delete t.futureBuilding;t.reservedFor='monument';t.yardOf={type:spot.building,x:spot.x,y:spot.y,i:6};changed++;
+ }
+ return changed;
+}
 export function advanceMonuments(s){
  s.monuments??=[];advanceCastle(s);if(s.year%10===5){reserveCastleSite(s);if(s.court)claimCastleGrounds(s);}if(s.ending||s.year%7!==3)return;
+ let cleared=0;for(const t of s.buildings)if(['statue','monument'].includes(t.building))cleared+=claimMonumentSpace(s,t);if(cleared)s.rebuildRoads();
  for(const m of MONUMENTS){
   if(s.monuments.some(x=>x.kind===m.kind)||!m.when(s))continue;
   if(m.square&&s.monuments.some(x=>x.square))continue;
   let tile=m.square?s.tile(1,3):null;
   if(tile&&(tile.building!=='town-square'||tile.monument))tile=null;
-  if(!tile)tile=s.land.filter(t=>!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.road&&Math.hypot(t.x,t.y)<=7).sort((a,b)=>Math.hypot(a.x,a.y)-Math.hypot(b.x,b.y))[0];
+  if(!tile)tile=s.land.filter(t=>!t.building&&!t.buildSite&&!t.reservedFor&&!t.landform&&!t.road&&Math.hypot(t.x,t.y)>=4&&Math.hypot(t.x,t.y)<=9).sort((a,b)=>Math.abs(Math.hypot(a.x,a.y)-6)-Math.abs(Math.hypot(b.x,b.y)-6))[0];
   if(!tile)continue;
   if(tile.building!=='town-square'){tile.building='monument';tile.builtYear=s.year;}
-  tile.monument=m.kind;const title=monumentTitle(s,m);
+  tile.monument=m.kind;if(tile.building==='monument')claimMonumentSpace(s,tile);const title=monumentTitle(s,m);
   s.monuments.push({kind:m.kind,x:tile.x,y:tile.y,year:s.year,square:!!m.square});
   s.log(`Een standbeeld: ${title}. ${m.text}`,'delight',{x:tile.x,y:tile.y});s.rebuildRoads();
   startParty(s,tile,`Onthulling: ${title}`,['Het doek gaat eraf. Iedereen zegt ‘oooh’.','De burgemeester knipt een lint door dat er niet hoeft te zijn.','Er zijn bitterballen. Dat maakt alles plechtig.'],8);

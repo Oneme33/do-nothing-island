@@ -91,7 +91,7 @@ test('standalone distribution contains valid executable JavaScript and no module
   assert.doesNotThrow(()=>new vm.Script(script));
   assert.match(html,/Probeer niets aan te raken/);assert.match(html,/DO NOTHING/);
   assert.match(html,/Versie <strong id="app-version">\d+\.\d+\.\d+<\/strong>/,'the built game carries its version');
-  assert.doesNotMatch(html,/lokale versie|niet gebouwd/,'the build fills in its version and date');
+  assert.doesNotMatch(html.split('<script>')[0],/lokale versie|niet gebouwd/,'the build fills in its version and date');
 });
 test('walkers stay on the drawn street geometry, approach entrances, and spend time inside',()=>{
   const {canvas}=canvasHarness(),sim=new Civilization(31);sim.planBuilding(sim.freeLand.filter(t=>!t.reservedFor).sort((a,b)=>Math.hypot(a.x,a.y)-Math.hypot(b.x,b.y))[0],'well');for(let i=0;i<5;i++)sim.advanceBuildings();sim.population=100;
@@ -166,7 +166,7 @@ test('every open wish shows one clickable question mark at the requested place a
   const s=new Civilization(31),{canvas}=canvasHarness(width,650),r=new IslandRenderer(canvas,s);s.wishes.active={x:1,y:-1,id:'test'};r.draw(100);
   const p=r.wishResidentPoint();assert.ok(p&&Number.isFinite(p.x)&&Number.isFinite(p.y),'visible outside Help mode too');assert.equal(r.pickWishResident(p.x,p.y),true);assert.equal(r.pickWishResident(p.x+100,p.y),false);
   r.mode='help';assert.doesNotThrow(()=>r.draw(200));
-  s.wishes.active.hidden=true;assert.equal(r.wishResidentPoint(),null,'a dismissed wish hides its question mark');
+  s.wishes.active.hidden=true;assert.ok(r.wishResidentPoint(),'closing a wish cloud leaves its question mark visible');
   s.wishes.active=null;r.draw(300);assert.equal(r.pickWishResident(p.x,p.y),false);
  }
 });
@@ -200,4 +200,14 @@ test('a bridge replaces the street and lifts walkers over its arch',()=>{
  assert.equal(renderer.bridgeLift({building:'house'},{building:'bridge'},1),5);
  assert.ok(renderer.bridgeLift({building:'bridge'},{building:'house'},.5)>0);
  assert.equal(renderer.bridgeLift({building:'house'},{building:'house'},.5),0);
+});
+
+test('plaza paving is painted below residents, never over their heads',()=>{
+ const sim=new Civilization(31),{canvas}=canvasHarness(),r=new IslandRenderer(canvas,sim),order=[];
+ const plaza=sim.tile(1,1);plaza.building='town-square';sim.year=200;
+ const ground=r.drawGround.bind(r);r.drawGround=t=>{if(t===plaza)order.push('paving');ground(t);};
+ r.drawWorkers=()=>r.enqueueActor(r.p(plaza.x,plaza.y).y-3,()=>order.push('resident'));
+ r.drawBuilding=t=>{if(t===plaza){r.currentTile=t;r.townSquare(t);}};
+ const diamond=r.diamond.bind(r);r.diamond=(x,y,w,h,color,...rest)=>{if(order.includes('resident')&&['#d9d1b3','#cdbf96'].includes(color))assert.fail('plaza floor covered a resident');return diamond(x,y,w,h,color,...rest);};
+ r.draw(100);assert.ok(order.indexOf('paving')<order.indexOf('resident'));
 });

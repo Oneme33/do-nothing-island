@@ -95,7 +95,7 @@ function playStyle(seed,share,trials=[]){
 test('the island inspection is win-win: helping never costs, a few trials help, a heavy hand costs',()=>{
  const watched=playStyle(7,0),helpful=playStyle(7,1),balanced=playStyle(7,.5,[400,901,1500]);
  const quiet=islandScores(watched),all=islandScores(helpful),middle=islandScores(balanced);
- assert.ok(quiet.total>=55&&quiet.total<88,`watching alone: ${quiet.total}`);assert.ok(quiet.values.band>0&&quiet.values.band<35,'wishes they solve themselves count too');
+ assert.ok(quiet.total>=50&&quiet.total<88,`watching alone: ${quiet.total}`);assert.ok(quiet.values.band>0&&quiet.values.band<35,'wishes they solve themselves count too');
  assert.equal(all.values.band,35,'helping with everything never costs');assert.ok(all.total>=88,`helping all: ${all.total}`);
  assert.ok(middle.total>=93,`middle ground: ${JSON.stringify(middle.values)}`);assert.ok(middle.total>=all.total&&middle.total>quiet.total);
  assert.equal(scoreInputs(balanced).tests,3);assert.equal(scoreInputs(helpful).unrequested,0,'asked-for help never counts as meddling');

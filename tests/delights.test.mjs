@@ -49,3 +49,13 @@ test('the castle stands in its own garden ring, in a style that differs per isla
  const styles=new Set();for(const seed of [31,77,5,9,12]){const s=new Civilization(seed);while(s.year<1100&&!s.court)s.tick();const ring=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].map(([dx,dy])=>s.tile(s.court.x+dx,s.court.y+dy)).filter(t=>t?.building==='castle-garden');assert.ok(ring.length>=3,`seed ${seed}: ${ring.length} garden plots`);styles.add(ring[0].gardenStyle);}
  assert.ok(styles.size>=2,'gardens differ between islands');
 });
+
+import {claimMonumentSpace} from '../src/monuments.js';
+test('statues keep a small clear forecourt and never remove protected homes or landmarks',()=>{
+ const s=new Civilization(31),spot=s.land.find(t=>!t.reservedFor&&!t.landform&&[[1,0],[0,1],[1,1]].every(([dx,dy])=>s.tile(t.x+dx,t.y+dy)?.kind==='land'&&!s.tile(t.x+dx,t.y+dy).reservedFor));
+ assert.ok(spot);spot.building='statue';
+ const front=s.tile(spot.x+1,spot.y);front.building='tree';front.landform=null;
+ const protectedHome=s.tile(spot.x,spot.y+1);protectedHome.building='hut';protectedHome.foundingHome=true;
+ assert.ok(claimMonumentSpace(s,spot)>0);assert.equal(front.building,null);assert.equal(front.reservedFor,'monument');assert.equal(protectedHome.building,'hut');
+ assert.equal(s.planBuilding(front,'house',true),false);
+});
