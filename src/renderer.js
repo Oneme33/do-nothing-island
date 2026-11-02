@@ -173,7 +173,7 @@ export class IslandRenderer {
       if(t.kind!=='water')continue;
       const coast=neighbors(t).some(([x,y])=>this.sim.tile(x,y)?.kind!=='water'&&this.sim.tile(x,y));
       const near=coast||neighbors(t).some(([x,y])=>neighbors({x,y}).some(([a,b])=>this.sim.tile(a,b)?.kind==='land'));
-      if(near){const p=this.p(t.x,t.y);this.diamond(p.x,p.y,23.8,12,t.rift?'#708c87':coast?'#c0d9ca':'#d0e3d8');if(t.rift)this.line([[p.x-15,p.y],[p.x,p.y+7],[p.x+15,p.y]],'#716e5e',2);}
+      if(near){const p=this.p(t.x,t.y);this.diamond(p.x,p.y,23.8,12,t.rift?'#708c87':coast?'#bdd8cc':'#c3dbd2');if(t.rift)this.line([[p.x-15,p.y],[p.x,p.y+7],[p.x+15,p.y]],'#716e5e',2);}
     }
     drawCauseway(this);
     // Waterline rings softly break up the tile silhouette.
@@ -347,10 +347,8 @@ export class IslandRenderer {
   }
   drawWater(){
     const c=this.ctx;
-    // A deeper sea: light lagoon water near the island, richer blue-green towards the edges, with glints of sun.
-    c.fillStyle=this.sim.storm?'#c5d8d3':'#d6e8e3';c.fillRect(0,0,this.width,this.height);
-    const g=c.createRadialGradient(this.width*.55,this.height*.5,40,this.width*.55,this.height*.5,this.width*.7);
-    g.addColorStop(0,'#eaf3e6aa');g.addColorStop(.55,'#cfe4df33');g.addColorStop(1,'#9fc4c1aa');c.fillStyle=g;c.fillRect(0,0,this.width,this.height);
+    // Flat, related pastel tones keep the sea consistent with the isometric terrain.
+    c.fillStyle=this.sim.storm?'#bbcfc9':'#cbdedb';c.fillRect(0,0,this.width,this.height);
     if(!this.reduced)for(let i=0;i<26;i++){const tw=Math.sin(this.time*1.7+i*2.3);if(tw<.7)continue;const x=hash(i,41)*this.width,y=hash(i,43)*this.height;c.fillStyle=`rgba(255,255,250,${(tw-.7)*2})`;c.fillRect(x-2,y,4,.8);c.fillRect(x-.4,y-1.6,.8,4);}
     for(let i=0;i<(this.interacting?24:115);i++){
       const x=hash(i,2)*this.width+Math.sin(this.time*.13+i)*3;
