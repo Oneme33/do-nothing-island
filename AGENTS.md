@@ -29,3 +29,13 @@
 - Gepubliceerd op `/do-nothing-island/`: pagina, app.js en styles.css HTTP 200; `start.html` heeft dezelfde SHA-256 als de lokale build.
 - `/nothing-island/` geeft HTTP 301 naar het nieuwe pad; queryparameters blijven behouden. Doorverwijzing gevolgd tot HTTP 200.
 - Oude startpagina bewaard op de server: `~/audit/do-nothing-island-move-20261102/index.html`. Voor rollback: herstel die als `nothing-island/index.html`.
+
+## Spelverbeteringen 2026-11-02
+- Brugroutes volgen echte oversteekassen; water is vóór een rivierbrug onbegaanbaar. Eerste brug is een mijlpaal. Bruggen staan minimaal vier tegels uit elkaar; elke rivierarm krijgt voorrang op extra bruggen.
+- Nieuwe eilanden hebben soms één, soms twee verbonden rivierarmen. Bestaande opgeslagen geografie blijft behouden. Brugaanlopen worden vrijgemaakt en gereserveerd.
+- Lopende bewoners houden hun route vast tot de reis klaar is; continue dieptesortering voorkomt verspringende hoofdjes. Pleinbestrating ligt in de grondlaag.
+- Veilige Help-modus bij starten/nieuw eiland. Wensvraagtekens blijven zichtbaar als het tekstwolkje verborgen is; buiten beeld verschijnt een randmarkering.
+- Beelden zijn groter, hebben verschillende materialen en een gereserveerde voorruimte; aantal groeit mee met bevolking.
+- NL/EN: `localization.js` vertaalt presentatie/DOM/canvas, `english.js` bevat het vaste catalogus. Geen vertaaldienst tijdens spelen; opgeslagen verhalen blijven origineel. Taalvoorkeur staat apart van de simulatie. Controleer bij nieuwe teksten beide talen.
+- Portfolio: `scripts/update-portfolio.py` plaatst Doe Niks Eiland als eerste onder persoonlijke projecten, vóór Film Atlas. Backup server: `~/audit/dni-portfolio-20261102/index-before.html`.
+- Validatie: volledige suite 210/210; laatste taaltests 4/4 en app/bundelcontroles 6/6. Browser: Engelse bediening en verhaal, terugschakelen naar Nederlands en logo gecontroleerd.
