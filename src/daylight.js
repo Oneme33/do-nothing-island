@@ -34,6 +34,9 @@ export function seasonalLeaf(hex,light){
  const result=toHex(rgb)+hex.slice(7);
  if(leafCache.size>600)leafCache.clear();leafCache.set(cacheKey,result);return result;
 }
+export const buildingGrowthScale=(year,tile)=>tile.building!=='bridge'&&tile.builtYear&&year-tile.builtYear<3?.75+(year-tile.builtYear)/12:1;
+export const LIGHTHOUSE_SCALE=1.4;
+export const LIGHTHOUSE_LANTERN_Y=-60;
 const FIRES=new Set(['campfire','bonfire']);
 // Lights are painted after the island, so anything standing right in front must hide them.
 const LOW_FRONT=new Set(['airfield','castle-garden','farm','beach','park','garden','campfire','bonfire','playground','campus-square','palace-square','town-square','royal-garden','ruins']);
@@ -76,7 +79,7 @@ export function drawDaylight(r,light){
    if(t.kind!=='land')continue;const p=r.p(t.x,t.y);
    if(t.building==='lighthouse'){
     // A slow sweep of light over the sea; the beam is a soft wedge from the lantern room.
-    const angle=(r.dayClock*.8)%DAY_TAU,x=p.x,y=p.y-62,len=280,spread=.12;
+    const angle=(r.dayClock*.8)%DAY_TAU,x=p.x,y=p.y-2+LIGHTHOUSE_LANTERN_Y*LIGHTHOUSE_SCALE*buildingGrowthScale(r.sim.year,t),len=280,spread=.12;
     c.beginPath();c.moveTo(x,y);c.lineTo(x+Math.cos(angle-spread)*len,y+Math.sin(angle-spread)*len*.5);c.lineTo(x+Math.cos(angle+spread)*len,y+Math.sin(angle+spread)*len*.5);c.closePath();
     c.fillStyle=`rgba(255,236,170,${(.11*d).toFixed(3)})`;c.fill();
     glow(x,y,20,14,`rgba(255,225,150,${(.22*d).toFixed(3)})`);glow(x,y,5,5,`rgba(255,245,200,${(.6*d).toFixed(3)})`);continue;

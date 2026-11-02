@@ -39,3 +39,4 @@
 - NL/EN: `localization.js` vertaalt presentatie/DOM/canvas, `english.js` bevat het vaste catalogus. Geen vertaaldienst tijdens spelen; opgeslagen verhalen blijven origineel. Taalvoorkeur staat apart van de simulatie. Controleer bij nieuwe teksten beide talen.
 - Portfolio: `scripts/update-portfolio.py` plaatst Doe Niks Eiland als eerste onder persoonlijke projecten, vóór Film Atlas. Backup server: `~/audit/dni-portfolio-20261102/index-before.html`.
 - Validatie: volledige suite 210/210; laatste taaltests 4/4 en app/bundelcontroles 6/6. Browser: Engelse bediening en verhaal, terugschakelen naar Nederlands en logo gecontroleerd.
+- Vuurtorenlicht: vaste lichtbundelhoogte vervangen door dezelfde schaal en groeifactor als de toren (`daylight.js`). Gerichte regressie vergelijkt de werkelijk getekende lantaarn met het bundelbegin tijdens groei, pannen en zoomen; 8 dag/nachtcontroles geslaagd.

@@ -57,3 +57,26 @@ test('seasonal customs and night life draw safely in every season and at night',
  for(const season of [0,1,2,3])for(const phase of [.02,.5]){const {canvas}=canvasHarness(),r=new IslandRenderer(canvas,s);r.dayClock=(season*SEASON_DAYS+phase)*DAY_SECONDS;r.time=30;assert.doesNotThrow(()=>r.draw(16));}
  assert.equal(s.serialize(),before);
 });
+
+test('lighthouse beam stays centered on its drawn lantern while growing, panning and zooming',async()=>{
+ const {drawDaylight}=await import('../src/daylight.js');
+ for(const age of [0,1,2,3,100])for(const zoom of [.68,1,1.55]){
+  let m=[1,1,0,0],stack=[],lantern,beam;
+  const point=(x,y)=>[m[0]*x+m[2],m[1]*y+m[3]];
+  const ctx=new Proxy({
+   save(){stack.push([...m]);},restore(){m=stack.pop();},
+   setTransform(a,b,c,d,e,f){m=[a,d,e,f];},
+   translate(x,y){m[2]+=x*m[0];m[3]+=y*m[1];},scale(x,y){m[0]*=x;m[1]*=y;},
+   moveTo(x,y){beam??=point(x,y);}
+  },{get:(t,k)=>k in t?t[k]:()=>{}});
+  const tile={x:2,y:3,kind:'land',building:'lighthouse',builtYear:100};
+  const r={ctx,sim:{year:100+age,age:{id:'classical'}},light:{darkness:1},dpr:2,width:800,height:600,zoom,origin:{x:340,y:210},dayClock:12,visibleTiles:[tile],p:()=>({x:46,y:57}),
+   ellipse(x,y,rx,ry,color){if(color==='#fff6cf')lantern=point(x,y);},poly(){},line(){},diamond(){}};
+  r.lighthouse=()=>IslandRenderer.prototype.lighthouse.call(r);
+  ctx.setTransform(2,0,0,2,0,0);ctx.translate(r.origin.x,r.origin.y);ctx.scale(zoom,zoom);
+  IslandRenderer.prototype.drawBuilding.call(r,tile);
+  drawDaylight(r,r.light);
+  assert.ok(lantern);assert.ok(beam);
+  assert.ok(Math.abs(lantern[0]-beam[0])<1e-8&&Math.abs(lantern[1]-beam[1])<1e-8,`age ${age}, zoom ${zoom}: beam originates at lantern`);
+ }
+});

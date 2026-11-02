@@ -1,7 +1,7 @@
 import {localizeCanvasContext} from './localization.js';
 import { cinemaVisible } from './spectacle.js';
 import {nl} from './language.js';
-import {daylightAt,drawDaylight,seasonalLeaf,randomDaylightStart} from './daylight.js';
+import {daylightAt,drawDaylight,seasonalLeaf,randomDaylightStart,buildingGrowthScale,LIGHTHOUSE_SCALE,LIGHTHOUSE_LANTERN_Y} from './daylight.js';
 import {drawSeaLife} from './sea.js';
 import {drawInterventionFx} from './fx.js';
 import {drawAnimals,isPasture} from './animals.js';
@@ -706,13 +706,13 @@ export class IslandRenderer {
     c.save();c.translate(p.x,p.y-2);
     // A soft shadow to the lower right gives every building weight on the ground.
     if(!['beach','forest','farm','park','garden','town-square','palace-square','tree','original-tree','origin','ruins'].includes(t.building))this.ellipse(9,5,18,6,'rgba(40,55,40,.09)');
-    if(t.building!=='bridge'&&t.builtYear && this.sim.year-t.builtYear<3){const s=.75+(this.sim.year-t.builtYear)/12;c.scale(s,s);}
+    const growth=buildingGrowthScale(this.sim.year,t);if(growth!==1)c.scale(growth,growth);
     if(t.kind==='flooded')c.globalAlpha=.78;
     const b=t.building;this.currentTile=t;
     this.look=['hut','house','townhouse'].includes(b)?houseLook(t):null;
     if(this.look)c.scale(this.look.sx,this.look.sy);
     // Special places are drawn larger so they stand out between the houses.
-    if(SPECIAL_BIG.has(b))c.scale(1.4,1.4);
+    if(SPECIAL_BIG.has(b)){const scale=b==='lighthouse'?LIGHTHOUSE_SCALE:1.4;c.scale(scale,scale);}
     if(b==='original-tree')this.tree(true,t.variant,!!t.bloomYear);
     else if(b==='origin')this.drawOrigin(t);
     else if(b==='tree')this.tree(false,t.variant);
@@ -1634,7 +1634,7 @@ export class IslandRenderer {
     this.poly([[-4.2,-57],[0,-55.5],[0,-63],[-4.2,-64.5]],lamp);this.poly([[0,-55.5],[4.2,-57],[4.2,-64.5],[0,-63]],'#e3d197');
     this.poly([[-5,-64.5],[0,-71],[5,-64.5],[0,-62.5]],'#8c5a48');this.line([[0,-71],[0,-75]],'#6d5a4a',1);
     this.line([[-7,-56],[-7,-59]],'#6d675a',.6);this.line([[7,-56],[7,-59]],'#6d675a',.6);this.line([[-7,-59],[0,-56.5],[7,-59]],'#6d675a',.6);
-    c.save();c.globalAlpha=.5+this.light.darkness*.5;this.ellipse(0,-60,3,3,'#fff6cf');c.restore();
+    c.save();c.globalAlpha=.5+this.light.darkness*.5;this.ellipse(0,LIGHTHOUSE_LANTERN_Y,3,3,'#fff6cf');c.restore();
   }
   // The first huts come in three shapes with their own thatch, so a young village never looks copied.
   // Snow settles on roofs in winter: a white layer over the roof plane.
