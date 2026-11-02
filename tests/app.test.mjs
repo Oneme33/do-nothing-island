@@ -28,14 +28,14 @@ async function appHarness(initial,{firstVisit=false,persistentStorage=null,rejec
 }
 test('the delivered game starts, creates fresh islands immediately and can undo a reset',async()=>{
  const old=new Civilization(31);for(let i=0;i<40;i++)old.tick();const a=await appHarness(old),e=a.elements;
- assert.equal(e.get('year').textContent,41);e.get('new-island').handlers.click();
+ assert.equal(e.get('year').textContent,41);assert.equal(e.get('island').dataset.mode,'help');a.modes.find(b=>b.dataset.interference==='fire').handlers.click();e.get('new-island').handlers.click();assert.equal(e.get('island').dataset.mode,'help');
  assert.equal(a.saved().seed,8);assert.equal(a.saved().year,1);assert.equal(e.get('undo-reset').hidden,false);assert.doesNotThrow(()=>a.frame(16));
  assert.equal(a.saved().tiles.filter(([,t])=>t.building==='hut').length,1);assert.equal(a.saved().tiles.some(([,t])=>t.road),false);
  e.get('new-island').handlers.click();assert.equal(a.saved().seed,12);e.get('undo-reset').handlers.click();assert.equal(a.saved().seed,8);assert.equal(e.get('undo-reset').hidden,true);
 });
 test('Help allows looking around without interference; deliberately choosing rain changes the world',async()=>{
  const a=await appHarness(new Civilization(31)),e=a.elements,c=e.get('island');a.frame(16);
- assert.equal(c.dataset.mode,'nudge');a.modes.find(b=>b.dataset.interference==='help').handlers.click();
+ assert.equal(c.dataset.mode,'help');
  const tap=()=>{c.handlers.pointerdown({button:0,clientX:600,clientY:300,pointerId:1});c.handlers.pointerup({clientX:600,clientY:300,pointerId:1});};
  tap();assert.equal(a.saved().interferences,0);
  e.get('find-palace').handlers.click();assert.match(e.get('tile-inspector').textContent,/allereerste huis/);assert.match(e.get('tile-inspector').textContent,/familie/);

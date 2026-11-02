@@ -1,5 +1,5 @@
 // Dutch presentation also translates narrative text in older saved islands.
-const dutchText={
+export const dutchText={
  "They figured it out.": "Ze hebben het zelf uitgevogeld.",
  "The island would like to take all the credit.": "Het eiland neemt graag alle eer op zich.",
  "A civilization has learned to live with its limits. Generations come and go; the little world can look after itself.": "Een beschaving heeft met haar grenzen leren leven. Generaties komen en gaan; dit kleine wereldje kan voor zichzelf zorgen.",

@@ -1,3 +1,4 @@
+import {initLocalization,setLanguage,refreshLocalization} from './localization.js';
 import {nl} from './language.js';
 import { advanceCinema, startCinema, cinemaBeat } from './spectacle.js';
 import { eventPriority, resumeSandbox, ENDINGS } from './story.js';
@@ -24,6 +25,8 @@ import {returnFromAway} from './away.js';
 import {COLLECTION_STORAGE_KEY,COLLECTION_CATALOG,COLLECTION_GROUPS,readCollection,mergeCollections,collectIsland} from './collection.js';
 
 const $=id=>document.getElementById(id);
+initLocalization();
+$('language-switch').addEventListener('change',event=>{setLanguage(event.target.value);updateUI();refreshLocalization(document);});
 const storageKey='do-nothing-island-v1';
 let storageAvailable=true;
 let sim;
@@ -37,10 +40,10 @@ let collection=readCollection(null),collectionStorageAvailable=true;
 try{collection=readCollection(localStorage.getItem(COLLECTION_STORAGE_KEY));}catch{collectionStorageAvailable=false;}
 const canvas=$('island');
 let album={seed:sim.seed,photos:[]},albumBusy=false;try{album=readAlbum(localStorage.getItem(ALBUM_STORAGE_KEY),sim.seed);}catch{}
-const renderer=new IslandRenderer(canvas,sim);renderer.mode='nudge';canvas.dataset.mode='nudge';
+const renderer=new IslandRenderer(canvas,sim);renderer.mode='help';canvas.dataset.mode='help';
 let paused=false,speed=[1,2,3,10].includes(sim.config.speedMultiplier)?sim.config.speedMultiplier:1,accumulator=0,lastTime=performance.now(),saveTimer=0,toastTimer,dirtyHistory=true;
 let soundscape=null,soundAt=0;
-let interferenceMode='nudge',interventionTimer,lastRemarkAt=0,shownRemark='';
+let interferenceMode='help',interventionTimer,lastRemarkAt=0,shownRemark='';
 let previousIsland=null,undoTimer;
 let introStep=0,inspectionPinned=false,nightShown=false,drawTick=0;
 const introKey='do-nothing-island-intro-v1';
@@ -642,6 +645,7 @@ $('restart').addEventListener('click',()=>{$('restart-confirm').hidden=false;$('
 $('cancel-restart').addEventListener('click',()=>{$('restart-confirm').hidden=true;$('restart').hidden=false;});
 function switchIsland(next,message){
   syncCollection();persistCollection();
+  interferenceMode='look';chooseMode('help');
   sim=next;renderer.sim=sim;renderer.effects=[];renderer.ripples=[];renderer.visibleTiles=[];renderer.hover=null;renderer.center={x:0,y:0};renderer.zoom=1;renderer.activityTime=0;renderer.wheelTime=0;renderer.recenter();
   sim.config.speedMultiplier=speed;
   $('story-cards').checked=sim.config.storyCards===true;$('offline-life').checked=sim.config.offlineProgress!==false;
@@ -673,14 +677,14 @@ $('undo-reset').addEventListener('click',()=>{
 const modeHints={look:'Je kijkt alleen. Kies links een ingreep als je toch iets wilt doen.',help:'Klik op een vraagteken om te lezen wat iemand vraagt. Kies zelf of je helpt.',nudge:'Klik op een huis: een aanbouw. Op een veld: irrigatie. Op lege grond: bouwers.',rain:'Klik: regen, natte grond en betere oogst. Op een brand: meteen blussen.',rumble:'Klik: de grond scheurt en huizen raken beschadigd. De inwoners reageren.',fire:'Klik op lege grond: een kampvuur. Op een gebouw: brand en een blusploeg.'};
 // Clicking the active tool again puts it away: back to the ordinary cursor, just looking.
 function hintOnce(key,text){sim.config.hints??={};if(sim.config.hints[key])return;sim.config.hints[key]=true;showToast(text,5200);}
-function chooseMode(mode){
-  if(mode===interferenceMode&&mode!=='look')mode='look';
+function chooseMode(mode,{toggle=false}={}){
+  if(toggle&&mode===interferenceMode&&mode!=='look')mode='look';
   if(mode!=='look'&&modeHints[mode])hintOnce(`mode-${mode}`,modeHints[mode]);
   interferenceMode=mode;renderer.mode=interferenceMode;inspectionPinned=false;
   for(const b of document.querySelectorAll('[data-interference]')){const selected=b.dataset.interference===mode;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected));}
   $('interaction-hint').textContent=modeHints[interferenceMode];canvas.dataset.mode=interferenceMode;
 }
-for(const button of document.querySelectorAll('[data-interference]'))button.addEventListener('click',()=>chooseMode(button.dataset.interference));
+for(const button of document.querySelectorAll('[data-interference]'))button.addEventListener('click',()=>chooseMode(button.dataset.interference,{toggle:true}));
 function inspectTile(tile){
   const panel=$('tile-inspector');panel.hidden=!tile;
   if(tile)panel.textContent=interferenceMode==='help'?describePlot(sim,tile):describePlot(sim,tile).split('\n')[0];

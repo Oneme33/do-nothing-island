@@ -307,3 +307,5 @@ details.score-row{display:block}details.score-row>summary{display:grid;grid-temp
 
 .version-line{margin-top:14px;font-size:11px;letter-spacing:.04em;color:#8a846e;}
 .version-line strong{font-weight:600;color:#6f7a5d;}
+
+.language-switch{font:inherit;font-size:11px;color:#526547;background:#f4f5e9;border:1px solid #ccd5bd;border-radius:6px;padding:7px 5px;max-width:96px}.language-switch:focus-visible{outline:2px solid #78936c;outline-offset:2px}
