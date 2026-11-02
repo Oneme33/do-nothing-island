@@ -26,7 +26,7 @@ import {COLLECTION_STORAGE_KEY,COLLECTION_CATALOG,COLLECTION_GROUPS,readCollecti
 
 const $=id=>document.getElementById(id);
 initLocalization();
-$('language-switch').addEventListener('change',event=>{setLanguage(event.target.value);updateUI();refreshLocalization(document);});
+for(const id of ['language-switch','mobile-language-switch'])$(id).addEventListener('change',event=>{setLanguage(event.target.value);updateUI();refreshLocalization(document);});
 const storageKey='do-nothing-island-v1';
 let storageAvailable=true;
 let sim;

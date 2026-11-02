@@ -95,7 +95,7 @@ export function refreshLocalization(root=typeof document!=='undefined'?document:
 }
 export function setLanguage(language){
  activeLanguage=language==='en'?'en':'nl';translationCache.clear();
- if(typeof document!=='undefined'){if(document.documentElement)document.documentElement.lang=activeLanguage;const select=document.getElementById('language-switch');if(select)select.value=activeLanguage;refreshLocalization(document);}
+ if(typeof document!=='undefined'){if(document.documentElement)document.documentElement.lang=activeLanguage;for(const id of ['language-switch','mobile-language-switch']){const select=document.getElementById(id);if(select)select.value=activeLanguage;}refreshLocalization(document);}
  try{localStorage.setItem('do-nothing-island-language-v1',activeLanguage);}catch{}
  return activeLanguage;
 }
